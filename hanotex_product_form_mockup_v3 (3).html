@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HANOTEX – Form đăng sản phẩm KH&CN (Mockup v3 – đầy đủ + bổ sung)</title>
+  <style>
+:root{
+  --bg:#f7f9fc;--card:#fff;--muted:#6b7280;--text:#0f172a;--primary:#0ea5e9;
+  --accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--line:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f8fafc,#eef2f7);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans',sans-serif;color:#0f172a}
+.container{max-width:1180px;margin:24px auto;padding:0 16px}
+h1{font-size:28px;margin:0 0 8px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,0.05);margin:16px 0}
+.card .header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.card .content{padding:18px 20px}
+.grid{display:grid;gap:14px}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:860px){.g-2,.g-3{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:#334155;margin:6px 0}
+input[type="text"],input[type="number"],input[type="date"],input[type="email"],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;color:#0f172a;outline:none;transition:box-shadow .2s,border-color .2s
+}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:#fff}
+.badge.primary{border-color:rgba(14,165,233,.35);background:rgba(14,165,233,.1);color:#0369a1}
+.badge.accent{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.08);color:#0f766e}
+.hint{font-size:12px;color:var(--muted)}
+.section-title{font-weight:600;font-size:16px}
+.switch{display:flex;gap:8px;flex-wrap:wrap}
+.switch button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+.switch button.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.hr{height:1px;background:var(--line);margin:8px 0}
+.btn{background:var(--primary);color:#fff;border:0;border-radius:12px;padding:12px 16px;font-weight:600;cursor:pointer}
+.btn.secondary{background:#1118270f;color:#111827;border:1px solid var(--line)}
+.stickybar{position:sticky;bottom:0;background:rgba(255,255,255,.9);backdrop-filter: blur(6px);border-top:1px solid var(--line);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line);padding:6px 10px;border-radius:999px;background:#fff}
+.chip{display:inline-block;border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px;background:#fff;margin-right:6px;margin-bottom:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.preview{border:1px dashed var(--line);border-radius:12px;padding:12px;background:#fafafa}
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+.tab.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+.owner-card{border:1px dashed var(--line);border-radius:12px;padding:12px;background:#fff}
+.add{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>HANOTEX – Form đăng sản phẩm KH&CN (v3 – đầy đủ + bổ sung)</h1>
+    <div class="muted">Kế thừa V3 đầy đủ (Actor, Taxonomy, IP, Pricing, NDA…) và bổ sung: 2 tab Đối tượng (Người đăng/Chủ sở hữu – đồng sở hữu), Legal cho phép chọn nhiều + upload chứng nhận địa phương, gợi ý trường theo TRL, Ứng dụng/Thị trường, Thương mại hóa & Đối tác, Optional (thử nghiệm, KT-XH, quỹ hỗ trợ, nhân lực/hạ tầng).</div>
+
+    <!-- 0) Đối tượng: Tabs + Actor detail from original -->
+    <div class="card">
+      <div class="header">
+        <div class="section-title">0) Đối tượng</div>
+        <div class="badges">
+          <span class="badge primary">AI gợi ý</span>
+          <span class="badge">OCR tài liệu</span>
+          <span class="badge accent">Mapping IPC→VN</span>
+        </div>
+      </div>
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" data-tab="submitter">Dành cho đối tượng đăng</div>
+          <div class="tab" data-tab="owners">Dành cho đối tượng sở hữu (có thể đồng sở hữu)</div>
+        </div>
+
+        <!-- Submitter (giữ actor switch gốc) -->
+        <div id="tab-submitter">
+          <div class="switch" id="actorSwitch">
+            <button data-val="INDIVIDUAL" class="active">Cá nhân</button>
+            <button data-val="COMPANY">Doanh nghiệp</button>
+            <button data-val="RESEARCH">Viện/Trường</button>
+          </div>
+          <div class="hr"></div>
+          <div class="grid g-3" id="actorSpecific"></div>
+        </div>
+
+        <!-- Owners (đồng sở hữu) -->
+        <div id="tab-owners" style="display:none">
+          <div id="ownersWrap" class="grid g-2">
+            <div class="owner-card">
+              <label>Chủ sở hữu #1 – Loại</label>
+              <select><option>Cá nhân</option><option>Doanh nghiệp</option><option>Viện/Trường</option></select>
+              <label>Tên/Pháp nhân</label><input type="text" placeholder="Tên chủ sở hữu">
+              <label>Tỷ lệ sở hữu (%)</label><input type="number" placeholder="vd: 60">
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="add" onclick="addOwner()">+ Thêm đồng sở hữu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1) Pháp lý & Lãnh thổ (multi-select + local cert upload) -->
+    <div class="card">
+      <div class="header"><div class="section-title">1) Pháp lý & Lãnh thổ</div></div>
+      <div class="content grid g-3">
+        <div>
+          <label>Phạm vi bảo hộ/chứng nhận (chọn nhiều)</label>
+          <select id="territory" multiple size="7">
+            <option>VN (Cục SHTT)</option>
+            <option>PCT (đơn quốc tế)</option>
+            <option>EP/EPO (Châu Âu)</option>
+            <option>US/USPTO (Hoa Kỳ)</option>
+            <option>CN/CNIPA (Trung Quốc)</option>
+            <option>JP/JPO (Nhật Bản)</option>
+            <option>WO khác...</option>
+          </select>
+          <div class="hint">*PCT là đơn quốc tế (chưa là bằng); EPO/USPTO/JPO là cơ quan cấp bằng/đơn tương ứng.</div>
+        </div>
+        <div>
+          <label>Chứng nhận tiêu chuẩn/quy chuẩn (chọn nhiều)</label>
+          <select id="certs" multiple size="7">
+            <option>CE Marking (EU)</option>
+            <option>FDA Approval (US)</option>
+            <option>ISO 9001 (QMS)</option>
+            <option>ISO/IEC 27001 (ISMS)</option>
+            <option>ISO 13485 (Thiết bị y tế)</option>
+            <option>IEC/EN (thiết bị điện – điện tử)</option>
+            <option>Khác...</option>
+          </select>
+        </div>
+        <div>
+          <label>Upload chứng nhận tiêu chuẩn địa phương (optional – mock link)</label>
+          <input type="text" placeholder="Đường dẫn PDF/Ảnh chứng nhận địa phương">
+        </div>
+        <div style="grid-column:1/-1">
+          <div class="preview">
+            <strong>Khó khăn thường gặp:</strong> (1) Phân biệt PCT vs bằng đã cấp; (2) Phân biệt CE/FDA/ISO/IEC; (3) Tìm đúng mã/tiêu chuẩn. 
+            <br><em>Gợi ý UX:</em> thanh tìm kiếm có autocomplete + tooltip giải thích ngắn; bảng so sánh nhanh các tiêu chuẩn.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) Thông tin sản phẩm KH&CN (includes taxonomy fields from original) -->
+    <div class="card">
+      <div class="header"><div class="section-title">2) Thông tin sản phẩm KH&CN</div></div>
+      <div class="content grid g-2">
+        <div>
+          <label>Tên công nghệ / sản phẩm</label>
+          <input id="title" type="text" placeholder="VD: Hệ thống đốt LPG cho động cơ ô tô">
+        </div>
+        <div>
+          <label>Mức độ sẵn sàng công nghệ (TRL)</label>
+          <select id="trl">
+            <option value="1">TRL 1 – Nguyên lý cơ bản</option>
+            <option value="2">TRL 2 – Khái niệm công nghệ</option>
+            <option value="3">TRL 3 – Bằng chứng thực nghiệm</option>
+            <option value="4">TRL 4 – Mẫu thử trong lab</option>
+            <option value="5">TRL 5 – Mẫu thử gần điều kiện thực</option>
+            <option value="6">TRL 6 – Nguyên mẫu</option>
+            <option value="7">TRL 7 – Trình diễn quy mô pilot</option>
+            <option value="8">TRL 8 – Hoàn thiện</option>
+            <option value="9">TRL 9 – Thương mại hóa</option>
+          </select>
+        </div>
+        <div>
+          <label>Lĩnh vực KH&CN (cấp 1)</label>
+          <select id="field1">
+            <option value="">-- chọn --</option>
+            <option value="SCI_NAT">Khoa học tự nhiên</option>
+            <option value="SCI_ENG">Khoa học kỹ thuật & công nghệ</option>
+            <option value="SCI_MED">Khoa học y, dược</option>
+            <option value="SCI_AGR">Khoa học nông nghiệp</option>
+            <option value="SCI_SOC">Khoa học xã hội</option>
+            <option value="SCI_HUM">Khoa học nhân văn</option>
+            <option value="SCI_INT">Khoa học liên ngành</option>
+          </select>
+        </div>
+        <div>
+          <label>Ngành (cấp 2) – gợi ý bởi AI</label>
+          <select id="field2"><option value="">-- chọn --</option></select>
+          <div class="hint">Gợi ý dựa trên tài liệu upload & mã IPC/CPC (nếu có).</div>
+        </div>
+        <div>
+          <label>Chuyên ngành (cấp 3)</label>
+          <select id="field3"><option value="">-- chọn --</option></select>
+        </div>
+        <div>
+          <label>Link tài liệu minh chứng (mock)</label>
+          <input type="text" placeholder="Bản triển khai: upload PDF/Ảnh/Video + OCR">
+        </div>
+        <div class="g-2" style="grid-column:1/-1;display:grid;gap:14px">
+          <div>
+            <label><strong>Mô tả ngắn (hiển thị công khai)</strong></label>
+            <textarea id="public_summary" placeholder="2–3 câu mô tả giá trị, không lộ bí mật"></textarea>
+          </div>
+          <div>
+            <label><strong>Mô tả chi tiết (ẩn sau NDA)</strong></label>
+            <textarea id="confidential_detail" placeholder="Kiến trúc hệ thống, bản vẽ, công thức, số liệu thử nghiệm..."></textarea>
+          </div>
+        </div>
+
+        <!-- TRL-conditional hints -->
+        <div id="trl-early" class="preview" style="grid-column:1/-1;display:none">
+          <strong>Gợi ý trường cho TRL 1–3:</strong> giả thuyết/khung lý thuyết, phương pháp, kết quả thử nghiệm cơ sở, kế hoạch R&D.
+        </div>
+        <div id="trl-mid" class="preview" style="grid-column:1/-1;display:none">
+          <strong>Gợi ý trường cho TRL 4–6:</strong> BOM linh kiện, sơ đồ/kiến trúc, video demo, kết quả pilot, yêu cầu hạ tầng thử nghiệm.
+        </div>
+        <div id="trl-high" class="preview" style="grid-column:1/-1;display:none">
+          <strong>Gợi ý trường cho TRL 7–9:</strong> hồ sơ QC/QA, tiêu chuẩn áp dụng, công suất, chi phí sản xuất, case khách hàng.
+        </div>
+
+        <div style="grid-column:1/-1" class="grid g-2">
+          <div>
+            <label>Ứng dụng thực tế/Thị trường tiềm năng (optional)</label>
+            <textarea placeholder="Ngành/Use-case; quy mô thị trường; đối thủ; lợi thế cạnh tranh"></textarea>
+          </div>
+          <div>
+            <label>Nhân lực & Cơ sở hạ tầng (optional)</label>
+            <textarea placeholder="Nhân sự R&D; thiết bị/nhà xưởng; năng lực sản xuất; phòng lab..."></textarea>
+            <div class="hint">Đặt tại phần Thông tin KH&CN để tránh rải rác.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) Sở hữu trí tuệ (IP) – original section restored -->
+    <div class="card">
+      <div class="header"><div class="section-title">3) Sở hữu trí tuệ (IP)</div></div>
+      <div class="content grid g-3">
+        <div>
+          <label>Loại hình</label>
+          <select id="iptype">
+            <option>Sáng chế (Patent)</option>
+            <option>Giải pháp hữu ích</option>
+            <option>Kiểu dáng công nghiệp</option>
+            <option>Nhãn hiệu</option>
+            <option>Quyền tác giả phần mềm</option>
+            <option>Bí mật kinh doanh</option>
+          </select>
+        </div>
+        <div>
+          <label>Số đơn/Số bằng (ẩn sau NDA)</label>
+          <input id="ipno" type="text" placeholder="VN1-001234; PCT/US2024/xxxxx">
+        </div>
+        <div>
+          <label>Tình trạng</label>
+          <select>
+            <option>Đang nộp</option>
+            <option>Đã được cấp</option>
+            <option>Hết hiệu lực</option>
+            <option>Khác...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4) Đầu tư & Chuyển giao (extended) -->
+    <div class="card">
+      <div class="header"><div class="section-title">4) Mong muốn đầu tư & Hình thức chuyển giao</div></div>
+      <div class="content grid g-2">
+        <div>
+          <label>Stage đầu tư mong muốn</label>
+          <select>
+            <option>Grant/Seed (TRL 1–3)</option>
+            <option>VC/Joint Venture (TRL 4–6)</option>
+            <option>Growth/Strategic (TRL 7–9)</option>
+          </select>
+        </div>
+        <div>
+          <label>Phương án thương mại hóa</label>
+          <select multiple size="7">
+            <option>B2B</option>
+            <option>B2C</option>
+            <option>Licensing (độc quyền/không độc quyền)</option>
+            <option>OEM/ODM</option>
+            <option>JV/Hợp tác chiến lược</option>
+            <option>Spin-off/Startup</option>
+            <option>Phân phối/Franchise</option>
+          </select>
+        </div>
+        <div>
+          <label>Hình thức chuyển quyền (chọn nhiều)</label>
+          <select multiple size="7" id="transfer">
+            <option>Chuyển nhượng toàn bộ</option>
+            <option>Chuyển nhượng một phần</option>
+            <option>License độc quyền</option>
+            <option>License không độc quyền</option>
+            <option>License sole (độc quyền giới hạn)</option>
+            <option>Sub-license (cho phép cấp lại)</option>
+            <option>Kèm dịch vụ kỹ thuật (training/bảo trì/bí quyết)</option>
+          </select>
+        </div>
+        <div>
+          <label>Đối tác đã/đang hợp tác (optional)</label>
+          <textarea placeholder="Tên đối tác, phạm vi hợp tác, trạng thái..."></textarea>
+        </div>
+        <div>
+          <label>Đối tác tiềm năng (optional)</label>
+          <textarea placeholder="Danh sách mục tiêu, kênh tiếp cận..."></textarea>
+        </div>
+        <div>
+          <label>Phạm vi lãnh thổ</label>
+          <select>
+            <option>Trong nước (VN)</option>
+            <option>Khu vực (ASEAN/EU/US)</option>
+            <option>Toàn cầu</option>
+          </select>
+        </div>
+        <div>
+          <label>Phương thức tài chính</label>
+          <select multiple size="5">
+            <option>Phí cố định (Lump sum)</option>
+            <option>Theo doanh thu (% Royalty)</option>
+            <option>Kết hợp (Fee + Royalty)</option>
+            <option>Đổi chéo công nghệ (Cross-licensing)</option>
+            <option>Góp vốn bằng công nghệ</option>
+          </select>
+        </div>
+        <div>
+          <label>Giới hạn/mục đích sử dụng</label>
+          <input type="text" placeholder="VD: chỉ R&D; giới hạn 50k đơn vị/năm; ngành ô tô...">
+        </div>
+      </div>
+    </div>
+
+    <!-- 5) Chính sách hiển thị & NDA (kept) -->
+    <div class="card">
+      <div class="header"><div class="section-title">5) Chính sách hiển thị & NDA</div></div>
+      <div class="content">
+        <div class="row">
+          <label style="min-width:220px">Chế độ hiển thị</label>
+          <select id="visMode">
+            <option value="PUBLIC_SUMMARY">Tóm tắt công khai + Chi tiết sau NDA</option>
+            <option value="PUBLIC_FULL">Hoàn toàn công khai</option>
+            <option value="PRIVATE">Riêng tư (chỉ theo lời mời)</option>
+          </select>
+        </div>
+        <div class="two" style="margin-top:12px">
+          <div>
+            <div class="section-title">Trường công khai</div>
+            <label><input type="checkbox" class="pub" data-field="title" checked> Tên công nghệ/sản phẩm</label>
+            <label><input type="checkbox" class="pub" data-field="public_summary" checked> Mô tả ngắn (2–3 câu)</label>
+            <label><input type="checkbox" class="pub" data-field="taxonomy" checked> Lĩnh vực/Ngành/Chuyên ngành</label>
+            <label><input type="checkbox" class="pub" data-field="trl" checked> TRL</label>
+            <label><input type="checkbox" class="pub" data-field="usecases" checked> Ứng dụng</label>
+            <label><input type="checkbox" class="pub" data-field="owner"> Chủ sở hữu</label>
+            <label><input type="checkbox" class="pub" data-field="certs"> Loại chứng nhận (không hiển thị số)</label>
+            <div class="hint">Không công khai: số bằng, tài liệu chi tiết, dữ liệu tài chính.</div>
+          </div>
+          <div>
+            <div class="section-title">Trường ẩn sau NDA</div>
+            <label><input type="checkbox" class="nda" data-field="confidential_detail" checked> Mô tả chi tiết kỹ thuật</label>
+            <label><input type="checkbox" class="nda" data-field="artifacts" checked> Tài liệu minh chứng (PDF/Ảnh/Video)</label>
+            <label><input type="checkbox" class="nda" data-field="ipno" checked> Số đơn/Số bằng</label>
+            <label><input type="checkbox" class="nda" data-field="financials" checked> Dữ liệu tài chính/kiểm thử chi tiết</label>
+            <label><input type="checkbox" class="nda" data-field="contacts"> Liên hệ trực tiếp nhóm R&D</label>
+            <div class="row" style="margin-top:6px">
+              <label style="min-width:180px">Watermark tài liệu</label>
+              <select id="watermark"><option>Có</option><option>Không</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="preview" id="publicPreview" style="margin-top:12px">
+          <strong>🔍 Xem trước phần CÔNG KHAI:</strong>
+          <div id="pubChips" class="row" style="margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6) Định giá & Giá mong muốn (original pricing panels restored) -->
+    <div class="card">
+      <div class="header"><div class="section-title">6) Định giá & Giá mong muốn</div></div>
+      <div class="content">
+        <div class="row">
+          <label style="min-width:220px">Chọn hình thức</label>
+          <div class="switch" id="pricingSwitch">
+            <button data-val="APPRAISAL" class="active">Yêu cầu THẨM ĐỊNH</button>
+            <button data-val="ASK">Đặt GIÁ MONG MUỐN</button>
+            <button data-val="AUCTION">MỞ ĐẤU GIÁ</button>
+            <button data-val="OFFER">CHÀO GIÁ (Open to offers)</button>
+          </div>
+        </div>
+        <div class="hr"></div>
+        <div id="pricingPanels">
+          <div data-panel="APPRAISAL" class="panel">
+            <div class="grid g-2">
+              <div><label>Mục đích thẩm định</label>
+                <select><option>Tham chiếu đàm phán</option><option>Phục vụ đấu giá</option><option>Báo cáo cho nhà đầu tư</option></select></div>
+              <div><label>Thời hạn mong muốn</label><input type="date"></div>
+              <div><label>Phạm vi thẩm định</label>
+                <select><option>Chỉ IP</option><option>IP + công nghệ + tài sản kèm</option><option>Toàn bộ dự án</option></select></div>
+              <div class="hint">Hệ thống sẽ tạo <strong>valuation_request</strong> tới bên thẩm định được phê duyệt.</div>
+            </div>
+          </div>
+          <div data-panel="ASK" class="panel" style="display:none">
+            <div class="grid g-3">
+              <div><label>Giá mong muốn</label><input type="number" placeholder="Nhập số tiền"></div>
+              <div><label>Tiền tệ</label><select><option>VND</option><option>USD</option><option>EUR</option></select></div>
+              <div><label>Loại giá</label><select><option>Indicative (không ràng buộc)</option><option>Floor (giá sàn)</option><option>Firm (cam kết)</option></select></div>
+              <div class="hint">Khuyến nghị kèm thẩm định để tăng độ tin cậy.</div>
+            </div>
+          </div>
+          <div data-panel="AUCTION" class="panel" style="display:none">
+            <div class="grid g-3">
+              <div><label>Loại đấu giá</label><select><option>English (tăng dần)</option><option>Dutch (giảm dần)</option><option>Sealed bid</option></select></div>
+              <div><label>Giá khởi điểm / Reserve</label><input type="number" placeholder="0 nếu không có"></div>
+              <div><label>Thời gian bắt đầu</label><input type="date"></div>
+            </div>
+          </div>
+          <div data-panel="OFFER" class="panel" style="display:none">
+            <div class="hint">Bạn không đặt giá – người mua sẽ gửi đề nghị. Có thể bật “gợi ý khoảng giá” dựa trên dữ liệu thị trường.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7) Dữ liệu bổ sung (Optional) -->
+    <div class="card">
+      <div class="header"><div class="section-title">7) Dữ liệu bổ sung (optional)</div></div>
+      <div class="content grid g-2">
+        <div>
+          <label>Kết quả thử nghiệm/triển khai</label>
+          <textarea placeholder="Tóm tắt kết quả, chỉ số, địa điểm triển khai, thời gian..."></textarea>
+        </div>
+        <div>
+          <label>Hiệu quả kinh tế – xã hội</label>
+          <textarea placeholder="Tác động kinh tế, tạo việc làm, môi trường, ESG..."></textarea>
+        </div>
+        <div>
+          <label>Thông tin quỹ tài chính hỗ trợ</label>
+          <textarea placeholder="Quỹ nhà nước/doanh nghiệp, chương trình hỗ trợ, mức tài trợ..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8) Gửi duyệt -->
+    <div class="card stickybar">
+      <div class="pill">
+        <strong>Tóm tắt công khai:</strong>
+        <span id="pubSummary" class="muted">Tên, mô tả ngắn, taxonomy, TRL, ứng dụng (theo lựa chọn trường công khai).</span>
+      </div>
+      <div class="row">
+        <button class="btn secondary" onclick="window.alert('Lưu nháp (mock)')">Lưu nháp</button>
+        <div style="width:10px"></div>
+        <button class="btn" onclick="window.alert('Gửi duyệt (mock)')">Gửi duyệt</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== Tabs (Submitter vs Owners) =====
+const tabs = document.querySelectorAll('.tab');
+const submitter = document.getElementById('tab-submitter');
+const owners = document.getElementById('tab-owners');
+tabs.forEach(t=> t.addEventListener('click', ()=>{
+  tabs.forEach(x=>x.classList.remove('active')); t.classList.add('active');
+  if(t.dataset.tab==='submitter'){ submitter.style.display='block'; owners.style.display='none'; }
+  else { submitter.style.display='none'; owners.style.display='block'; }
+}));
+
+// ===== Owners add =====
+function addOwner(){
+  const wrap = document.getElementById('ownersWrap');
+  const div = document.createElement('div');
+  div.className='owner-card';
+  div.innerHTML = `
+    <label>Chủ sở hữu – Loại</label>
+    <select><option>Cá nhân</option><option>Doanh nghiệp</option><option>Viện/Trường</option></select>
+    <label>Tên/Pháp nhân</label><input type="text" placeholder="Tên chủ sở hữu">
+    <label>Tỷ lệ sở hữu (%)</label><input type="number" placeholder="vd: 40">
+  `;
+  wrap.appendChild(div);
+}
+
+// ===== Actor dynamic fields (from original V3) =====
+const actorSwitch = document.getElementById('actorSwitch');
+const actorSpecific = document.getElementById('actorSpecific');
+function renderActorFields(type){
+  if(type==='INDIVIDUAL'){
+    actorSpecific.innerHTML = `
+      <div><label>Họ tên</label><input type="text" placeholder="Nguyễn Văn A"></div>
+      <div><label>CMND/CCCD</label><input type="text" placeholder="0123456789"></div>
+      <div><label>Email</label><input type="email" placeholder="email@abc.com"></div>
+      <div><label>SĐT</label><input type="text" placeholder="09xx xxx xxx"></div>
+      <div><label>Nghề nghiệp/Chức danh</label><input type="text" placeholder="Nhà nghiên cứu / Founder"></div>
+      <div><label>Tài khoản ngân hàng (thanh toán)</label><input type="text" placeholder="Ngân hàng/ Số TK (tuỳ chọn)"></div>`;
+  }else if(type==='COMPANY'){
+    actorSpecific.innerHTML = `
+      <div><label>Tên doanh nghiệp</label><input type="text" placeholder="Công ty ABC"></div>
+      <div><label>Mã số thuế</label><input type="text" placeholder="010xxxxxxx"></div>
+      <div><label>Giấy ĐKKD</label><input type="text" placeholder="Số/Ngày cấp (mock)"></div>
+      <div><label>Người đại diện pháp luật</label><input type="text" placeholder="Nguyễn Văn B"></div>
+      <div><label>Email liên hệ</label><input type="email" placeholder="contact@company.com"></div>
+      <div><label>Năng lực sản xuất</label><input type="text" placeholder="Nhà xưởng, công suất, nhân sự R&D"></div>`;
+  }else{
+    actorSpecific.innerHTML = `
+      <div><label>Tên viện/trường</label><input type="text" placeholder="Trường/Viện XYZ"></div>
+      <div><label>Mã số đơn vị</label><input type="text" placeholder="..."></div>
+      <div><label>Cơ quan chủ quản</label><input type="text" placeholder="Bộ/UBND ..."></div>
+      <div><label>Mã số nhiệm vụ KH&CN</label><input type="text" placeholder="VD: KC.01.xx.yyyy"></div>
+      <div><label>Báo cáo nghiệm thu</label><input type="text" placeholder="Link hoặc ghi chú (mock)"></div>
+      <div><label>Nhóm nghiên cứu/Chủ nhiệm</label><input type="text" placeholder="TS. ..."></div>`;
+  }
+}
+let actorType = 'INDIVIDUAL'; renderActorFields(actorType);
+actorSwitch.addEventListener('click', (e)=>{
+  if(e.target.tagName==='BUTTON'){
+    [...actorSwitch.children].forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    actorType = e.target.dataset.val; renderActorFields(actorType); buildSummary();
+  }
+});
+
+// ===== Taxonomy cascade (from original V3) =====
+const field1 = document.getElementById('field1');
+const field2 = document.getElementById('field2');
+const field3 = document.getElementById('field3');
+const optionsLevel2 = {
+  'SCI_ENG':[
+    {v:'MECH',t:'Cơ khí – Động lực'},
+    {v:'EEICT',t:'Điện – Điện tử – CNTT'},
+    {v:'MTRL',t:'Vật liệu & Công nghệ vật liệu'},
+    {v:'ENV',t:'Công nghệ môi trường'},
+    {v:'AUTO',t:'Tự động hóa & Robot'}
+  ],
+  'SCI_MED':[
+    {v:'BIOTECH',t:'Công nghệ sinh học y dược'},
+    {v:'MEDDEV',t:'Thiết bị y tế'},
+    {v:'PHARMA',t:'Dược học'}
+  ],
+  'SCI_AGR':[
+    {v:'AGRI',t:'Nông nghiệp'},
+    {v:'FOOD',t:'Công nghệ thực phẩm'},
+    {v:'AQUA',t:'Thủy sản'}
+  ],
+  'SCI_INT':[
+    {v:'AI',t:'Trí tuệ nhân tạo'},
+    {v:'NANO',t:'Công nghệ nano'},
+    {v:'SPACE',t:'Công nghệ vũ trụ'}
+  ]
+};
+const optionsLevel3 = {
+  'MECH':['Động cơ đốt trong','Cơ khí chính xác','Phương tiện giao thông'],
+  'EEICT':['Bán dẫn','Viễn thông','Phần mềm hệ thống'],
+  'MTRL':['Polyme/Compozit','Vật liệu nano','Pin & Nhiên liệu'],
+  'ENV':['Xử lý nước thải','Tái chế chất thải','Giảm phát thải'],
+  'AUTO':['Robot công nghiệp','IoT công nghiệp','Điều khiển thông minh'],
+  'BIOTECH':['Sinh học phân tử','Enzyme & Protein','Chẩn đoán phân tử'],
+  'MEDDEV':['Thiết bị chẩn đoán','Thiết bị điều trị','Phần mềm y tế'],
+  'PHARMA':['Hoạt chất sinh học','Bào chế thuốc','Lâm sàng tiền khả thi'],
+  'AGRI':['Trồng trọt','Chăn nuôi','Công nghệ giống'],
+  'FOOD':['Bao gói thông minh','Công nghệ lên men','An toàn thực phẩm'],
+  'AQUA':['Nuôi trồng thủy sản','Chế biến thủy sản','Giống thủy sản'],
+  'AI':['Học sâu','Thị giác máy tính','Xử lý ngôn ngữ'],
+  'NANO':['Vật liệu nano y sinh','Nanotube/Graphene','Nano chế tạo'],
+  'SPACE':['Viễn thám','Định vị vệ tinh','Thiết bị hàng không vũ trụ']
+};
+function updateLevel2(){
+  const k = field1.value;
+  field2.innerHTML = '<option value="">-- chọn --</option>';
+  if(optionsLevel2[k]){
+    optionsLevel2[k].forEach(o=>{
+      const opt=document.createElement('option');opt.value=o.v;opt.textContent=o.t;field2.appendChild(opt);
+    });
+  }
+  field3.innerHTML = '<option value="">-- chọn --</option>';
+  buildSummary();
+}
+function updateLevel3(){
+  const k = field2.value;
+  field3.innerHTML = '<option value="">-- chọn --</option>';
+  if(optionsLevel3[k]){
+    optionsLevel3[k].forEach(t=>{
+      const opt=document.createElement('option');opt.textContent=t;field3.appendChild(opt);
+    });
+  }
+  buildSummary();
+}
+field1.addEventListener('change', updateLevel2);
+field2.addEventListener('change', updateLevel3);
+field3.addEventListener('change', ()=>buildSummary());
+
+// ===== Public vs NDA preview & Summary (from original) =====
+const pubBoxes = document.querySelectorAll('.pub');
+const pubChips = document.getElementById('pubChips');
+const pubSummaryEl = document.getElementById('pubSummary');
+function renderChips(){
+  pubChips.innerHTML='';
+  pubBoxes.forEach(b=>{
+    if(b.checked){
+      const chip=document.createElement('span');chip.className='chip';chip.textContent=b.parentElement.innerText.trim();
+      pubChips.appendChild(chip);
+    }
+  });
+  buildSummary();
+}
+pubBoxes.forEach(b=> b.addEventListener('change', renderChips));
+renderChips();
+function buildSummary(){
+  const title = document.getElementById('title').value || '(chưa đặt tên)';
+  const trl = document.getElementById('trl').selectedOptions[0]?.textContent || '';
+  const f1 = document.getElementById('field1').selectedOptions[0]?.textContent || '';
+  const f2 = document.getElementById('field2').selectedOptions[0]?.textContent || '';
+  const f3 = document.getElementById('field3').selectedOptions[0]?.textContent || '';
+  const pubSum = document.getElementById('public_summary').value;
+  const included = Array.from(document.querySelectorAll('.pub:checked')).map(x=>x.dataset.field);
+  const parts = [];
+  if(included.includes('title') && title) parts.push(title);
+  if(included.includes('public_summary') && pubSum) parts.push(pubSum);
+  if(included.includes('taxonomy')) parts.push([f1,f2,f3].filter(Boolean).join(' › '));
+  if(included.includes('trl') && trl) parts.push(trl);
+  pubSummaryEl.textContent = parts.filter(Boolean).join(' • ') || 'Chưa có nội dung công khai.';
+}
+document.addEventListener('input', (e)=>{
+  if(e.target.matches('input,textarea,select')) buildSummary();
+});
+buildSummary();
+
+// ===== Pricing switch (from original) =====
+const pricingSwitch = document.getElementById('pricingSwitch');
+const panels = document.querySelectorAll('#pricingPanels .panel');
+pricingSwitch.addEventListener('click',(e)=>{
+  if(e.target.tagName==='BUTTON'){
+    [...pricingSwitch.children].forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    const v=e.target.dataset.val;
+    panels.forEach(p=> p.style.display = (p.dataset.panel===v)?'block':'none');
+  }
+});
+</script>
+</body>
+</html>
