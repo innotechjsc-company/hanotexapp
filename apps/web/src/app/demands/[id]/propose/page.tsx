@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '@/store/auth';
-import { 
-  ArrowLeft, 
-  Send, 
-  Upload, 
-  CheckCircle, 
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useAuth } from "@/store/auth";
+import {
+  ArrowLeft,
+  Send,
+  Upload,
+  CheckCircle,
   AlertCircle,
   Target,
   Clock,
   DollarSign,
   FileText,
   Users,
-  Calendar
-} from 'lucide-react';
+  Calendar,
+} from "lucide-react";
 
 interface Demand {
   id: string;
@@ -30,6 +30,11 @@ interface Demand {
     email: string;
     phone: string;
   };
+}
+
+interface Technology {
+  id: string;
+  title: string;
 }
 
 interface Proposal {
@@ -49,45 +54,46 @@ export default function ProposeSolutionPage() {
   const { user } = useAuth();
   const [demand, setDemand] = useState<Demand | null>(null);
   const [proposal, setProposal] = useState<Proposal>({
-    technology_id: '',
-    technology_title: '',
+    technology_id: "",
+    technology_title: "",
     match_score: 5,
-    solution_description: '',
-    implementation_timeline: '',
-    estimated_cost: '',
-    cooperation_terms: '',
-    additional_documents: []
+    solution_description: "",
+    implementation_timeline: "",
+    estimated_cost: "",
+    cooperation_terms: "",
+    additional_documents: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [userTechnologies, setUserTechnologies] = useState([]);
+  const [userTechnologies, setUserTechnologies] = useState<Technology[]>([]);
 
   // Load demand details
   useEffect(() => {
     // TODO: Fetch demand details from API
     setDemand({
       id: params.id as string,
-      title: 'Tìm kiếm công nghệ xử lý rác thải sinh học',
-      description: 'Cần công nghệ xử lý rác thải sinh học hiệu quả, thân thiện môi trường, có thể triển khai quy mô công nghiệp.',
-      category: 'Công nghệ môi trường',
-      budget: '500,000,000 VND',
-      deadline: '2024-03-15',
+      title: "Tìm kiếm công nghệ xử lý rác thải sinh học",
+      description:
+        "Cần công nghệ xử lý rác thải sinh học hiệu quả, thân thiện môi trường, có thể triển khai quy mô công nghiệp.",
+      category: "Công nghệ môi trường",
+      budget: "500,000,000 VND",
+      deadline: "2024-03-15",
       requirements: [
-        'Hiệu suất xử lý > 90%',
-        'Chi phí vận hành thấp',
-        'Thời gian triển khai < 6 tháng',
-        'Có chứng nhận môi trường'
+        "Hiệu suất xử lý > 90%",
+        "Chi phí vận hành thấp",
+        "Thời gian triển khai < 6 tháng",
+        "Có chứng nhận môi trường",
       ],
       contact_info: {
-        name: 'Nguyễn Văn A',
-        email: 'nguyenvana@company.com',
-        phone: '0123456789'
-      }
+        name: "Nguyễn Văn A",
+        email: "nguyenvana@company.com",
+        phone: "0123456789",
+      },
     });
 
     // TODO: Fetch user's technologies
     setUserTechnologies([
-      { id: '1', title: 'Hệ thống xử lý rác thải sinh học tiên tiến' },
-      { id: '2', title: 'Công nghệ phân hủy rác thải hữu cơ' }
+      { id: "1", title: "Hệ thống xử lý rác thải sinh học tiên tiến" },
+      { id: "2", title: "Công nghệ phân hủy rác thải hữu cơ" },
     ]);
   }, [params.id]);
 
@@ -95,15 +101,15 @@ export default function ProposeSolutionPage() {
     setIsSubmitting(true);
     try {
       // TODO: Submit proposal to API
-      console.log('Submitting proposal:', proposal);
-      
+      console.log("Submitting proposal:", proposal);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Success - redirect to success page
       router.push(`/demands/${params.id}/propose/success`);
     } catch (error) {
-      console.error('Error submitting proposal:', error);
+      console.error("Error submitting proposal:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -111,9 +117,9 @@ export default function ProposeSolutionPage() {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setProposal(prev => ({
+    setProposal((prev) => ({
       ...prev,
-      additional_documents: [...prev.additional_documents, ...files]
+      additional_documents: [...prev.additional_documents, ...files],
     }));
   };
 
@@ -138,8 +144,12 @@ export default function ProposeSolutionPage() {
               <ArrowLeft className="h-6 w-6" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Đề xuất giải pháp</h1>
-              <p className="text-gray-600">Gửi đề xuất công nghệ cho nhu cầu này</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Đề xuất giải pháp
+              </h1>
+              <p className="text-gray-600">
+                Gửi đề xuất công nghệ cho nhu cầu này
+              </p>
             </div>
           </div>
         </div>
@@ -150,12 +160,16 @@ export default function ProposeSolutionPage() {
           {/* Demand Info Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6 sticky top-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Thông tin nhu cầu</h2>
-              
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Thông tin nhu cầu
+              </h2>
+
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium text-gray-900">{demand.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{demand.description}</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {demand.description}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -174,7 +188,9 @@ export default function ProposeSolutionPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Yêu cầu kỹ thuật:</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Yêu cầu kỹ thuật:
+                  </h4>
                   <ul className="text-sm text-gray-600 space-y-1">
                     {demand.requirements.map((req, index) => (
                       <li key={index} className="flex items-start space-x-2">
@@ -186,7 +202,9 @@ export default function ProposeSolutionPage() {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">Thông tin liên hệ:</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Thông tin liên hệ:
+                  </h4>
                   <div className="text-sm text-gray-600 space-y-1">
                     <div className="flex items-center space-x-2">
                       <Users className="h-4 w-4" />
@@ -206,8 +224,12 @@ export default function ProposeSolutionPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow">
               <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Đề xuất của bạn</h2>
-                <p className="text-gray-600 mt-1">Điền thông tin chi tiết về giải pháp công nghệ</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Đề xuất của bạn
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Điền thông tin chi tiết về giải pháp công nghệ
+                </p>
               </div>
 
               <div className="p-6 space-y-6">
@@ -219,11 +241,13 @@ export default function ProposeSolutionPage() {
                   <select
                     value={proposal.technology_id}
                     onChange={(e) => {
-                      const selectedTech = userTechnologies.find(t => t.id === e.target.value);
-                      setProposal(prev => ({
+                      const selectedTech = userTechnologies.find(
+                        (t) => t.id === e.target.value
+                      );
+                      setProposal((prev) => ({
                         ...prev,
                         technology_id: e.target.value,
-                        technology_title: selectedTech?.title || ''
+                        technology_title: selectedTech?.title || "",
                       }));
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -248,7 +272,12 @@ export default function ProposeSolutionPage() {
                       min="1"
                       max="10"
                       value={proposal.match_score}
-                      onChange={(e) => setProposal(prev => ({ ...prev, match_score: parseInt(e.target.value) }))}
+                      onChange={(e) =>
+                        setProposal((prev) => ({
+                          ...prev,
+                          match_score: parseInt(e.target.value),
+                        }))
+                      }
                       className="flex-1"
                     />
                     <span className="text-lg font-semibold text-blue-600 w-8">
@@ -268,7 +297,12 @@ export default function ProposeSolutionPage() {
                   </label>
                   <textarea
                     value={proposal.solution_description}
-                    onChange={(e) => setProposal(prev => ({ ...prev, solution_description: e.target.value }))}
+                    onChange={(e) =>
+                      setProposal((prev) => ({
+                        ...prev,
+                        solution_description: e.target.value,
+                      }))
+                    }
                     rows={4}
                     placeholder="Mô tả chi tiết về cách công nghệ của bạn đáp ứng nhu cầu này..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -283,7 +317,12 @@ export default function ProposeSolutionPage() {
                   <input
                     type="text"
                     value={proposal.implementation_timeline}
-                    onChange={(e) => setProposal(prev => ({ ...prev, implementation_timeline: e.target.value }))}
+                    onChange={(e) =>
+                      setProposal((prev) => ({
+                        ...prev,
+                        implementation_timeline: e.target.value,
+                      }))
+                    }
                     placeholder="Ví dụ: 3-6 tháng, 6-12 tháng..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -297,7 +336,12 @@ export default function ProposeSolutionPage() {
                   <input
                     type="text"
                     value={proposal.estimated_cost}
-                    onChange={(e) => setProposal(prev => ({ ...prev, estimated_cost: e.target.value }))}
+                    onChange={(e) =>
+                      setProposal((prev) => ({
+                        ...prev,
+                        estimated_cost: e.target.value,
+                      }))
+                    }
                     placeholder="Ví dụ: 300,000,000 - 500,000,000 VND"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -310,7 +354,12 @@ export default function ProposeSolutionPage() {
                   </label>
                   <textarea
                     value={proposal.cooperation_terms}
-                    onChange={(e) => setProposal(prev => ({ ...prev, cooperation_terms: e.target.value }))}
+                    onChange={(e) =>
+                      setProposal((prev) => ({
+                        ...prev,
+                        cooperation_terms: e.target.value,
+                      }))
+                    }
                     rows={3}
                     placeholder="Điều kiện hợp tác, phương thức thanh toán, bảo hành..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -342,20 +391,28 @@ export default function ProposeSolutionPage() {
                       Chọn tài liệu
                     </label>
                   </div>
-                  
+
                   {proposal.additional_documents.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {proposal.additional_documents.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                        >
                           <div className="flex items-center space-x-3">
                             <FileText className="h-5 w-5 text-blue-600" />
-                            <span className="text-sm text-gray-900">{file.name}</span>
+                            <span className="text-sm text-gray-900">
+                              {file.name}
+                            </span>
                           </div>
                           <button
                             onClick={() => {
-                              setProposal(prev => ({
+                              setProposal((prev) => ({
                                 ...prev,
-                                additional_documents: prev.additional_documents.filter((_, i) => i !== index)
+                                additional_documents:
+                                  prev.additional_documents.filter(
+                                    (_, i) => i !== index
+                                  ),
                               }));
                             }}
                             className="text-red-600 hover:text-red-800 text-sm"
@@ -378,7 +435,11 @@ export default function ProposeSolutionPage() {
                   </button>
                   <button
                     onClick={handleSubmitProposal}
-                    disabled={isSubmitting || !proposal.technology_id || !proposal.solution_description}
+                    disabled={
+                      isSubmitting ||
+                      !proposal.technology_id ||
+                      !proposal.solution_description
+                    }
                     className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
                   >
                     {isSubmitting ? (

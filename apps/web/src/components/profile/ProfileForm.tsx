@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import { Button, Input } from '@/components/ui';
-import { useAuthStore } from '@/store/auth';
-import { 
-  User, 
-  Building2, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import React, { useState, useEffect } from "react";
+import { Button, Card, CardContent, CardHeader, Input } from "@/components/ui";
+import { useAuthStore } from "@/store/auth";
+import {
+  User,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
   Calendar,
   Edit,
   Save,
   X,
   Shield,
   Award,
-  FileText
-} from 'lucide-react';
+  FileText,
+} from "lucide-react";
 
 interface ProfileFormProps {
   onSave?: (data: any) => Promise<void>;
@@ -27,33 +26,33 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    profession: '',
-    companyName: '',
-    taxCode: '',
-    legalRepresentative: '',
-    contactEmail: '',
-    institutionName: '',
-    institutionCode: '',
-    governingBody: ''
+    fullName: "",
+    email: "",
+    phone: "",
+    profession: "",
+    companyName: "",
+    taxCode: "",
+    legalRepresentative: "",
+    contactEmail: "",
+    institutionName: "",
+    institutionCode: "",
+    governingBody: "",
   });
 
   useEffect(() => {
     if (user) {
       setProfileData({
-        fullName: user.profile?.full_name || '',
-        email: user.email || '',
-        phone: user.profile?.phone || '',
-        profession: user.profile?.profession || '',
-        companyName: user.profile?.company_name || '',
-        taxCode: user.profile?.tax_code || '',
-        legalRepresentative: user.profile?.legal_representative || '',
-        contactEmail: user.profile?.contact_email || '',
-        institutionName: user.profile?.institution_name || '',
-        institutionCode: user.profile?.institution_code || '',
-        governingBody: user.profile?.governing_body || ''
+        fullName: user.profile?.full_name || "",
+        email: user.email || "",
+        phone: user.profile?.phone || "",
+        profession: user.profile?.profession || "",
+        companyName: user.profile?.company_name || "",
+        taxCode: user.profile?.tax_code || "",
+        legalRepresentative: user.profile?.legal_representative || "",
+        contactEmail: user.profile?.contact_email || "",
+        institutionName: user.profile?.institution_name || "",
+        institutionCode: user.profile?.institution_code || "",
+        governingBody: user.profile?.governing_body || "",
       });
     }
   }, [user]);
@@ -65,11 +64,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
         await onSave(profileData);
       } else {
         // Default save behavior
-        updateUser({ profile: profileData });
+        updateUser({ profile: profileData as any });
       }
       setIsEditing(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error("Error saving profile:", error);
     } finally {
       setLoading(false);
     }
@@ -78,17 +77,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
   const handleCancel = () => {
     if (user) {
       setProfileData({
-        fullName: user.profile?.full_name || '',
-        email: user.email || '',
-        phone: user.profile?.phone || '',
-        profession: user.profile?.profession || '',
-        companyName: user.profile?.company_name || '',
-        taxCode: user.profile?.tax_code || '',
-        legalRepresentative: user.profile?.legal_representative || '',
-        contactEmail: user.profile?.contact_email || '',
-        institutionName: user.profile?.institution_name || '',
-        institutionCode: user.profile?.institution_code || '',
-        governingBody: user.profile?.governing_body || ''
+        fullName: user.profile?.full_name || "",
+        email: user.email || "",
+        phone: user.profile?.phone || "",
+        profession: user.profile?.profession || "",
+        companyName: user.profile?.company_name || "",
+        taxCode: user.profile?.tax_code || "",
+        legalRepresentative: user.profile?.legal_representative || "",
+        contactEmail: user.profile?.contact_email || "",
+        institutionName: user.profile?.institution_name || "",
+        institutionCode: user.profile?.institution_code || "",
+        governingBody: user.profile?.governing_body || "",
       });
     }
     setIsEditing(false);
@@ -96,9 +95,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -106,20 +105,29 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
 
   const getUserTypeLabel = (type: string) => {
     switch (type) {
-      case 'INDIVIDUAL': return 'Cá nhân';
-      case 'COMPANY': return 'Doanh nghiệp';
-      case 'RESEARCH_INSTITUTION': return 'Viện/Trường';
-      default: return type;
+      case "INDIVIDUAL":
+        return "Cá nhân";
+      case "COMPANY":
+        return "Doanh nghiệp";
+      case "RESEARCH_INSTITUTION":
+        return "Viện/Trường";
+      default:
+        return type;
     }
   };
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'USER': return 'Người dùng';
-      case 'ADMIN': return 'Quản trị viên';
-      case 'MODERATOR': return 'Điều hành viên';
-      case 'SUPPORT': return 'Hỗ trợ';
-      default: return role;
+      case "USER":
+        return "Người dùng";
+      case "ADMIN":
+        return "Quản trị viên";
+      case "MODERATOR":
+        return "Điều hành viên";
+      case "SUPPORT":
+        return "Hỗ trợ";
+      default:
+        return role;
     }
   };
 
@@ -137,7 +145,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
                 {profileData.fullName || user.email}
               </h2>
               <p className="text-gray-600">{user.email}</p>
-              
+
               <div className="flex items-center space-x-4 mt-2">
                 <div className="flex items-center text-sm text-gray-600">
                   <Shield className="h-4 w-4 mr-1" />
@@ -149,11 +157,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
-                  Tham gia: {new Date(user.created_at).toLocaleDateString('vi-VN')}
+                  Tham gia:{" "}
+                  {new Date(user.created_at).toLocaleDateString("vi-VN")}
                 </div>
               </div>
             </div>
-            
+
             <div className="flex space-x-2">
               {isEditing ? (
                 <>
@@ -189,7 +198,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
         <Card>
-          <CardHeader 
+          <CardHeader
             title="Thông tin cơ bản"
             icon={<User className="h-5 w-5" />}
           />
@@ -221,7 +230,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
               icon={<Phone className="h-4 w-4" />}
             />
 
-            {user.user_type === 'INDIVIDUAL' && (
+            {user.user_type === "INDIVIDUAL" && (
               <Input
                 label="Nghề nghiệp"
                 name="profession"
@@ -236,12 +245,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
 
         {/* Organization Information */}
         <Card>
-          <CardHeader 
+          <CardHeader
             title="Thông tin tổ chức"
             icon={<Building2 className="h-5 w-5" />}
           />
           <CardContent className="space-y-4">
-            {user.user_type === 'COMPANY' && (
+            {user.user_type === "COMPANY" && (
               <>
                 <Input
                   label="Tên công ty"
@@ -272,7 +281,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
               </>
             )}
 
-            {user.user_type === 'RESEARCH_INSTITUTION' && (
+            {user.user_type === "RESEARCH_INSTITUTION" && (
               <>
                 <Input
                   label="Tên viện/trường"
@@ -310,5 +319,3 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
 };
 
 export default ProfileForm;
-
-

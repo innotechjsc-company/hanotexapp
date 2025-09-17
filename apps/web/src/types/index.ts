@@ -30,6 +30,23 @@ export interface UserProfile {
   user_id: string;
   created_at: string;
   updated_at: string;
+  full_name: string;
+  id_number?: string;
+  phone?: string;
+  profession?: string;
+  bank_account?: string;
+  company_name?: string;
+  tax_code?: string;
+  business_license?: string;
+  legal_representative?: string;
+  contact_email?: string;
+  production_capacity?: string;
+  institution_name?: string;
+  institution_code?: string;
+  governing_body?: string;
+  research_task_code?: string;
+  acceptance_report?: string;
+  research_group?: string;
 }
 
 export interface IndividualProfile extends UserProfile {

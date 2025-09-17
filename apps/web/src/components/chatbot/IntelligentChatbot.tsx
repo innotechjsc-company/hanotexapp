@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { 
-  MessageCircle, 
-  X, 
-  Send, 
-  Bot, 
-  User, 
+import { useState, useRef, useEffect } from "react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  User,
   HelpCircle,
   Lightbulb,
   FileText,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 
 interface Message {
   id: string;
-  type: 'user' | 'bot';
+  type: "user" | "bot";
   content: string;
   timestamp: Date;
   suggestions?: string[];
-  userType?: 'INVESTOR' | 'INDIVIDUAL' | 'ORGANIZATION';
+  userType?: "INVESTOR" | "INDIVIDUAL" | "ORGANIZATION";
   step?: number;
   totalSteps?: number;
 }
@@ -28,78 +28,106 @@ interface Message {
 interface ChatbotProps {
   isOpen: boolean;
   onToggle: () => void;
-  context?: 'register' | 'general';
+  context?: "register" | "general";
 }
 
-export default function IntelligentChatbot({ isOpen, onToggle, context = 'register' }: ChatbotProps) {
+export default function IntelligentChatbot({
+  isOpen,
+  onToggle,
+  context = "register",
+}: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>(() => {
-    if (context === 'register') {
+    if (context === "register") {
       return [
         {
-          id: '1',
-          type: 'bot',
-          content: '👋 **Chào mừng bạn đến với trang đăng ký sản phẩm KH&CN!**\n\nTôi sẽ hướng dẫn bạn từng bước để đăng sản phẩm lên HANOTEX:\n\n• Hướng dẫn điền form đăng ký\n• Giải thích các trường thông tin\n• Cách sử dụng tính năng OCR\n• Gợi ý nội dung phù hợp\n\nBạn muốn bắt đầu từ đâu?',
+          id: "1",
+          type: "bot",
+          content:
+            "👋 **Chào mừng bạn đến với trang đăng ký sản phẩm KH&CN!**\n\nTôi sẽ hướng dẫn bạn từng bước để đăng sản phẩm lên HANOTEX:\n\n• Hướng dẫn điền form đăng ký\n• Giải thích các trường thông tin\n• Cách sử dụng tính năng OCR\n• Gợi ý nội dung phù hợp\n\nBạn muốn bắt đầu từ đâu?",
           timestamp: new Date(),
           suggestions: [
-            'Hướng dẫn đăng ký sản phẩm',
-            'Giải thích TRL là gì?',
-            'Cách điền thông tin người đăng',
-            'Sử dụng OCR để tự động điền'
-          ]
-        }
+            "Hướng dẫn đăng ký sản phẩm",
+            "Giải thích TRL là gì?",
+            "Cách điền thông tin người đăng",
+            "Sử dụng OCR để tự động điền",
+          ],
+        },
       ];
     } else {
       return [
         {
-          id: '1',
-          type: 'bot',
-          content: 'Xin chào! Tôi là trợ lý thông minh của HANOTEX. Tôi có thể giúp bạn:\n\n• Hướng dẫn đăng ký sản phẩm KH&CN\n• Giải thích các trường thông tin\n• Gợi ý cách điền form hiệu quả\n• Trả lời câu hỏi về quy trình\n\nBạn cần hỗ trợ gì?',
+          id: "1",
+          type: "bot",
+          content:
+            "Xin chào! Tôi là trợ lý thông minh của HANOTEX. Tôi có thể giúp bạn:\n\n• Hướng dẫn đăng ký sản phẩm KH&CN\n• Giải thích các trường thông tin\n• Gợi ý cách điền form hiệu quả\n• Trả lời câu hỏi về quy trình\n\nBạn cần hỗ trợ gì?",
           timestamp: new Date(),
           suggestions: [
-            'Hướng dẫn đăng ký sản phẩm',
-            'Giải thích TRL là gì?',
-            'Cách điền thông tin người đăng',
-            'Tài liệu cần chuẩn bị'
-          ]
-        }
+            "Hướng dẫn đăng ký sản phẩm",
+            "Giải thích TRL là gì?",
+            "Cách điền thông tin người đăng",
+            "Tài liệu cần chuẩn bị",
+          ],
+        },
       ];
     }
   });
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [userType, setUserType] = useState<'INVESTOR' | 'INDIVIDUAL' | 'ORGANIZATION' | null>(null);
+  const [userType, setUserType] = useState<
+    "INVESTOR" | "INDIVIDUAL" | "ORGANIZATION" | null
+  >(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [currentGuide, setCurrentGuide] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const getUserTypeFromMessage = (message: string): 'INVESTOR' | 'INDIVIDUAL' | 'ORGANIZATION' | null => {
+  const getUserTypeFromMessage = (
+    message: string
+  ): "INVESTOR" | "INDIVIDUAL" | "ORGANIZATION" | null => {
     const msg = message.toLowerCase();
-    if (msg.includes('nhà đầu tư') || msg.includes('đầu tư') || msg.includes('investor')) {
-      return 'INVESTOR';
+    if (
+      msg.includes("nhà đầu tư") ||
+      msg.includes("đầu tư") ||
+      msg.includes("investor")
+    ) {
+      return "INVESTOR";
     }
-    if (msg.includes('cá nhân') || msg.includes('individual') || msg.includes('cá nhân')) {
-      return 'INDIVIDUAL';
+    if (
+      msg.includes("cá nhân") ||
+      msg.includes("individual") ||
+      msg.includes("cá nhân")
+    ) {
+      return "INDIVIDUAL";
     }
-    if (msg.includes('tổ chức') || msg.includes('viện') || msg.includes('trường') || msg.includes('doanh nghiệp') || msg.includes('organization')) {
-      return 'ORGANIZATION';
+    if (
+      msg.includes("tổ chức") ||
+      msg.includes("viện") ||
+      msg.includes("trường") ||
+      msg.includes("doanh nghiệp") ||
+      msg.includes("organization")
+    ) {
+      return "ORGANIZATION";
     }
     return null;
   };
 
-  const getStepByStepGuide = (guideType: string, userType: string, step: number) => {
+  const getStepByStepGuide = (
+    guideType: "register",
+    userType: "INVESTOR" | "INDIVIDUAL" | "ORGANIZATION",
+    step: number
+  ) => {
     const guides = {
-      'register': {
-        'INVESTOR': [
+      register: {
+        INVESTOR: [
           {
-            title: 'Bước 1: Thông tin nhà đầu tư',
+            title: "Bước 1: Thông tin nhà đầu tư",
             content: `🏦 **Thông tin nhà đầu tư** *(Bắt buộc)*
 
 **Thông tin cơ bản:**
@@ -109,10 +137,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Lĩnh vực đầu tư quan tâm
 
 **💡 Lưu ý:** Nhà đầu tư cần cung cấp thông tin pháp lý đầy đủ để đảm bảo tính minh bạch.`,
-            suggestions: ['Tiếp tục bước 2', 'Hỏi về lĩnh vực đầu tư', 'Thông tin pháp lý cần thiết']
+            suggestions: [
+              "Tiếp tục bước 2",
+              "Hỏi về lĩnh vực đầu tư",
+              "Thông tin pháp lý cần thiết",
+            ],
           },
           {
-            title: 'Bước 2: Tiêu chí đầu tư',
+            title: "Bước 2: Tiêu chí đầu tư",
             content: `🎯 **Tiêu chí đầu tư** *(Bắt buộc)*
 
 **Mức đầu tư:**
@@ -126,10 +158,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Thời gian hoàn vốn mong muốn
 
 **💡 Gợi ý:** Xác định rõ tiêu chí giúp tìm được công nghệ phù hợp.`,
-            suggestions: ['Tiếp tục bước 3', 'Hỏi về TRL', 'Cách đánh giá công nghệ']
+            suggestions: [
+              "Tiếp tục bước 3",
+              "Hỏi về TRL",
+              "Cách đánh giá công nghệ",
+            ],
           },
           {
-            title: 'Bước 3: Quy trình đầu tư',
+            title: "Bước 3: Quy trình đầu tư",
             content: `📋 **Quy trình đầu tư**
 
 **Các bước:**
@@ -140,12 +176,16 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 5. Ký kết hợp đồng đầu tư
 
 **💡 Mẹo:** Sử dụng bộ lọc để tìm công nghệ phù hợp với tiêu chí.`,
-            suggestions: ['Cách tìm kiếm công nghệ', 'Đánh giá công nghệ', 'Quy trình thương lượng']
-          }
+            suggestions: [
+              "Cách tìm kiếm công nghệ",
+              "Đánh giá công nghệ",
+              "Quy trình thương lượng",
+            ],
+          },
         ],
-        'INDIVIDUAL': [
+        INDIVIDUAL: [
           {
-            title: 'Bước 1: Thông tin cá nhân',
+            title: "Bước 1: Thông tin cá nhân",
             content: `👤 **Thông tin cá nhân** *(Bắt buộc)*
 
 **Thông tin cơ bản:**
@@ -155,10 +195,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Chức vụ/chuyên môn
 
 **💡 Lưu ý:** Thông tin này sẽ hiển thị công khai, đảm bảo tính chính xác.`,
-            suggestions: ['Tiếp tục bước 2', 'Hỏi về bảo mật thông tin', 'Cách thay đổi thông tin']
+            suggestions: [
+              "Tiếp tục bước 2",
+              "Hỏi về bảo mật thông tin",
+              "Cách thay đổi thông tin",
+            ],
           },
           {
-            title: 'Bước 2: Thông tin sản phẩm',
+            title: "Bước 2: Thông tin sản phẩm",
             content: `🔬 **Thông tin sản phẩm KH&CN** *(Bắt buộc)*
 
 **Mô tả sản phẩm:**
@@ -167,10 +211,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Chi tiết bảo mật (chỉ hiển thị sau NDA)
 
 **💡 Gợi ý:** Viết mô tả hấp dẫn để thu hút nhà đầu tư.`,
-            suggestions: ['Tiếp tục bước 3', 'Cách viết mô tả hấp dẫn', 'Phân biệt công khai/bảo mật']
+            suggestions: [
+              "Tiếp tục bước 3",
+              "Cách viết mô tả hấp dẫn",
+              "Phân biệt công khai/bảo mật",
+            ],
           },
           {
-            title: 'Bước 3: Phân loại và TRL',
+            title: "Bước 3: Phân loại và TRL",
             content: `🏷️ **Phân loại và TRL** *(Bắt buộc)*
 
 **Phân loại:**
@@ -184,12 +232,16 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • TRL 7-9: Thương mại hóa
 
 **💡 Mẹo:** Sử dụng OCR để tự động điền thông tin từ tài liệu.`,
-            suggestions: ['Tiếp tục bước 4', 'Giải thích TRL chi tiết', 'Cách sử dụng OCR']
-          }
+            suggestions: [
+              "Tiếp tục bước 4",
+              "Giải thích TRL chi tiết",
+              "Cách sử dụng OCR",
+            ],
+          },
         ],
-        'ORGANIZATION': [
+        ORGANIZATION: [
           {
-            title: 'Bước 1: Thông tin tổ chức',
+            title: "Bước 1: Thông tin tổ chức",
             content: `🏢 **Thông tin tổ chức** *(Bắt buộc)*
 
 **Thông tin pháp lý:**
@@ -204,10 +256,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Website (nếu có)
 
 **💡 Lưu ý:** Tổ chức cần cung cấp đầy đủ thông tin pháp lý.`,
-            suggestions: ['Tiếp tục bước 2', 'Hỏi về giấy phép', 'Thông tin pháp lý cần thiết']
+            suggestions: [
+              "Tiếp tục bước 2",
+              "Hỏi về giấy phép",
+              "Thông tin pháp lý cần thiết",
+            ],
           },
           {
-            title: 'Bước 2: Năng lực tổ chức',
+            title: "Bước 2: Năng lực tổ chức",
             content: `⚡ **Năng lực tổ chức** *(Bắt buộc)*
 
 **Năng lực nghiên cứu:**
@@ -222,10 +278,14 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Khả năng sản xuất
 
 **💡 Gợi ý:** Năng lực mạnh giúp tăng độ tin cậy.`,
-            suggestions: ['Tiếp tục bước 3', 'Cách thể hiện năng lực', 'Tài liệu minh chứng']
+            suggestions: [
+              "Tiếp tục bước 3",
+              "Cách thể hiện năng lực",
+              "Tài liệu minh chứng",
+            ],
           },
           {
-            title: 'Bước 3: Sản phẩm và IP',
+            title: "Bước 3: Sản phẩm và IP",
             content: `🔒 **Sản phẩm và Sở hữu trí tuệ** *(Bắt buộc)*
 
 **Sản phẩm KH&CN:**
@@ -240,20 +300,32 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • Bí mật thương mại
 
 **💡 Mẹo:** IP mạnh tăng giá trị sản phẩm.`,
-            suggestions: ['Tiếp tục bước 4', 'Các loại IP', 'Cách bảo vệ IP']
-          }
-        ]
-      }
+            suggestions: ["Tiếp tục bước 4", "Các loại IP", "Cách bảo vệ IP"],
+          },
+        ],
+      },
     };
 
     return guides[guideType]?.[userType]?.[step] || null;
   };
 
-  const getBotResponse = (userMessage: string): { content: string; suggestions?: string[]; userType?: string; step?: number; totalSteps?: number } => {
+  const getBotResponse = (
+    userMessage: string
+  ): {
+    content: string;
+    suggestions?: string[];
+    userType?: string;
+    step?: number;
+    totalSteps?: number;
+  } => {
     const message = userMessage.toLowerCase();
-    
+
     // Hướng dẫn đăng ký sản phẩm - Step by step
-    if (message.includes('hướng dẫn') || message.includes('đăng ký') || message.includes('sản phẩm')) {
+    if (
+      message.includes("hướng dẫn") ||
+      message.includes("đăng ký") ||
+      message.includes("sản phẩm")
+    ) {
       if (!userType) {
         return {
           content: `👋 **Chào mừng bạn đến với HANOTEX!**
@@ -264,24 +336,28 @@ export default function IntelligentChatbot({ isOpen, onToggle, context = 'regist
 • **Tổ chức/Viện-Trường** - Đăng sản phẩm từ tổ chức
 
 Bạn thuộc nhóm nào?`,
-          suggestions: ['Tôi là nhà đầu tư', 'Tôi là cá nhân', 'Tôi là tổ chức/viện trường']
+          suggestions: [
+            "Tôi là nhà đầu tư",
+            "Tôi là cá nhân",
+            "Tôi là tổ chức/viện trường",
+          ],
         };
       }
-      
+
       const detectedUserType = getUserTypeFromMessage(userMessage) || userType;
       const step = currentStep;
-      const guide = getStepByStepGuide('register', detectedUserType, step);
-      
+      const guide = getStepByStepGuide("register", detectedUserType, step);
+
       if (guide) {
         return {
           content: guide.content,
           suggestions: guide.suggestions,
           userType: detectedUserType,
           step: step + 1,
-          totalSteps: 3
+          totalSteps: 3,
         };
       }
-      
+
       return {
         content: `🎉 **Hoàn thành hướng dẫn cơ bản!**
 
@@ -291,7 +367,12 @@ Bạn đã nắm được các bước chính. Bây giờ bạn có thể:
 • Tìm hiểu về các tính năng khác
 
 Chúc bạn thành công! 🚀`,
-        suggestions: ['Bắt đầu đăng ký', 'Hỏi về OCR', 'Tìm hiểu TRL', 'Các tính năng khác']
+        suggestions: [
+          "Bắt đầu đăng ký",
+          "Hỏi về OCR",
+          "Tìm hiểu TRL",
+          "Các tính năng khác",
+        ],
       };
     }
 
@@ -299,43 +380,47 @@ Chúc bạn thành công! 🚀`,
     const detectedUserType = getUserTypeFromMessage(userMessage);
     if (detectedUserType && !userType) {
       setUserType(detectedUserType);
-      setCurrentGuide('register');
+      setCurrentGuide("register");
       setCurrentStep(0);
-      
-      const guide = getStepByStepGuide('register', detectedUserType, 0);
+
+      const guide = getStepByStepGuide("register", detectedUserType, 0);
       if (guide) {
         return {
-          content: `✅ **Đã xác định bạn là ${detectedUserType === 'INVESTOR' ? 'nhà đầu tư' : detectedUserType === 'INDIVIDUAL' ? 'cá nhân' : 'tổ chức/viện trường'}!**
+          content: `✅ **Đã xác định bạn là ${detectedUserType === "INVESTOR" ? "nhà đầu tư" : detectedUserType === "INDIVIDUAL" ? "cá nhân" : "tổ chức/viện trường"}!**
 
 ${guide.content}`,
           suggestions: guide.suggestions,
           userType: detectedUserType,
           step: 1,
-          totalSteps: 3
+          totalSteps: 3,
         };
       }
     }
 
     // Xử lý tiếp tục bước tiếp theo
-    if (message.includes('tiếp tục') || message.includes('bước tiếp')) {
-      if (userType && currentGuide === 'register') {
+    if (message.includes("tiếp tục") || message.includes("bước tiếp")) {
+      if (userType && currentGuide === "register") {
         const nextStep = currentStep + 1;
-        const guide = getStepByStepGuide('register', userType, nextStep);
-        
+        const guide = getStepByStepGuide("register", userType, nextStep);
+
         if (guide) {
           return {
             content: guide.content,
             suggestions: guide.suggestions,
             userType: userType,
             step: nextStep + 1,
-            totalSteps: 3
+            totalSteps: 3,
           };
         }
       }
     }
 
     // Giải thích TRL
-    if (message.includes('trl') || message.includes('mức độ') || message.includes('phát triển')) {
+    if (
+      message.includes("trl") ||
+      message.includes("mức độ") ||
+      message.includes("phát triển")
+    ) {
       return {
         content: `🔬 **TRL (Technology Readiness Level) - Mức độ sẵn sàng công nghệ:**
 
@@ -355,12 +440,20 @@ ${guide.content}`,
 • TRL 9: Thương mại hóa
 
 **💡 Gợi ý:** Dựa vào tài liệu của bạn để xác định TRL phù hợp!`,
-        suggestions: ['Cách xác định TRL', 'Sử dụng OCR để gợi ý TRL', 'Ví dụ về TRL']
+        suggestions: [
+          "Cách xác định TRL",
+          "Sử dụng OCR để gợi ý TRL",
+          "Ví dụ về TRL",
+        ],
       };
     }
 
     // Thông tin người đăng
-    if (message.includes('người đăng') || message.includes('thông tin cá nhân') || message.includes('doanh nghiệp')) {
+    if (
+      message.includes("người đăng") ||
+      message.includes("thông tin cá nhân") ||
+      message.includes("doanh nghiệp")
+    ) {
       return {
         content: `👤 **Thông tin người đăng:**
 
@@ -381,12 +474,20 @@ ${guide.content}`,
 • Báo cáo nghiệm thu
 
 **💡 Lưu ý:** Thông tin này sẽ được hiển thị công khai!`,
-        suggestions: ['Cách bảo mật thông tin', 'Thay đổi thông tin sau khi đăng', 'Quyền riêng tư']
+        suggestions: [
+          "Cách bảo mật thông tin",
+          "Thay đổi thông tin sau khi đăng",
+          "Quyền riêng tư",
+        ],
       };
     }
 
     // Tài liệu cần chuẩn bị
-    if (message.includes('tài liệu') || message.includes('chuẩn bị') || message.includes('upload')) {
+    if (
+      message.includes("tài liệu") ||
+      message.includes("chuẩn bị") ||
+      message.includes("upload")
+    ) {
       return {
         content: `📎 **Tài liệu cần chuẩn bị:**
 
@@ -407,12 +508,20 @@ ${guide.content}`,
 • Gợi ý TRL dựa trên nội dung
 
 **Kích thước:** Tối đa 10MB mỗi file`,
-        suggestions: ['Cách sử dụng OCR', 'Định dạng file được hỗ trợ', 'Tối ưu hóa tài liệu']
+        suggestions: [
+          "Cách sử dụng OCR",
+          "Định dạng file được hỗ trợ",
+          "Tối ưu hóa tài liệu",
+        ],
       };
     }
 
     // Lĩnh vực và phân loại
-    if (message.includes('lĩnh vực') || message.includes('ngành') || message.includes('chuyên ngành')) {
+    if (
+      message.includes("lĩnh vực") ||
+      message.includes("ngành") ||
+      message.includes("chuyên ngành")
+    ) {
       return {
         content: `🏷️ **Phân loại sản phẩm KH&CN:**
 
@@ -433,12 +542,21 @@ ${guide.content}`,
 • Năng lượng - Môi trường
 
 **💡 Gợi ý:** Chọn chính xác để tăng khả năng tìm kiếm!`,
-        suggestions: ['Cách chọn lĩnh vực phù hợp', 'Danh sách đầy đủ các ngành', 'Tác động của phân loại']
+        suggestions: [
+          "Cách chọn lĩnh vực phù hợp",
+          "Danh sách đầy đủ các ngành",
+          "Tác động của phân loại",
+        ],
       };
     }
 
     // Sở hữu trí tuệ
-    if (message.includes('sở hữu') || message.includes('trí tuệ') || message.includes('ip') || message.includes('bằng sáng chế')) {
+    if (
+      message.includes("sở hữu") ||
+      message.includes("trí tuệ") ||
+      message.includes("ip") ||
+      message.includes("bằng sáng chế")
+    ) {
       return {
         content: `🔒 **Sở hữu trí tuệ (IP):**
 
@@ -451,12 +569,16 @@ ${guide.content}`,
 • **Trade Secret (Bí mật thương mại):** Thông tin bí mật, không thời hạn
 
 **💡 Lưu ý:** Có IP sẽ tăng giá trị và độ tin cậy của sản phẩm!`,
-        suggestions: ['Cách đăng ký IP', 'Lợi ích của IP', 'Bảo vệ IP']
+        suggestions: ["Cách đăng ký IP", "Lợi ích của IP", "Bảo vệ IP"],
       };
     }
 
     // Pháp lý và lãnh thổ
-    if (message.includes('pháp lý') || message.includes('lãnh thổ') || message.includes('bảo hộ')) {
+    if (
+      message.includes("pháp lý") ||
+      message.includes("lãnh thổ") ||
+      message.includes("bảo hộ")
+    ) {
       return {
         content: `⚖️ **Pháp lý & Lãnh thổ:**
 
@@ -474,12 +596,20 @@ ${guide.content}`,
 • FDA (Hoa Kỳ)
 
 **💡 Lưu ý:** Chứng nhận quốc tế tăng khả năng xuất khẩu!`,
-        suggestions: ['Cách đăng ký chứng nhận', 'Lợi ích của chứng nhận', 'Quy trình pháp lý']
+        suggestions: [
+          "Cách đăng ký chứng nhận",
+          "Lợi ích của chứng nhận",
+          "Quy trình pháp lý",
+        ],
       };
     }
 
     // OCR và tự động hóa
-    if (message.includes('ocr') || message.includes('tự động') || message.includes('điền')) {
+    if (
+      message.includes("ocr") ||
+      message.includes("tự động") ||
+      message.includes("điền")
+    ) {
       return {
         content: `🤖 **Tính năng OCR thông minh:**
 
@@ -495,12 +625,20 @@ ${guide.content}`,
 • Độ tin cậy của kết quả
 
 **💡 Mẹo:** OCR hoạt động tốt nhất với tài liệu rõ nét, có text!`,
-        suggestions: ['Cách tối ưu tài liệu cho OCR', 'Xử lý lỗi OCR', 'Độ chính xác của OCR']
+        suggestions: [
+          "Cách tối ưu tài liệu cho OCR",
+          "Xử lý lỗi OCR",
+          "Độ chính xác của OCR",
+        ],
       };
     }
 
     // Câu hỏi chung
-    if (message.includes('giúp') || message.includes('hỗ trợ') || message.includes('không biết')) {
+    if (
+      message.includes("giúp") ||
+      message.includes("hỗ trợ") ||
+      message.includes("không biết")
+    ) {
       return {
         content: `🤝 **Tôi có thể giúp bạn:**
 
@@ -520,7 +658,12 @@ ${guide.content}`,
 • "Tài liệu cần chuẩn bị gì?"
 
 Tôi luôn sẵn sàng hỗ trợ bạn! 😊`,
-        suggestions: ['Hướng dẫn đăng ký sản phẩm', 'Giải thích TRL là gì?', 'Cách điền thông tin người đăng', 'Tài liệu cần chuẩn bị']
+        suggestions: [
+          "Hướng dẫn đăng ký sản phẩm",
+          "Giải thích TRL là gì?",
+          "Cách điền thông tin người đăng",
+          "Tài liệu cần chuẩn bị",
+        ],
       };
     }
 
@@ -535,7 +678,12 @@ Bạn có thể hỏi tôi về:
 • Quy trình và yêu cầu
 
 Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊`,
-      suggestions: ['Hướng dẫn đăng ký sản phẩm', 'Giải thích TRL là gì?', 'Cách điền thông tin người đăng', 'Tài liệu cần chuẩn bị']
+      suggestions: [
+        "Hướng dẫn đăng ký sản phẩm",
+        "Giải thích TRL là gì?",
+        "Cách điền thông tin người đăng",
+        "Tài liệu cần chuẩn bị",
+      ],
     };
   };
 
@@ -544,13 +692,13 @@ Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user',
+      type: "user",
       content: inputValue,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
     setIsTyping(true);
 
     // Simulate typing delay
@@ -558,24 +706,24 @@ Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊
       const botResponse = getBotResponse(inputValue);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        type: 'bot',
+        type: "bot",
         content: botResponse.content,
         timestamp: new Date(),
         suggestions: botResponse.suggestions,
-        userType: botResponse.userType,
+        userType: botResponse.userType as any,
         step: botResponse.step,
-        totalSteps: botResponse.totalSteps
+        totalSteps: botResponse.totalSteps,
       };
 
       // Update state if user type is detected
       if (botResponse.userType && botResponse.userType !== userType) {
-        setUserType(botResponse.userType);
+        setUserType(botResponse.userType as any);
       }
       if (botResponse.step !== undefined) {
         setCurrentStep(botResponse.step - 1);
       }
 
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
     }, 1000);
   };
@@ -585,7 +733,7 @@ Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -625,52 +773,67 @@ Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
-                    message.type === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                    message.type === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   <div className="flex items-start space-x-2">
-                    {message.type === 'bot' && <Bot className="h-4 w-4 mt-1 flex-shrink-0" />}
-                    {message.type === 'user' && <User className="h-4 w-4 mt-1 flex-shrink-0" />}
-                      <div className="flex-1">
-                        {/* Progress Bar for Step-by-Step Guide */}
-                        {message.step && message.totalSteps && message.type === 'bot' && (
+                    {message.type === "bot" && (
+                      <Bot className="h-4 w-4 mt-1 flex-shrink-0" />
+                    )}
+                    {message.type === "user" && (
+                      <User className="h-4 w-4 mt-1 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      {/* Progress Bar for Step-by-Step Guide */}
+                      {message.step &&
+                        message.totalSteps &&
+                        message.type === "bot" && (
                           <div className="mb-3">
                             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                              <span>Bước {message.step} / {message.totalSteps}</span>
-                              <span>{Math.round((message.step / message.totalSteps) * 100)}%</span>
+                              <span>
+                                Bước {message.step} / {message.totalSteps}
+                              </span>
+                              <span>
+                                {Math.round(
+                                  (message.step / message.totalSteps) * 100
+                                )}
+                                %
+                              </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
+                              <div
                                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                style={{ width: `${(message.step / message.totalSteps) * 100}%` }}
+                                style={{
+                                  width: `${(message.step / message.totalSteps) * 100}%`,
+                                }}
                               ></div>
                             </div>
                           </div>
                         )}
-                        
-                        <div className="whitespace-pre-wrap text-sm">
-                          {message.content}
-                        </div>
-                        {message.suggestions && message.type === 'bot' && (
-                          <div className="mt-3 space-y-2">
-                            {message.suggestions.map((suggestion, index) => (
-                              <button
-                                key={index}
-                                onClick={() => handleSuggestionClick(suggestion)}
-                                className="block w-full text-left p-2 bg-white bg-opacity-20 rounded text-xs hover:bg-opacity-30 transition-colors"
-                              >
-                                {suggestion}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+
+                      <div className="whitespace-pre-wrap text-sm">
+                        {message.content}
                       </div>
+                      {message.suggestions && message.type === "bot" && (
+                        <div className="mt-3 space-y-2">
+                          {message.suggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleSuggestionClick(suggestion)}
+                              className="block w-full text-left p-2 bg-white bg-opacity-20 rounded text-xs hover:bg-opacity-30 transition-colors"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -684,8 +847,14 @@ Hoặc chọn một gợi ý bên dưới để tôi hỗ trợ tốt hơn! 😊
                     <Bot className="h-4 w-4" />
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
                     </div>
                   </div>
                 </div>

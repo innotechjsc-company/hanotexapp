@@ -1,12 +1,6 @@
-import React from 'react';
-import { Button } from '@/components/ui/Button';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  FileX,
-  RefreshCw
-} from 'lucide-react';
+import React from "react";
+import { Search, Filter, Plus, FileX, RefreshCw } from "lucide-react";
+import Button from "./Button";
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -15,7 +9,7 @@ interface EmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
-    variant?: 'primary' | 'secondary' | 'outline';
+    variant?: "primary" | "secondary" | "outline";
   };
   secondaryAction?: {
     label: string;
@@ -30,39 +24,37 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   action,
   secondaryAction,
-  className = ''
+  className = "",
 }) => {
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}>
+    <div
+      className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
+    >
       {/* Icon */}
       <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
         {icon || <FileX className="w-full h-full" />}
       </div>
-      
+
       {/* Title */}
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        {title}
-      </h3>
-      
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+
       {/* Description */}
       {description && (
-        <p className="text-sm text-gray-600 mb-6 max-w-sm">
-          {description}
-        </p>
+        <p className="text-sm text-gray-600 mb-6 max-w-sm">{description}</p>
       )}
-      
+
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
         {action && (
           <Button
-            variant={action.variant || 'primary'}
+            variant={action.variant || "primary"}
             onClick={action.onClick}
             icon={<Plus className="h-4 w-4" />}
           >
             {action.label}
           </Button>
         )}
-        
+
         {secondaryAction && (
           <Button
             variant="outline"
@@ -89,7 +81,7 @@ export const NoResults: React.FC<NoResultsProps> = ({
   searchQuery,
   onClearSearch,
   onClearFilters,
-  hasFilters = false
+  hasFilters = false,
 }) => {
   const handleClearAll = () => {
     if (searchQuery && onClearSearch) {
@@ -105,14 +97,14 @@ export const NoResults: React.FC<NoResultsProps> = ({
       icon={<Search className="w-full h-full" />}
       title="Không tìm thấy kết quả"
       description={
-        searchQuery 
+        searchQuery
           ? `Không tìm thấy công nghệ nào cho từ khóa "${searchQuery}"`
           : "Không có công nghệ nào phù hợp với bộ lọc hiện tại"
       }
       action={{
-        label: searchQuery ? 'Xóa tìm kiếm' : 'Xóa bộ lọc',
+        label: searchQuery ? "Xóa tìm kiếm" : "Xóa bộ lọc",
         onClick: handleClearAll,
-        variant: 'outline'
+        variant: "outline",
       }}
     />
   );
@@ -125,18 +117,22 @@ interface NoDataProps {
 
 export const NoData: React.FC<NoDataProps> = ({
   onCreateNew,
-  createLabel = 'Tạo mới'
+  createLabel = "Tạo mới",
 }) => {
   return (
     <EmptyState
       icon={<Plus className="w-full h-full" />}
       title="Chưa có dữ liệu"
       description="Bắt đầu bằng cách tạo mục đầu tiên của bạn"
-      action={onCreateNew ? {
-        label: createLabel,
-        onClick: onCreateNew,
-        variant: 'primary'
-      } : undefined}
+      action={
+        onCreateNew
+          ? {
+              label: createLabel,
+              onClick: onCreateNew,
+              variant: "primary",
+            }
+          : undefined
+      }
     />
   );
 };
@@ -148,22 +144,24 @@ interface ErrorStateProps {
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
   onRetry,
-  error = 'Có lỗi xảy ra khi tải dữ liệu'
+  error = "Có lỗi xảy ra khi tải dữ liệu",
 }) => {
   return (
     <EmptyState
       icon={<RefreshCw className="w-full h-full" />}
       title="Lỗi tải dữ liệu"
       description={error}
-      action={onRetry ? {
-        label: 'Thử lại',
-        onClick: onRetry,
-        variant: 'primary'
-      } : undefined}
+      action={
+        onRetry
+          ? {
+              label: "Thử lại",
+              onClick: onRetry,
+              variant: "primary",
+            }
+          : undefined
+      }
     />
   );
 };
 
 export default EmptyState;
-
-

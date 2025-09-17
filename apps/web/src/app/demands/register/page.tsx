@@ -1,112 +1,109 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth';
-import { 
-  ArrowLeft,
-  Save,
-  Eye,
-  Plus,
-  Trash2,
-  AlertCircle
-} from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import { ArrowLeft, Save, Eye, Plus, Trash2, AlertCircle } from "lucide-react";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    categoryId: '',
-    budget: '',
-    currency: 'VND',
-    deadline: '',
-    location: '',
+    title: "",
+    description: "",
+    categoryId: "",
+    budget: "",
+    currency: "VND",
+    deadline: "",
+    location: "",
     contactInfo: {
-      contactPerson: '',
-      email: '',
-      phone: '',
-      company: ''
+      contactPerson: "",
+      email: "",
+      phone: "",
+      company: "",
     },
     requirements: {
-      trlLevel: '',
-      technologyType: '',
-      specificRequirements: '',
-      preferredPartners: '',
-      timeline: ''
-    }
+      trlLevel: "",
+      technologyType: "",
+      specificRequirements: "",
+      preferredPartners: "",
+      timeline: "",
+    },
   });
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
-    router.push('/auth/login');
+    router.push("/auth/login");
     return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       // TODO: Implement demand registration API call
-      console.log('Submitting demand:', formData);
-      
+      console.log("Submitting demand:", formData);
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setSuccess('Nhu cầu đã được đăng ký thành công!');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      setSuccess("Nhu cầu đã được đăng ký thành công!");
       setFormData({
-        title: '',
-        description: '',
-        categoryId: '',
-        budget: '',
-        currency: 'VND',
-        deadline: '',
-        location: '',
+        title: "",
+        description: "",
+        categoryId: "",
+        budget: "",
+        currency: "VND",
+        deadline: "",
+        location: "",
         contactInfo: {
-          contactPerson: '',
-          email: '',
-          phone: '',
-          company: ''
+          contactPerson: "",
+          email: "",
+          phone: "",
+          company: "",
         },
         requirements: {
-          trlLevel: '',
-          technologyType: '',
-          specificRequirements: '',
-          preferredPartners: '',
-          timeline: ''
-        }
+          trlLevel: "",
+          technologyType: "",
+          specificRequirements: "",
+          preferredPartners: "",
+          timeline: "",
+        },
       });
     } catch (err: any) {
-      setError(err.message || 'Có lỗi xảy ra khi đăng ký nhu cầu');
+      setError(err.message || "Có lỗi xảy ra khi đăng ký nhu cầu");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
-          [child]: value
-        }
+          ...((prev[parent as keyof typeof prev] as object) || {}),
+          [child]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -126,8 +123,12 @@ export default function RegisterDemandPage() {
                   <ArrowLeft className="h-5 w-5 text-gray-600" />
                 </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Đăng nhu cầu công nghệ</h1>
-                  <p className="text-gray-600">Đăng nhu cầu tìm kiếm công nghệ lên sàn giao dịch HANOTEX</p>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Đăng nhu cầu công nghệ
+                  </h1>
+                  <p className="text-gray-600">
+                    Đăng nhu cầu tìm kiếm công nghệ lên sàn giao dịch HANOTEX
+                  </p>
                 </div>
               </div>
               <div className="flex space-x-3">
@@ -161,11 +162,16 @@ export default function RegisterDemandPage() {
           {/* Basic Information */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Thông tin cơ bản</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Thông tin cơ bản
+              </h2>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Tiêu đề nhu cầu *
                 </label>
                 <input
@@ -181,7 +187,10 @@ export default function RegisterDemandPage() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Mô tả chi tiết *
                 </label>
                 <textarea
@@ -198,7 +207,10 @@ export default function RegisterDemandPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="categoryId"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Danh mục *
                   </label>
                   <select
@@ -210,18 +222,35 @@ export default function RegisterDemandPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Chọn danh mục</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440001">Công nghệ thông tin</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440002">Công nghệ sinh học</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440003">Vật liệu mới</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440004">Năng lượng</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440005">Môi trường</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440006">Y tế</option>
-                    <option value="550e8400-e29b-41d4-a716-446655440007">Nông nghiệp</option>
+                    <option value="550e8400-e29b-41d4-a716-446655440001">
+                      Công nghệ thông tin
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440002">
+                      Công nghệ sinh học
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440003">
+                      Vật liệu mới
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440004">
+                      Năng lượng
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440005">
+                      Môi trường
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440006">
+                      Y tế
+                    </option>
+                    <option value="550e8400-e29b-41d4-a716-446655440007">
+                      Nông nghiệp
+                    </option>
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Địa điểm
                   </label>
                   <input
@@ -238,7 +267,10 @@ export default function RegisterDemandPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="budget"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Ngân sách
                   </label>
                   <input
@@ -253,7 +285,10 @@ export default function RegisterDemandPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="currency"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Đơn vị tiền tệ
                   </label>
                   <select
@@ -270,7 +305,10 @@ export default function RegisterDemandPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="deadline"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Thời hạn
                   </label>
                   <input
@@ -289,12 +327,17 @@ export default function RegisterDemandPage() {
           {/* Contact Information */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Thông tin liên hệ</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Thông tin liên hệ
+              </h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="contactInfo.contactPerson" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="contactInfo.contactPerson"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Người liên hệ *
                   </label>
                   <input
@@ -310,7 +353,10 @@ export default function RegisterDemandPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="contactInfo.company" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="contactInfo.company"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Công ty/Tổ chức
                   </label>
                   <input
@@ -327,7 +373,10 @@ export default function RegisterDemandPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="contactInfo.email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="contactInfo.email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Email *
                   </label>
                   <input
@@ -343,7 +392,10 @@ export default function RegisterDemandPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="contactInfo.phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="contactInfo.phone"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Số điện thoại
                   </label>
                   <input
@@ -363,12 +415,17 @@ export default function RegisterDemandPage() {
           {/* Requirements */}
           <div className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Yêu cầu kỹ thuật</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Yêu cầu kỹ thuật
+              </h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="requirements.trlLevel" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="requirements.trlLevel"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Mức độ phát triển (TRL)
                   </label>
                   <select
@@ -382,17 +439,32 @@ export default function RegisterDemandPage() {
                     <option value="1">TRL 1 - Nguyên lý cơ bản</option>
                     <option value="2">TRL 2 - Khái niệm công nghệ</option>
                     <option value="3">TRL 3 - Bằng chứng khái niệm</option>
-                    <option value="4">TRL 4 - Xác thực trong phòng thí nghiệm</option>
-                    <option value="5">TRL 5 - Xác thực trong môi trường liên quan</option>
-                    <option value="6">TRL 6 - Trình diễn trong môi trường liên quan</option>
-                    <option value="7">TRL 7 - Trình diễn trong môi trường vận hành</option>
-                    <option value="8">TRL 8 - Hệ thống hoàn chỉnh và đủ điều kiện</option>
-                    <option value="9">TRL 9 - Hệ thống thực tế được chứng minh</option>
+                    <option value="4">
+                      TRL 4 - Xác thực trong phòng thí nghiệm
+                    </option>
+                    <option value="5">
+                      TRL 5 - Xác thực trong môi trường liên quan
+                    </option>
+                    <option value="6">
+                      TRL 6 - Trình diễn trong môi trường liên quan
+                    </option>
+                    <option value="7">
+                      TRL 7 - Trình diễn trong môi trường vận hành
+                    </option>
+                    <option value="8">
+                      TRL 8 - Hệ thống hoàn chỉnh và đủ điều kiện
+                    </option>
+                    <option value="9">
+                      TRL 9 - Hệ thống thực tế được chứng minh
+                    </option>
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="requirements.technologyType" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="requirements.technologyType"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Loại công nghệ
                   </label>
                   <input
@@ -408,7 +480,10 @@ export default function RegisterDemandPage() {
               </div>
 
               <div>
-                <label htmlFor="requirements.specificRequirements" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="requirements.specificRequirements"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Yêu cầu cụ thể
                 </label>
                 <textarea
@@ -424,7 +499,10 @@ export default function RegisterDemandPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="requirements.preferredPartners" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="requirements.preferredPartners"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Đối tác ưu tiên
                   </label>
                   <input
@@ -439,7 +517,10 @@ export default function RegisterDemandPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="requirements.timeline" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="requirements.timeline"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Thời gian thực hiện
                   </label>
                   <input

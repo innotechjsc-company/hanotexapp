@@ -1,45 +1,47 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Metadata } from 'next';
-import { 
-  Search, 
-  Filter, 
-  Grid, 
-  List, 
-  SortAsc, 
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Metadata } from "next";
+import {
+  Search,
+  Filter,
+  Grid,
+  List,
+  SortAsc,
   SortDesc,
   MapPin,
   Calendar,
   Eye,
   Star,
-  ArrowRight
-} from 'lucide-react';
-import { Technology } from '@/types';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import apiClient from '@/lib/api';
+  ArrowRight,
+} from "lucide-react";
+import { Technology } from "@/types";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import apiClient from "@/lib/api";
 
 export default function TechnologiesPage() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
-  const [categories, setCategories] = useState<Array<{id: string, name: string, code: string}>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string; code: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState('DESC');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("DESC");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState({
-    category: '',
-    trl_level: '',
-    status: 'ACTIVE'
+    category: "",
+    trl_level: "",
+    status: "ACTIVE",
   });
-  
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // Initialize search query from URL params
   useEffect(() => {
-    const q = searchParams.get('q');
+    const q = searchParams.get("q");
     if (q) {
       setSearchQuery(q);
     }
@@ -49,7 +51,7 @@ export default function TechnologiesPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/categories');
+        const response = await fetch("/api/categories");
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
@@ -57,7 +59,7 @@ export default function TechnologiesPage() {
           }
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
     fetchCategories();
@@ -71,75 +73,90 @@ export default function TechnologiesPage() {
         const params = {
           sort: sortBy,
           order: sortOrder,
-          ...filters
+          ...filters,
         };
-        
-        const response = await apiClient.getTechnologies(params);
+
+        const response = await apiClient.getTechnologies(params as any);
         if (response.success && response.data && Array.isArray(response.data)) {
           let filteredData = response.data;
-          
+
           // Client-side filtering since backend doesn't support proper filtering
-          
+
           // 1. Search filtering
           if (searchQuery.trim()) {
             const searchLower = searchQuery.toLowerCase();
-            filteredData = filteredData.filter(tech => 
-              (tech.title && tech.title.toLowerCase().includes(searchLower)) ||
-              (tech.public_summary && tech.public_summary.toLowerCase().includes(searchLower)) ||
-              (tech.category_name && tech.category_name.toLowerCase().includes(searchLower)) ||
-              (tech.owners && tech.owners.some((owner: any) => 
-                owner.owner_name && owner.owner_name.toLowerCase().includes(searchLower)
-              ))
+            filteredData = filteredData.filter(
+              (tech) =>
+                (tech.title &&
+                  tech.title.toLowerCase().includes(searchLower)) ||
+                (tech.public_summary &&
+                  tech.public_summary.toLowerCase().includes(searchLower)) ||
+                (tech.category_name &&
+                  tech.category_name.toLowerCase().includes(searchLower)) ||
+                (tech.owners &&
+                  tech.owners.some(
+                    (owner: any) =>
+                      owner.owner_name &&
+                      owner.owner_name.toLowerCase().includes(searchLower)
+                  ))
             );
           }
-          
+
           // 2. Category filtering
           if (filters.category) {
-            filteredData = filteredData.filter(tech => {
+            filteredData = filteredData.filter((tech) => {
               // Map category ID to category name for comparison
-              const categoryMap: {[key: string]: string} = {
-                '1': 'Điện – Điện tử – CNTT',
-                '2': 'Vật liệu & Công nghệ vật liệu', 
-                '3': 'Cơ khí – Động lực',
-                '4': 'Công nghệ sinh học y dược',
-                '5': 'Năng lượng & Môi trường',
-                '6': 'Nông nghiệp & Thực phẩm',
-                '7': 'Xây dựng & Kiến trúc',
-                '8': 'Giao thông vận tải'
+              const categoryMap: { [key: string]: string } = {
+                "1": "Điện – Điện tử – CNTT",
+                "2": "Vật liệu & Công nghệ vật liệu",
+                "3": "Cơ khí – Động lực",
+                "4": "Công nghệ sinh học y dược",
+                "5": "Năng lượng & Môi trường",
+                "6": "Nông nghiệp & Thực phẩm",
+                "7": "Xây dựng & Kiến trúc",
+                "8": "Giao thông vận tải",
               };
-              return tech.category_name && tech.category_name === categoryMap[filters.category];
+              return (
+                tech.category_name &&
+                tech.category_name === categoryMap[filters.category]
+              );
             });
           }
-          
+
           // 3. TRL Level filtering
           if (filters.trl_level) {
-            filteredData = filteredData.filter(tech => {
-              const [min, max] = filters.trl_level.split('-').map(Number);
+            filteredData = filteredData.filter((tech) => {
+              const [min, max] = filters.trl_level.split("-").map(Number);
               return tech.trl_level >= min && tech.trl_level <= max;
             });
           }
-          
+
           // 4. Status filtering
           if (filters.status) {
-            filteredData = filteredData.filter(tech => tech.status === filters.status);
+            filteredData = filteredData.filter(
+              (tech) => tech.status === filters.status
+            );
           }
-          
+
           setTechnologies(filteredData);
         } else {
-          console.error('API response error:', response);
+          console.error("API response error:", response);
           setTechnologies([]);
         }
       } catch (error) {
-        console.error('Error fetching technologies:', error);
+        console.error("Error fetching technologies:", error);
       } finally {
         setLoading(false);
       }
     };
 
     // Debounce search to avoid too many API calls
-    const timeoutId = setTimeout(() => {
-      fetchTechnologies();
-    }, searchQuery ? 300 : 0);
+    const timeoutId = setTimeout(
+      () => {
+        fetchTechnologies();
+      },
+      searchQuery ? 300 : 0
+    );
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery, sortBy, sortOrder, filters]);
@@ -149,36 +166,36 @@ export default function TechnologiesPage() {
     // Update URL with search query
     const params = new URLSearchParams(searchParams.toString());
     if (searchQuery.trim()) {
-      params.set('q', searchQuery.trim());
+      params.set("q", searchQuery.trim());
     } else {
-      params.delete('q');
+      params.delete("q");
     }
     router.push(`/technologies?${params.toString()}`);
   };
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
-      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
     } else {
       setSortBy(field);
-      setSortOrder('DESC');
+      setSortOrder("DESC");
     }
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setFilters({
-      category: '',
-      trl_level: '',
-      status: 'ACTIVE'
+      category: "",
+      trl_level: "",
+      status: "ACTIVE",
     });
-    router.push('/technologies');
+    router.push("/technologies");
   };
 
   const getTRLColor = (level: number) => {
-    if (level <= 3) return 'bg-red-100 text-red-800';
-    if (level <= 6) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
+    if (level <= 3) return "bg-red-100 text-red-800";
+    if (level <= 6) return "bg-yellow-100 text-yellow-800";
+    return "bg-green-100 text-green-800";
   };
 
   if (loading) {
@@ -218,7 +235,7 @@ export default function TechnologiesPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       handleSearch(e);
                     }
                   }}
@@ -232,7 +249,10 @@ export default function TechnologiesPage() {
               >
                 Tìm kiếm
               </button>
-              {(searchQuery || filters.category || filters.trl_level || filters.status !== 'ACTIVE') && (
+              {(searchQuery ||
+                filters.category ||
+                filters.trl_level ||
+                filters.status !== "ACTIVE") && (
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -251,7 +271,9 @@ export default function TechnologiesPage() {
                 </label>
                 <select
                   value={filters.category}
-                  onChange={(e) => setFilters({...filters, category: e.target.value})}
+                  onChange={(e) =>
+                    setFilters({ ...filters, category: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Tất cả danh mục</option>
@@ -262,14 +284,16 @@ export default function TechnologiesPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   TRL Level
                 </label>
                 <select
                   value={filters.trl_level}
-                  onChange={(e) => setFilters({...filters, trl_level: e.target.value})}
+                  onChange={(e) =>
+                    setFilters({ ...filters, trl_level: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Tất cả TRL</option>
@@ -285,7 +309,9 @@ export default function TechnologiesPage() {
                 </label>
                 <select
                   value={filters.status}
-                  onChange={(e) => setFilters({...filters, status: e.target.value})}
+                  onChange={(e) =>
+                    setFilters({ ...filters, status: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ACTIVE">Đang hoạt động</option>
@@ -301,59 +327,79 @@ export default function TechnologiesPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <p className="text-gray-600">
-              Tìm thấy <span className="font-semibold">{technologies.length}</span> công nghệ
+              Tìm thấy{" "}
+              <span className="font-semibold">{technologies.length}</span> công
+              nghệ
               {searchQuery && (
                 <span className="ml-2">
-                  cho từ khóa "<span className="font-medium text-blue-600">{searchQuery}</span>"
+                  cho từ khóa "
+                  <span className="font-medium text-blue-600">
+                    {searchQuery}
+                  </span>
+                  "
                 </span>
               )}
             </p>
-            {(searchQuery || filters.category || filters.trl_level || filters.status !== 'ACTIVE') && (
+            {(searchQuery ||
+              filters.category ||
+              filters.trl_level ||
+              filters.status !== "ACTIVE") && (
               <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                ⚠️ Tìm kiếm và bộ lọc được thực hiện ở frontend (backend chưa hỗ trợ đầy đủ)
+                ⚠️ Tìm kiếm và bộ lọc được thực hiện ở frontend (backend chưa hỗ
+                trợ đầy đủ)
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {/* Sort Options */}
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => handleSort('created_at')}
+                onClick={() => handleSort("created_at")}
                 className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  sortBy === 'created_at' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  sortBy === "created_at"
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Ngày tạo
-                {sortBy === 'created_at' && (
-                  sortOrder === 'ASC' ? <SortAsc className="ml-1 h-4 w-4" /> : <SortDesc className="ml-1 h-4 w-4" />
-                )}
+                {sortBy === "created_at" &&
+                  (sortOrder === "ASC" ? (
+                    <SortAsc className="ml-1 h-4 w-4" />
+                  ) : (
+                    <SortDesc className="ml-1 h-4 w-4" />
+                  ))}
               </button>
-              
+
               <button
-                onClick={() => handleSort('trl_level')}
+                onClick={() => handleSort("trl_level")}
                 className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  sortBy === 'trl_level' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                  sortBy === "trl_level"
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 TRL Level
-                {sortBy === 'trl_level' && (
-                  sortOrder === 'ASC' ? <SortAsc className="ml-1 h-4 w-4" /> : <SortDesc className="ml-1 h-4 w-4" />
-                )}
+                {sortBy === "trl_level" &&
+                  (sortOrder === "ASC" ? (
+                    <SortAsc className="ml-1 h-4 w-4" />
+                  ) : (
+                    <SortDesc className="ml-1 h-4 w-4" />
+                  ))}
               </button>
             </div>
 
             {/* View Mode Toggle */}
             <div className="flex items-center border border-gray-300 rounded-lg">
               <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                onClick={() => setViewMode("grid")}
+                className={`p-2 ${viewMode === "grid" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
               >
                 <Grid className="h-4 w-4" />
               </button>
               <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 ${viewMode === 'list' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
+                onClick={() => setViewMode("list")}
+                className={`p-2 ${viewMode === "list" ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100"}`}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -363,28 +409,37 @@ export default function TechnologiesPage() {
 
         {/* Technologies Grid/List */}
         {technologies.length > 0 ? (
-          <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-            : 'space-y-4'
-          }>
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "space-y-4"
+            }
+          >
             {technologies.map((tech) => (
               <div
                 key={tech.id}
                 className={`bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
-                  viewMode === 'list' ? 'p-6' : 'p-6'
+                  viewMode === "list" ? "p-6" : "p-6"
                 }`}
               >
-                {viewMode === 'grid' ? (
+                {viewMode === "grid" ? (
                   // Grid View
                   <>
                     <div className="flex items-start justify-between mb-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTRLColor(tech.trl_level)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTRLColor(tech.trl_level || 0)}`}
+                      >
                         TRL {tech.trl_level}
                       </span>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        tech.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {tech.status === 'ACTIVE' ? 'Hoạt động' : 'Chờ duyệt'}
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          tech.status === "ACTIVE"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {tech.status === "ACTIVE" ? "Hoạt động" : "Chờ duyệt"}
                       </span>
                     </div>
 
@@ -409,7 +464,11 @@ export default function TechnologiesPage() {
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1" />
-                        <span>{new Date(tech.updated_at).toLocaleDateString('vi-VN')}</span>
+                        <span>
+                          {new Date(tech.updated_at).toLocaleDateString(
+                            "vi-VN"
+                          )}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
@@ -420,15 +479,25 @@ export default function TechnologiesPage() {
                     {tech.asking_price && (
                       <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Giá đề xuất:</span>
+                          <span className="text-sm text-gray-600">
+                            Giá đề xuất:
+                          </span>
                           <span className="font-semibold text-green-600">
-                            {new Intl.NumberFormat('vi-VN').format(parseFloat(tech.asking_price))} {tech.currency}
+                            {new Intl.NumberFormat("vi-VN").format(
+                              tech.asking_price
+                            )}{" "}
+                            {tech.currency}
                           </span>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          Loại: {tech.pricing_type === 'ASK' ? 'Giá cố định' : 
-                                 tech.pricing_type === 'AUCTION' ? 'Đấu giá' : 
-                                 tech.pricing_type === 'APPRAISAL' ? 'Định giá' : tech.pricing_type}
+                          Loại:{" "}
+                          {tech.pricing_type === "ASK"
+                            ? "Giá cố định"
+                            : tech.pricing_type === "AUCTION"
+                              ? "Đấu giá"
+                              : tech.pricing_type === "APPRAISAL"
+                                ? "Định giá"
+                                : tech.pricing_type}
                         </div>
                       </div>
                     )}
@@ -447,13 +516,21 @@ export default function TechnologiesPage() {
                           {tech.title}
                         </h3>
                         <div className="flex items-center space-x-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTRLColor(tech.trl_level)}`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTRLColor(tech.trl_level || 0)}`}
+                          >
                             TRL {tech.trl_level}
                           </span>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            tech.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {tech.status === 'ACTIVE' ? 'Hoạt động' : 'Chờ duyệt'}
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              tech.status === "ACTIVE"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {tech.status === "ACTIVE"
+                              ? "Hoạt động"
+                              : "Chờ duyệt"}
                           </span>
                         </div>
                       </div>
@@ -475,7 +552,11 @@ export default function TechnologiesPage() {
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          <span>{new Date(tech.updated_at).toLocaleDateString('vi-VN')}</span>
+                          <span>
+                            {new Date(tech.updated_at).toLocaleDateString(
+                              "vi-VN"
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <Eye className="h-4 w-4 mr-1" />
@@ -486,15 +567,25 @@ export default function TechnologiesPage() {
                       {tech.asking_price && (
                         <div className="mt-3 p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Giá đề xuất:</span>
+                            <span className="text-sm text-gray-600">
+                              Giá đề xuất:
+                            </span>
                             <span className="font-semibold text-green-600">
-                              {new Intl.NumberFormat('vi-VN').format(parseFloat(tech.asking_price))} {tech.currency}
+                              {new Intl.NumberFormat("vi-VN").format(
+                                tech.asking_price
+                              )}{" "}
+                              {tech.currency}
                             </span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            Loại: {tech.pricing_type === 'ASK' ? 'Giá cố định' : 
-                                   tech.pricing_type === 'AUCTION' ? 'Đấu giá' : 
-                                   tech.pricing_type === 'APPRAISAL' ? 'Định giá' : tech.pricing_type}
+                            Loại:{" "}
+                            {tech.pricing_type === "ASK"
+                              ? "Giá cố định"
+                              : tech.pricing_type === "AUCTION"
+                                ? "Đấu giá"
+                                : tech.pricing_type === "APPRAISAL"
+                                  ? "Định giá"
+                                  : tech.pricing_type}
                           </div>
                         </div>
                       )}

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,17 +12,17 @@ import {
   ColumnDef,
   SortingState,
   ColumnFiltersState,
-} from '@tanstack/react-table';
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  ChevronLeft, 
+} from "@tanstack/react-table";
+import {
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Search,
   Filter,
   Download,
-  MoreHorizontal
-} from 'lucide-react';
+  MoreHorizontal,
+} from "lucide-react";
 
 interface DataTableProps<T> {
   data: T[];
@@ -43,11 +43,11 @@ export default function DataTable<T>({
   exportable = true,
   pagination = true,
   pageSize = 10,
-  className = '',
+  className = "",
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
@@ -77,32 +77,33 @@ export default function DataTable<T>({
 
   const handleExport = () => {
     const selectedRows = table.getFilteredSelectedRowModel().rows;
-    const exportData = selectedRows.length > 0 
-      ? selectedRows.map(row => row.original)
-      : data;
-    
+    const exportData =
+      selectedRows.length > 0 ? selectedRows.map((row) => row.original) : data;
+
     const csv = convertToCSV(exportData);
-    downloadCSV(csv, 'export.csv');
+    downloadCSV(csv, "export.csv");
   };
 
   const convertToCSV = (data: T[]) => {
-    if (data.length === 0) return '';
-    
-    const headers = columns.map(col => col.header as string).join(',');
-    const rows = data.map(row => 
-      columns.map(col => {
-        const value = (row as any)[col.accessorKey as string];
-        return `"${value || ''}"`;
-      }).join(',')
+    if (data.length === 0) return "";
+
+    const headers = columns.map((col) => col.header as string).join(",");
+    const rows = data.map((row) =>
+      columns
+        .map((col) => {
+          const value = (row as any)[col.id as string];
+          return `"${value || ""}"`;
+        })
+        .join(",")
     );
-    
-    return [headers, ...rows].join('\n');
+
+    return [headers, ...rows].join("\n");
   };
 
   const downloadCSV = (csv: string, filename: string) => {
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
@@ -110,7 +111,9 @@ export default function DataTable<T>({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
+    <div
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}
+    >
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -127,7 +130,7 @@ export default function DataTable<T>({
                 />
               </div>
             )}
-            
+
             {filterable && (
               <button className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 <Filter className="h-4 w-4 mr-2" />
@@ -146,7 +149,7 @@ export default function DataTable<T>({
                 Export
               </button>
             )}
-            
+
             <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
               <MoreHorizontal className="h-4 w-4" />
             </button>
@@ -158,9 +161,9 @@ export default function DataTable<T>({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -168,24 +171,33 @@ export default function DataTable<T>({
                     {header.isPlaceholder ? null : (
                       <div
                         className={`flex items-center space-x-1 ${
-                          header.column.getCanSort() ? 'cursor-pointer hover:text-gray-700' : ''
+                          header.column.getCanSort()
+                            ? "cursor-pointer hover:text-gray-700"
+                            : ""
                         }`}
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <span>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                         </span>
                         {header.column.getCanSort() && (
                           <div className="flex flex-col">
-                            <ChevronUp 
+                            <ChevronUp
                               className={`h-3 w-3 ${
-                                header.column.getIsSorted() === 'asc' ? 'text-blue-600' : 'text-gray-400'
-                              }`} 
+                                header.column.getIsSorted() === "asc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400"
+                              }`}
                             />
-                            <ChevronDown 
+                            <ChevronDown
                               className={`h-3 w-3 -mt-1 ${
-                                header.column.getIsSorted() === 'desc' ? 'text-blue-600' : 'text-gray-400'
-                              }`} 
+                                header.column.getIsSorted() === "desc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400"
+                              }`}
                             />
                           </div>
                         )}
@@ -197,10 +209,13 @@ export default function DataTable<T>({
             ))}
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {table.getRowModel().rows.map(row => (
+            {table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="hover:bg-gray-50">
-                {row.getVisibleCells().map(cell => (
-                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -216,15 +231,20 @@ export default function DataTable<T>({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">
-                Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                Showing{" "}
+                {table.getState().pagination.pageIndex *
+                  table.getState().pagination.pageSize +
+                  1}{" "}
+                to{" "}
                 {Math.min(
-                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  (table.getState().pagination.pageIndex + 1) *
+                    table.getState().pagination.pageSize,
                   table.getFilteredRowModel().rows.length
-                )}{' '}
+                )}{" "}
                 of {table.getFilteredRowModel().rows.length} results
               </span>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => table.previousPage()}
@@ -233,11 +253,12 @@ export default function DataTable<T>({
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              
+
               <span className="text-sm text-gray-700">
-                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
               </span>
-              
+
               <button
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
