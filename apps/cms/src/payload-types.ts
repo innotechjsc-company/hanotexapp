@@ -162,11 +162,11 @@ export interface User {
   /**
    * Link to company information
    */
-  company_id?: (number | null) | Company;
+  company?: (number | null) | Company;
   /**
    * Link to research institution information
    */
-  research_institution_id?: (number | null) | ResearchInstitution;
+  research_institution?: (number | null) | ResearchInstitution;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -360,7 +360,7 @@ export interface Category {
   /**
    * Select parent category for hierarchical structure
    */
-  parent_id?: (number | null) | Category;
+  parent?: (number | null) | Category;
   /**
    * Category hierarchy level (1-5)
    */
@@ -405,8 +405,8 @@ export interface Technology {
    * Technology Readiness Level (1-9)
    */
   trl_level?: number | null;
-  category_id?: (number | null) | Category;
-  submitter_id: number | User;
+  category?: (number | null) | Category;
+  submitter: number | User;
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE';
   visibility_mode?: ('public' | 'private' | 'restricted') | null;
   owners?:
@@ -538,7 +538,7 @@ export interface Auction {
   /**
    * The technology being auctioned
    */
-  technology_id: number | Technology;
+  technology: number | Technology;
   auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
   /**
    * Initial price for the auction
@@ -568,8 +568,8 @@ export interface Auction {
  */
 export interface Bid {
   id: number;
-  auction_id: number | Auction;
-  bidder_id: number | User;
+  auction: number | Auction;
+  bidder: number | User;
   bid_amount: number;
   bid_time: string;
   /**
@@ -588,15 +588,15 @@ export interface Transaction {
   /**
    * The technology involved in this transaction
    */
-  technology_id?: (number | null) | Technology;
+  technology?: (number | null) | Technology;
   /**
    * User who is purchasing
    */
-  buyer_id?: (number | null) | User;
+  buyer?: (number | null) | User;
   /**
    * User who is selling
    */
-  seller_id?: (number | null) | User;
+  seller?: (number | null) | User;
   amount: number;
   currency: 'VND' | 'USD' | 'EUR';
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
@@ -619,7 +619,7 @@ export interface Transaction {
   /**
    * If this transaction resulted from an auction
    */
-  auction_id?: (number | null) | Auction;
+  auction?: (number | null) | Auction;
   updatedAt: string;
   createdAt: string;
 }
@@ -769,8 +769,8 @@ export interface UsersSelect<T extends boolean = true> {
   phone?: T;
   profession?: T;
   bank_account?: T;
-  company_id?: T;
-  research_institution_id?: T;
+  company?: T;
+  research_institution?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -895,7 +895,7 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   code?: T;
-  parent_id?: T;
+  parent?: T;
   level?: T;
   description?: T;
   updatedAt?: T;
@@ -910,8 +910,8 @@ export interface TechnologiesSelect<T extends boolean = true> {
   public_summary?: T;
   confidential_detail?: T;
   trl_level?: T;
-  category_id?: T;
-  submitter_id?: T;
+  category?: T;
+  submitter?: T;
   status?: T;
   visibility_mode?: T;
   owners?:
@@ -1002,7 +1002,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
  * via the `definition` "auctions_select".
  */
 export interface AuctionsSelect<T extends boolean = true> {
-  technology_id?: T;
+  technology?: T;
   auction_type?: T;
   start_price?: T;
   reserve_price?: T;
@@ -1019,8 +1019,8 @@ export interface AuctionsSelect<T extends boolean = true> {
  * via the `definition` "bids_select".
  */
 export interface BidsSelect<T extends boolean = true> {
-  auction_id?: T;
-  bidder_id?: T;
+  auction?: T;
+  bidder?: T;
   bid_amount?: T;
   bid_time?: T;
   is_winning?: T;
@@ -1032,9 +1032,9 @@ export interface BidsSelect<T extends boolean = true> {
  * via the `definition` "transactions_select".
  */
 export interface TransactionsSelect<T extends boolean = true> {
-  technology_id?: T;
-  buyer_id?: T;
-  seller_id?: T;
+  technology?: T;
+  buyer?: T;
+  seller?: T;
   amount?: T;
   currency?: T;
   status?: T;
@@ -1042,7 +1042,7 @@ export interface TransactionsSelect<T extends boolean = true> {
   transaction_fee?: T;
   completed_at?: T;
   notes?: T;
-  auction_id?: T;
+  auction?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -15,7 +15,7 @@ export const Auctions: CollectionConfig = {
   },
   fields: [
     {
-      name: 'technology_id',
+      name: 'technology',
       type: 'relationship',
       relationTo: 'technologies',
       required: true,

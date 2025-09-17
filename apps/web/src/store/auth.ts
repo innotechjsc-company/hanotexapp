@@ -104,15 +104,18 @@ export const useAuthStore = create<AuthStore>()(
 
       // Logout action
       logout: async () => {
+        console.log('[Auth Store] Starting logout...');
         set({ isLoading: true });
 
         try {
           await authApi.logout(); // Đã xóa localStorage bên trong authApi.logout()
+          console.log('[Auth Store] API logout successful');
         } catch (error) {
           console.error("Logout error:", error);
           // Vẫn clear state dù có lỗi từ server
         } finally {
           // Clear state
+          console.log('[Auth Store] Clearing auth state...');
           set({
             user: null,
             token: null,
@@ -124,6 +127,7 @@ export const useAuthStore = create<AuthStore>()(
           localStorageService.remove("auth_user");
           localStorageService.remove("auth_token");
           localStorageService.remove("auth_data");
+          console.log('[Auth Store] Logout complete');
         }
       },
 
@@ -233,10 +237,18 @@ export const useAuthStore = create<AuthStore>()(
 
       // Load user from localStorage only
       loadUserFromStorage: () => {
+        console.log('[Auth Store] Loading user from storage...');
         const storedUser = localStorageService.get<User>("auth_user");
         const storedToken = localStorageService.get<string>("auth_token");
+        
+        console.log('[Auth Store] Stored data:', { 
+          hasUser: !!storedUser, 
+          hasToken: !!storedToken,
+          userEmail: storedUser?.email 
+        });
 
         if (storedUser && storedToken) {
+          console.log('[Auth Store] Setting authenticated state from storage');
           set({
             user: storedUser,
             token: storedToken,
@@ -245,21 +257,37 @@ export const useAuthStore = create<AuthStore>()(
           });
           return true;
         }
+        
+        console.log('[Auth Store] No valid stored data found');
         return false;
       },
 
       // Initialize auth state from localStorage
       initialize: () => {
+        console.log('[Auth Store] Starting initialization...');
+        
         authApi.initializeAuth();
 
         // Lấy dữ liệu từ localStorage trước
         const hasStoredData = get().loadUserFromStorage();
+        console.log('[Auth Store] Has stored data:', hasStoredData);
 
         // Check if we have a valid token
-        if (authApi.isAuthenticated() && !get().isTokenExpired()) {
+        const isApiAuthenticated = authApi.isAuthenticated();
+        const isTokenExpired = get().isTokenExpired();
+        
+        console.log('[Auth Store] Auth check:', { 
+          isApiAuthenticated, 
+          isTokenExpired, 
+          hasStoredData 
+        });
+
+        if (isApiAuthenticated && !isTokenExpired) {
+          console.log('[Auth Store] Valid token found');
           // Nếu đã có user trong localStorage, không cần gọi API ngay
           // Chỉ refresh user trong background để đảm bảo data mới nhất
           if (hasStoredData) {
+            console.log('[Auth Store] Using stored data, refreshing in background');
             // Refresh user data trong background (không block UI)
             get()
               .refreshUser()
@@ -272,18 +300,33 @@ export const useAuthStore = create<AuthStore>()(
                 }
               });
           } else {
+            console.log('[Auth Store] No stored data, fetching user');
             // Nếu không có stored user, cần gọi API để lấy
             get()
               .refreshUser()
               .catch(() => {
+                console.log('[Auth Store] Failed to fetch user, logging out');
                 // If failed, clear the auth state
                 get().logout();
               });
           }
         } else {
-          // Clear invalid auth state
-          get().logout();
+          console.log('[Auth Store] No valid token, clearing auth state');
+          // Clear invalid auth state - but don't await it to avoid blocking
+          get().logout().finally(() => {
+            console.log('[Auth Store] Final state after logout:', {
+              isAuthenticated: get().isAuthenticated,
+              isLoading: get().isLoading,
+              user: get().user
+            });
+          });
         }
+        
+        console.log('[Auth Store] Initialization complete, current state:', {
+          isAuthenticated: get().isAuthenticated,
+          isLoading: get().isLoading,
+          user: !!get().user
+        });
       },
     }),
     {

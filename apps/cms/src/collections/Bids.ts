@@ -15,14 +15,14 @@ export const Bids: CollectionConfig = {
   },
   fields: [
     {
-      name: 'auction_id',
+      name: 'auction',
       type: 'relationship',
       relationTo: 'auctions',
       required: true,
       label: 'Auction',
     },
     {
-      name: 'bidder_id',
+      name: 'bidder',
       type: 'relationship',
       relationTo: 'users',
       required: true,

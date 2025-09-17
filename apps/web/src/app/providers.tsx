@@ -2,23 +2,24 @@
 
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { SessionProvider } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HeroUIProvider } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { initializeAuth } from "@/store/auth";
 
 // Separate component for HeroUIProvider that can use hooks
 function HeroUIWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  
-  return (
-    <HeroUIProvider navigate={router.push}>
-      {children}
-    </HeroUIProvider>
-  );
+
+  return <HeroUIProvider navigate={router.push}>{children}</HeroUIProvider>;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // Initialize auth store on app startup
+  useEffect(() => {
+    initializeAuth();
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -46,15 +47,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <HeroUIWrapper>
-          {children}
-        </HeroUIWrapper>
-        {process.env.NODE_ENV === "development" && (
-          <ReactQueryDevtools initialIsOpen={false} />
-        )}
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryClientProvider client={queryClient}>
+      <HeroUIWrapper>{children}</HeroUIWrapper>
+      {process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </QueryClientProvider>
   );
 }

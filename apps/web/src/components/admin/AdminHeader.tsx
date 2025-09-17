@@ -1,28 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { signOut } from 'next-auth/react';
-import { 
-  Bell, 
-  Search, 
-  User, 
-  Settings, 
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
-import { NextAuthUser } from '@/types';
+import { useState } from "react";
+import { Bell, Search, User, Settings, LogOut } from "lucide-react";
+import { useUser } from "@/store/auth";
+import { useAuthActions } from "@/store/auth";
 
-interface AdminHeaderProps {
-  user: NextAuthUser;
-}
-
-export default function AdminHeader({ user }: AdminHeaderProps) {
+export default function AdminHeader() {
+  const user = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/' });
+    useAuthActions().logout();
   };
 
   return (
@@ -61,19 +50,29 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-200">
-                    <h3 className="text-lg font-medium text-gray-900">Notifications</h3>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Notifications
+                    </h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     <div className="p-4 border-b border-gray-100">
-                      <p className="text-sm text-gray-600">New technology submitted for review</p>
-                      <p className="text-xs text-gray-400 mt-1">2 minutes ago</p>
+                      <p className="text-sm text-gray-600">
+                        New technology submitted for review
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        2 minutes ago
+                      </p>
                     </div>
                     <div className="p-4 border-b border-gray-100">
-                      <p className="text-sm text-gray-600">User verification pending</p>
+                      <p className="text-sm text-gray-600">
+                        User verification pending
+                      </p>
                       <p className="text-xs text-gray-400 mt-1">1 hour ago</p>
                     </div>
                     <div className="p-4">
-                      <p className="text-sm text-gray-600">System backup completed</p>
+                      <p className="text-sm text-gray-600">
+                        System backup completed
+                      </p>
                       <p className="text-xs text-gray-400 mt-1">3 hours ago</p>
                     </div>
                   </div>
@@ -96,8 +95,10 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                   <User className="h-5 w-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.role}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.full_name}
+                  </p>
+                  <p className="text-xs text-gray-500">{user?.role}</p>
                 </div>
               </button>
 

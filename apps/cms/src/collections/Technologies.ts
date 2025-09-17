@@ -47,13 +47,13 @@ export const Technologies: CollectionConfig = {
       },
     },
     {
-      name: 'category_id',
+      name: 'category',
       type: 'relationship',
       relationTo: 'categories',
       label: 'Category',
     },
     {
-      name: 'submitter_id',
+      name: 'submitter',
       type: 'relationship',
       relationTo: 'users',
       label: 'Submitter',

@@ -3,50 +3,15 @@
  * Các function để quản lý auctions với PayloadCMS
  */
 
-import { payloadApiClient, ApiResponse } from './client';
-import { API_ENDPOINTS, PAGINATION_DEFAULTS } from './config';
-
-export interface Auction {
-  id: string;
-  title: string;
-  description?: string;
-  technology_id: string | Technology;
-  seller_id: string | User;
-  starting_price: number;
-  reserve_price?: number;
-  current_price: number;
-  currency: 'VND' | 'USD' | 'EUR';
-  start_time: string;
-  end_time: string;
-  status: 'DRAFT' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
-  auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
-  bid_increment: number;
-  total_bids: number;
-  winner_id?: string | User;
-  winning_bid?: number;
-  terms_conditions?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Technology {
-  id: string;
-  title: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-}
+import { Auction } from "@/types/Auction";
+import { payloadApiClient, ApiResponse } from "./client";
+import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
 export interface AuctionFilters {
-  status?: Auction['status'];
-  auction_type?: Auction['auction_type'];
+  status?: Auction["status"];
+  auction_type?: Auction["auction_type"];
   technology_id?: string;
   seller_id?: string;
-  currency?: Auction['currency'];
-  min_price?: number;
-  max_price?: number;
   search?: string;
 }
 
@@ -67,7 +32,7 @@ export async function getAuctions(
     ...filters,
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
-    sort: pagination.sort || '-createdAt',
+    sort: pagination.sort || "-createdAt",
   };
 
   return payloadApiClient.get<Auction[]>(API_ENDPOINTS.AUCTIONS, params);
@@ -77,7 +42,9 @@ export async function getAuctions(
  * Get auction by ID
  */
 export async function getAuctionById(id: string): Promise<Auction> {
-  const response = await payloadApiClient.get<Auction>(`${API_ENDPOINTS.AUCTIONS}/${id}`);
+  const response = await payloadApiClient.get<Auction>(
+    `${API_ENDPOINTS.AUCTIONS}/${id}`
+  );
   return response.data!;
 }
 
@@ -85,15 +52,24 @@ export async function getAuctionById(id: string): Promise<Auction> {
  * Create new auction
  */
 export async function createAuction(data: Partial<Auction>): Promise<Auction> {
-  const response = await payloadApiClient.post<Auction>(API_ENDPOINTS.AUCTIONS, data);
+  const response = await payloadApiClient.post<Auction>(
+    API_ENDPOINTS.AUCTIONS,
+    data
+  );
   return response.data!;
 }
 
 /**
  * Update auction
  */
-export async function updateAuction(id: string, data: Partial<Auction>): Promise<Auction> {
-  const response = await payloadApiClient.patch<Auction>(`${API_ENDPOINTS.AUCTIONS}/${id}`, data);
+export async function updateAuction(
+  id: string,
+  data: Partial<Auction>
+): Promise<Auction> {
+  const response = await payloadApiClient.patch<Auction>(
+    `${API_ENDPOINTS.AUCTIONS}/${id}`,
+    data
+  );
   return response.data!;
 }
 
@@ -110,10 +86,7 @@ export async function deleteAuction(id: string): Promise<void> {
 export async function getActiveAuctions(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Auction[]>> {
-  return getAuctions(
-    { status: 'ACTIVE' },
-    pagination
-  );
+  return getAuctions({ status: "ACTIVE" }, pagination);
 }
 
 /**
@@ -123,10 +96,7 @@ export async function getAuctionsByTechnology(
   technologyId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Auction[]>> {
-  return getAuctions(
-    { technology_id: technologyId },
-    pagination
-  );
+  return getAuctions({ technology_id: technologyId }, pagination);
 }
 
 /**
@@ -136,10 +106,7 @@ export async function getAuctionsBySeller(
   sellerId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Auction[]>> {
-  return getAuctions(
-    { seller_id: sellerId },
-    pagination
-  );
+  return getAuctions({ seller_id: sellerId }, pagination);
 }
 
 /**
@@ -150,10 +117,7 @@ export async function searchAuctions(
   filters: AuctionFilters = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Auction[]>> {
-  return getAuctions(
-    { ...filters, search: query },
-    pagination
-  );
+  return getAuctions({ ...filters, search: query }, pagination);
 }
 
 /**
@@ -165,12 +129,12 @@ export async function getEndingSoonAuctions(
 ): Promise<ApiResponse<Auction[]>> {
   const endTime = new Date();
   endTime.setHours(endTime.getHours() + hoursFromNow);
-  
+
   return getAuctions(
-    { 
-      status: 'ACTIVE',
+    {
+      status: "ACTIVE",
       // Note: You might need to implement date filtering in PayloadCMS
     },
-    { ...pagination, sort: 'end_time' }
+    { ...pagination, sort: "end_time" }
   );
 }

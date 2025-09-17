@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { 
-  Gavel, 
-  Clock, 
-  Users, 
-  DollarSign, 
+import { useState, useEffect } from "react";
+import {
+  Gavel,
+  Clock,
+  Users,
+  DollarSign,
   TrendingUp,
   AlertCircle,
   CheckCircle,
-  Timer
-} from 'lucide-react';
-import { useAuctionWebSocket } from '@/hooks/useWebSocket';
-import { Auction, Bid } from '@/types';
+  Timer,
+} from "lucide-react";
+import { useAuctionWebSocket } from "@/hooks/useWebSocket";
+import { Bid } from "@/types/Bid";
+import { useAuth } from "@/store/auth";
+import { Auction } from "@/types/Auction";
 
 interface LiveAuctionProps {
   auction: Auction;
@@ -21,14 +22,18 @@ interface LiveAuctionProps {
   onAuctionEnd?: (auction: Auction) => void;
 }
 
-export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: LiveAuctionProps) {
-  const { data: session } = useSession();
-  const { bids, currentPrice, auctionStatus, placeBid, isConnected } = useAuctionWebSocket(auction.id);
-  
+export default function LiveAuction({
+  auction,
+  onBidPlaced,
+  onAuctionEnd,
+}: LiveAuctionProps) {
+  const { bids, currentPrice, auctionStatus, placeBid, isConnected } =
+    useAuctionWebSocket(auction.id);
+  const { user } = useAuth();
   const [bidAmount, setBidAmount] = useState<number>(0);
-  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState<string>("");
   const [isPlacingBid, setIsPlacingBid] = useState(false);
-  const [bidError, setBidError] = useState<string>('');
+  const [bidError, setBidError] = useState<string>("");
 
   // Calculate time remaining
   useEffect(() => {
@@ -39,8 +44,12 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
 
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const hours = Math.floor(
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor(
+          (difference % (1000 * 60 * 60)) / (1000 * 60)
+        );
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
         if (days > 0) {
@@ -51,7 +60,7 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
           setTimeLeft(`${minutes}m ${seconds}s`);
         }
       } else {
-        setTimeLeft('Auction Ended');
+        setTimeLeft("Auction Ended");
         if (onAuctionEnd) {
           onAuctionEnd(auction);
         }
@@ -61,51 +70,50 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
 
   // Set minimum bid amount
   useEffect(() => {
-    const minBid = currentPrice > 0 ? currentPrice + 1000 : auction.start_price || 0;
+    const minBid =
+      currentPrice > 0 ? currentPrice + 1000 : auction.start_price || 0;
     setBidAmount(minBid);
   }, [currentPrice, auction.start_price]);
 
   const handlePlaceBid = async () => {
-    if (!session) {
-      setBidError('You must be logged in to place a bid');
+    if (!user) {
+      setBidError("You must be logged in to place a bid");
       return;
     }
 
     if (bidAmount <= currentPrice) {
-      setBidError('Bid amount must be higher than current price');
+      setBidError("Bid amount must be higher than current price");
       return;
     }
 
-    if (auctionStatus === 'ENDED') {
-      setBidError('Auction has ended');
+    if (auctionStatus === "ENDED") {
+      setBidError("Auction has ended");
       return;
     }
 
     setIsPlacingBid(true);
-    setBidError('');
+    setBidError("");
 
     try {
       placeBid(bidAmount);
-      
+
       // Simulate bid placement
       const newBid: Bid = {
         id: Date.now().toString(),
-        auction_id: auction.id,
-        bidder_id: session.user.id,
+        auction: auction.id,
+        bidder: user,
         bid_amount: bidAmount,
         bid_time: new Date().toISOString(),
         is_winning: true,
-        bidder_email: session.user.email,
-        bidder_type: session.user.userType as any,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       if (onBidPlaced) {
         onBidPlaced(newBid);
       }
     } catch (error) {
-      setBidError('Failed to place bid. Please try again.');
+      setBidError("Failed to place bid. Please try again.");
     } finally {
       setIsPlacingBid(false);
     }
@@ -113,24 +121,24 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
-        return 'text-green-600 bg-green-100';
-      case 'ENDED':
-        return 'text-red-600 bg-red-100';
-      case 'SCHEDULED':
-        return 'text-blue-600 bg-blue-100';
+      case "ACTIVE":
+        return "text-green-600 bg-green-100";
+      case "ENDED":
+        return "text-red-600 bg-red-100";
+      case "SCHEDULED":
+        return "text-blue-600 bg-blue-100";
       default:
-        return 'text-gray-600 bg-gray-100';
+        return "text-gray-600 bg-gray-100";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ACTIVE':
+      case "ACTIVE":
         return <CheckCircle className="h-4 w-4" />;
-      case 'ENDED':
+      case "ENDED":
         return <AlertCircle className="h-4 w-4" />;
-      case 'SCHEDULED':
+      case "SCHEDULED":
         return <Clock className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
@@ -145,13 +153,14 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
               <Gavel className="h-6 w-6 text-blue-600" />
-              <h2 className="text-2xl font-bold text-gray-900">{auction.technology_title}</h2>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 ${getStatusColor(auctionStatus)}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 ${getStatusColor(auctionStatus)}`}
+              >
                 {getStatusIcon(auctionStatus)}
                 <span>{auctionStatus}</span>
               </span>
             </div>
-            
+
             <div className="flex items-center space-x-6 text-sm text-gray-600">
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
@@ -163,7 +172,6 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
               </div>
               <div className="flex items-center space-x-1">
                 <TrendingUp className="h-4 w-4" />
-                <span>TRL {auction.trl_level}</span>
               </div>
             </div>
           </div>
@@ -177,20 +185,23 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
           <div>
             <div className="mb-6">
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">Current Highest Bid</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  Current Highest Bid
+                </p>
                 <p className="text-4xl font-bold text-green-600">
                   ${currentPrice.toLocaleString()}
                 </p>
-                {auction.reserve_price && currentPrice < auction.reserve_price && (
-                  <p className="text-sm text-orange-600 mt-2">
-                    Reserve: ${auction.reserve_price.toLocaleString()}
-                  </p>
-                )}
+                {auction.reserve_price &&
+                  currentPrice < auction.reserve_price && (
+                    <p className="text-sm text-orange-600 mt-2">
+                      Reserve: ${auction.reserve_price.toLocaleString()}
+                    </p>
+                  )}
               </div>
             </div>
 
             {/* Bid Form */}
-            {auctionStatus === 'ACTIVE' && (
+            {auctionStatus === "ACTIVE" && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -201,7 +212,9 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
                     <input
                       type="number"
                       value={bidAmount}
-                      onChange={(e) => setBidAmount(parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        setBidAmount(parseFloat(e.target.value) || 0)
+                      }
                       min={currentPrice + 1000}
                       step="1000"
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -221,7 +234,7 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
 
                 <button
                   onClick={handlePlaceBid}
-                  disabled={isPlacingBid || !session || !isConnected}
+                  disabled={isPlacingBid || !user || !isConnected}
                   className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {isPlacingBid ? (
@@ -237,11 +250,15 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
                   )}
                 </button>
 
-                {!session && (
+                {!user && (
                   <p className="text-sm text-gray-600 text-center">
-                    <a href="/auth/login" className="text-blue-600 hover:text-blue-800">
+                    <a
+                      href="/auth/login"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       Sign in
-                    </a> to place a bid
+                    </a>{" "}
+                    to place a bid
                   </p>
                 )}
 
@@ -253,12 +270,17 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
               </div>
             )}
 
-            {auctionStatus === 'ENDED' && (
+            {auctionStatus === "ENDED" && (
               <div className="text-center py-8">
                 <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Auction Ended</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Auction Ended
+                </h3>
                 <p className="text-gray-600">
-                  Final price: <span className="font-semibold">${currentPrice.toLocaleString()}</span>
+                  Final price:{" "}
+                  <span className="font-semibold">
+                    ${currentPrice.toLocaleString()}
+                  </span>
                 </p>
               </div>
             )}
@@ -266,7 +288,9 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
 
           {/* Bid History */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Bid History</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Bid History
+            </h3>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {bids.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No bids yet</p>
@@ -275,9 +299,9 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
                   <div
                     key={bid.id}
                     className={`p-3 rounded-lg border ${
-                      bid.is_winning 
-                        ? 'bg-green-50 border-green-200' 
-                        : 'bg-gray-50 border-gray-200'
+                      bid.is_winning
+                        ? "bg-green-50 border-green-200"
+                        : "bg-gray-50 border-gray-200"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -313,15 +337,15 @@ export default function LiveAuction({ auction, onBidPlaced, onAuctionEnd }: Live
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="font-medium text-gray-900">Auction Type</p>
-            <p className="text-gray-600 capitalize">{auction.auction_type.toLowerCase().replace('_', ' ')}</p>
+            <p className="text-gray-600 capitalize">
+              {auction.auction_type.toLowerCase().replace("_", " ")}
+            </p>
           </div>
           <div>
             <p className="font-medium text-gray-900">Starting Price</p>
-            <p className="text-gray-600">${auction.start_price?.toLocaleString() || '0'}</p>
-          </div>
-          <div>
-            <p className="font-medium text-gray-900">Submitter</p>
-            <p className="text-gray-600">{auction.submitter_email}</p>
+            <p className="text-gray-600">
+              ${auction.start_price?.toLocaleString() || "0"}
+            </p>
           </div>
         </div>
       </div>

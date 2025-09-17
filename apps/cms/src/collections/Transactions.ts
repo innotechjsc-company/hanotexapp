@@ -15,7 +15,7 @@ export const Transactions: CollectionConfig = {
   },
   fields: [
     {
-      name: 'technology_id',
+      name: 'technology',
       type: 'relationship',
       relationTo: 'technologies',
       label: 'Technology',
@@ -24,7 +24,7 @@ export const Transactions: CollectionConfig = {
       },
     },
     {
-      name: 'buyer_id',
+      name: 'buyer',
       type: 'relationship',
       relationTo: 'users',
       label: 'Buyer',
@@ -33,7 +33,7 @@ export const Transactions: CollectionConfig = {
       },
     },
     {
-      name: 'seller_id',
+      name: 'seller',
       type: 'relationship',
       relationTo: 'users',
       label: 'Seller',
@@ -110,7 +110,7 @@ export const Transactions: CollectionConfig = {
     },
     // Related auction if applicable
     {
-      name: 'auction_id',
+      name: 'auction',
       type: 'relationship',
       relationTo: 'auctions',
       label: 'Related Auction',

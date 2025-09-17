@@ -30,7 +30,7 @@ export const Categories: CollectionConfig = {
       },
     },
     {
-      name: 'parent_id',
+      name: 'parent',
       type: 'relationship',
       relationTo: 'categories',
       label: 'Parent Category',

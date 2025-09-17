@@ -100,7 +100,7 @@ export const Users: CollectionConfig = {
 
     // Company Profile - relationship to Companies collection
     {
-      name: 'company_id',
+      name: 'company',
       type: 'relationship',
       relationTo: 'companies',
       label: 'Company Profile',
@@ -112,7 +112,7 @@ export const Users: CollectionConfig = {
 
     // Research Institution Profile - relationship to ResearchInstitutions collection
     {
-      name: 'research_institution_id',
+      name: 'research_institution',
       type: 'relationship',
       relationTo: 'research-institutions',
       label: 'Research Institution Profile',
