@@ -1,5 +1,13 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ApiResponse, LoginRequest, RegisterRequest, TechnologySearchParams, UserSearchParams, TechnologyCreateRequest, BidRequest } from '@/types';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import {
+  ApiResponse,
+  LoginRequest,
+  RegisterRequest,
+  TechnologySearchParams,
+  UserSearchParams,
+  TechnologyCreateRequest,
+  BidRequest,
+} from "@/types";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -7,15 +15,13 @@ class ApiClient {
 
   constructor() {
     // Use local API routes when in development
-    const baseURL = process.env.NODE_ENV === 'development' 
-      ? '/api' // Use local Next.js API routes
-      : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1');
-      
+    const baseURL = "http://localhost:3001/api/v1";
+    console.log("baseURL", baseURL);
     this.client = axios.create({
       baseURL,
       timeout: 10000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -39,8 +45,12 @@ class ApiClient {
         if (error.response?.status === 401) {
           this.clearToken();
           // Redirect to login if not already there
-          if (typeof window !== 'undefined' && window.location && !window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
+          if (
+            typeof window !== "undefined" &&
+            window.location &&
+            !window.location.pathname.includes("/login")
+          ) {
+            window.location.href = "/login";
           }
         }
         return Promise.reject(error);
@@ -48,22 +58,22 @@ class ApiClient {
     );
 
     // Load token from localStorage on client side
-    if (typeof window !== 'undefined') {
-      this.token = localStorage.getItem('hanotex_token');
+    if (typeof window !== "undefined") {
+      this.token = localStorage.getItem("hanotex_token");
     }
   }
 
   setToken(token: string) {
     this.token = token;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('hanotex_token', token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hanotex_token", token);
     }
   }
 
   clearToken() {
     this.token = null;
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('hanotex_token');
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("hanotex_token");
     }
   }
 
@@ -71,9 +81,12 @@ class ApiClient {
     return this.token;
   }
 
-  private async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  private async request<T>(
+    config: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<ApiResponse<T>> = await this.client.request(config);
+      const response: AxiosResponse<ApiResponse<T>> =
+        await this.client.request(config);
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
@@ -86,16 +99,16 @@ class ApiClient {
   // Health check
   async healthCheck() {
     return this.request({
-      method: 'GET',
-      url: '/health',
+      method: "GET",
+      url: "/health",
     });
   }
 
   // Authentication endpoints
   async login(credentials: LoginRequest) {
     const response = await this.request({
-      method: 'POST',
-      url: '/auth/login',
+      method: "POST",
+      url: "/auth/login",
       data: credentials,
     });
 
@@ -108,23 +121,23 @@ class ApiClient {
 
   async register(userData: RegisterRequest) {
     return this.request({
-      method: 'POST',
-      url: '/auth/register',
+      method: "POST",
+      url: "/auth/register",
       data: userData,
     });
   }
 
   async getCurrentUser() {
     return this.request({
-      method: 'GET',
-      url: '/auth/me',
+      method: "GET",
+      url: "/auth/me",
     });
   }
 
   async logout() {
     const response = await this.request({
-      method: 'POST',
-      url: '/auth/logout',
+      method: "POST",
+      url: "/auth/logout",
     });
     this.clearToken();
     return response;
@@ -132,8 +145,8 @@ class ApiClient {
 
   async refreshToken() {
     const response = await this.request({
-      method: 'POST',
-      url: '/auth/refresh',
+      method: "POST",
+      url: "/auth/refresh",
     });
 
     if (response.success && response.data?.token) {
@@ -146,30 +159,30 @@ class ApiClient {
   // Technology endpoints
   async getTechnologies(params?: TechnologySearchParams) {
     return this.request({
-      method: 'GET',
-      url: '/technologies',
+      method: "GET",
+      url: "/technologies",
       params,
     });
   }
 
   async getTechnology(id: string) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/technologies/${id}`,
     });
   }
 
   async createTechnology(data: TechnologyCreateRequest) {
     return this.request({
-      method: 'POST',
-      url: '/technologies',
+      method: "POST",
+      url: "/technologies",
       data,
     });
   }
 
   async updateTechnology(id: string, data: Partial<TechnologyCreateRequest>) {
     return this.request({
-      method: 'PUT',
+      method: "PUT",
       url: `/technologies/${id}`,
       data,
     });
@@ -177,14 +190,14 @@ class ApiClient {
 
   async deleteTechnology(id: string) {
     return this.request({
-      method: 'DELETE',
+      method: "DELETE",
       url: `/technologies/${id}`,
     });
   }
 
   async submitTechnology(id: string) {
     return this.request({
-      method: 'POST',
+      method: "POST",
       url: `/technologies/${id}/submit`,
     });
   }
@@ -192,22 +205,22 @@ class ApiClient {
   // User endpoints
   async getUsers(params?: UserSearchParams) {
     return this.request({
-      method: 'GET',
-      url: '/users',
+      method: "GET",
+      url: "/users",
       params,
     });
   }
 
   async getUser(id: string) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/users/${id}`,
     });
   }
 
   async updateUser(id: string, data: any) {
     return this.request({
-      method: 'PUT',
+      method: "PUT",
       url: `/users/${id}`,
       data,
     });
@@ -215,14 +228,14 @@ class ApiClient {
 
   async verifyUser(id: string) {
     return this.request({
-      method: 'POST',
+      method: "POST",
       url: `/users/${id}/verify`,
     });
   }
 
   async deactivateUser(id: string) {
     return this.request({
-      method: 'POST',
+      method: "POST",
       url: `/users/${id}/deactivate`,
     });
   }
@@ -230,38 +243,46 @@ class ApiClient {
   // Category endpoints
   async getCategories() {
     return this.request({
-      method: 'GET',
-      url: '/categories',
+      method: "GET",
+      url: "/categories",
     });
   }
 
   async getCategory(id: string) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/categories/${id}`,
     });
   }
 
-  async getCategoryTechnologies(id: string, params?: { page?: number; limit?: number }) {
+  async getCategoryTechnologies(
+    id: string,
+    params?: { page?: number; limit?: number }
+  ) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/categories/${id}/technologies`,
       params,
     });
   }
 
   // Auction endpoints
-  async getAuctions(params?: { page?: number; limit?: number; sort?: string; order?: string }) {
+  async getAuctions(params?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    order?: string;
+  }) {
     return this.request({
-      method: 'GET',
-      url: '/auctions',
+      method: "GET",
+      url: "/auctions",
       params,
     });
   }
 
   async getAuction(id: string) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/auctions/${id}`,
     });
   }
@@ -275,23 +296,26 @@ class ApiClient {
     end_time?: string;
   }) {
     return this.request({
-      method: 'POST',
-      url: '/auctions',
+      method: "POST",
+      url: "/auctions",
       data,
     });
   }
 
   async placeBid(data: BidRequest) {
     return this.request({
-      method: 'POST',
+      method: "POST",
       url: `/auctions/${data.auction_id}/bid`,
       data,
     });
   }
 
-  async getAuctionBids(auctionId: string, params?: { page?: number; limit?: number }) {
+  async getAuctionBids(
+    auctionId: string,
+    params?: { page?: number; limit?: number }
+  ) {
     return this.request({
-      method: 'GET',
+      method: "GET",
       url: `/auctions/${auctionId}/bids`,
       params,
     });
@@ -300,15 +324,15 @@ class ApiClient {
   // File upload
   async uploadFile(file: File, technologyId: string) {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('technology_id', technologyId);
+    formData.append("file", file);
+    formData.append("technology_id", technologyId);
 
     return this.request({
-      method: 'POST',
-      url: '/upload',
+      method: "POST",
+      url: "/upload",
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
   }
@@ -316,11 +340,11 @@ class ApiClient {
   // Search and filter utilities
   buildSearchParams(filters: Record<string, any>): URLSearchParams {
     const params = new URLSearchParams();
-    
+
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         if (Array.isArray(value)) {
-          value.forEach(item => params.append(key, item.toString()));
+          value.forEach((item) => params.append(key, item.toString()));
         } else {
           params.append(key, value.toString());
         }
@@ -341,7 +365,7 @@ class ApiClient {
     if (error.message) {
       return error.message;
     }
-    return 'An unexpected error occurred';
+    return "An unexpected error occurred";
   }
 
   // Request status utilities
@@ -415,4 +439,3 @@ export const {
   clearToken,
   getToken,
 } = apiClient;
-
