@@ -56,12 +56,12 @@
     @apply px-6 py-3 text-base;
   }
   
-  /* Form Components */
-  .form-input {
+  /* Form Components - Custom forms (not HeroUI) */
+  .form-input:not([data-slot]) {
     @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
   
-  .form-select {
+  .form-select:not([data-slot]) {
     @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
   }
   

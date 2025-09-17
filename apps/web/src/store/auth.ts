@@ -1,20 +1,42 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { useSession, signIn, signOut } from 'next-auth/react';
-import { useEffect } from 'react';
-import { User, AuthState, LoginRequest, RegisterRequest } from '@/types';
-import apiClient from '@/lib/api';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import * as authApi from "@/api/auth";
+import { RegisterData, User, UserType } from "@/api/auth";
+import { localStorageService } from "@/services/localstorage";
 
+// Định nghĩa types cho User
+
+// Định nghĩa interface cho AuthState
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+// Định nghĩa interface cho AuthStore
 interface AuthStore extends AuthState {
   // Actions
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, userType: string, profile: any) => Promise<void>;
-  logout: () => void;
+  register: (userData: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshToken: () => Promise<void>;
   refreshUser: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   clearError: () => void;
+  // Forgot password actions
+  forgotPassword: (email: string) => Promise<{ message: string }>;
+  resetPassword: (
+    token: string,
+    password: string
+  ) => Promise<{ message: string }>;
+  // Helper methods
+  isTokenExpired: () => boolean;
+  initialize: () => void;
+  loadUserFromStorage: () => boolean;
 }
 
+// Tạo auth store với Zustand
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
@@ -24,92 +46,129 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       isLoading: false,
 
-      // Actions
+      // Login action
       login: async (email: string, password: string) => {
         set({ isLoading: true });
-        
+
         try {
-          const result = await signIn('credentials', {
-            email,
-            password,
-            redirect: false,
+          const response = await authApi.login({ email, password });
+          
+          // Add defensive checks
+          if (!response) {
+            throw new Error("Không nhận được phản hồi từ server");
+          }
+          
+          if (!response.user) {
+            throw new Error("Thông tin người dùng không hợp lệ");
+          }
+          
+          if (!response.token) {
+            throw new Error("Token xác thực không hợp lệ");
+          }
+
+          set({
+            user: response.user,
+            token: response.token,
+            isAuthenticated: true,
+            isLoading: false,
           });
 
-          if (result?.error) {
-            set({ isLoading: false });
-            throw new Error('Đăng nhập thất bại');
-          }
-
-          // Get user data after successful login
-          const response = await apiClient.getCurrentUser();
-          if (response.success && response.data) {
-            set({
-              user: response.data.user,
-              token: response.data.token,
-              isAuthenticated: true,
-              isLoading: false,
-            });
-          }
+          // Đồng bộ với localStorage (authApi.login đã làm rồi nhưng để đảm bảo)
+          // localStorageService.set('auth_user', userData);
+          // localStorageService.set('auth_token', response.token);
         } catch (error: any) {
-          console.error('Login error:', error);
-          set({ isLoading: false });
-          throw error;
+          set({ 
+            isLoading: false,
+            user: null,
+            token: null,
+            isAuthenticated: false
+          });
+          console.error("Login error:", error);
+          throw new Error(error.message || "Đăng nhập thất bại");
         }
       },
 
-      register: async (email: string, password: string, userType: string, profile: any) => {
+      // Register action
+      register: async (userData: RegisterData) => {
         set({ isLoading: true });
-        
+
         try {
-          const userData = {
-            email,
-            password,
-            user_type: userType,
-            profile
-          };
-          
-          const response = await apiClient.register(userData);
-          
-          if (response.success) {
-            set({ isLoading: false });
-          } else {
-            set({ isLoading: false });
-            throw new Error(response.error || 'Đăng ký thất bại');
-          }
-        } catch (error: any) {
-          console.error('Registration error:', error);
+          await authApi.register(userData);
           set({ isLoading: false });
+        } catch (error: any) {
+          set({ isLoading: false });
+          console.error("Registration error:", error);
+          throw new Error(error.message || "Đăng ký thất bại");
+        }
+      },
+
+      // Logout action
+      logout: async () => {
+        set({ isLoading: true });
+
+        try {
+          await authApi.logout(); // Đã xóa localStorage bên trong authApi.logout()
+        } catch (error) {
+          console.error("Logout error:", error);
+          // Vẫn clear state dù có lỗi từ server
+        } finally {
+          // Clear state
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+
+          // Đảm bảo xóa hết dữ liệu localStorage (backup)
+          localStorageService.remove("auth_user");
+          localStorageService.remove("auth_token");
+          localStorageService.remove("auth_data");
+        }
+      },
+
+      // Refresh token action
+      refreshToken: async () => {
+        const { token } = get();
+        if (!token) throw new Error("Không có token để refresh");
+
+        try {
+          const response = await authApi.refreshToken();
+
+          set({
+            user: response.user,
+            token: response.token,
+            isAuthenticated: true,
+          });
+        } catch (error: any) {
+          console.error("Refresh token error:", error);
+          // Nếu refresh thất bại, logout user
+          await get().logout();
           throw error;
         }
       },
 
-      logout: () => {
-        signOut({ redirect: false });
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      },
-
+      // Refresh user data
       refreshUser: async () => {
         const { token } = get();
         if (!token) return;
 
         try {
-          const response = await apiClient.getCurrentUser();
-          
-          if (response.success && response.data) {
-            set({ user: response.data.user });
+          const user = await authApi.getCurrentUser();
+          set({
+            user: user,
+          });
+        } catch (error: any) {
+          console.error("Refresh user error:", error);
+          // Nếu token không hợp lệ, logout user
+          if (error.status === 401) {
+            await get().logout();
           }
-        } catch (error) {
-          console.error('Refresh user error:', error);
-          // If refresh fails, logout user
-          get().logout();
+          throw error;
         }
       },
 
+      // Update user locally
       updateUser: (userData: Partial<User>) => {
         const { user } = get();
         if (user) {
@@ -117,12 +176,118 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
+      // Clear error state
       clearError: () => {
         set({ isLoading: false });
       },
+
+      // Forgot password
+      forgotPassword: async (email: string) => {
+        set({ isLoading: true });
+
+        try {
+          const response = await authApi.forgotPassword({ email });
+          set({ isLoading: false });
+          return response;
+        } catch (error: any) {
+          set({ isLoading: false });
+          console.error("Forgot password error:", error);
+          throw new Error(error.message || "Gửi email khôi phục thất bại");
+        }
+      },
+
+      // Reset password
+      resetPassword: async (token: string, password: string) => {
+        set({ isLoading: true });
+
+        try {
+          const response = await authApi.resetPassword({ token, password });
+          set({ isLoading: false });
+          return response;
+        } catch (error: any) {
+          set({ isLoading: false });
+          console.error("Reset password error:", error);
+          throw new Error(error.message || "Đặt lại mật khẩu thất bại");
+        }
+      },
+
+      // Check if token is expired (helper method)
+      isTokenExpired: () => {
+        let token = get().token;
+
+        // Nếu không có token trong state, thử lấy từ localStorage
+        if (!token) {
+          token = localStorageService.get<string>("auth_token");
+        }
+
+        if (!token) return true;
+
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          const currentTime = Date.now() / 1000;
+          return payload.exp < currentTime;
+        } catch {
+          return true;
+        }
+      },
+
+      // Load user from localStorage only
+      loadUserFromStorage: () => {
+        const storedUser = localStorageService.get<User>("auth_user");
+        const storedToken = localStorageService.get<string>("auth_token");
+
+        if (storedUser && storedToken) {
+          set({
+            user: storedUser,
+            token: storedToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+          return true;
+        }
+        return false;
+      },
+
+      // Initialize auth state from localStorage
+      initialize: () => {
+        authApi.initializeAuth();
+
+        // Lấy dữ liệu từ localStorage trước
+        const hasStoredData = get().loadUserFromStorage();
+
+        // Check if we have a valid token
+        if (authApi.isAuthenticated() && !get().isTokenExpired()) {
+          // Nếu đã có user trong localStorage, không cần gọi API ngay
+          // Chỉ refresh user trong background để đảm bảo data mới nhất
+          if (hasStoredData) {
+            // Refresh user data trong background (không block UI)
+            get()
+              .refreshUser()
+              .catch((error) => {
+                console.warn("Background user refresh failed:", error);
+                // Nếu refresh thất bại nhưng vẫn có stored user, giữ nguyên
+                // Chỉ logout nếu lỗi 401 (unauthorized)
+                if (error.status === 401) {
+                  get().logout();
+                }
+              });
+          } else {
+            // Nếu không có stored user, cần gọi API để lấy
+            get()
+              .refreshUser()
+              .catch(() => {
+                // If failed, clear the auth state
+                get().logout();
+              });
+          }
+        } else {
+          // Clear invalid auth state
+          get().logout();
+        }
+      },
     }),
     {
-      name: 'hanotex-auth',
+      name: "hanotex-auth",
       partialize: (state) => ({
         user: state.user,
         token: state.token,
@@ -132,77 +297,153 @@ export const useAuthStore = create<AuthStore>()(
   )
 );
 
-// Hook to sync NextAuth session with Zustand store
-export const useAuthSync = () => {
-  const { data: session, status } = useSession();
-  const { user, isAuthenticated, token } = useAuthStore();
+// ==============================================================================
+// HOOKS & SELECTORS - Đơn giản hóa việc sử dụng auth store
+// ==============================================================================
 
-  useEffect(() => {
-    // Sync NextAuth session with Zustand store
-    if (status === 'authenticated' && session?.user) {
-      // Only sync if the data has actually changed
-      const newUser = session.user as any;
-      const newToken = session.apiToken || null;
-      
-      if (!isAuthenticated || user?.id !== newUser?.id || token !== newToken) {
-        useAuthStore.setState({
-          user: newUser,
-          isAuthenticated: true,
-          token: newToken,
-        });
-      }
-    } else if (status === 'unauthenticated' && isAuthenticated) {
-      // Only clear if currently authenticated
-      useAuthStore.setState({
-        user: null,
-        isAuthenticated: false,
-        token: null,
-      });
-    }
-  }, [status, session, user, isAuthenticated, token]);
-};
-
-// Selectors
+/**
+ * Hook chính để sử dụng authentication state và actions
+ * Trả về tất cả state và actions cần thiết
+ */
 export const useAuth = () => {
-  const { data: session, status } = useSession();
-  const storeState = useAuthStore((state) => ({
+  return useAuthStore((state) => ({
+    // State
     user: state.user,
+    token: state.token,
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
-  }));
 
-  // Use NextAuth session as source of truth
+    // Actions
+    login: state.login,
+    register: state.register,
+    logout: state.logout,
+    refreshToken: state.refreshToken,
+    refreshUser: state.refreshUser,
+    updateUser: state.updateUser,
+    clearError: state.clearError,
+    forgotPassword: state.forgotPassword,
+    resetPassword: state.resetPassword,
+
+    // Utilities
+    isTokenExpired: state.isTokenExpired,
+    initialize: state.initialize,
+    loadUserFromStorage: state.loadUserFromStorage,
+  }));
+};
+
+/**
+ * Hook chỉ lấy user data
+ */
+export const useUser = () => {
+  return useAuthStore((state) => state.user);
+};
+
+/**
+ * Hook chỉ lấy authentication status
+ */
+export const useIsAuthenticated = () => {
+  return useAuthStore((state) => state.isAuthenticated);
+};
+
+/**
+ * Hook chỉ lấy loading state
+ */
+export const useIsLoading = () => {
+  return useAuthStore((state) => state.isLoading);
+};
+
+/**
+ * Hook chỉ lấy auth actions (không có state)
+ * Useful khi component chỉ cần actions mà không cần re-render khi state thay đổi
+ */
+export const useAuthActions = () => {
+  return useAuthStore((state) => ({
+    login: state.login,
+    register: state.register,
+    logout: state.logout,
+    refreshToken: state.refreshToken,
+    refreshUser: state.refreshUser,
+    updateUser: state.updateUser,
+    clearError: state.clearError,
+    forgotPassword: state.forgotPassword,
+    resetPassword: state.resetPassword,
+    initialize: state.initialize,
+    loadUserFromStorage: state.loadUserFromStorage,
+  }));
+};
+
+/**
+ * Hook để check xem user có role cụ thể không
+ */
+export const useHasRole = (role: string) => {
+  return useAuthStore((state) => state.user?.role === role);
+};
+
+/**
+ * Hook để check xem user có user_type cụ thể không
+ */
+export const useHasUserType = (userType: UserType) => {
+  return useAuthStore((state) => state.user?.user_type === userType);
+};
+
+/**
+ * Hook để check xem user đã verified chưa
+ */
+export const useIsVerified = () => {
+  return useAuthStore((state) => state.user?.is_verified || false);
+};
+
+/**
+ * Hook để check xem user có active không
+ */
+export const useIsActive = () => {
+  return useAuthStore((state) => state.user?.is_active || false);
+};
+
+// ==============================================================================
+// UTILITY FUNCTIONS
+// ==============================================================================
+
+/**
+ * Initialize auth store khi app khởi động
+ * Gọi function này trong _app.tsx hoặc layout component
+ */
+export const initializeAuth = () => {
+  useAuthStore.getState().initialize();
+};
+
+/**
+ * Get current auth state (không phải hook)
+ * Useful cho việc sử dụng bên ngoài React components
+ */
+export const getAuthState = () => {
+  const state = useAuthStore.getState();
   return {
-    user: session?.user || storeState.user,
-    isAuthenticated: status === 'authenticated' || storeState.isAuthenticated,
-    isLoading: status === 'loading' || storeState.isLoading,
+    user: state.user,
+    token: state.token,
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
   };
 };
 
-export const useAuthActions = () => useAuthStore((state) => ({
-  login: state.login,
-  register: state.register,
-  logout: state.logout,
-  refreshUser: state.refreshUser,
-  updateUser: state.updateUser,
-  clearError: state.clearError,
-}));
-
-export const useUser = () => {
-  const { data: session } = useSession();
-  const storeUser = useAuthStore((state) => state.user);
-  return session?.user || storeUser;
+/**
+ * Check if user is authenticated (không phải hook)
+ */
+export const isUserAuthenticated = () => {
+  return useAuthStore.getState().isAuthenticated;
 };
 
-export const useIsAuthenticated = () => {
-  const { status } = useSession();
-  const storeAuth = useAuthStore((state) => state.isAuthenticated);
-  return status === 'authenticated' || storeAuth;
+/**
+ * Get current user (không phải hook)
+ */
+export const getCurrentUser = () => {
+  return useAuthStore.getState().user;
 };
 
-export const useIsLoading = () => {
-  const { status } = useSession();
-  const storeLoading = useAuthStore((state) => state.isLoading);
-  return status === 'loading' || storeLoading;
+/**
+ * Load user from localStorage (không phải hook)
+ * Trả về true nếu load thành công
+ */
+export const loadUserFromStorage = () => {
+  return useAuthStore.getState().loadUserFromStorage();
 };
-

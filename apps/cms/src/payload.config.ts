@@ -28,6 +28,16 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
+  // Allow web app at localhost:3000 to access the CMS API
+  cors: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ],
+  // Allow CSRF for cookie-based auth from the web app
+  csrf: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ],
   collections: [
     Users,
     Companies,

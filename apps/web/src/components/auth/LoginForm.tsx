@@ -32,11 +32,39 @@ const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
 
     try {
+      // Validate form data before submission
+      if (!formData.email || !formData.password) {
+        throw new Error('Vui lòng nhập đầy đủ email và mật khẩu');
+      }
+
       await login(formData.email, formData.password);
-      onSuccess?.();
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      // Navigate to redirect URL
       router.push(redirectTo);
     } catch (err: any) {
-      setError(err.message || 'Đăng nhập thất bại');
+      console.error('Login error:', err);
+      
+      // Set user-friendly error message
+      let errorMessage = 'Đăng nhập thất bại';
+      
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.status === 401) {
+        errorMessage = 'Email hoặc mật khẩu không chính xác';
+      } else if (err.status === 400) {
+        errorMessage = 'Thông tin đăng nhập không hợp lệ';
+      } else if (err.status === 500) {
+        errorMessage = 'Lỗi server, vui lòng thử lại sau';
+      } else if (!navigator.onLine) {
+        errorMessage = 'Không có kết nối internet';
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
