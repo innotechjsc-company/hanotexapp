@@ -21,12 +21,11 @@ export const Technologies: CollectionConfig = {
       label: 'Tiêu đề Công nghệ',
     },
     {
-      name: 'public_summary',
-      type: 'textarea',
-      label: 'Tóm tắt Công khai',
-      admin: {
-        description: 'Tóm tắt hiển thị cho người dùng công khai',
-      },
+      name: 'documents',
+      type: 'relationship',
+      relationTo: 'media',
+      hasMany: true,
+      label: 'Tài liệu chứng minh',
     },
     {
       name: 'category',
@@ -114,47 +113,11 @@ export const Technologies: CollectionConfig = {
         },
       ],
     },
-    // Intellectual Property Details
-    {
-      name: 'ip_details',
-      type: 'array',
-      label: 'Chi tiết Sở hữu Trí tuệ',
-      fields: [
-        {
-          name: 'ip_type',
-          type: 'select',
-          required: true,
-          options: [
-            { label: 'Bằng sáng chế', value: 'PATENT' },
-            { label: 'Giải pháp hữu ích', value: 'UTILITY_MODEL' },
-            { label: 'Kiểu dáng công nghiệp', value: 'INDUSTRIAL_DESIGN' },
-            { label: 'Nhãn hiệu', value: 'TRADEMARK' },
-            { label: 'Bản quyền phần mềm', value: 'SOFTWARE_COPYRIGHT' },
-            { label: 'Bí mật kinh doanh', value: 'TRADE_SECRET' },
-          ],
-        },
-        {
-          name: 'ip_number',
-          type: 'text',
-          label: 'Số IP',
-        },
-        {
-          name: 'status',
-          type: 'text',
-          label: 'Trạng thái IP',
-        },
-        {
-          name: 'territory',
-          type: 'text',
-          label: 'Lãnh thổ',
-        },
-      ],
-    },
     // Legal Certification
     {
       name: 'legal_certification',
       type: 'group',
-      label: 'Chứng nhận Pháp lý',
+      label: 'Pháp lý & Lãnh thổ',
       fields: [
         {
           name: 'protection_scope',
@@ -184,6 +147,19 @@ export const Technologies: CollectionConfig = {
           name: 'local_certification_url',
           type: 'text',
           label: 'File chứng nhận',
+        },
+      ],
+    },
+    // Mong muốn đầu tư & Hình thức chuyển giao
+    {
+      name: 'investment_desire',
+      type: 'array',
+      label: 'Mong muốn đầu tư & Hình thức chuyển giao',
+      fields: [
+        {
+          name: 'investment_option',
+          type: 'text',
+          label: 'Mong muốn đầu tư & Hình thức chuyển giao',
         },
       ],
     },
@@ -251,13 +227,15 @@ export const Technologies: CollectionConfig = {
         },
       ],
     },
-    // Related Documents
     {
-      name: 'documents',
-      type: 'relationship',
-      relationTo: 'media',
-      hasMany: true,
-      label: 'Tài liệu liên quan',
+      name: 'display_mode',
+      type: 'select',
+      defaultValue: 'public_summary_with_nda_details',
+      options: [
+        { label: 'Tóm tắt công khai + Chi tiết sau NDA', value: 'public_summary_with_nda_details' },
+        { label: 'Hoàn toàn công khai', value: 'fully_public' },
+        { label: 'Riêng tư (chỉ theo lời mời)', value: 'private_by_invitation' },
+      ],
     },
   ],
   timestamps: true,
