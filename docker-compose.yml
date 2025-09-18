@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: hanotex-postgres
     environment:
-      POSTGRES_DB: hanotex
+      POSTGRES_DB: hanotex-dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
     ports:
