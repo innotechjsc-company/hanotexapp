@@ -29,8 +29,14 @@ export const Technologies: CollectionConfig = {
       },
     },
     {
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'categories',
+      label: 'Lĩnh vực',
+    },
+    {
       name: 'confidential_detail',
-      type: 'richText',
+      type: 'textarea',
       label: 'Chi tiết Bảo mật',
       admin: {
         description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
@@ -38,19 +44,10 @@ export const Technologies: CollectionConfig = {
     },
     {
       name: 'trl_level',
-      type: 'number',
-      label: 'Mức TRL',
-      min: 1,
-      max: 9,
-      admin: {
-        description: 'Mức độ sẵn sàng công nghệ (1-9)',
-      },
-    },
-    {
-      name: 'category',
       type: 'relationship',
-      relationTo: 'categories',
-      label: 'Danh mục',
+      required: true,
+      relationTo: 'trl',
+      label: 'Mức TRL',
     },
     {
       name: 'submitter',
@@ -186,7 +183,7 @@ export const Technologies: CollectionConfig = {
         {
           name: 'local_certification_url',
           type: 'text',
-          label: 'URL Chứng nhận Địa phương',
+          label: 'File chứng nhận',
         },
       ],
     },
@@ -201,17 +198,22 @@ export const Technologies: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
-            { label: 'Đánh giá', value: 'APPRAISAL' },
-            { label: 'Yêu cầu giá', value: 'ASK' },
-            { label: 'Đấu giá', value: 'AUCTION' },
-            { label: 'Chào hàng', value: 'OFFER' },
+            { label: 'Grant/Seed (TRL 1–3)', value: 'GRANT_SEED' },
+            { label: 'VC/Joint Venture (TRL 4–6)', value: 'VC_JOINT_VENTURE' },
+            { label: 'Growth/Strategic (TRL 7–9)', value: 'GROWTH_STRATEGIC' },
           ],
         },
         {
-          name: 'asking_price',
+          name: 'price_from',
           type: 'number',
-          label: 'Giá yêu cầu',
-          min: 0,
+          required: true,
+          label: 'Giá từ',
+        },
+        {
+          name: 'price_to',
+          type: 'number',
+          required: true,
+          label: 'Giá đến',
         },
         {
           name: 'currency',
@@ -223,95 +225,6 @@ export const Technologies: CollectionConfig = {
             { label: 'Đô la Mỹ (USD)', value: 'USD' },
             { label: 'Euro (EUR)', value: 'EUR' },
           ],
-        },
-        {
-          name: 'price_type',
-          type: 'text',
-          label: 'Loại giá',
-        },
-        {
-          name: 'appraisal_purpose',
-          type: 'text',
-          label: 'Mục đích đánh giá',
-        },
-        {
-          name: 'appraisal_scope',
-          type: 'text',
-          label: 'Phạm vi đánh giá',
-        },
-        {
-          name: 'appraisal_deadline',
-          type: 'date',
-          label: 'Thời hạn đánh giá',
-        },
-      ],
-    },
-    // Investment & Transfer Information
-    {
-      name: 'investment_transfer',
-      type: 'group',
-      label: 'Thông tin Đầu tư & Chuyển giao',
-      fields: [
-        {
-          name: 'investment_stage',
-          type: 'text',
-          label: 'Giai đoạn đầu tư',
-        },
-        {
-          name: 'commercialization_methods',
-          type: 'array',
-          label: 'Phương pháp thương mại hóa',
-          fields: [
-            {
-              name: 'method',
-              type: 'text',
-              label: 'Phương pháp',
-            },
-          ],
-        },
-        {
-          name: 'transfer_methods',
-          type: 'array',
-          label: 'Phương pháp chuyển giao',
-          fields: [
-            {
-              name: 'method',
-              type: 'text',
-              label: 'Phương pháp',
-            },
-          ],
-        },
-        {
-          name: 'territory_scope',
-          type: 'text',
-          label: 'Phạm vi lãnh thổ',
-        },
-        {
-          name: 'financial_methods',
-          type: 'array',
-          label: 'Phương pháp tài chính',
-          fields: [
-            {
-              name: 'method',
-              type: 'text',
-              label: 'Phương pháp',
-            },
-          ],
-        },
-        {
-          name: 'usage_limitations',
-          type: 'textarea',
-          label: 'Hạn chế sử dụng',
-        },
-        {
-          name: 'current_partners',
-          type: 'textarea',
-          label: 'Đối tác hiện tại',
-        },
-        {
-          name: 'potential_partners',
-          type: 'textarea',
-          label: 'Đối tác tiềm năng',
         },
       ],
     },
