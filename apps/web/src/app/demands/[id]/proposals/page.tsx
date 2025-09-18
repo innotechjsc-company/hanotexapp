@@ -14,6 +14,18 @@ import {
   FileText,
   Download,
 } from "lucide-react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Select,
+  SelectItem,
+  Chip,
+  Avatar,
+  Progress,
+  Divider,
+} from "@heroui/react";
 
 interface Proposal {
   id: string;
@@ -122,21 +134,6 @@ export default function DemandProposalsPage() {
     ]);
   }, [params.id]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "accepted":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      case "under_review":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending":
@@ -173,166 +170,211 @@ export default function DemandProposalsPage() {
       : proposals.filter((p) => p.status === filterStatus);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <Card className="shadow-sm rounded-none border-b">
+        <CardBody className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              <Button
+                isIconOnly
+                variant="bordered"
+                onPress={() => router.back()}
+                className="bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                style={{
+                  minWidth: "44px",
+                  minHeight: "44px",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <ArrowLeft className="h-6 w-6" />
-              </button>
+              </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-foreground">
                   Đề xuất nhận được
                 </h1>
-                <p className="text-gray-600">{demand?.title}</p>
+                <p className="text-default-600">{demand?.title}</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <select
+              <Select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onSelectionChange={(key) => setFilterStatus(key as string)}
+                variant="bordered"
+                size="sm"
+                className="w-48"
+                classNames={{
+                  label: "text-sm font-medium text-foreground",
+                }}
               >
-                <option value="all">Tất cả</option>
-                <option value="pending">Chờ xem xét</option>
-                <option value="under_review">Đang xem xét</option>
-                <option value="accepted">Đã chấp nhận</option>
-                <option value="rejected">Đã từ chối</option>
-              </select>
+                <SelectItem key="all">Tất cả</SelectItem>
+                <SelectItem key="pending">Chờ xem xét</SelectItem>
+                <SelectItem key="under_review">Đang xem xét</SelectItem>
+                <SelectItem key="accepted">Đã chấp nhận</SelectItem>
+                <SelectItem key="rejected">Đã từ chối</SelectItem>
+              </Select>
             </div>
           </div>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredProposals.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Chưa có đề xuất nào
-            </h3>
-            <p className="text-gray-600">
-              Các đề xuất sẽ xuất hiện ở đây khi có người quan tâm đến nhu cầu
-              của bạn.
-            </p>
-          </div>
+          <Card className="text-center py-12">
+            <CardBody>
+              <MessageSquare className="h-12 w-12 text-default-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                Chưa có đề xuất nào
+              </h3>
+              <p className="text-default-600">
+                Các đề xuất sẽ xuất hiện ở đây khi có người quan tâm đến nhu cầu
+                của bạn.
+              </p>
+            </CardBody>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Proposals List */}
             <div className="lg:col-span-1 space-y-4">
               {filteredProposals.map((proposal) => (
-                <div
+                <Card
                   key={proposal.id}
-                  onClick={() => setSelectedProposal(proposal)}
-                  className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all ${
+                  isPressable
+                  onPress={() => setSelectedProposal(proposal)}
+                  className={`cursor-pointer transition-all ${
                     selectedProposal?.id === proposal.id
-                      ? "ring-2 ring-blue-500 border-blue-500"
+                      ? "ring-2 ring-primary border-primary"
                       : "hover:shadow-md"
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                        {proposal.proposer.avatar}
+                  <CardBody className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <Avatar
+                          name={proposal.proposer.avatar}
+                          size="sm"
+                          className="bg-primary text-white font-semibold"
+                        />
+                        <div>
+                          <h3 className="font-semibold text-foreground">
+                            {proposal.proposer.name}
+                          </h3>
+                          <p className="text-sm text-default-600">
+                            {proposal.proposer.company}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {proposal.proposer.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {proposal.proposer.company}
-                        </p>
+                      <Chip
+                        size="sm"
+                        color={
+                          proposal.status === "pending"
+                            ? "warning"
+                            : proposal.status === "accepted"
+                              ? "success"
+                              : proposal.status === "rejected"
+                                ? "danger"
+                                : "primary"
+                        }
+                        variant="flat"
+                        className="text-xs"
+                      >
+                        {getStatusText(proposal.status)}
+                      </Chip>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-foreground text-sm">
+                        {proposal.technology.title}
+                      </h4>
+
+                      <div className="flex items-center space-x-4 text-xs text-default-500">
+                        <div className="flex items-center space-x-1">
+                          <Star className="h-3 w-3 text-warning" />
+                          <span>{proposal.match_score}/10</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{proposal.implementation_timeline}</span>
+                        </div>
                       </div>
                     </div>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(proposal.status)}`}
-                    >
-                      {getStatusText(proposal.status)}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-gray-900 text-sm">
-                      {proposal.technology.title}
-                    </h4>
-
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-3 w-3 text-yellow-500" />
-                        <span>{proposal.match_score}/10</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3 w-3" />
-                        <span>{proposal.implementation_timeline}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  </CardBody>
+                </Card>
               ))}
             </div>
 
             {/* Proposal Details */}
             <div className="lg:col-span-2">
               {selectedProposal ? (
-                <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
+                <Card className="shadow-sm">
+                  <CardHeader className="p-6">
+                    <div className="flex items-center justify-between w-full">
                       <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                          {selectedProposal.proposer.avatar}
-                        </div>
+                        <Avatar
+                          name={selectedProposal.proposer.avatar}
+                          size="md"
+                          className="bg-primary text-white font-semibold"
+                        />
                         <div>
-                          <h2 className="text-lg font-semibold text-gray-900">
+                          <h2 className="text-lg font-semibold text-foreground">
                             {selectedProposal.proposer.name}
                           </h2>
-                          <p className="text-gray-600">
+                          <p className="text-default-600">
                             {selectedProposal.proposer.company}
                           </p>
                         </div>
                       </div>
-                      <span
-                        className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(selectedProposal.status)}`}
+                      <Chip
+                        size="md"
+                        color={
+                          selectedProposal.status === "pending"
+                            ? "warning"
+                            : selectedProposal.status === "accepted"
+                              ? "success"
+                              : selectedProposal.status === "rejected"
+                                ? "danger"
+                                : "primary"
+                        }
+                        variant="flat"
+                        className="text-sm"
                       >
                         {getStatusText(selectedProposal.status)}
-                      </span>
+                      </Chip>
                     </div>
-                  </div>
+                  </CardHeader>
+                  <Divider />
 
-                  <div className="p-6 space-y-6">
+                  <CardBody className="p-6 space-y-6">
                     {/* Technology Info */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="font-semibold text-foreground mb-2">
                         Công nghệ đề xuất
                       </h3>
-                      <p className="text-gray-900 font-medium">
+                      <p className="text-foreground font-medium">
                         {selectedProposal.technology.title}
                       </p>
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-default-600 mt-1">
                         {selectedProposal.technology.description}
                       </p>
                     </div>
 
                     {/* Match Score */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="font-semibold text-foreground mb-2">
                         Mức độ phù hợp
                       </h3>
                       <div className="flex items-center space-x-3">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{
-                              width: `${selectedProposal.match_score * 10}%`,
-                            }}
-                          ></div>
-                        </div>
-                        <span className="text-lg font-semibold text-blue-600">
+                        <Progress
+                          value={selectedProposal.match_score * 10}
+                          color="primary"
+                          className="flex-1"
+                          size="sm"
+                        />
+                        <span className="text-lg font-semibold text-primary">
                           {selectedProposal.match_score}/10
                         </span>
                       </div>
@@ -340,10 +382,10 @@ export default function DemandProposalsPage() {
 
                     {/* Solution Description */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="font-semibold text-foreground mb-2">
                         Mô tả giải pháp
                       </h3>
-                      <p className="text-gray-700">
+                      <p className="text-default-700">
                         {selectedProposal.solution_description}
                       </p>
                     </div>
@@ -351,18 +393,18 @@ export default function DemandProposalsPage() {
                     {/* Timeline & Cost */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">
+                        <h3 className="font-semibold text-foreground mb-2">
                           Thời gian triển khai
                         </h3>
-                        <p className="text-gray-700">
+                        <p className="text-default-700">
                           {selectedProposal.implementation_timeline}
                         </p>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">
+                        <h3 className="font-semibold text-foreground mb-2">
                           Chi phí ước tính
                         </h3>
-                        <p className="text-gray-700">
+                        <p className="text-default-700">
                           {selectedProposal.estimated_cost}
                         </p>
                       </div>
@@ -370,10 +412,10 @@ export default function DemandProposalsPage() {
 
                     {/* Cooperation Terms */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">
+                      <h3 className="font-semibold text-foreground mb-2">
                         Điều kiện hợp tác
                       </h3>
-                      <p className="text-gray-700">
+                      <p className="text-default-700">
                         {selectedProposal.cooperation_terms}
                       </p>
                     </div>
@@ -381,27 +423,40 @@ export default function DemandProposalsPage() {
                     {/* Documents */}
                     {selectedProposal.additional_documents.length > 0 && (
                       <div>
-                        <h3 className="font-semibold text-gray-900 mb-2">
+                        <h3 className="font-semibold text-foreground mb-2">
                           Tài liệu đính kèm
                         </h3>
                         <div className="space-y-2">
                           {selectedProposal.additional_documents.map(
                             (doc, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <FileText className="h-5 w-5 text-blue-600" />
-                                  <span className="text-sm text-gray-900">
-                                    {doc}
-                                  </span>
-                                </div>
-                                <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center space-x-1">
-                                  <Download className="h-4 w-4" />
-                                  <span>Tải xuống</span>
-                                </button>
-                              </div>
+                              <Card key={index} className="bg-default-50">
+                                <CardBody className="flex flex-row items-center justify-between p-3">
+                                  <div className="flex items-center space-x-3">
+                                    <FileText className="h-5 w-5 text-primary" />
+                                    <span className="text-sm text-foreground">
+                                      {doc}
+                                    </span>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="solid"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-2 border-blue-600 hover:border-blue-700"
+                                    startContent={
+                                      <Download className="h-4 w-4" />
+                                    }
+                                    style={{
+                                      minHeight: "36px",
+                                      minWidth: "110px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      gap: "6px",
+                                    }}
+                                  >
+                                    Tải xuống
+                                  </Button>
+                                </CardBody>
+                              </Card>
                             )
                           )}
                         </div>
@@ -410,48 +465,86 @@ export default function DemandProposalsPage() {
 
                     {/* Actions */}
                     {selectedProposal.status === "pending" && (
-                      <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                        <button
-                          onClick={() =>
-                            handleContactProposer(selectedProposal)
-                          }
-                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          <span>Liên hệ</span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleRejectProposal(selectedProposal.id)
-                          }
-                          className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors flex items-center space-x-2"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          <span>Từ chối</span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleAcceptProposal(selectedProposal.id)
-                          }
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          <span>Chấp nhận</span>
-                        </button>
-                      </div>
+                      <>
+                        <Divider />
+                        <div className="flex justify-end space-x-4 pt-6">
+                          <Button
+                            variant="bordered"
+                            size="lg"
+                            onPress={() =>
+                              handleContactProposer(selectedProposal)
+                            }
+                            startContent={<MessageSquare className="h-4 w-4" />}
+                            className="bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50 font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                            style={{
+                              minHeight: "44px",
+                              minWidth: "120px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              borderRadius: "10px",
+                            }}
+                          >
+                            Liên hệ
+                          </Button>
+                          <Button
+                            variant="bordered"
+                            size="lg"
+                            onPress={() =>
+                              handleRejectProposal(selectedProposal.id)
+                            }
+                            startContent={<XCircle className="h-4 w-4" />}
+                            className="bg-white border-2 border-red-500 text-red-600 hover:border-red-600 hover:text-red-700 hover:bg-red-50 font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                            style={{
+                              minHeight: "44px",
+                              minWidth: "120px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              borderRadius: "10px",
+                            }}
+                          >
+                            Từ chối
+                          </Button>
+                          <Button
+                            variant="solid"
+                            size="lg"
+                            onPress={() =>
+                              handleAcceptProposal(selectedProposal.id)
+                            }
+                            startContent={<CheckCircle className="h-5 w-5" />}
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-green-600 hover:border-green-700 transform hover:scale-105"
+                            style={{
+                              minHeight: "48px",
+                              minWidth: "140px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              borderRadius: "12px",
+                            }}
+                          >
+                            Chấp nhận
+                          </Button>
+                        </div>
+                      </>
                     )}
-                  </div>
-                </div>
+                  </CardBody>
+                </Card>
               ) : (
-                <div className="bg-white rounded-lg shadow p-12 text-center">
-                  <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Chọn một đề xuất để xem chi tiết
-                  </h3>
-                  <p className="text-gray-600">
-                    Click vào đề xuất ở bên trái để xem thông tin chi tiết
-                  </p>
-                </div>
+                <Card className="shadow-sm p-12 text-center">
+                  <CardBody>
+                    <Eye className="h-12 w-12 text-default-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-foreground mb-2">
+                      Chọn một đề xuất để xem chi tiết
+                    </h3>
+                    <p className="text-default-600">
+                      Click vào đề xuất ở bên trái để xem thông tin chi tiết
+                    </p>
+                  </CardBody>
+                </Card>
               )}
             </div>
           </div>
