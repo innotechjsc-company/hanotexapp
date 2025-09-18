@@ -81,6 +81,7 @@ export interface Config {
     services: Service;
     'service-ticket': ServiceTicket;
     trl: Trl;
+    intellectual_property: IntellectualProperty;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -101,6 +102,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
     trl: TrlSelect<false> | TrlSelect<true>;
+    intellectual_property: IntellectualPropertySelect<false> | IntellectualPropertySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -695,6 +697,31 @@ export interface ServiceTicket {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property".
+ */
+export interface IntellectualProperty {
+  id: number;
+  /**
+   * Sản phẩm khoa học/công nghệ
+   */
+  technology?: (number | null) | Technology;
+  /**
+   * Số đơn/số bằng
+   */
+  code: string;
+  /**
+   * Loại sở hữu trí tuệ
+   */
+  type?: ('patent' | 'utility_solution' | 'industrial_design' | 'trademark' | 'copyright' | 'trade_secret') | null;
+  /**
+   * Tình trạng sở hữu trí tuệ
+   */
+  status?: ('pending' | 'granted' | 'expired' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -755,6 +782,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trl';
         value: number | Trl;
+      } | null)
+    | ({
+        relationTo: 'intellectual_property';
+        value: number | IntellectualProperty;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1117,6 +1148,18 @@ export interface TrlSelect<T extends boolean = true> {
   title?: T;
   value?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property_select".
+ */
+export interface IntellectualPropertySelect<T extends boolean = true> {
+  technology?: T;
+  code?: T;
+  type?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
