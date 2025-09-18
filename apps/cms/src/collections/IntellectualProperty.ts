@@ -3,9 +3,9 @@ import type { CollectionConfig } from 'payload'
 export const IntellectualProperty: CollectionConfig = {
   slug: 'intellectual_property',
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'code',
     group: 'Quản lý sở hữu trí tuệ',
-    defaultColumns: ['title', 'type', 'status'],
+    defaultColumns: ['code', 'type', 'status'],
   },
   access: {
     read: () => true,
