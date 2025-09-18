@@ -25,7 +25,7 @@ interface PricingDesiredSectionProps {
 }
 
 export interface PricingDesiredSectionRef {
-  getData: () => { pricing: PricingInfo };
+  getData: () => PricingInfo;
   reset: () => void;
 }
 
@@ -52,12 +52,10 @@ export const PricingDesiredSection = forwardRef<
 
   useImperativeHandle(ref, () => ({
     getData: () => ({
-      pricing: {
-        pricing_type: pricingType,
-        price_from: priceFrom ? Number(priceFrom) : 0,
-        price_to: priceTo ? Number(priceTo) : 0,
-        currency,
-      },
+      pricing_type: pricingType,
+      price_from: priceFrom ? Number(priceFrom) : 0,
+      price_to: priceTo ? Number(priceTo) : 0,
+      currency,
     }),
     reset: () => {
       setPriceFrom("");

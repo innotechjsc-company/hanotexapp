@@ -9,3 +9,4 @@ export type { InvestmentTransferSectionRef } from './InvestmentTransferSection';
 export { PricingDesiredSection } from './PricingDesiredSection';
 export type { PricingDesiredSectionRef } from './PricingDesiredSection';
 export { VisibilityNDASection } from './VisibilityNDASection';
+export type { VisibilityNDASectionRef } from './VisibilityNDASection';

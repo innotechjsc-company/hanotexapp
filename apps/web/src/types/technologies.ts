@@ -26,12 +26,6 @@ export type PricingType =
 
 export type Currency = "vnd" | "usd" | "eur"; // Tiền tệ định giá
 
-// Chế độ hiển thị chi tiết công nghệ
-export type DisplayMode =
-  | "public_summary_with_nda_details"
-  | "fully_public"
-  | "private_by_invitation";
-
 // Chi tiết chủ sở hữu
 export interface TechnologyOwner {
   owner_type: OwnerType; // Loại chủ sở hữu

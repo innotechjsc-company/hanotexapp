@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useIsAuthenticated, useIsLoading } from "@/store/auth";
-import { ArrowLeft, Save, Eye, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Eye } from "lucide-react";
 import {
   TechnologyOwnersSection,
   LegalTerritorySection,
@@ -14,29 +13,23 @@ import {
   LegalTerritorySectionRef,
   InvestmentTransferSectionRef,
   PricingDesiredSectionRef,
+  VisibilityNDASectionRef,
 } from "./components";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Spinner,
-  Checkbox,
-} from "@heroui/react";
+import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
 import { IPSectionRef } from "./components/IPSection";
 import { useMasterData } from "@/hooks/useMasterData";
+import { Technology } from "@/types/technologies";
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
-  const isAuthenticated = useIsAuthenticated();
-  const authLoading = useIsLoading();
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+  const [confirmUpload, setConfirmUpload] = useState(false);
   const ownersRef = useRef<TechnologyOwnersSectionRef>(null);
   const ipRef = useRef<IPSectionRef>(null);
   const legalTerritoryRef = useRef<LegalTerritorySectionRef>(null);
   const investmentTransferRef = useRef<InvestmentTransferSectionRef>(null);
   const pricingRef = useRef<PricingDesiredSectionRef>(null);
+  const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
   const { masterData, loading: masterDataLoading } = useMasterData();
 
@@ -52,6 +45,19 @@ export default function RegisterTechnologyPage() {
     console.log("Investment & Transfer:", investmentTransfer);
     const pricingDesired = pricingRef.current?.getData();
     console.log("Pricing Desired:", pricingDesired);
+    const visibility = visibilityRef.current?.getData();
+    console.log("Visibility:", visibility);
+
+    const data = {
+      owners,
+      legal_certification: legalDetails,
+      investment_desire: investmentTransfer?.investment_desire,
+      transfer_type: investmentTransfer?.transfer_type,
+      pricing: pricingDesired,
+      status: "draft",
+      visibility_mode: visibility?.visibility_mode,
+    };
+    console.log("Data:", data);
   };
 
   // Show loading while auth is being checked
@@ -101,15 +107,6 @@ export default function RegisterTechnologyPage() {
                   Đăng ký công nghệ mới lên sàn giao dịch HANOTEX
                 </p>
               </div>
-            </div>
-            <div className="flex space-x-3">
-              <Button
-                variant="bordered"
-                startContent={<Eye className="h-4 w-4" />}
-                className="text-gray-700"
-              >
-                Xem trước
-              </Button>
             </div>
           </CardHeader>
         </Card>
@@ -188,25 +185,26 @@ export default function RegisterTechnologyPage() {
           {/* 7. Pricing & Desired Price (Optional) */}
           <PricingDesiredSection ref={pricingRef} />
 
-          {/* 8. Visibility & NDA (Optional) */}
-          {/* <VisibilityNDASection
-            visibilityMode={formData.visibilityMode}
-            onChange={actions.handleFieldChange as any}
-          /> */}
+          {/* 8. Visibility */}
+          <VisibilityNDASection ref={visibilityRef} />
 
           {/* Confirmation checkbox */}
-          {/* <Card>
+          <Card>
             <CardBody className="p-4">
-              <Checkbox
-                isSelected={confirmUpload}
-                onValueChange={actions.setConfirmUpload}
-                classNames={{ label: "text-sm text-gray-700" }}
-              >
-                Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm công nghệ
-                theo đúng quy định.
-              </Checkbox>
+              <label className="flex items-start gap-3 cursor-pointer p-2 rounded-md transition-colors">
+                <input
+                  type="checkbox"
+                  checked={confirmUpload}
+                  onChange={(e) => setConfirmUpload(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">
+                  Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm công
+                  nghệ theo đúng quy định.
+                </span>
+              </label>
             </CardBody>
-          </Card> */}
+          </Card>
 
           {/* Submit Button - only visible when confirmed */}
           {
@@ -219,8 +217,8 @@ export default function RegisterTechnologyPage() {
                 color="primary"
                 className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
                 isLoading={false}
-                startContent={!false && <Save className="h-4 w-4" />}
-                isDisabled={false}
+                startContent={<Save className="h-4 w-4" />}
+                isDisabled={confirmUpload === false}
               >
                 {"Đăng ký công nghệ"}
               </Button>

@@ -5,9 +5,9 @@ import { LegalCertification } from "@/types";
 
 // Temporary interface for file upload state before saving to server
 interface LegalCertificationWithFiles {
-  protection_scope?: { scope: string }[];
-  standard_certifications?: { certification: string }[];
-  files?: File[]; // Use File[] instead of Media[] for upload state
+  protection_scope: { scope: string }[];
+  standard_certifications: { certification: string }[];
+  files: File[]; // Use File[] instead of Media[] for upload state
 }
 
 interface LegalTerritorySectionProps {
@@ -398,9 +398,6 @@ export const LegalTerritorySection = forwardRef<
                   (Mỹ), ISO (quốc tế), IEC (điện tử)
                 </p>
               </div>
-              <p className="text-xs text-blue-600 mt-2">
-                💡 Tip: Hover vào các tùy chọn để xem mô tả chi tiết
-              </p>
             </div>
           </CardBody>
         </Card>
