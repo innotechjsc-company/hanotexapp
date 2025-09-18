@@ -13,8 +13,6 @@ Trả về tất cả master data trong một request.
   "success": true,
   "data": {
     "fields": [...],
-    "industries": [...],
-    "specialties": [...],
     "trlLevels": [...],
     "categories": [...],
     "ipTypes": [...],
@@ -30,8 +28,6 @@ Trả về tất cả master data trong một request.
 ### Individual Endpoints
 
 - `/api/master-data/fields` - Lĩnh vực
-- `/api/master-data/industries` - Ngành
-- `/api/master-data/specialties` - Chuyên ngành
 - `/api/master-data/trl-levels` - Mức độ TRL
 - `/api/master-data/categories` - Danh mục
 - `/api/master-data/ip-types` - Loại hình IP

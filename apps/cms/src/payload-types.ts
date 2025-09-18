@@ -360,21 +360,17 @@ export interface Category {
   id: number;
   name: string;
   /**
-   * Mã định danh duy nhất cho danh mục này
+   * Mã danh mục quốc tế
    */
-  code: string;
+  code_intl?: string | null;
+  /**
+   * Tên danh mục Việt Nam
+   */
+  code_vn?: string | null;
   /**
    * Chọn danh mục cha cho cấu trúc phân cấp
    */
   parent?: (number | null) | Category;
-  /**
-   * Cấp độ phân cấp danh mục (1-5)
-   */
-  level: number;
-  /**
-   * Mô tả tùy chọn cho danh mục này
-   */
-  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -605,7 +601,7 @@ export interface Notification {
   /**
    * Người dùng sẽ nhận thông báo này
    */
-  user_id: number | User;
+  user: number | User;
   title: string;
   /**
    * Nội dung chính của thông báo
@@ -903,10 +899,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
-  code?: T;
+  code_intl?: T;
+  code_vn?: T;
   parent?: T;
-  level?: T;
-  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1030,7 +1025,7 @@ export interface TransactionsSelect<T extends boolean = true> {
  * via the `definition` "notifications_select".
  */
 export interface NotificationsSelect<T extends boolean = true> {
-  user_id?: T;
+  user?: T;
   title?: T;
   message?: T;
   type?: T;

@@ -11,40 +11,6 @@ const fields = [
   { value: 'SCI_INT', label: 'Khoa học liên ngành' }
 ];
 
-const industries = [
-  { value: 'MECH', label: 'Cơ khí – Động lực' },
-  { value: 'EEICT', label: 'Điện – Điện tử – CNTT' },
-  { value: 'MTRL', label: 'Vật liệu & Công nghệ vật liệu' },
-  { value: 'ENV', label: 'Công nghệ môi trường' },
-  { value: 'AUTO', label: 'Tự động hóa & Robot' },
-  { value: 'BIOTECH', label: 'Công nghệ sinh học y dược' },
-  { value: 'MEDDEV', label: 'Thiết bị y tế' },
-  { value: 'PHARMA', label: 'Dược học' },
-  { value: 'AGRI', label: 'Nông nghiệp' },
-  { value: 'FOOD', label: 'Công nghệ thực phẩm' },
-  { value: 'AQUA', label: 'Thủy sản' },
-  { value: 'AI', label: 'Trí tuệ nhân tạo' },
-  { value: 'NANO', label: 'Công nghệ nano' },
-  { value: 'SPACE', label: 'Công nghệ vũ trụ' }
-];
-
-const specialties = [
-  { value: 'ENGINE_INTERNAL', label: 'Động cơ đốt trong' },
-  { value: 'PRECISION_MECHANICS', label: 'Cơ khí chính xác' },
-  { value: 'TRANSPORTATION', label: 'Phương tiện giao thông' },
-  { value: 'SEMICONDUCTOR', label: 'Bán dẫn' },
-  { value: 'TELECOMMUNICATIONS', label: 'Viễn thông' },
-  { value: 'SYSTEM_SOFTWARE', label: 'Phần mềm hệ thống' },
-  { value: 'POLYMER_COMPOSITE', label: 'Polyme/Compozit' },
-  { value: 'NANO_MATERIALS', label: 'Vật liệu nano' },
-  { value: 'BATTERY_FUEL', label: 'Pin & Nhiên liệu' },
-  { value: 'WATER_TREATMENT', label: 'Xử lý nước thải' },
-  { value: 'WASTE_RECYCLING', label: 'Tái chế chất thải' },
-  { value: 'EMISSION_REDUCTION', label: 'Giảm phát thải' },
-  { value: 'INDUSTRIAL_ROBOT', label: 'Robot công nghiệp' },
-  { value: 'INDUSTRIAL_IOT', label: 'IoT công nghiệp' },
-  { value: 'SMART_CONTROL', label: 'Điều khiển thông minh' }
-];
 
 const trlLevels = [
   { value: '1', label: 'TRL 1 - Nguyên lý cơ bản' },
@@ -155,8 +121,6 @@ export async function GET() {
       success: true,
       data: {
         fields,
-        industries,
-        specialties,
         trlLevels,
         categories,
         ipTypes,
