@@ -16,6 +16,19 @@ import {
   Users,
   Calendar,
 } from "lucide-react";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
+  Select,
+  SelectItem,
+  Textarea,
+  Chip,
+  Spinner,
+  Divider,
+} from "@heroui/react";
 
 interface Demand {
   id: string;
@@ -48,7 +61,7 @@ interface Proposal {
   additional_documents: File[];
 }
 
-export default function ProposeSolutionPage() {
+function ProposeSolutionPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useAuth();
@@ -125,87 +138,94 @@ export default function ProposeSolutionPage() {
 
   if (!demand) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <Card className="rounded-none shadow-sm border-b">
+        <CardBody className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center space-x-4 mb-4">
-            <button
-              onClick={() => router.back()}
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            <Button
+              isIconOnly
+              variant="bordered"
+              onPress={() => router.back()}
+              className="bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-800 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <ArrowLeft className="h-6 w-6" />
-            </button>
+            </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-foreground">
                 Đề xuất giải pháp
               </h1>
-              <p className="text-gray-600">
+              <p className="text-default-600">
                 Gửi đề xuất công nghệ cho nhu cầu này
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardBody>
+      </Card>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Demand Info Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-8">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Thông tin nhu cầu
-              </h2>
-
-              <div className="space-y-4">
+            <Card className="sticky top-8">
+              <CardHeader className="pb-3">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Thông tin nhu cầu
+                </h2>
+              </CardHeader>
+              <CardBody className="space-y-4">
                 <div>
-                  <h3 className="font-medium text-gray-900">{demand.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <h3 className="font-medium text-foreground">
+                    {demand.title}
+                  </h3>
+                  <p className="text-sm text-default-600 mt-1">
                     {demand.description}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
-                    <Target className="h-4 w-4 text-blue-600" />
-                    <span className="text-gray-600">{demand.category}</span>
+                    <Target className="h-4 w-4 text-primary" />
+                    <span className="text-default-600">{demand.category}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-gray-600">{demand.budget}</span>
+                    <DollarSign className="h-4 w-4 text-success" />
+                    <span className="text-default-600">{demand.budget}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4 text-orange-600" />
-                    <span className="text-gray-600">{demand.deadline}</span>
+                    <Calendar className="h-4 w-4 text-warning" />
+                    <span className="text-default-600">{demand.deadline}</span>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">
+                  <h4 className="font-medium text-foreground mb-2">
                     Yêu cầu kỹ thuật:
                   </h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <ul className="text-sm text-default-600 space-y-1">
                     {demand.requirements.map((req, index) => (
                       <li key={index} className="flex items-start space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
                         <span>{req}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="border-t pt-4">
-                  <h4 className="font-medium text-gray-900 mb-2">
+                <Divider />
+
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">
                     Thông tin liên hệ:
                   </h4>
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-sm text-default-600 space-y-1">
                     <div className="flex items-center space-x-2">
                       <Users className="h-4 w-4" />
                       <span>{demand.contact_info.name}</span>
@@ -216,54 +236,57 @@ export default function ProposeSolutionPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
 
           {/* Proposal Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Đề xuất của bạn
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Điền thông tin chi tiết về giải pháp công nghệ
-                </p>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Technology Selection */}
+            <Card>
+              <CardHeader className="pb-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chọn công nghệ đề xuất *
-                  </label>
-                  <select
-                    value={proposal.technology_id}
-                    onChange={(e) => {
-                      const selectedTech = userTechnologies.find(
-                        (t) => t.id === e.target.value
-                      );
-                      setProposal((prev) => ({
-                        ...prev,
-                        technology_id: e.target.value,
-                        technology_title: selectedTech?.title || "",
-                      }));
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Chọn công nghệ</option>
-                    {userTechnologies.map((tech) => (
-                      <option key={tech.id} value={tech.id}>
-                        {tech.title}
-                      </option>
-                    ))}
-                  </select>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Đề xuất của bạn
+                  </h2>
+                  <p className="text-default-600 mt-1">
+                    Điền thông tin chi tiết về giải pháp công nghệ
+                  </p>
                 </div>
+              </CardHeader>
+
+              <CardBody className="space-y-6">
+                {/* Technology Selection */}
+                <Select
+                  label="Chọn công nghệ đề xuất *"
+                  placeholder="Chọn công nghệ"
+                  selectedKeys={
+                    proposal.technology_id ? [proposal.technology_id] : []
+                  }
+                  onSelectionChange={(keys) => {
+                    const selectedKey = Array.from(keys)[0] as string;
+                    const selectedTech = userTechnologies.find(
+                      (t) => t.id === selectedKey
+                    );
+                    setProposal((prev) => ({
+                      ...prev,
+                      technology_id: selectedKey || "",
+                      technology_title: selectedTech?.title || "",
+                    }));
+                  }}
+                  variant="bordered"
+                  isRequired
+                  classNames={{
+                    label: "text-sm font-medium text-foreground",
+                  }}
+                >
+                  {userTechnologies.map((tech) => (
+                    <SelectItem key={tech.id}>{tech.title}</SelectItem>
+                  ))}
+                </Select>
 
                 {/* Match Score */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Mức độ phù hợp (1-10) *
                   </label>
                   <div className="flex items-center space-x-4">
@@ -278,188 +301,204 @@ export default function ProposeSolutionPage() {
                           match_score: parseInt(e.target.value),
                         }))
                       }
-                      className="flex-1"
+                      className="flex-1 h-2 bg-default-200 rounded-lg appearance-none cursor-pointer
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary
+                        [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg
+                        [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full
+                        [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
                     />
-                    <span className="text-lg font-semibold text-blue-600 w-8">
+                    <Chip
+                      color="primary"
+                      variant="flat"
+                      className="w-12 justify-center"
+                    >
                       {proposal.match_score}
-                    </span>
+                    </Chip>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between text-xs text-default-500 mt-1">
                     <span>Không phù hợp</span>
                     <span>Rất phù hợp</span>
                   </div>
                 </div>
 
                 {/* Solution Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mô tả giải pháp cụ thể *
-                  </label>
-                  <textarea
-                    value={proposal.solution_description}
-                    onChange={(e) =>
-                      setProposal((prev) => ({
-                        ...prev,
-                        solution_description: e.target.value,
-                      }))
-                    }
-                    rows={4}
-                    placeholder="Mô tả chi tiết về cách công nghệ của bạn đáp ứng nhu cầu này..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <Textarea
+                  label="Mô tả giải pháp cụ thể *"
+                  placeholder="Mô tả chi tiết về cách công nghệ của bạn đáp ứng nhu cầu này..."
+                  value={proposal.solution_description}
+                  onValueChange={(value) =>
+                    setProposal((prev) => ({
+                      ...prev,
+                      solution_description: value,
+                    }))
+                  }
+                  minRows={4}
+                  variant="bordered"
+                  isRequired
+                  classNames={{
+                    label: "text-sm font-medium text-foreground",
+                  }}
+                />
 
                 {/* Implementation Timeline */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Thời gian triển khai *
-                  </label>
-                  <input
-                    type="text"
-                    value={proposal.implementation_timeline}
-                    onChange={(e) =>
-                      setProposal((prev) => ({
-                        ...prev,
-                        implementation_timeline: e.target.value,
-                      }))
-                    }
-                    placeholder="Ví dụ: 3-6 tháng, 6-12 tháng..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <Input
+                  label="Thời gian triển khai *"
+                  placeholder="Ví dụ: 3-6 tháng, 6-12 tháng..."
+                  value={proposal.implementation_timeline}
+                  onValueChange={(value) =>
+                    setProposal((prev) => ({
+                      ...prev,
+                      implementation_timeline: value,
+                    }))
+                  }
+                  variant="bordered"
+                  isRequired
+                  classNames={{
+                    label: "text-sm font-medium text-foreground",
+                  }}
+                />
 
                 {/* Estimated Cost */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chi phí ước tính *
-                  </label>
-                  <input
-                    type="text"
-                    value={proposal.estimated_cost}
-                    onChange={(e) =>
-                      setProposal((prev) => ({
-                        ...prev,
-                        estimated_cost: e.target.value,
-                      }))
-                    }
-                    placeholder="Ví dụ: 300,000,000 - 500,000,000 VND"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <Input
+                  label="Chi phí ước tính *"
+                  placeholder="Ví dụ: 300,000,000 - 500,000,000 VND"
+                  value={proposal.estimated_cost}
+                  onValueChange={(value) =>
+                    setProposal((prev) => ({
+                      ...prev,
+                      estimated_cost: value,
+                    }))
+                  }
+                  variant="bordered"
+                  isRequired
+                  classNames={{
+                    label: "text-sm font-medium text-foreground",
+                  }}
+                />
 
                 {/* Cooperation Terms */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Điều kiện hợp tác
-                  </label>
-                  <textarea
-                    value={proposal.cooperation_terms}
-                    onChange={(e) =>
-                      setProposal((prev) => ({
-                        ...prev,
-                        cooperation_terms: e.target.value,
-                      }))
-                    }
-                    rows={3}
-                    placeholder="Điều kiện hợp tác, phương thức thanh toán, bảo hành..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                <Textarea
+                  label="Điều kiện hợp tác"
+                  placeholder="Điều kiện hợp tác, phương thức thanh toán, bảo hành..."
+                  value={proposal.cooperation_terms}
+                  onValueChange={(value) =>
+                    setProposal((prev) => ({
+                      ...prev,
+                      cooperation_terms: value,
+                    }))
+                  }
+                  minRows={3}
+                  variant="bordered"
+                  classNames={{
+                    label: "text-sm font-medium text-foreground",
+                  }}
+                />
 
                 {/* Additional Documents */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Tài liệu bổ sung
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <div className="text-sm text-gray-600 mb-4">
-                      Kéo thả tài liệu vào đây hoặc click để chọn
-                    </div>
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileUpload}
-                      accept=".pdf,.doc,.docx,.jpg,.png"
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Chọn tài liệu
-                    </label>
-                  </div>
+                  <Card className="border-2 border-dashed border-default-300 bg-default-50">
+                    <CardBody className="p-6 text-center">
+                      <Upload className="h-12 w-12 text-default-400 mx-auto mb-4" />
+                      <div className="text-sm text-default-600 mb-4">
+                        Kéo thả tài liệu vào đây hoặc click để chọn
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        accept=".pdf,.doc,.docx,.jpg,.png"
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <Button
+                        as="label"
+                        htmlFor="file-upload"
+                        variant="solid"
+                        size="lg"
+                        className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-blue-600 hover:border-blue-700 transform hover:scale-105"
+                      >
+                        <Upload className="h-5 w-5 mr-2" />
+                        Chọn tài liệu
+                      </Button>
+                    </CardBody>
+                  </Card>
 
                   {proposal.additional_documents.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {proposal.additional_documents.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <FileText className="h-5 w-5 text-blue-600" />
-                            <span className="text-sm text-gray-900">
-                              {file.name}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setProposal((prev) => ({
-                                ...prev,
-                                additional_documents:
-                                  prev.additional_documents.filter(
-                                    (_, i) => i !== index
-                                  ),
-                              }));
-                            }}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Xóa
-                          </button>
-                        </div>
+                        <Card key={index} className="bg-default-50">
+                          <CardBody className="p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <FileText className="h-5 w-5 text-primary" />
+                                <span className="text-sm text-foreground">
+                                  {file.name}
+                                </span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="solid"
+                                className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-2 border-red-500 hover:border-red-600"
+                                onPress={() => {
+                                  setProposal((prev) => ({
+                                    ...prev,
+                                    additional_documents:
+                                      prev.additional_documents.filter(
+                                        (_, i) => i !== index
+                                      ),
+                                  }));
+                                }}
+                              >
+                                Xóa
+                              </Button>
+                            </div>
+                          </CardBody>
+                        </Card>
                       ))}
                     </div>
                   )}
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                  <button
-                    onClick={() => router.back()}
-                    className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                <Divider className="my-6" />
+                <div className="flex justify-end space-x-4">
+                  <Button
+                    variant="bordered"
+                    size="lg"
+                    onPress={() => router.back()}
+                    className="bg-white border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50 font-medium px-8 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Hủy
-                  </button>
-                  <button
-                    onClick={handleSubmitProposal}
-                    disabled={
+                  </Button>
+                  <Button
+                    variant="solid"
+                    size="lg"
+                    onPress={handleSubmitProposal}
+                    isDisabled={
                       isSubmitting ||
                       !proposal.technology_id ||
                       !proposal.solution_description
                     }
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+                    isLoading={isSubmitting}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-3 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-green-600 hover:border-green-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600 transform hover:scale-105"
+                    startContent={
+                      !isSubmitting ? <Send className="h-5 w-5" /> : undefined
+                    }
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Đang gửi...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        <span>Gửi đề xuất</span>
-                      </>
-                    )}
-                  </button>
+                    {isSubmitting ? "Đang gửi..." : "Gửi đề xuất"}
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+export default ProposeSolutionPage;
