@@ -59,1063 +59,1086 @@ export type SupportedTimezones =
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | 'Pacific/Fiji'
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
-  };
-  blocks: {};
+    users: UserAuthOperations
+  }
+  blocks: {}
   collections: {
-    users: User;
-    companies: Company;
-    'research-institutions': ResearchInstitution;
-    media: Media;
-    categories: Category;
-    technologies: Technology;
-    auctions: Auction;
-    bids: Bid;
-    transactions: Transaction;
-    notifications: Notification;
-    services: Service;
-    'service-ticket': ServiceTicket;
-    trl: Trl;
-    'payload-locked-documents': PayloadLockedDocument;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  collectionsJoins: {};
+    users: User
+    companies: Company
+    'research-institutions': ResearchInstitution
+    media: Media
+    categories: Category
+    technologies: Technology
+    auctions: Auction
+    bids: Bid
+    transactions: Transaction
+    notifications: Notification
+    services: Service
+    'service-ticket': ServiceTicket
+    trl: Trl
+    'payload-locked-documents': PayloadLockedDocument
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  collectionsJoins: {}
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    companies: CompaniesSelect<false> | CompaniesSelect<true>;
-    'research-institutions': ResearchInstitutionsSelect<false> | ResearchInstitutionsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
-    auctions: AuctionsSelect<false> | AuctionsSelect<true>;
-    bids: BidsSelect<false> | BidsSelect<true>;
-    transactions: TransactionsSelect<false> | TransactionsSelect<true>;
-    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
-    services: ServicesSelect<false> | ServicesSelect<true>;
-    'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
-    trl: TrlSelect<false> | TrlSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-  };
+    users: UsersSelect<false> | UsersSelect<true>
+    companies: CompaniesSelect<false> | CompaniesSelect<true>
+    'research-institutions': ResearchInstitutionsSelect<false> | ResearchInstitutionsSelect<true>
+    media: MediaSelect<false> | MediaSelect<true>
+    categories: CategoriesSelect<false> | CategoriesSelect<true>
+    technologies: TechnologiesSelect<false> | TechnologiesSelect<true>
+    auctions: AuctionsSelect<false> | AuctionsSelect<true>
+    bids: BidsSelect<false> | BidsSelect<true>
+    transactions: TransactionsSelect<false> | TransactionsSelect<true>
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>
+    services: ServicesSelect<false> | ServicesSelect<true>
+    'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>
+    trl: TrlSelect<false> | TrlSelect<true>
+    'payload-locked-documents':
+      | PayloadLockedDocumentsSelect<false>
+      | PayloadLockedDocumentsSelect<true>
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>
+  }
   db: {
-    defaultIDType: number;
-  };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+    defaultIDType: number
+  }
+  globals: {}
+  globalsSelect: {}
+  locale: null
   user: User & {
-    collection: 'users';
-  };
+    collection: 'users'
+  }
   jobs: {
-    tasks: unknown;
-    workflows: unknown;
-  };
+    tasks: unknown
+    workflows: unknown
+  }
 }
 export interface UserAuthOperations {
   forgotPassword: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   login: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   registerFirstUser: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
   unlock: {
-    email: string;
-    password: string;
-  };
+    email: string
+    password: string
+  }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  user_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
-  role: 'USER' | 'ADMIN' | 'MODERATOR' | 'SUPPORT';
-  is_verified?: boolean | null;
-  is_active?: boolean | null;
+  id: number
+  user_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION'
+  role: 'USER' | 'ADMIN' | 'MODERATOR' | 'SUPPORT'
+  is_verified?: boolean | null
+  is_active?: boolean | null
   /**
    * Tên đầy đủ của người dùng cá nhân
    */
-  full_name?: string | null;
+  full_name?: string | null
   /**
    * Số CMND hoặc hộ chiếu quốc gia
    */
-  id_number?: string | null;
+  id_number?: string | null
   /**
    * Số điện thoại cá nhân
    */
-  phone?: string | null;
+  phone?: string | null
   /**
    * Nghề nghiệp chuyên môn
    */
-  profession?: string | null;
+  profession?: string | null
   /**
    * Thông tin tài khoản ngân hàng cho thanh toán
    */
-  bank_account?: string | null;
+  bank_account?: string | null
   /**
    * Liên kết đến thông tin công ty
    */
-  company?: (number | null) | Company;
+  company?: (number | null) | Company
   /**
    * Liên kết đến thông tin viện nghiên cứu
    */
-  research_institution?: (number | null) | ResearchInstitution;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
+  research_institution?: (number | null) | ResearchInstitution
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string | null
+  resetPasswordExpiration?: string | null
+  salt?: string | null
+  hash?: string | null
+  loginAttempts?: number | null
+  lockUntil?: string | null
   sessions?:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
+        id: string
+        createdAt?: string | null
+        expiresAt: string
       }[]
-    | null;
-  password?: string | null;
+    | null
+  password?: string | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "companies".
  */
 export interface Company {
-  id: number;
+  id: number
   /**
    * Tên chính thức của công ty
    */
-  company_name: string;
+  company_name: string
   /**
    * Mã số nhận dạng thuế duy nhất
    */
-  tax_code: string;
+  tax_code: string
   /**
    * Số giấy phép đăng ký kinh doanh
    */
-  business_license?: string | null;
+  business_license?: string | null
   /**
    * Tên người đại diện pháp luật
    */
-  legal_representative: string;
+  legal_representative: string
   /**
    * Email liên hệ chính thức của công ty
    */
-  contact_email?: string | null;
+  contact_email?: string | null
   /**
    * Số điện thoại liên hệ chính thức của công ty
    */
-  contact_phone?: string | null;
+  contact_phone?: string | null
   address?: {
-    street?: string | null;
-    city?: string | null;
-    state?: string | null;
-    country?: string | null;
-    postal_code?: string | null;
-  };
+    street?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    postal_code?: string | null
+  }
   /**
    * Mô tả năng lực sản xuất của công ty
    */
-  production_capacity?: string | null;
+  production_capacity?: string | null
   /**
    * Các lĩnh vực kinh doanh chính của công ty
    */
   business_sectors?:
     | {
-        sector: string;
-        id?: string | null;
+        sector: string
+        id?: string | null
       }[]
-    | null;
+    | null
   /**
    * Số lượng nhân viên
    */
-  employee_count?: number | null;
+  employee_count?: number | null
   /**
    * Năm thành lập công ty
    */
-  established_year?: number | null;
+  established_year?: number | null
   /**
    * URL trang web chính thức của công ty
    */
-  website?: string | null;
+  website?: string | null
   /**
    * Công ty có đang hoạt động hay không
    */
-  is_active?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  is_active?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "research-institutions".
  */
 export interface ResearchInstitution {
-  id: number;
+  id: number
   /**
    * Tên chính thức của viện nghiên cứu
    */
-  institution_name: string;
+  institution_name: string
   /**
    * Mã định danh duy nhất của viện nghiên cứu
    */
-  institution_code: string;
+  institution_code: string
   /**
    * Cơ quan chính phủ hoặc tổ chức giám sát viện nghiên cứu này
    */
-  governing_body: string;
-  institution_type: 'UNIVERSITY' | 'RESEARCH_INSTITUTE' | 'GOVERNMENT_LAB' | 'PRIVATE_RND' | 'INTERNATIONAL_ORG';
+  governing_body: string
+  institution_type:
+    | 'UNIVERSITY'
+    | 'RESEARCH_INSTITUTE'
+    | 'GOVERNMENT_LAB'
+    | 'PRIVATE_RND'
+    | 'INTERNATIONAL_ORG'
   contact_info?: {
-    contact_email?: string | null;
-    contact_phone?: string | null;
-    website?: string | null;
-  };
+    contact_email?: string | null
+    contact_phone?: string | null
+    website?: string | null
+  }
   address?: {
-    street?: string | null;
-    city?: string | null;
-    state?: string | null;
-    country?: string | null;
-    postal_code?: string | null;
-  };
+    street?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    postal_code?: string | null
+  }
   /**
    * Các lĩnh vực trọng tâm nghiên cứu chính
    */
   research_areas?:
     | {
-        area: string;
-        id?: string | null;
+        area: string
+        id?: string | null
       }[]
-    | null;
+    | null
   /**
    * Mã định danh đề tài hoặc nhiệm vụ nghiên cứu hiện tại
    */
-  research_task_code?: string | null;
+  research_task_code?: string | null
   /**
    * Tham chiếu báo cáo nghiệm thu nghiên cứu mới nhất
    */
-  acceptance_report?: string | null;
+  acceptance_report?: string | null
   /**
    * Nhóm hoặc phòng ban nghiên cứu cụ thể trong viện
    */
-  research_group?: string | null;
+  research_group?: string | null
   /**
    * Năm thành lập viện nghiên cứu
    */
-  established_year?: number | null;
+  established_year?: number | null
   /**
    * Số lượng nhân viên nghiên cứu
    */
-  staff_count?: number | null;
+  staff_count?: number | null
   accreditation_info?: {
-    accreditation_body?: string | null;
-    accreditation_level?: string | null;
-    accreditation_date?: string | null;
-    accreditation_expiry?: string | null;
-  };
+    accreditation_body?: string | null
+    accreditation_level?: string | null
+    accreditation_date?: string | null
+    accreditation_expiry?: string | null
+  }
   /**
    * Viện nghiên cứu có đang hoạt động hay không
    */
-  is_active?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  is_active?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+  id: number
+  alt: string
+  updatedAt: string
+  createdAt: string
+  url?: string | null
+  thumbnailURL?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  filesize?: number | null
+  width?: number | null
+  height?: number | null
+  focalX?: number | null
+  focalY?: number | null
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
-  name: string;
+  id: number
+  name: string
   /**
    * Mã định danh duy nhất cho danh mục này
    */
-  code: string;
+  code: string
   /**
    * Chọn danh mục cha cho cấu trúc phân cấp
    */
-  parent?: (number | null) | Category;
+  parent?: (number | null) | Category
   /**
    * Cấp độ phân cấp danh mục (1-5)
    */
-  level: number;
+  level: number
   /**
    * Mô tả tùy chọn cho danh mục này
    */
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  description?: string | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "technologies".
  */
 export interface Technology {
-  id: number;
-  title: string;
+  id: number
+  title: string
   /**
    * Tóm tắt hiển thị cho người dùng công khai
    */
-  public_summary?: string | null;
-  category?: (number | null) | Category;
+  public_summary?: string | null
+  category?: (number | null) | Category
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
    */
-  confidential_detail?: string | null;
-  trl_level: number | Trl;
-  submitter: number | User;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE';
-  visibility_mode?: ('public' | 'private' | 'restricted') | null;
+  confidential_detail?: string | null
+  trl_level: number | Trl
+  submitter: number | User
+  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE'
+  visibility_mode?: ('public' | 'private' | 'restricted') | null
   owners?:
     | {
-        owner_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
-        owner_name: string;
+        owner_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION'
+        owner_name: string
         /**
          * Tỷ lệ sở hữu (0-100)
          */
-        ownership_percentage: number;
-        id?: string | null;
+        ownership_percentage: number
+        id?: string | null
       }[]
-    | null;
+    | null
   ip_details?:
     | {
-        ip_type: 'PATENT' | 'UTILITY_MODEL' | 'INDUSTRIAL_DESIGN' | 'TRADEMARK' | 'SOFTWARE_COPYRIGHT' | 'TRADE_SECRET';
-        ip_number?: string | null;
-        status?: string | null;
-        territory?: string | null;
-        id?: string | null;
+        ip_type:
+          | 'PATENT'
+          | 'UTILITY_MODEL'
+          | 'INDUSTRIAL_DESIGN'
+          | 'TRADEMARK'
+          | 'SOFTWARE_COPYRIGHT'
+          | 'TRADE_SECRET'
+        ip_number?: string | null
+        status?: string | null
+        territory?: string | null
+        id?: string | null
       }[]
-    | null;
+    | null
   legal_certification?: {
     protection_scope?:
       | {
-          scope?: string | null;
-          id?: string | null;
+          scope?: string | null
+          id?: string | null
         }[]
-      | null;
+      | null
     standard_certifications?:
       | {
-          certification?: string | null;
-          id?: string | null;
+          certification?: string | null
+          id?: string | null
         }[]
-      | null;
-    local_certification_url?: string | null;
-  };
+      | null
+    local_certification_url?: string | null
+  }
   pricing: {
-    pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC';
-    price_from: number;
-    price_to: number;
-    currency: 'VND' | 'USD' | 'EUR';
-  };
+    pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC'
+    price_from: number
+    price_to: number
+    currency: 'VND' | 'USD' | 'EUR'
+  }
   additional_data?: {
     test_results?: {
       root: {
-        type: string;
+        type: string
         children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        version: number
+      }
+      [k: string]: unknown
+    } | null
     economic_social_impact?: {
       root: {
-        type: string;
+        type: string
         children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        version: number
+      }
+      [k: string]: unknown
+    } | null
     financial_support_info?: {
       root: {
-        type: string;
+        type: string
         children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-  };
-  documents?: (number | Media)[] | null;
-  updatedAt: string;
-  createdAt: string;
+          type: string
+          version: number
+          [k: string]: unknown
+        }[]
+        direction: ('ltr' | 'rtl') | null
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+        indent: number
+        version: number
+      }
+      [k: string]: unknown
+    } | null
+  }
+  documents?: (number | Media)[] | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trl".
  */
 export interface Trl {
-  id: number;
-  title: string;
-  value: number;
-  description: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  title: string
+  value: number
+  description: string
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auctions".
  */
 export interface Auction {
-  id: number;
+  id: number
   /**
    * Công nghệ được đấu giá
    */
-  technology: number | Technology;
-  auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
+  technology: number | Technology
+  auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID'
   /**
    * Giá ban đầu cho phiên đấu giá
    */
-  start_price?: number | null;
+  start_price?: number | null
   /**
    * Giá tối thiểu chấp nhận được
    */
-  reserve_price?: number | null;
+  reserve_price?: number | null
   /**
    * Lượt đặt giá cao nhất hiện tại
    */
-  current_price?: number | null;
-  start_time?: string | null;
-  end_time?: string | null;
-  status: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
+  current_price?: number | null
+  start_time?: string | null
+  end_time?: string | null
+  status: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED'
   /**
    * Tất cả các lượt đặt giá cho phiên đấu giá này
    */
-  bids?: (number | Bid)[] | null;
-  updatedAt: string;
-  createdAt: string;
+  bids?: (number | Bid)[] | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bids".
  */
 export interface Bid {
-  id: number;
-  auction: number | Auction;
-  bidder: number | User;
-  bid_amount: number;
-  bid_time: string;
+  id: number
+  auction: number | Auction
+  bidder: number | User
+  bid_amount: number
+  bid_time: string
   /**
    * Cho biết đây có phải là lượt đặt giá thắng hiện tại không
    */
-  is_winning?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
+  is_winning?: boolean | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "transactions".
  */
 export interface Transaction {
-  id: number;
+  id: number
   /**
    * Công nghệ liên quan đến giao dịch này
    */
-  technology?: (number | null) | Technology;
+  technology?: (number | null) | Technology
   /**
    * Người dùng thực hiện giao dịch mua
    */
-  buyer?: (number | null) | User;
+  buyer?: (number | null) | User
   /**
    * Người dùng thực hiện giao dịch bán
    */
-  seller?: (number | null) | User;
-  amount: number;
-  currency: 'VND' | 'USD' | 'EUR';
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+  seller?: (number | null) | User
+  amount: number
+  currency: 'VND' | 'USD' | 'EUR'
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
   /**
    * Phương thức được sử dụng để thanh toán (ví dụ: chuyển khoản ngân hàng, thẻ tín dụng)
    */
-  payment_method?: string | null;
+  payment_method?: string | null
   /**
    * Phí được tính để xử lý giao dịch này
    */
-  transaction_fee?: number | null;
+  transaction_fee?: number | null
   /**
    * Ngày và giờ khi giao dịch được hoàn thành
    */
-  completed_at?: string | null;
+  completed_at?: string | null
   /**
    * Ghi chú nội bộ về giao dịch này
    */
-  notes?: string | null;
+  notes?: string | null
   /**
    * Nếu giao dịch này phát sinh từ một phiên đấu giá
    */
-  auction?: (number | null) | Auction;
-  updatedAt: string;
-  createdAt: string;
+  auction?: (number | null) | Auction
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "notifications".
  */
 export interface Notification {
-  id: number;
+  id: number
   /**
    * Người dùng sẽ nhận thông báo này
    */
-  user_id: number | User;
-  title: string;
+  user_id: number | User
+  title: string
   /**
    * Nội dung chính của thông báo
    */
-  message: string;
+  message: string
   /**
    * Phân loại thông báo để tạo kiểu và lọc
    */
-  type?: ('info' | 'success' | 'warning' | 'error' | 'auction' | 'transaction' | 'technology' | 'system') | null;
+  type?:
+    | (
+        | 'info'
+        | 'success'
+        | 'warning'
+        | 'error'
+        | 'auction'
+        | 'transaction'
+        | 'technology'
+        | 'system'
+      )
+    | null
   /**
    * Người dùng đã đọc thông báo này hay chưa
    */
-  is_read?: boolean | null;
+  is_read?: boolean | null
   /**
    * Công nghệ liên quan đến thông báo này
    */
-  related_technology?: (number | null) | Technology;
+  related_technology?: (number | null) | Technology
   /**
    * Phiên đấu giá liên quan đến thông báo này
    */
-  related_auction?: (number | null) | Auction;
+  related_auction?: (number | null) | Auction
   /**
    * Giao dịch liên quan đến thông báo này
    */
-  related_transaction?: (number | null) | Transaction;
+  related_transaction?: (number | null) | Transaction
   /**
    * URL để điều hướng khi nhấp vào thông báo
    */
-  action_url?: string | null;
-  priority?: ('low' | 'normal' | 'high' | 'urgent') | null;
-  updatedAt: string;
-  createdAt: string;
+  action_url?: string | null
+  priority?: ('low' | 'normal' | 'high' | 'urgent') | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */
 export interface Service {
-  id: number;
-  name: string;
-  description: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name: string
+  description: string
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-ticket".
  */
 export interface ServiceTicket {
-  id: number;
-  service: number | Service;
-  user: number | User;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
-  implementer: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  service: number | Service
+  user: number | User
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED'
+  implementer: string
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: number
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'users'
+        value: number | User
       } | null)
     | ({
-        relationTo: 'companies';
-        value: number | Company;
+        relationTo: 'companies'
+        value: number | Company
       } | null)
     | ({
-        relationTo: 'research-institutions';
-        value: number | ResearchInstitution;
+        relationTo: 'research-institutions'
+        value: number | ResearchInstitution
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'media'
+        value: number | Media
       } | null)
     | ({
-        relationTo: 'categories';
-        value: number | Category;
+        relationTo: 'categories'
+        value: number | Category
       } | null)
     | ({
-        relationTo: 'technologies';
-        value: number | Technology;
+        relationTo: 'technologies'
+        value: number | Technology
       } | null)
     | ({
-        relationTo: 'auctions';
-        value: number | Auction;
+        relationTo: 'auctions'
+        value: number | Auction
       } | null)
     | ({
-        relationTo: 'bids';
-        value: number | Bid;
+        relationTo: 'bids'
+        value: number | Bid
       } | null)
     | ({
-        relationTo: 'transactions';
-        value: number | Transaction;
+        relationTo: 'transactions'
+        value: number | Transaction
       } | null)
     | ({
-        relationTo: 'notifications';
-        value: number | Notification;
+        relationTo: 'notifications'
+        value: number | Notification
       } | null)
     | ({
-        relationTo: 'services';
-        value: number | Service;
+        relationTo: 'services'
+        value: number | Service
       } | null)
     | ({
-        relationTo: 'service-ticket';
-        value: number | ServiceTicket;
+        relationTo: 'service-ticket'
+        value: number | ServiceTicket
       } | null)
     | ({
-        relationTo: 'trl';
-        value: number | Trl;
-      } | null);
-  globalSlug?: string | null;
+        relationTo: 'trl'
+        value: number | Trl
+      } | null)
+  globalSlug?: string | null
   user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  updatedAt: string;
-  createdAt: string;
+    relationTo: 'users'
+    value: number | User
+  }
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: number
   user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  key?: string | null;
+    relationTo: 'users'
+    value: number | User
+  }
+  key?: string | null
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name?: string | null
+  batch?: number | null
+  updatedAt: string
+  createdAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  user_type?: T;
-  role?: T;
-  is_verified?: T;
-  is_active?: T;
-  full_name?: T;
-  id_number?: T;
-  phone?: T;
-  profession?: T;
-  bank_account?: T;
-  company?: T;
-  research_institution?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
+  user_type?: T
+  role?: T
+  is_verified?: T
+  is_active?: T
+  full_name?: T
+  id_number?: T
+  phone?: T
+  profession?: T
+  bank_account?: T
+  company?: T
+  research_institution?: T
+  updatedAt?: T
+  createdAt?: T
+  email?: T
+  resetPasswordToken?: T
+  resetPasswordExpiration?: T
+  salt?: T
+  hash?: T
+  loginAttempts?: T
+  lockUntil?: T
   sessions?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+        id?: T
+        createdAt?: T
+        expiresAt?: T
+      }
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "companies_select".
  */
 export interface CompaniesSelect<T extends boolean = true> {
-  company_name?: T;
-  tax_code?: T;
-  business_license?: T;
-  legal_representative?: T;
-  contact_email?: T;
-  contact_phone?: T;
+  company_name?: T
+  tax_code?: T
+  business_license?: T
+  legal_representative?: T
+  contact_email?: T
+  contact_phone?: T
   address?:
     | T
     | {
-        street?: T;
-        city?: T;
-        state?: T;
-        country?: T;
-        postal_code?: T;
-      };
-  production_capacity?: T;
+        street?: T
+        city?: T
+        state?: T
+        country?: T
+        postal_code?: T
+      }
+  production_capacity?: T
   business_sectors?:
     | T
     | {
-        sector?: T;
-        id?: T;
-      };
-  employee_count?: T;
-  established_year?: T;
-  website?: T;
-  is_active?: T;
-  updatedAt?: T;
-  createdAt?: T;
+        sector?: T
+        id?: T
+      }
+  employee_count?: T
+  established_year?: T
+  website?: T
+  is_active?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "research-institutions_select".
  */
 export interface ResearchInstitutionsSelect<T extends boolean = true> {
-  institution_name?: T;
-  institution_code?: T;
-  governing_body?: T;
-  institution_type?: T;
+  institution_name?: T
+  institution_code?: T
+  governing_body?: T
+  institution_type?: T
   contact_info?:
     | T
     | {
-        contact_email?: T;
-        contact_phone?: T;
-        website?: T;
-      };
+        contact_email?: T
+        contact_phone?: T
+        website?: T
+      }
   address?:
     | T
     | {
-        street?: T;
-        city?: T;
-        state?: T;
-        country?: T;
-        postal_code?: T;
-      };
+        street?: T
+        city?: T
+        state?: T
+        country?: T
+        postal_code?: T
+      }
   research_areas?:
     | T
     | {
-        area?: T;
-        id?: T;
-      };
-  research_task_code?: T;
-  acceptance_report?: T;
-  research_group?: T;
-  established_year?: T;
-  staff_count?: T;
+        area?: T
+        id?: T
+      }
+  research_task_code?: T
+  acceptance_report?: T
+  research_group?: T
+  established_year?: T
+  staff_count?: T
   accreditation_info?:
     | T
     | {
-        accreditation_body?: T;
-        accreditation_level?: T;
-        accreditation_date?: T;
-        accreditation_expiry?: T;
-      };
-  is_active?: T;
-  updatedAt?: T;
-  createdAt?: T;
+        accreditation_body?: T
+        accreditation_level?: T
+        accreditation_date?: T
+        accreditation_expiry?: T
+      }
+  is_active?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
+  alt?: T
+  updatedAt?: T
+  createdAt?: T
+  url?: T
+  thumbnailURL?: T
+  filename?: T
+  mimeType?: T
+  filesize?: T
+  width?: T
+  height?: T
+  focalX?: T
+  focalY?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
-  code?: T;
-  parent?: T;
-  level?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  name?: T
+  code?: T
+  parent?: T
+  level?: T
+  description?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "technologies_select".
  */
 export interface TechnologiesSelect<T extends boolean = true> {
-  title?: T;
-  public_summary?: T;
-  category?: T;
-  confidential_detail?: T;
-  trl_level?: T;
-  submitter?: T;
-  status?: T;
-  visibility_mode?: T;
+  title?: T
+  public_summary?: T
+  category?: T
+  confidential_detail?: T
+  trl_level?: T
+  submitter?: T
+  status?: T
+  visibility_mode?: T
   owners?:
     | T
     | {
-        owner_type?: T;
-        owner_name?: T;
-        ownership_percentage?: T;
-        id?: T;
-      };
+        owner_type?: T
+        owner_name?: T
+        ownership_percentage?: T
+        id?: T
+      }
   ip_details?:
     | T
     | {
-        ip_type?: T;
-        ip_number?: T;
-        status?: T;
-        territory?: T;
-        id?: T;
-      };
+        ip_type?: T
+        ip_number?: T
+        status?: T
+        territory?: T
+        id?: T
+      }
   legal_certification?:
     | T
     | {
         protection_scope?:
           | T
           | {
-              scope?: T;
-              id?: T;
-            };
+              scope?: T
+              id?: T
+            }
         standard_certifications?:
           | T
           | {
-              certification?: T;
-              id?: T;
-            };
-        local_certification_url?: T;
-      };
+              certification?: T
+              id?: T
+            }
+        local_certification_url?: T
+      }
   pricing?:
     | T
     | {
-        pricing_type?: T;
-        price_from?: T;
-        price_to?: T;
-        currency?: T;
-      };
+        pricing_type?: T
+        price_from?: T
+        price_to?: T
+        currency?: T
+      }
   additional_data?:
     | T
     | {
-        test_results?: T;
-        economic_social_impact?: T;
-        financial_support_info?: T;
-      };
-  documents?: T;
-  updatedAt?: T;
-  createdAt?: T;
+        test_results?: T
+        economic_social_impact?: T
+        financial_support_info?: T
+      }
+  documents?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auctions_select".
  */
 export interface AuctionsSelect<T extends boolean = true> {
-  technology?: T;
-  auction_type?: T;
-  start_price?: T;
-  reserve_price?: T;
-  current_price?: T;
-  start_time?: T;
-  end_time?: T;
-  status?: T;
-  bids?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  technology?: T
+  auction_type?: T
+  start_price?: T
+  reserve_price?: T
+  current_price?: T
+  start_time?: T
+  end_time?: T
+  status?: T
+  bids?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bids_select".
  */
 export interface BidsSelect<T extends boolean = true> {
-  auction?: T;
-  bidder?: T;
-  bid_amount?: T;
-  bid_time?: T;
-  is_winning?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  auction?: T
+  bidder?: T
+  bid_amount?: T
+  bid_time?: T
+  is_winning?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "transactions_select".
  */
 export interface TransactionsSelect<T extends boolean = true> {
-  technology?: T;
-  buyer?: T;
-  seller?: T;
-  amount?: T;
-  currency?: T;
-  status?: T;
-  payment_method?: T;
-  transaction_fee?: T;
-  completed_at?: T;
-  notes?: T;
-  auction?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  technology?: T
+  buyer?: T
+  seller?: T
+  amount?: T
+  currency?: T
+  status?: T
+  payment_method?: T
+  transaction_fee?: T
+  completed_at?: T
+  notes?: T
+  auction?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "notifications_select".
  */
 export interface NotificationsSelect<T extends boolean = true> {
-  user_id?: T;
-  title?: T;
-  message?: T;
-  type?: T;
-  is_read?: T;
-  related_technology?: T;
-  related_auction?: T;
-  related_transaction?: T;
-  action_url?: T;
-  priority?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  user_id?: T
+  title?: T
+  message?: T
+  type?: T
+  is_read?: T
+  related_technology?: T
+  related_auction?: T
+  related_transaction?: T
+  action_url?: T
+  priority?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
-  name?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  name?: T
+  description?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-ticket_select".
  */
 export interface ServiceTicketSelect<T extends boolean = true> {
-  service?: T;
-  user?: T;
-  status?: T;
-  implementer?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  service?: T
+  user?: T
+  status?: T
+  implementer?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "trl_select".
  */
 export interface TrlSelect<T extends boolean = true> {
-  title?: T;
-  value?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  title?: T
+  value?: T
+  description?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T;
-  globalSlug?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  document?: T
+  globalSlug?: T
+  user?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  user?: T
+  key?: T
+  value?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T;
-  batch?: T;
-  updatedAt?: T;
-  createdAt?: T;
+  name?: T
+  batch?: T
+  updatedAt?: T
+  createdAt?: T
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-  [k: string]: unknown;
+  [k: string]: unknown
 }
-
 
 declare module 'payload' {
   export interface GeneratedTypes extends Config {}
