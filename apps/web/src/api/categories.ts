@@ -3,20 +3,9 @@
  * Các function để quản lý categories với PayloadCMS
  */
 
-import { payloadApiClient, ApiResponse } from './client';
-import { API_ENDPOINTS, PAGINATION_DEFAULTS } from './config';
-
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  slug?: string;
-  parent_id?: string | Category;
-  is_active: boolean;
-  sort_order?: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Category } from "@/types/categories";
+import { payloadApiClient, ApiResponse } from "./client";
+import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
 export interface CategoryFilters {
   parent_id?: string;
@@ -41,7 +30,7 @@ export async function getCategories(
     ...filters,
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
-    sort: pagination.sort || 'sort_order',
+    sort: pagination.sort || "sort_order",
   };
 
   return payloadApiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES, params);
@@ -51,23 +40,36 @@ export async function getCategories(
  * Get category by ID
  */
 export async function getCategoryById(id: string): Promise<Category> {
-  const response = await payloadApiClient.get<Category>(`${API_ENDPOINTS.CATEGORIES}/${id}`);
+  const response = await payloadApiClient.get<Category>(
+    `${API_ENDPOINTS.CATEGORIES}/${id}`
+  );
   return response.data!;
 }
 
 /**
  * Create new category
  */
-export async function createCategory(data: Partial<Category>): Promise<Category> {
-  const response = await payloadApiClient.post<Category>(API_ENDPOINTS.CATEGORIES, data);
+export async function createCategory(
+  data: Partial<Category>
+): Promise<Category> {
+  const response = await payloadApiClient.post<Category>(
+    API_ENDPOINTS.CATEGORIES,
+    data
+  );
   return response.data!;
 }
 
 /**
  * Update category
  */
-export async function updateCategory(id: string, data: Partial<Category>): Promise<Category> {
-  const response = await payloadApiClient.patch<Category>(`${API_ENDPOINTS.CATEGORIES}/${id}`, data);
+export async function updateCategory(
+  id: string,
+  data: Partial<Category>
+): Promise<Category> {
+  const response = await payloadApiClient.patch<Category>(
+    `${API_ENDPOINTS.CATEGORIES}/${id}`,
+    data
+  );
   return response.data!;
 }
 
@@ -84,10 +86,7 @@ export async function deleteCategory(id: string): Promise<void> {
 export async function getActiveCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories(
-    { is_active: true },
-    pagination
-  );
+  return getCategories({ is_active: true }, pagination);
 }
 
 /**
@@ -96,10 +95,7 @@ export async function getActiveCategories(
 export async function getRootCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories(
-    { parent_id: undefined },
-    pagination
-  );
+  return getCategories({ parent_id: undefined }, pagination);
 }
 
 /**
@@ -109,10 +105,7 @@ export async function getSubcategories(
   parentId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories(
-    { parent_id: parentId },
-    pagination
-  );
+  return getCategories({ parent_id: parentId }, pagination);
 }
 
 /**
@@ -122,8 +115,5 @@ export async function searchCategories(
   query: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories(
-    { search: query },
-    pagination
-  );
+  return getCategories({ search: query }, pagination);
 }

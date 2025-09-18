@@ -81,8 +81,6 @@ export interface OptionalInfo {
 
 export interface Classification {
   field: string;
-  industry: string;
-  specialty: string;
 }
 
 export interface TechnologyFormData {
@@ -90,7 +88,6 @@ export interface TechnologyFormData {
   publicSummary: string;
   confidentialDetail: string;
   trlLevel: string;
-  categoryId: string;
   visibilityMode: "PUBLIC_SUMMARY" | "PUBLIC_FULL" | "PRIVATE";
   submitter: Submitter;
   owners: Owner[];
@@ -118,8 +115,6 @@ export interface OCRResult {
   extractedData?: {
     title?: string;
     field?: string;
-    industry?: string;
-    specialty?: string;
     trlSuggestion?: string;
     confidence?: number;
   };
@@ -139,10 +134,7 @@ export interface MasterDataItem {
 
 export interface MasterData {
   fields: MasterDataItem[];
-  industries: MasterDataItem[];
-  specialties: MasterDataItem[];
   trlLevels: MasterDataItem[];
-  categories: MasterDataItem[];
   ipTypes: MasterDataItem[];
   ipStatuses: MasterDataItem[];
   protectionTerritories: MasterDataItem[];
