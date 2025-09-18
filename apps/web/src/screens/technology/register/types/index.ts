@@ -81,6 +81,8 @@ export interface OptionalInfo {
 
 export interface Classification {
   field: string;
+  parentCategory: string;
+  childCategory: string;
 }
 
 export interface TechnologyFormData {

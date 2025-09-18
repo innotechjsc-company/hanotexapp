@@ -80,6 +80,7 @@ export interface Config {
     services: Service;
     'service-ticket': ServiceTicket;
     trl: Trl;
+    intellectual_property: IntellectualProperty;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -99,6 +100,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
     trl: TrlSelect<false> | TrlSelect<true>;
+    intellectual_property: IntellectualPropertySelect<false> | IntellectualPropertySelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -334,12 +336,25 @@ export interface ResearchInstitution {
   createdAt: string;
 }
 /**
+ * Quản lý tất cả file media (ảnh, video, documents)
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Mô tả ngắn gọn về file media (dùng cho SEO và accessibility). Sẽ tự động tạo từ tên file nếu để trống.
+   */
   alt: string;
+  /**
+   * Chú thích hiển thị dưới ảnh (tùy chọn)
+   */
+  caption?: string | null;
+  /**
+   * Loại file media
+   */
+  type?: ('image' | 'video' | 'document' | 'other') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -381,10 +396,7 @@ export interface Category {
 export interface Technology {
   id: number;
   title: string;
-  /**
-   * Tóm tắt hiển thị cho người dùng công khai
-   */
-  public_summary?: string | null;
+  documents?: (number | Media)[] | null;
   category?: (number | null) | Category;
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
@@ -405,15 +417,6 @@ export interface Technology {
         id?: string | null;
       }[]
     | null;
-  ip_details?:
-    | {
-        ip_type: 'PATENT' | 'UTILITY_MODEL' | 'INDUSTRIAL_DESIGN' | 'TRADEMARK' | 'SOFTWARE_COPYRIGHT' | 'TRADE_SECRET';
-        ip_number?: string | null;
-        status?: string | null;
-        territory?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   legal_certification?: {
     protection_scope?:
       | {
@@ -429,6 +432,12 @@ export interface Technology {
       | null;
     local_certification_url?: string | null;
   };
+  investment_desire?:
+    | {
+        investment_option?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   pricing: {
     pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC';
     price_from: number;
@@ -482,7 +491,7 @@ export interface Technology {
       [k: string]: unknown;
     } | null;
   };
-  documents?: (number | Media)[] | null;
+  display_mode?: ('public_summary_with_nda_details' | 'fully_public' | 'private_by_invitation') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -661,6 +670,31 @@ export interface ServiceTicket {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property".
+ */
+export interface IntellectualProperty {
+  id: number;
+  /**
+   * Sản phẩm khoa học/công nghệ
+   */
+  technology?: (number | null) | Technology;
+  /**
+   * Số đơn/số bằng
+   */
+  code: string;
+  /**
+   * Loại sở hữu trí tuệ
+   */
+  type?: ('patent' | 'utility_solution' | 'industrial_design' | 'trademark' | 'copyright' | 'trade_secret') | null;
+  /**
+   * Tình trạng sở hữu trí tuệ
+   */
+  status?: ('pending' | 'granted' | 'expired' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -717,6 +751,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trl';
         value: number | Trl;
+      } | null)
+    | ({
+        relationTo: 'intellectual_property';
+        value: number | IntellectualProperty;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -881,6 +919,8 @@ export interface ResearchInstitutionsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  type?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -911,7 +951,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface TechnologiesSelect<T extends boolean = true> {
   title?: T;
-  public_summary?: T;
+  documents?: T;
   category?: T;
   confidential_detail?: T;
   trl_level?: T;
@@ -924,15 +964,6 @@ export interface TechnologiesSelect<T extends boolean = true> {
         owner_type?: T;
         owner_name?: T;
         ownership_percentage?: T;
-        id?: T;
-      };
-  ip_details?:
-    | T
-    | {
-        ip_type?: T;
-        ip_number?: T;
-        status?: T;
-        territory?: T;
         id?: T;
       };
   legal_certification?:
@@ -952,6 +983,12 @@ export interface TechnologiesSelect<T extends boolean = true> {
             };
         local_certification_url?: T;
       };
+  investment_desire?:
+    | T
+    | {
+        investment_option?: T;
+        id?: T;
+      };
   pricing?:
     | T
     | {
@@ -967,7 +1004,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
         economic_social_impact?: T;
         financial_support_info?: T;
       };
-  documents?: T;
+  display_mode?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1068,6 +1105,18 @@ export interface TrlSelect<T extends boolean = true> {
   title?: T;
   value?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property_select".
+ */
+export interface IntellectualPropertySelect<T extends boolean = true> {
+  technology?: T;
+  code?: T;
+  type?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

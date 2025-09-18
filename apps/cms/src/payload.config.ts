@@ -20,6 +20,7 @@ import { Notifications } from './collections/Notifications'
 import { Services } from './collections/Services'
 import { ServiceTicket } from './collections/ServiceTicket'
 import { TRL } from './collections/TRL'
+import { IntellectualProperty } from './collections/IntellectualProperty'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,15 +33,9 @@ export default buildConfig({
     },
   },
   // Allow web app at localhost:3000 to access the CMS API
-  cors: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ],
+  cors: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   // Allow CSRF for cookie-based auth from the web app
-  csrf: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ],
+  csrf: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   collections: [
     Users,
     Companies,
@@ -55,6 +50,7 @@ export default buildConfig({
     Services,
     ServiceTicket,
     TRL,
+    IntellectualProperty,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

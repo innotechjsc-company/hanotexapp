@@ -66,6 +66,8 @@ const createInitialFormData = (): TechnologyFormData => ({
   },
   classification: {
     field: "",
+    parentCategory: "",
+    childCategory: "",
   },
   documents: [],
 });
@@ -177,6 +179,37 @@ export const useFormData = () => {
     }));
   }, []);
 
+  // Investment & Transfer - checkbox handlers
+  const handleCommercializationMethodChange = useCallback(
+    (method: string, checked: boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        investmentTransfer: {
+          ...prev.investmentTransfer,
+          commercializationMethods: checked
+            ? [...prev.investmentTransfer.commercializationMethods, method]
+            : prev.investmentTransfer.commercializationMethods.filter((m) => m !== method),
+        },
+      }));
+    },
+    []
+  );
+
+  const handleTransferMethodChange = useCallback(
+    (method: string, checked: boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        investmentTransfer: {
+          ...prev.investmentTransfer,
+          transferMethods: checked
+            ? [...prev.investmentTransfer.transferMethods, method]
+            : prev.investmentTransfer.transferMethods.filter((m) => m !== method),
+        },
+      }));
+    },
+    []
+  );
+
   const addDocument = useCallback((file: File) => {
     const newDocument: FileUpload = {
       id: generateFileId(),
@@ -232,6 +265,34 @@ export const useFormData = () => {
     }));
   }, []);
 
+  const updateProtectionTerritories = useCallback((territories: string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      legalTerritory: {
+        ...prev.legalTerritory,
+        protectionTerritories: territories,
+      },
+    }));
+  }, []);
+
+  const updateCertifications = useCallback((certifications: string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      legalTerritory: {
+        ...prev.legalTerritory,
+        certifications: certifications,
+      },
+    }));
+  }, []);
+
+  const handleLegalTerritoryFileUpload = useCallback((files: FileList | null) => {
+    if (!files) return;
+    
+    Array.from(files).forEach((file) => {
+      addLocalCertificationFile(file);
+    });
+  }, [addLocalCertificationFile]);
+
   const toggleSection = useCallback((sectionName: keyof ExpandedSections) => {
     setExpandedSections((prev) => ({
       ...prev,
@@ -273,10 +334,15 @@ export const useFormData = () => {
     updateIPDetail,
     handleTerritoryChange,
     handleCertificationChange,
+    handleCommercializationMethodChange,
+    handleTransferMethodChange,
     addDocument,
     removeDocument,
     addLocalCertificationFile,
     removeLocalCertificationFile,
+    updateProtectionTerritories,
+    updateCertifications,
+    handleLegalTerritoryFileUpload,
     toggleSection,
     resetForm,
     updateFormDataFromOCR,
