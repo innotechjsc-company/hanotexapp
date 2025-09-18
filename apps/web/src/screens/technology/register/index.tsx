@@ -12,6 +12,8 @@ import {
   VisibilityNDASection,
   IPSection,
   LegalTerritorySectionRef,
+  InvestmentTransferSectionRef,
+  PricingDesiredSectionRef,
 } from "./components";
 import {
   Card,
@@ -23,6 +25,7 @@ import {
 } from "@heroui/react";
 import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
 import { IPSectionRef } from "./components/IPSection";
+import { useMasterData } from "@/hooks/useMasterData";
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
@@ -32,6 +35,10 @@ export default function RegisterTechnologyPage() {
   const ownersRef = useRef<TechnologyOwnersSectionRef>(null);
   const ipRef = useRef<IPSectionRef>(null);
   const legalTerritoryRef = useRef<LegalTerritorySectionRef>(null);
+  const investmentTransferRef = useRef<InvestmentTransferSectionRef>(null);
+  const pricingRef = useRef<PricingDesiredSectionRef>(null);
+
+  const { masterData, loading: masterDataLoading } = useMasterData();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault(); // Ngăn chặn hành vi submit form mặc định
@@ -41,6 +48,10 @@ export default function RegisterTechnologyPage() {
     console.log("IP details:", ipDetails);
     const legalDetails = legalTerritoryRef.current?.getData();
     console.log("Legal details:", legalDetails);
+    const investmentTransfer = investmentTransferRef.current?.getData();
+    console.log("Investment & Transfer:", investmentTransfer);
+    const pricingDesired = pricingRef.current?.getData();
+    console.log("Pricing Desired:", pricingDesired);
   };
 
   // Show loading while auth is being checked
@@ -167,22 +178,15 @@ export default function RegisterTechnologyPage() {
           />
 
           {/* 6. Investment & Transfer (Optional) */}
-          {/* <InvestmentTransferSection
-            investmentTransfer={investmentTransfer}
-            masterData={masterData as any}
+          <InvestmentTransferSection
+            ref={investmentTransferRef}
+            masterData={masterData}
             masterDataLoading={masterDataLoading}
-            onCommercializationChange={
-              actions.handleCommercializationMethodChange
-            }
-            onTransferMethodChange={actions.handleTransferMethodChange}
+            onChange={(data) => console.log("Changed:", data)} // optional
           />
 
           {/* 7. Pricing & Desired Price (Optional) */}
-          {/* <PricingDesiredSection
-            pricing={pricing}
-            investmentStage={investmentTransfer.investmentStage}
-            onChange={actions.handleFieldChange}
-          /> */}
+          <PricingDesiredSection ref={pricingRef} />
 
           {/* 8. Visibility & NDA (Optional) */}
           {/* <VisibilityNDASection
@@ -213,6 +217,7 @@ export default function RegisterTechnologyPage() {
               <Button
                 type="submit"
                 color="primary"
+                className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
                 isLoading={false}
                 startContent={!false && <Save className="h-4 w-4" />}
                 isDisabled={false}

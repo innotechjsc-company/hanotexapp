@@ -5,5 +5,7 @@ export { IPSection } from './IPSection';
 export { LegalTerritorySection } from './LegalTerritorySection';
 export type { LegalTerritorySectionRef } from './LegalTerritorySection';
 export { InvestmentTransferSection } from './InvestmentTransferSection';
+export type { InvestmentTransferSectionRef } from './InvestmentTransferSection';
 export { PricingDesiredSection } from './PricingDesiredSection';
+export type { PricingDesiredSectionRef } from './PricingDesiredSection';
 export { VisibilityNDASection } from './VisibilityNDASection';

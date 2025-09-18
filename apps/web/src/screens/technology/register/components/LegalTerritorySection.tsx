@@ -1,84 +1,105 @@
 import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Upload, FileText, Trash2, Info } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Checkbox,
-} from "@heroui/react";
+import { Card, CardHeader, CardBody, Button } from "@heroui/react";
 import { LegalCertification } from "@/types";
+
+// Temporary interface for file upload state before saving to server
+interface LegalCertificationWithFiles {
+  protection_scope?: { scope: string }[];
+  standard_certifications?: { certification: string }[];
+  files?: File[]; // Use File[] instead of Media[] for upload state
+}
 
 interface LegalTerritorySectionProps {
   initialData?: LegalCertification;
-  onChange?: (data: LegalCertification) => void;
+  onChange?: (data: LegalCertificationWithFiles) => void;
 }
 
 export interface LegalTerritorySectionRef {
-  getData: () => LegalCertification;
+  getData: () => LegalCertificationWithFiles;
   reset: () => void;
 }
 
-export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalTerritorySectionProps>((
-  { initialData, onChange },
-  ref
-) => {
+export const LegalTerritorySection = forwardRef<
+  LegalTerritorySectionRef,
+  LegalTerritorySectionProps
+>(({ initialData, onChange }, ref) => {
   // Internal state management
-  const [selectedProtectionTerritories, setSelectedProtectionTerritories] = useState<string[]>(
-    initialData?.protection_scope?.map(item => item.scope) || []
-  );
-  const [selectedCertifications, setSelectedCertifications] = useState<string[]>(
-    initialData?.standard_certifications?.map(item => item.certification) || []
+  const [selectedProtectionTerritories, setSelectedProtectionTerritories] =
+    useState<string[]>(
+      initialData?.protection_scope?.map((item) => item.scope) || []
+    );
+  const [selectedCertifications, setSelectedCertifications] = useState<
+    string[]
+  >(
+    initialData?.standard_certifications?.map((item) => item.certification) ||
+      []
   );
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
-    getData: (): LegalCertification => ({
-      protection_scope: selectedProtectionTerritories.map(scope => ({ scope })),
-      standard_certifications: selectedCertifications.map(certification => ({ certification })),
-      files: [] // Files would be handled separately in a real implementation
+    getData: (): LegalCertificationWithFiles => ({
+      protection_scope: selectedProtectionTerritories.map((scope) => ({
+        scope,
+      })),
+      standard_certifications: selectedCertifications.map((certification) => ({
+        certification,
+      })),
+      files: uploadedFiles, // Return the actual uploaded files
     }),
     reset: () => {
       setSelectedProtectionTerritories([]);
       setSelectedCertifications([]);
       setUploadedFiles([]);
-    }
+    },
   }));
 
   // Handle protection territory changes
-  const handleProtectionTerritoryChange = (territory: string, checked: boolean) => {
-    const newTerritories = checked 
+  const handleProtectionTerritoryChange = (
+    territory: string,
+    checked: boolean
+  ) => {
+    const newTerritories = checked
       ? [...selectedProtectionTerritories, territory]
-      : selectedProtectionTerritories.filter(t => t !== territory);
-    
+      : selectedProtectionTerritories.filter((t) => t !== territory);
+
     setSelectedProtectionTerritories(newTerritories);
-    
+
     // Notify parent of changes if callback provided
     if (onChange) {
-      const newData: LegalCertification = {
-        protection_scope: newTerritories.map(scope => ({ scope })),
-        standard_certifications: selectedCertifications.map(certification => ({ certification })),
-        files: []
+      const newData: LegalCertificationWithFiles = {
+        protection_scope: newTerritories.map((scope) => ({ scope })),
+        standard_certifications: selectedCertifications.map(
+          (certification) => ({ certification })
+        ),
+        files: uploadedFiles,
       };
       onChange(newData);
     }
   };
 
   // Handle certification changes
-  const handleCertificationChange = (certification: string, checked: boolean) => {
-    const newCertifications = checked 
+  const handleCertificationChange = (
+    certification: string,
+    checked: boolean
+  ) => {
+    const newCertifications = checked
       ? [...selectedCertifications, certification]
-      : selectedCertifications.filter(c => c !== certification);
-    
+      : selectedCertifications.filter((c) => c !== certification);
+
     setSelectedCertifications(newCertifications);
-    
+
     // Notify parent of changes if callback provided
     if (onChange) {
-      const newData: LegalCertification = {
-        protection_scope: selectedProtectionTerritories.map(scope => ({ scope })),
-        standard_certifications: newCertifications.map(certification => ({ certification })),
-        files: []
+      const newData: LegalCertificationWithFiles = {
+        protection_scope: selectedProtectionTerritories.map((scope) => ({
+          scope,
+        })),
+        standard_certifications: newCertifications.map((certification) => ({
+          certification,
+        })),
+        files: uploadedFiles,
       };
       onChange(newData);
     }
@@ -88,13 +109,47 @@ export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalT
   const handleFileUpload = (files: FileList | null) => {
     if (files) {
       const newFiles = Array.from(files);
-      setUploadedFiles(prev => [...prev, ...newFiles]);
+      const updatedFiles = [...uploadedFiles, ...newFiles];
+      setUploadedFiles(updatedFiles);
+
+      // Notify parent of changes if callback provided
+      if (onChange) {
+        const newData: LegalCertificationWithFiles = {
+          protection_scope: selectedProtectionTerritories.map((scope) => ({
+            scope,
+          })),
+          standard_certifications: selectedCertifications.map(
+            (certification) => ({
+              certification,
+            })
+          ),
+          files: updatedFiles,
+        };
+        onChange(newData);
+      }
     }
   };
 
   // Handle file removal
   const handleRemoveFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    const updatedFiles = uploadedFiles.filter((_, i) => i !== index);
+    setUploadedFiles(updatedFiles);
+
+    // Notify parent of changes if callback provided
+    if (onChange) {
+      const newData: LegalCertificationWithFiles = {
+        protection_scope: selectedProtectionTerritories.map((scope) => ({
+          scope,
+        })),
+        standard_certifications: selectedCertifications.map(
+          (certification) => ({
+            certification,
+          })
+        ),
+        files: updatedFiles,
+      };
+      onChange(newData);
+    }
   };
 
   // Fallback data when master data is not available
@@ -190,18 +245,20 @@ export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalT
             <div className="space-y-3 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
               {protectionTerritories.map((territory) => (
                 <div key={territory.value} className="w-full">
-                  <Checkbox
-                    isSelected={selectedProtectionTerritories.includes(territory.value)}
-                    onValueChange={(checked) =>
-                      handleProtectionTerritoryChange(territory.value, checked)
-                    }
-                    size="sm"
-                    classNames={{
-                      base: "inline-flex max-w-full w-full bg-content1",
-                      wrapper: "flex-shrink-0",
-                      label: "text-sm text-gray-700 w-full",
-                    }}
-                  >
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedProtectionTerritories.includes(
+                        territory.value
+                      )}
+                      onChange={(e) =>
+                        handleProtectionTerritoryChange(
+                          territory.value,
+                          e.target.checked
+                        )
+                      }
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
                     <div className="flex flex-col w-full">
                       <span className="font-medium text-sm">
                         {territory.label}
@@ -212,7 +269,7 @@ export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalT
                         </span>
                       )}
                     </div>
-                  </Checkbox>
+                  </label>
                 </div>
               ))}
             </div>
@@ -231,18 +288,20 @@ export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalT
             <div className="space-y-3 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
               {certifications.map((certification) => (
                 <div key={certification.value} className="w-full">
-                  <Checkbox
-                    isSelected={selectedCertifications.includes(certification.value)}
-                    onValueChange={(checked) =>
-                      handleCertificationChange(certification.value, checked)
-                    }
-                    size="sm"
-                    classNames={{
-                      base: "inline-flex max-w-full w-full bg-content1",
-                      wrapper: "flex-shrink-0",
-                      label: "text-sm text-gray-700 w-full",
-                    }}
-                  >
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedCertifications.includes(
+                        certification.value
+                      )}
+                      onChange={(e) =>
+                        handleCertificationChange(
+                          certification.value,
+                          e.target.checked
+                        )
+                      }
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
                     <div className="flex flex-col w-full">
                       <span className="font-medium text-sm">
                         {certification.label}
@@ -253,7 +312,7 @@ export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalT
                         </span>
                       )}
                     </div>
-                  </Checkbox>
+                  </label>
                 </div>
               ))}
             </div>
