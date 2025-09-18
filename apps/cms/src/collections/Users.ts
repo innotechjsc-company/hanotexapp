@@ -11,8 +11,8 @@ export const Users: CollectionConfig = {
   access: {
     read: () => true,
     create: () => true,
-    update: ({ req: { user } }) => !!user,
-    delete: ({ req: { user } }) => !!user,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     // Email added by default
