@@ -398,17 +398,15 @@ export interface Technology {
   title: string;
   documents?: (number | Media)[] | null;
   category?: (number | null) | Category;
+  trl_level: number | Trl;
+  description?: string | null;
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
    */
   confidential_detail?: string | null;
-  trl_level: number | Trl;
-  submitter: number | User;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE';
-  visibility_mode?: ('public' | 'private' | 'restricted') | null;
   owners?:
     | {
-        owner_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
+        owner_type: 'individual' | 'company' | 'research_institution';
         owner_name: string;
         /**
          * Tỷ lệ sở hữu (0-100)
@@ -430,7 +428,7 @@ export interface Technology {
           id?: string | null;
         }[]
       | null;
-    local_certification_url?: string | null;
+    files?: (number | Media)[] | null;
   };
   investment_desire?:
     | {
@@ -438,11 +436,17 @@ export interface Technology {
         id?: string | null;
       }[]
     | null;
+  transfer_type?:
+    | {
+        transfer_option?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   pricing: {
-    pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC';
+    pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
     price_to: number;
-    currency: 'VND' | 'USD' | 'EUR';
+    currency: 'vnd' | 'usd' | 'eur';
   };
   additional_data?: {
     test_results?: {
@@ -491,7 +495,9 @@ export interface Technology {
       [k: string]: unknown;
     } | null;
   };
-  display_mode?: ('public_summary_with_nda_details' | 'fully_public' | 'private_by_invitation') | null;
+  submitter: number | User;
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
+  visibility_mode?: ('public' | 'private' | 'restricted') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -953,11 +959,9 @@ export interface TechnologiesSelect<T extends boolean = true> {
   title?: T;
   documents?: T;
   category?: T;
-  confidential_detail?: T;
   trl_level?: T;
-  submitter?: T;
-  status?: T;
-  visibility_mode?: T;
+  description?: T;
+  confidential_detail?: T;
   owners?:
     | T
     | {
@@ -981,12 +985,18 @@ export interface TechnologiesSelect<T extends boolean = true> {
               certification?: T;
               id?: T;
             };
-        local_certification_url?: T;
+        files?: T;
       };
   investment_desire?:
     | T
     | {
         investment_option?: T;
+        id?: T;
+      };
+  transfer_type?:
+    | T
+    | {
+        transfer_option?: T;
         id?: T;
       };
   pricing?:
@@ -1004,7 +1014,9 @@ export interface TechnologiesSelect<T extends boolean = true> {
         economic_social_impact?: T;
         financial_support_info?: T;
       };
-  display_mode?: T;
+  submitter?: T;
+  status?: T;
+  visibility_mode?: T;
   updatedAt?: T;
   createdAt?: T;
 }

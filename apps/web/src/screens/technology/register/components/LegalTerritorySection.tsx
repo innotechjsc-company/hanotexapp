@@ -1,34 +1,102 @@
-import React from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Upload, FileText, Trash2, Info } from "lucide-react";
-import { LegalTerritory, MasterData, FileUpload } from "../types";
 import {
   Card,
   CardHeader,
   CardBody,
   Button,
-  Spinner,
   Checkbox,
 } from "@heroui/react";
+import { LegalCertification } from "@/types";
 
 interface LegalTerritorySectionProps {
-  legalTerritory: LegalTerritory;
-  masterData: MasterData | null;
-  masterDataLoading: boolean;
-  onProtectionTerritoryChange: (territory: string, checked: boolean) => void;
-  onCertificationChange: (certification: string, checked: boolean) => void;
-  onFileUpload: (files: FileList | null) => void;
-  onRemoveFile: (index: number) => void;
+  initialData?: LegalCertification;
+  onChange?: (data: LegalCertification) => void;
 }
 
-export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
-  legalTerritory,
-  masterData,
-  masterDataLoading,
-  onProtectionTerritoryChange,
-  onCertificationChange,
-  onFileUpload,
-  onRemoveFile,
-}) => {
+export interface LegalTerritorySectionRef {
+  getData: () => LegalCertification;
+  reset: () => void;
+}
+
+export const LegalTerritorySection = forwardRef<LegalTerritorySectionRef, LegalTerritorySectionProps>((
+  { initialData, onChange },
+  ref
+) => {
+  // Internal state management
+  const [selectedProtectionTerritories, setSelectedProtectionTerritories] = useState<string[]>(
+    initialData?.protection_scope?.map(item => item.scope) || []
+  );
+  const [selectedCertifications, setSelectedCertifications] = useState<string[]>(
+    initialData?.standard_certifications?.map(item => item.certification) || []
+  );
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    getData: (): LegalCertification => ({
+      protection_scope: selectedProtectionTerritories.map(scope => ({ scope })),
+      standard_certifications: selectedCertifications.map(certification => ({ certification })),
+      files: [] // Files would be handled separately in a real implementation
+    }),
+    reset: () => {
+      setSelectedProtectionTerritories([]);
+      setSelectedCertifications([]);
+      setUploadedFiles([]);
+    }
+  }));
+
+  // Handle protection territory changes
+  const handleProtectionTerritoryChange = (territory: string, checked: boolean) => {
+    const newTerritories = checked 
+      ? [...selectedProtectionTerritories, territory]
+      : selectedProtectionTerritories.filter(t => t !== territory);
+    
+    setSelectedProtectionTerritories(newTerritories);
+    
+    // Notify parent of changes if callback provided
+    if (onChange) {
+      const newData: LegalCertification = {
+        protection_scope: newTerritories.map(scope => ({ scope })),
+        standard_certifications: selectedCertifications.map(certification => ({ certification })),
+        files: []
+      };
+      onChange(newData);
+    }
+  };
+
+  // Handle certification changes
+  const handleCertificationChange = (certification: string, checked: boolean) => {
+    const newCertifications = checked 
+      ? [...selectedCertifications, certification]
+      : selectedCertifications.filter(c => c !== certification);
+    
+    setSelectedCertifications(newCertifications);
+    
+    // Notify parent of changes if callback provided
+    if (onChange) {
+      const newData: LegalCertification = {
+        protection_scope: selectedProtectionTerritories.map(scope => ({ scope })),
+        standard_certifications: newCertifications.map(certification => ({ certification })),
+        files: []
+      };
+      onChange(newData);
+    }
+  };
+
+  // Handle file upload
+  const handleFileUpload = (files: FileList | null) => {
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  // Handle file removal
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Fallback data when master data is not available
   const defaultProtectionTerritories = [
     {
@@ -101,9 +169,8 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
     },
   ];
 
-  const protectionTerritories =
-    masterData?.protectionTerritories || defaultProtectionTerritories;
-  const certifications = masterData?.certifications || defaultCertifications;
+  const protectionTerritories = defaultProtectionTerritories;
+  const certifications = defaultCertifications;
 
   return (
     <Card>
@@ -121,40 +188,33 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
               Phạm vi bảo hộ/chứng nhận (chọn nhiều)
             </label>
             <div className="space-y-3 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
-              {masterDataLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Spinner size="sm" className="mr-2" />
-                  <span className="text-sm text-gray-600">Đang tải...</span>
-                </div>
-              ) : (
-                protectionTerritories.map((territory) => (
-                  <div key={territory.value} className="w-full">
-                    <Checkbox
-                      isSelected={legalTerritory.protectionTerritories.includes(
-                        territory.value
+              {protectionTerritories.map((territory) => (
+                <div key={territory.value} className="w-full">
+                  <Checkbox
+                    isSelected={selectedProtectionTerritories.includes(territory.value)}
+                    onValueChange={(checked) =>
+                      handleProtectionTerritoryChange(territory.value, checked)
+                    }
+                    size="sm"
+                    classNames={{
+                      base: "inline-flex max-w-full w-full bg-content1",
+                      wrapper: "flex-shrink-0",
+                      label: "text-sm text-gray-700 w-full",
+                    }}
+                  >
+                    <div className="flex flex-col w-full">
+                      <span className="font-medium text-sm">
+                        {territory.label}
+                      </span>
+                      {territory.description && (
+                        <span className="text-xs text-gray-500 mt-0.5">
+                          {territory.description}
+                        </span>
                       )}
-                      onValueChange={(checked) =>
-                        onProtectionTerritoryChange(territory.value, checked)
-                      }
-                      size="sm"
-                      classNames={{
-                        base: "inline-flex max-w-full w-full bg-content1",
-                        wrapper: "flex-shrink-0",
-                        label: "text-sm text-gray-700 w-full",
-                      }}
-                    >
-                      <div className="flex flex-col w-full">
-                        <span className="font-medium text-sm">{territory.label}</span>
-                        {territory.description && (
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            {territory.description}
-                          </span>
-                        )}
-                      </div>
-                    </Checkbox>
-                  </div>
-                ))
-              )}
+                    </div>
+                  </Checkbox>
+                </div>
+              ))}
             </div>
             <p className="text-xs text-gray-500">
               *PCT là đơn quốc tế (chưa là bằng);
@@ -169,40 +229,33 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
               Chứng nhận tiêu chuẩn/quy chuẩn (chọn nhiều)
             </label>
             <div className="space-y-3 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto">
-              {masterDataLoading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Spinner size="sm" className="mr-2" />
-                  <span className="text-sm text-gray-600">Đang tải...</span>
-                </div>
-              ) : (
-                certifications.map((certification) => (
-                  <div key={certification.value} className="w-full">
-                    <Checkbox
-                      isSelected={legalTerritory.certifications.includes(
-                        certification.value
+              {certifications.map((certification) => (
+                <div key={certification.value} className="w-full">
+                  <Checkbox
+                    isSelected={selectedCertifications.includes(certification.value)}
+                    onValueChange={(checked) =>
+                      handleCertificationChange(certification.value, checked)
+                    }
+                    size="sm"
+                    classNames={{
+                      base: "inline-flex max-w-full w-full bg-content1",
+                      wrapper: "flex-shrink-0",
+                      label: "text-sm text-gray-700 w-full",
+                    }}
+                  >
+                    <div className="flex flex-col w-full">
+                      <span className="font-medium text-sm">
+                        {certification.label}
+                      </span>
+                      {certification.description && (
+                        <span className="text-xs text-gray-500 mt-0.5">
+                          {certification.description}
+                        </span>
                       )}
-                      onValueChange={(checked) =>
-                        onCertificationChange(certification.value, checked)
-                      }
-                      size="sm"
-                      classNames={{
-                        base: "inline-flex max-w-full w-full bg-content1",
-                        wrapper: "flex-shrink-0",
-                        label: "text-sm text-gray-700 w-full",
-                      }}
-                    >
-                      <div className="flex flex-col w-full">
-                        <span className="font-medium text-sm">{certification.label}</span>
-                        {certification.description && (
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            {certification.description}
-                          </span>
-                        )}
-                      </div>
-                    </Checkbox>
-                  </div>
-                ))
-              )}
+                    </div>
+                  </Checkbox>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -228,14 +281,14 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
                 multiple
                 accept=".pdf,.jpg,.jpeg,.png"
                 className="hidden"
-                onChange={(e) => onFileUpload(e.target.files)}
+                onChange={(e) => handleFileUpload(e.target.files)}
               />
             </div>
 
             {/* Uploaded files list */}
-            {legalTerritory.localCertificationFiles.length > 0 && (
+            {uploadedFiles.length > 0 && (
               <div className="space-y-2 max-h-32 overflow-y-auto">
-                {legalTerritory.localCertificationFiles.map((file, index) => (
+                {uploadedFiles.map((file, index) => (
                   <div
                     key={index}
                     className="bg-gray-50 rounded p-2 flex items-center justify-between"
@@ -256,7 +309,7 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
                       size="sm"
                       color="danger"
                       variant="light"
-                      onClick={() => onRemoveFile(index)}
+                      onClick={() => handleRemoveFile(index)}
                       className="ml-2 flex-shrink-0"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -295,4 +348,4 @@ export const LegalTerritorySection: React.FC<LegalTerritorySectionProps> = ({
       </CardBody>
     </Card>
   );
-};
+});

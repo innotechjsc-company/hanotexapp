@@ -3,24 +3,9 @@
  * Các function để quản lý intellectual properties với PayloadCMS
  */
 
-import { payloadApiClient, ApiResponse } from './client';
-import { API_ENDPOINTS, PAGINATION_DEFAULTS } from './config';
-
-// Import the base type from CMS
-import { IntellectualProperty as BaseIntellectualProperty } from '../../../cms/src/types/IntellectualProperty';
-
-// Extended interface with API fields
-export interface IntellectualProperty extends BaseIntellectualProperty {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Type mappings for better type safety
-export type IPTechnology = IntellectualProperty['technology'];
-export type IPCode = IntellectualProperty['code'];
-export type IPType = IntellectualProperty['type'];
-export type IPStatus = IntellectualProperty['status'];
+import { payloadApiClient, ApiResponse } from "./client";
+import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
+import { IntellectualProperty } from "@/types/IntellectualProperty";
 
 export interface IntellectualPropertyFilters {
   technology?: string;
@@ -47,33 +32,51 @@ export async function getIntellectualProperties(
     ...filters,
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
-    sort: pagination.sort || '-createdAt',
+    sort: pagination.sort || "-createdAt",
   };
 
-  return payloadApiClient.get<IntellectualProperty[]>(API_ENDPOINTS.INTELLECTUAL_PROPERTIES, params);
+  return payloadApiClient.get<IntellectualProperty[]>(
+    API_ENDPOINTS.INTELLECTUAL_PROPERTIES,
+    params
+  );
 }
 
 /**
  * Get intellectual property by ID
  */
-export async function getIntellectualPropertyById(id: string): Promise<IntellectualProperty> {
-  const response = await payloadApiClient.get<IntellectualProperty>(`${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`);
+export async function getIntellectualPropertyById(
+  id: string
+): Promise<IntellectualProperty> {
+  const response = await payloadApiClient.get<IntellectualProperty>(
+    `${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`
+  );
   return response.data!;
 }
 
 /**
  * Create new intellectual property
  */
-export async function createIntellectualProperty(data: Partial<IntellectualProperty>): Promise<IntellectualProperty> {
-  const response = await payloadApiClient.post<IntellectualProperty>(API_ENDPOINTS.INTELLECTUAL_PROPERTIES, data);
+export async function createIntellectualProperty(
+  data: Partial<IntellectualProperty>
+): Promise<IntellectualProperty> {
+  const response = await payloadApiClient.post<IntellectualProperty>(
+    API_ENDPOINTS.INTELLECTUAL_PROPERTIES,
+    data
+  );
   return response.data!;
 }
 
 /**
  * Update intellectual property
  */
-export async function updateIntellectualProperty(id: string, data: Partial<IntellectualProperty>): Promise<IntellectualProperty> {
-  const response = await payloadApiClient.patch<IntellectualProperty>(`${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`, data);
+export async function updateIntellectualProperty(
+  id: string,
+  data: Partial<IntellectualProperty>
+): Promise<IntellectualProperty> {
+  const response = await payloadApiClient.patch<IntellectualProperty>(
+    `${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`,
+    data
+  );
   return response.data!;
 }
 
@@ -81,7 +84,9 @@ export async function updateIntellectualProperty(id: string, data: Partial<Intel
  * Delete intellectual property
  */
 export async function deleteIntellectualProperty(id: string): Promise<void> {
-  await payloadApiClient.delete(`${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`);
+  await payloadApiClient.delete(
+    `${API_ENDPOINTS.INTELLECTUAL_PROPERTIES}/${id}`
+  );
 }
 
 /**
@@ -92,10 +97,7 @@ export async function searchIntellectualProperties(
   filters: IntellectualPropertyFilters = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<IntellectualProperty[]>> {
-  return getIntellectualProperties(
-    { ...filters, search: query },
-    pagination
-  );
+  return getIntellectualProperties({ ...filters, search: query }, pagination);
 }
 
 /**
@@ -105,10 +107,7 @@ export async function getIntellectualPropertiesByTechnology(
   technology: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<IntellectualProperty[]>> {
-  return getIntellectualProperties(
-    { technology },
-    pagination
-  );
+  return getIntellectualProperties({ technology }, pagination);
 }
 
 /**
@@ -118,10 +117,7 @@ export async function getIntellectualPropertiesByType(
   type: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<IntellectualProperty[]>> {
-  return getIntellectualProperties(
-    { type },
-    pagination
-  );
+  return getIntellectualProperties({ type }, pagination);
 }
 
 /**
@@ -131,10 +127,7 @@ export async function getIntellectualPropertiesByStatus(
   status: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<IntellectualProperty[]>> {
-  return getIntellectualProperties(
-    { status },
-    pagination
-  );
+  return getIntellectualProperties({ status }, pagination);
 }
 
 /**
@@ -144,10 +137,7 @@ export async function getIntellectualPropertiesByCode(
   code: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<IntellectualProperty[]>> {
-  return getIntellectualProperties(
-    { code },
-    pagination
-  );
+  return getIntellectualProperties({ code }, pagination);
 }
 
 /**
