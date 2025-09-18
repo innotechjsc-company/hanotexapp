@@ -250,7 +250,8 @@ export default function EventsPage() {
           <Button
             color="primary"
             startContent={<Plus className="h-5 w-5" />}
-            className="font-medium"
+            className="font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-md visible opacity-100 z-10 relative"
+            size="md"
           >
             Đăng sự kiện
           </Button>
@@ -261,7 +262,7 @@ export default function EventsPage() {
           <CardBody className="p-6">
             <form onSubmit={handleSearch} className="space-y-4">
               {/* Search Bar */}
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-center flex-wrap">
                 <Input
                   type="text"
                   value={searchQuery}
@@ -271,7 +272,12 @@ export default function EventsPage() {
                   variant="bordered"
                   className="flex-1"
                 />
-                <Button type="submit" color="primary" className="px-6">
+                <Button
+                  type="submit"
+                  color="primary"
+                  className="px-6 bg-blue-600 text-white hover:bg-blue-700 shadow-md min-w-[120px] visible opacity-100 z-10 relative flex-shrink-0"
+                  size="md"
+                >
                   Tìm kiếm
                 </Button>
               </div>
@@ -405,10 +411,14 @@ export default function EventsPage() {
                       <span className="font-medium">{event.organizer}</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-h-[40px]">
                       {event.status === "upcoming" &&
                         event.registration_required && (
-                          <Button color="primary" size="sm">
+                          <Button
+                            color="primary"
+                            size="sm"
+                            className="bg-blue-600 text-white hover:bg-blue-700 shadow-sm font-medium visible opacity-100 z-10 relative flex-shrink-0"
+                          >
                             Đăng ký tham gia
                           </Button>
                         )}
@@ -417,6 +427,7 @@ export default function EventsPage() {
                         color="primary"
                         size="sm"
                         endContent={<ExternalLink className="h-3 w-3" />}
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
                       >
                         Chi tiết sự kiện
                       </Button>
@@ -456,7 +467,8 @@ export default function EventsPage() {
             <Button
               variant="bordered"
               endContent={<ArrowRight className="h-4 w-4" />}
-              className="px-6"
+              className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm font-medium visible opacity-100 z-10 relative"
+              size="md"
             >
               Xem thêm sự kiện
             </Button>
