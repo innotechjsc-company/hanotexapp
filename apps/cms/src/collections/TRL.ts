@@ -4,6 +4,9 @@ export const TRL: CollectionConfig = {
   slug: 'trl',
   access: {
     read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {

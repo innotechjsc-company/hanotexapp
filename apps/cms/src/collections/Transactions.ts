@@ -8,10 +8,10 @@ export const Transactions: CollectionConfig = {
     defaultColumns: ['technology_id', 'buyer_id', 'seller_id', 'amount', 'status'],
   },
   access: {
-    read: ({ req: { user } }) => !!user,
-    create: ({ req: { user } }) => !!user,
-    update: ({ req: { user } }) => !!user,
-    delete: ({ req: { user } }) => !!user,
+    read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
