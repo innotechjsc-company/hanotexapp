@@ -1,16 +1,31 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useIsAuthenticated, useIsLoading } from "@/store/auth";
 import { useMasterData } from "@/hooks/useMasterData";
 import { ArrowLeft, Save, Eye, AlertCircle } from "lucide-react";
 import {
+  // Import từ store mới
+  useRegisterTechnologyStore,
   useFormData,
-  useRegisterTechnology,
-  useOCR,
-  useIPManagement,
-} from "./hooks";
+  useOwners,
+  useIPDetails,
+  useDocuments,
+  useLegalTerritory,
+  usePricing,
+  useInvestmentTransfer,
+  useConfirmUpload,
+  useShowOptionalFields,
+  useSubmitLoading,
+  useOCRLoading,
+  useIPSaveLoading,
+  useSubmitError,
+  useSubmitSuccess,
+  useOCRError,
+  useOCRResult,
+  useRegisterActions,
+} from "@/store/registerTechnology";
 import {
   BasicInfoSection,
   TechnologyOwnersSection,
@@ -34,85 +49,66 @@ export default function RegisterTechnologyPage() {
   const isAuthenticated = useIsAuthenticated();
   const authLoading = useIsLoading();
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
-  const [confirmUpload, setConfirmUpload] = useState(false);
+
+  // Master Data
   const {
     masterData,
     loading: masterDataLoading,
     error: masterDataError,
   } = useMasterData();
 
-  // Custom hooks for form management
-  const formManager = useFormData();
-  const {
-    loading: submitLoading,
-    error: submitError,
-    success: submitSuccess,
-    showOptionalFields,
-    setShowOptionalFields,
-    submitTechnology,
-    handleFileUpload,
-    clearMessages,
-  } = useRegisterTechnology();
+  // Store state selectors
+  const formData = useFormData();
+  const owners = useOwners();
+  const ipDetails = useIPDetails();
+  const documents = useDocuments();
+  const legalTerritory = useLegalTerritory();
+  const pricing = usePricing();
+  const investmentTransfer = useInvestmentTransfer();
+  const confirmUpload = useConfirmUpload();
+  const showOptionalFields = useShowOptionalFields();
 
-  const {
-    loading: ocrLoading,
-    result: ocrResult,
-    error: ocrError,
-    processOCR,
-  } = useOCR();
+  // Loading states
+  const submitLoading = useSubmitLoading();
+  const ocrLoading = useOCRLoading();
+  const ipSaveLoading = useIPSaveLoading();
 
-  // IP Management hook
-  const ipManager = useIPManagement({
-    onIPDetailsChange: (ipDetails) => {
-      // Update form data when IP details are loaded from API
-      formManager.setFormData((prev) => ({ ...prev, ipDetails }));
-    },
-  });
+  // Error & Success states
+  const submitError = useSubmitError();
+  const submitSuccess = useSubmitSuccess();
+  const ocrError = useOCRError();
+  const ocrResult = useOCRResult();
+
+  // Store actions
+  const actions = useRegisterActions();
 
   // File upload handler with OCR processing
-  const handleFileUploadWithOCR = useCallback(
-    async (files: FileList | null) => {
-      if (!files) return;
-
-      handleFileUpload(
-        files,
-        (file) => {
-          formManager.addDocument(file);
-
-          // Process OCR for PDF and image files
-          if (
-            file.type === "application/pdf" ||
-            file.type.startsWith("image/")
-          ) {
-            processOCR(file).then((result) => {
-              if (result && result.success && result.extractedData) {
-                formManager.updateFormDataFromOCR(result.extractedData);
-              }
-            });
-          }
-        },
-        (error) => {
-          // Handle file upload errors through the form manager or show alerts
-          console.error("File upload error:", error);
-        }
-      );
-    },
-    [handleFileUpload, formManager, processOCR]
-  );
+  const handleFileUploadWithOCR = (files: FileList | null) => {
+    actions.handleFileUpload(
+      files,
+      undefined, // Success callback already handled in store
+      (error) => {
+        console.error("File upload error:", error);
+        actions.setSubmitError(error.message as string | null);
+      }
+    );
+  };
 
   // Form submission handler
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      clearMessages();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    actions.clearMessages();
 
-      const success = await submitTechnology(formManager.formData);
-      if (success) {
-        formManager.resetForm();
-      }
-    },
-    [submitTechnology, formManager, clearMessages]
-  );
+    // Submit technology using store action
+    const success = await actions.submitTechnology();
+
+    if (success) {
+      // Navigate to success page or dashboard
+      setTimeout(() => {
+        router.push("/technologies");
+      }, 3000);
+    }
+  };
 
   // Debug auth state
   useEffect(() => {
@@ -138,13 +134,12 @@ export default function RegisterTechnologyPage() {
   // Load IP draft data on component mount
   useEffect(() => {
     if (hasCheckedAuth && isAuthenticated) {
-      const draftData = ipManager.loadFromDraft();
+      const draftData = actions.loadIPFromDraft();
       if (draftData.length > 0) {
-        formManager.setFormData((prev) => ({ ...prev, ipDetails: draftData }));
         console.log("Loaded IP draft data:", draftData);
       }
     }
-  }, [hasCheckedAuth, isAuthenticated, formManager, ipManager]);
+  }, [hasCheckedAuth, isAuthenticated]);
 
   // Show loading while auth is being checked
   if (authLoading || !hasCheckedAuth) {
@@ -237,84 +232,78 @@ export default function RegisterTechnologyPage() {
 
           {/* 1. Basic Information */}
           <BasicInfoSection
-            formData={formManager.formData}
+            formData={formData}
             masterData={masterData as any}
             masterDataLoading={masterDataLoading}
             showOptionalFields={showOptionalFields}
-            setShowOptionalFields={setShowOptionalFields}
+            setShowOptionalFields={actions.setShowOptionalFields}
             ocrLoading={ocrLoading}
             ocrResult={ocrResult}
-            onChange={formManager.handleChange}
+            onChange={actions.handleFieldChange}
             onFileUpload={handleFileUploadWithOCR}
-            onRemoveDocument={formManager.removeDocument}
+            onRemoveDocument={actions.removeDocument}
           />
 
           {/* 2. Technology Owners */}
           <TechnologyOwnersSection
-            owners={formManager.formData.owners}
-            onAddOwner={formManager.addOwner}
-            onRemoveOwner={formManager.removeOwner}
-            onUpdateOwner={formManager.updateOwner}
+            owners={owners}
+            onAddOwner={actions.addOwner}
+            onRemoveOwner={actions.removeOwner}
+            onUpdateOwner={actions.updateOwner}
           />
 
           {/* 3. IP Details */}
           <IPSection
-            ipDetails={formManager.formData.ipDetails}
+            ipDetails={ipDetails}
             masterData={masterData as any}
             masterDataLoading={masterDataLoading}
-            onAddIPDetail={formManager.addIPDetail}
-            onRemoveIPDetail={formManager.removeIPDetail}
-            onUpdateIPDetail={formManager.updateIPDetail}
-            onSaveAsDraft={ipManager.saveAsDraft}
-            onLoadFromDraft={() => {
-              const draftData = ipManager.loadFromDraft();
-              if (draftData.length > 0) {
-                formManager.setFormData((prev) => ({
-                  ...prev,
-                  ipDetails: draftData,
-                }));
-              }
-              return draftData;
-            }}
-            ipSaveLoading={ipManager.loading}
-            ipSaveError={ipManager.error}
+            onAddIPDetail={actions.addIPDetail}
+            onRemoveIPDetail={actions.removeIPDetail}
+            onUpdateIPDetail={actions.updateIPDetail}
+            onSaveAsDraft={async () => actions.saveIPAsDraft()}
+            onLoadFromDraft={actions.loadIPFromDraft}
+            ipSaveLoading={ipSaveLoading}
           />
 
           {/* 4. Legal Territory */}
           <LegalTerritorySection
-            legalTerritory={formManager.formData.legalTerritory}
+            legalTerritory={legalTerritory}
             masterData={masterData as any}
             masterDataLoading={masterDataLoading}
-            onProtectionTerritoryChange={formManager.handleTerritoryChange}
-            onCertificationChange={formManager.handleCertificationChange}
-            onFileUpload={formManager.handleLegalTerritoryFileUpload}
-            onRemoveFile={formManager.removeLocalCertificationFile}
+            onProtectionTerritoryChange={actions.handleTerritoryChange}
+            onCertificationChange={actions.handleCertificationChange}
+            onFileUpload={(files) => {
+              if (files) {
+                Array.from(files).forEach((file) => {
+                  actions.addLocalCertificationFile(file);
+                });
+              }
+            }}
+            onRemoveFile={actions.removeLocalCertificationFile}
           />
 
           {/* 6. Investment & Transfer (Optional) */}
           <InvestmentTransferSection
-            investmentTransfer={formManager.formData.investmentTransfer}
+            investmentTransfer={investmentTransfer}
             masterData={masterData as any}
             masterDataLoading={masterDataLoading}
             onCommercializationChange={
-              formManager.handleCommercializationMethodChange
+              actions.handleCommercializationMethodChange
             }
-            onTransferMethodChange={formManager.handleTransferMethodChange}
+            onTransferMethodChange={actions.handleTransferMethodChange}
           />
 
           {/* 7. Pricing & Desired Price (Optional) */}
           <PricingDesiredSection
-            pricing={formManager.formData.pricing}
-            investmentStage={
-              formManager.formData.investmentTransfer.investmentStage
-            }
-            onChange={formManager.handleChange}
+            pricing={pricing}
+            investmentStage={investmentTransfer.investmentStage}
+            onChange={actions.handleFieldChange}
           />
 
           {/* 8. Visibility & NDA (Optional) */}
           <VisibilityNDASection
-            visibilityMode={formManager.formData.visibilityMode}
-            onChange={formManager.handleChange as any}
+            visibilityMode={formData.visibilityMode}
+            onChange={actions.handleFieldChange as any}
           />
 
           {/* Confirmation checkbox */}
@@ -322,7 +311,7 @@ export default function RegisterTechnologyPage() {
             <CardBody className="p-4">
               <Checkbox
                 isSelected={confirmUpload}
-                onValueChange={setConfirmUpload}
+                onValueChange={actions.setConfirmUpload}
                 classNames={{ label: "text-sm text-gray-700" }}
               >
                 Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm công nghệ
