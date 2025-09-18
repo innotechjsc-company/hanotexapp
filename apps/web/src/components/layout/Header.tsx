@@ -57,11 +57,6 @@ export default function Header() {
 
   const mainMenuItems = [
     {
-      name: "Trang chủ",
-      href: "/",
-      icon: Building2,
-    },
-    {
       name: "Công nghệ",
       href: "/technologies",
       icon: Zap,
@@ -84,7 +79,30 @@ export default function Header() {
       ],
     },
     {
-      name: "Tin tức",
+      name: "Dịch vụ",
+      href: "/services",
+      icon: Building2,
+      submenu: [
+        { name: "Tư vấn công nghệ", href: "/services/consulting" },
+        { name: "Thẩm định & định giá", href: "/services/valuation" },
+        { name: "Tư vấn pháp lý", href: "/services/legal" },
+        { name: "Sở hữu trí tuệ", href: "/services/intellectual-property" },
+        { name: "Kết nối đầu tư", href: "/services/investment" },
+        { name: "Đào tạo & Hỗ trợ", href: "/services/training" },
+      ],
+    },
+    {
+      name: "Quỹ & Đầu tư",
+      href: "/funds",
+      icon: Target,
+      submenu: [
+        { name: "Dự án đang hoạt động", href: "/funds/active-projects" },
+        { name: "Dự án đang gọi vốn", href: "/funds/fundraising" },
+        { name: "Danh sách Quỹ đầu tư", href: "/funds/investment-funds" },
+      ],
+    },
+    {
+      name: "Tin tức & Sự kiện",
       href: "/news",
       icon: FileText,
       submenu: [
@@ -92,17 +110,22 @@ export default function Header() {
         { name: "Thông báo", href: "/news?category=announcements" },
         { name: "Chính sách", href: "/news?category=policies" },
         { name: "Hướng dẫn", href: "/news?category=guides" },
-      ],
-    },
-    {
-      name: "Sự kiện",
-      href: "/events",
-      icon: Calendar,
-      submenu: [
         { name: "Sự kiện sắp diễn ra", href: "/events" },
         { name: "Hội thảo", href: "/events?type=seminar" },
         { name: "Triển lãm", href: "/events?type=exhibition" },
-        { name: "Đăng ký sự kiện", href: "/events/register" },
+      ],
+    },
+    {
+      name: "Giới thiệu",
+      href: "/about",
+      icon: User,
+      submenu: [
+        { name: "Về HANOTEX", href: "/about" },
+        { name: "Liên hệ", href: "/contact" },
+        { name: "Hướng dẫn sử dụng", href: "/user-guide" },
+        { name: "Câu hỏi thường gặp", href: "/faq" },
+        { name: "Chính sách bảo mật", href: "/privacy" },
+        { name: "Điều khoản sử dụng", href: "/terms" },
       ],
     },
   ];
@@ -129,23 +152,19 @@ export default function Header() {
         <div className="flex items-center h-20 gap-4">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl font-bold text-xl shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 whitespace-nowrap">
-                HANOTEX
-              </div>
-              <div className="hidden md:block min-w-0">
-                <div className="text-gray-800 font-semibold text-base whitespace-nowrap">
-                  Sàn giao dịch công nghệ Hà Nội
-                </div>
-                <div className="text-gray-500 text-sm whitespace-nowrap">
-                  Technology Exchange Platform
-                </div>
+            <Link href="/" className="flex items-center group">
+              <div className="w-28 h-16 min-w-[112px] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+                <img 
+                  src="/logo.png" 
+                  alt="HANOTEX Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1 flex-1 justify-center max-w-2xl">
+          <nav className="hidden lg:flex items-center space-x-2 flex-1 justify-center max-w-4xl ml-2">
             {mainMenuItems.map((item) => (
               <div key={item.name} className="relative group">
                 <Link
@@ -184,24 +203,25 @@ export default function Header() {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            {/* Search Button */}
-            <button
-              onClick={() => setIsSearchModalOpen(true)}
-              className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 hover:scale-110 group"
-            >
-              <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-
-            {/* Notifications */}
-            <button className="p-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300 hover:scale-110 relative group">
-              <Bell className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full animate-pulse shadow-md"></span>
-            </button>
-
+          <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
             {/* User Menu or Auth Buttons */}
             {isAuthenticated ? (
-              <div className="relative">
+              <>
+                {/* Search Button - Only show when authenticated */}
+                <button
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 hover:scale-110 group"
+                >
+                  <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                </button>
+
+                {/* Notifications - Only show when authenticated */}
+                <button className="p-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300 hover:scale-110 relative group">
+                  <Bell className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full animate-pulse shadow-md"></span>
+                </button>
+
+                <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:shadow-md group min-w-0"
@@ -270,7 +290,8 @@ export default function Header() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             ) : (
               <div className="flex items-center space-x-2">
                 <Link

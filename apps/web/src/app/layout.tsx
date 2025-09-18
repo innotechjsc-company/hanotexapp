@@ -12,6 +12,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'HANOTEX - Sàn Giao Dịch Công Nghệ Hà Nội',
   description: 'Sàn giao dịch công nghệ trực tuyến của thành phố Hà Nội - Kết nối doanh nghiệp, viện nghiên cứu và cá nhân trong lĩnh vực khoa học công nghệ',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   keywords: [
     'HANOTEX',
     'sàn giao dịch công nghệ',
