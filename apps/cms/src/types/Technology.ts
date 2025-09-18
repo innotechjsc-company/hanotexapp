@@ -23,102 +23,102 @@ export type Currency = 'VND' | 'USD' | 'EUR'
 
 // Technology Owner Interface
 export interface TechnologyOwner {
-  owner_type: OwnerType
-  owner_name: string
-  ownership_percentage: number
+  owner_type: OwnerType // Loại chủ sở hữu
+  owner_name: string // Tên chủ sở hữu
+  ownership_percentage: number // Tỷ lệ sở hữu
 }
 
 // IP Details Interface
 export interface IPDetail {
-  ip_type: IPType
-  ip_number?: string
-  status?: string
-  territory?: string
+  ip_type: IPType // Loại sở hữu trí tuệ
+  ip_number?: string // Số IP
+  status?: string // Trạng thái IP
+  territory?: string // Lãnh thổ
 }
 
 // Legal Certification Interfaces
 export interface ProtectionScope {
-  scope: string
+  scope: string // Phạm vi
 }
 
 export interface StandardCertification {
-  certification: string
+  certification: string // Chứng nhận
 }
 
 export interface LegalCertification {
-  protection_scope?: ProtectionScope[]
-  standard_certifications?: StandardCertification[]
-  local_certification_url?: string
+  protection_scope?: ProtectionScope[] // Phạm vi bảo hộ
+  standard_certifications?: StandardCertification[] // Chứng nhận tiêu chuẩn
+  local_certification_url?: string // URL chứng nhận địa phương
 }
 
 // Pricing Information Interface
 export interface PricingInfo {
-  pricing_type: PricingType
-  asking_price?: number
-  currency: Currency
-  price_type?: string
-  appraisal_purpose?: string
-  appraisal_scope?: string
-  appraisal_deadline?: string
+  pricing_type: PricingType // Loại định giá
+  asking_price?: number // Giá yêu cầu
+  currency: Currency // Đơn vị tiền tệ
+  price_type?: string // Loại giá
+  appraisal_purpose?: string // Mục đích đánh giá
+  appraisal_scope?: string // Phạm vi đánh giá
+  appraisal_deadline?: string // Thời hạn đánh giá
 }
 
 // Investment & Transfer Interfaces
 export interface CommercializationMethod {
-  method: string
+  method: string // Phương pháp
 }
 
 export interface TransferMethod {
-  method: string
+  method: string // Phương pháp
 }
 
 export interface FinancialMethod {
-  method: string
+  method: string // Phương pháp
 }
 
 export interface InvestmentTransferInfo {
-  investment_stage?: string
-  commercialization_methods?: CommercializationMethod[]
-  transfer_methods?: TransferMethod[]
-  territory_scope?: string
-  financial_methods?: FinancialMethod[]
-  usage_limitations?: string
-  current_partners?: string
-  potential_partners?: string
+  investment_stage?: string // Giai đoạn đầu tư
+  commercialization_methods?: CommercializationMethod[] // Phương pháp thương mại hóa
+  transfer_methods?: TransferMethod[] // Phương pháp chuyển giao
+  territory_scope?: string // Phạm vi lãnh thổ
+  financial_methods?: FinancialMethod[] // Phương pháp tài chính
+  usage_limitations?: string // Hạn chế sử dụng
+  current_partners?: string // Đối tác hiện tại
+  potential_partners?: string // Đối tác tiềm năng
 }
 
 // Additional Data Interface
 export interface AdditionalData {
-  test_results?: string
-  economic_social_impact?: string
-  financial_support_info?: string
+  test_results?: string // Kết quả kiểm tra
+  economic_social_impact?: string // Tác động kinh tế & xã hội
+  financial_support_info?: string // Thông tin hỗ trợ tài chính
 }
 
 // Main Technology Interface
 export interface Technology {
-  id: string
-  title: string
-  public_summary?: string
-  confidential_detail?: string
-  trl_level?: number
-  category?: string | Category
-  submitter: string | User
-  status: TechnologyStatus
-  visibility_mode: VisibilityMode
+  id: string // Mã định danh công nghệ
+  title: string // Tiêu đề công nghệ
+  public_summary?: string // Tóm tắt công khai
+  confidential_detail?: string // Chi tiết bảo mật
+  trl_level?: number // Mức TRL
+  category?: string | Category // Danh mục
+  submitter: string | User // Người đăng tải
+  status: TechnologyStatus // Trạng thái công nghệ
+  visibility_mode: VisibilityMode // Chế độ hiển thị
 
   // Complex nested data
-  owners?: TechnologyOwner[]
-  ip_details?: IPDetail[]
-  legal_certification?: LegalCertification
-  pricing?: PricingInfo
-  investment_transfer?: InvestmentTransferInfo
-  additional_data?: AdditionalData
+  owners?: TechnologyOwner[] // Chủ sở hữu công nghệ
+  ip_details?: IPDetail[] // Chi tiết sở hữu trí tuệ
+  legal_certification?: LegalCertification // Chứng nhận pháp lý
+  pricing?: PricingInfo // Thông tin định giá
+  investment_transfer?: InvestmentTransferInfo // Thông tin đầu tư & chuyển giao
+  additional_data?: AdditionalData // Dữ liệu bổ sung
 
   // Related documents
-  documents?: string[] | Media[]
+  documents?: string[] | Media[] // Tài liệu liên quan
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Types for form data and API responses
@@ -127,14 +127,14 @@ export interface TechnologyUpdateData extends Partial<TechnologyCreateData> {}
 
 // Technology summary for lists
 export interface TechnologySummary {
-  id: string
-  title: string
-  public_summary?: string
-  trl_level?: number
-  status: TechnologyStatus
-  category?: string | Category
-  submitter: string | User
-  pricing?: Pick<PricingInfo, 'asking_price' | 'currency' | 'pricing_type'>
-  createdAt: string
-  updatedAt: string
+  id: string // Mã định danh công nghệ
+  title: string // Tiêu đề công nghệ
+  public_summary?: string // Tóm tắt công khai
+  trl_level?: number // Mức TRL
+  status: TechnologyStatus // Trạng thái công nghệ
+  category?: string | Category // Danh mục
+  submitter: string | User // Người đăng tải
+  pricing?: Pick<PricingInfo, 'asking_price' | 'currency' | 'pricing_type'> // Thông tin định giá
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }

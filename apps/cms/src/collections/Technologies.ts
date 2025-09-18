@@ -4,7 +4,7 @@ export const Technologies: CollectionConfig = {
   slug: 'technologies',
   admin: {
     useAsTitle: 'title',
-    group: 'Technology Management',
+    group: 'Quản lý Công nghệ',
     defaultColumns: ['title', 'status', 'trl_level', 'submitter_id'],
   },
   access: {
@@ -18,45 +18,45 @@ export const Technologies: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
-      label: 'Technology Title',
+      label: 'Tiêu đề Công nghệ',
     },
     {
       name: 'public_summary',
       type: 'textarea',
-      label: 'Public Summary',
+      label: 'Tóm tắt Công khai',
       admin: {
-        description: 'Summary visible to public users',
+        description: 'Tóm tắt hiển thị cho người dùng công khai',
       },
     },
     {
       name: 'confidential_detail',
       type: 'richText',
-      label: 'Confidential Details',
+      label: 'Chi tiết Bảo mật',
       admin: {
-        description: 'Detailed information for authorized users only',
+        description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
       },
     },
     {
       name: 'trl_level',
       type: 'number',
-      label: 'TRL Level',
+      label: 'Mức TRL',
       min: 1,
       max: 9,
       admin: {
-        description: 'Technology Readiness Level (1-9)',
+        description: 'Mức độ sẵn sàng công nghệ (1-9)',
       },
     },
     {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
-      label: 'Category',
+      label: 'Danh mục',
     },
     {
       name: 'submitter',
       type: 'relationship',
       relationTo: 'users',
-      label: 'Submitter',
+      label: 'Người đăng tải',
       required: true,
     },
     {
@@ -65,12 +65,12 @@ export const Technologies: CollectionConfig = {
       required: true,
       defaultValue: 'DRAFT',
       options: [
-        { label: 'Draft', value: 'DRAFT' },
-        { label: 'Pending', value: 'PENDING' },
-        { label: 'Approved', value: 'APPROVED' },
-        { label: 'Rejected', value: 'REJECTED' },
-        { label: 'Active', value: 'ACTIVE' },
-        { label: 'Inactive', value: 'INACTIVE' },
+        { label: 'Bản nháp', value: 'DRAFT' },
+        { label: 'Đang chờ duyệt', value: 'PENDING' },
+        { label: 'Đã duyệt', value: 'APPROVED' },
+        { label: 'Từ chối', value: 'REJECTED' },
+        { label: 'Hoạt động', value: 'ACTIVE' },
+        { label: 'Không hoạt động', value: 'INACTIVE' },
       ],
     },
     {
@@ -78,31 +78,32 @@ export const Technologies: CollectionConfig = {
       type: 'select',
       defaultValue: 'public',
       options: [
-        { label: 'Public', value: 'public' },
-        { label: 'Private', value: 'private' },
-        { label: 'Restricted', value: 'restricted' },
+        { label: 'Công khai', value: 'public' },
+        { label: 'Riêng tư', value: 'private' },
+        { label: 'Hạn chế', value: 'restricted' },
       ],
     },
     // Technology Owners
     {
       name: 'owners',
       type: 'array',
-      label: 'Technology Owners',
+      label: 'Chủ sở hữu Công nghệ',
       fields: [
         {
           name: 'owner_type',
           type: 'select',
           required: true,
           options: [
-            { label: 'Individual', value: 'INDIVIDUAL' },
-            { label: 'Company', value: 'COMPANY' },
-            { label: 'Research Institution', value: 'RESEARCH_INSTITUTION' },
+            { label: 'Cá nhân', value: 'INDIVIDUAL' },
+            { label: 'Công ty', value: 'COMPANY' },
+            { label: 'Viện nghiên cứu', value: 'RESEARCH_INSTITUTION' },
           ],
         },
         {
           name: 'owner_name',
           type: 'text',
           required: true,
+          label: 'Tên Chủ sở hữu',
         },
         {
           name: 'ownership_percentage',
@@ -111,7 +112,7 @@ export const Technologies: CollectionConfig = {
           min: 0,
           max: 100,
           admin: {
-            description: 'Ownership percentage (0-100)',
+            description: 'Tỷ lệ sở hữu (0-100)',
           },
         },
       ],
@@ -120,35 +121,35 @@ export const Technologies: CollectionConfig = {
     {
       name: 'ip_details',
       type: 'array',
-      label: 'Intellectual Property Details',
+      label: 'Chi tiết Sở hữu Trí tuệ',
       fields: [
         {
           name: 'ip_type',
           type: 'select',
           required: true,
           options: [
-            { label: 'Patent', value: 'PATENT' },
-            { label: 'Utility Model', value: 'UTILITY_MODEL' },
-            { label: 'Industrial Design', value: 'INDUSTRIAL_DESIGN' },
-            { label: 'Trademark', value: 'TRADEMARK' },
-            { label: 'Software Copyright', value: 'SOFTWARE_COPYRIGHT' },
-            { label: 'Trade Secret', value: 'TRADE_SECRET' },
+            { label: 'Bằng sáng chế', value: 'PATENT' },
+            { label: 'Giải pháp hữu ích', value: 'UTILITY_MODEL' },
+            { label: 'Kiểu dáng công nghiệp', value: 'INDUSTRIAL_DESIGN' },
+            { label: 'Nhãn hiệu', value: 'TRADEMARK' },
+            { label: 'Bản quyền phần mềm', value: 'SOFTWARE_COPYRIGHT' },
+            { label: 'Bí mật kinh doanh', value: 'TRADE_SECRET' },
           ],
         },
         {
           name: 'ip_number',
           type: 'text',
-          label: 'IP Number',
+          label: 'Số IP',
         },
         {
           name: 'status',
           type: 'text',
-          label: 'IP Status',
+          label: 'Trạng thái IP',
         },
         {
           name: 'territory',
           type: 'text',
-          label: 'Territory',
+          label: 'Lãnh thổ',
         },
       ],
     },
@@ -156,34 +157,36 @@ export const Technologies: CollectionConfig = {
     {
       name: 'legal_certification',
       type: 'group',
-      label: 'Legal Certification',
+      label: 'Chứng nhận Pháp lý',
       fields: [
         {
           name: 'protection_scope',
           type: 'array',
-          label: 'Protection Scope',
+          label: 'Phạm vi Bảo hộ',
           fields: [
             {
               name: 'scope',
               type: 'text',
+              label: 'Phạm vi',
             },
           ],
         },
         {
           name: 'standard_certifications',
           type: 'array',
-          label: 'Standard Certifications',
+          label: 'Chứng nhận Tiêu chuẩn',
           fields: [
             {
               name: 'certification',
               type: 'text',
+              label: 'Chứng nhận',
             },
           ],
         },
         {
           name: 'local_certification_url',
           type: 'text',
-          label: 'Local Certification URL',
+          label: 'URL Chứng nhận Địa phương',
         },
       ],
     },
@@ -191,23 +194,23 @@ export const Technologies: CollectionConfig = {
     {
       name: 'pricing',
       type: 'group',
-      label: 'Pricing Information',
+      label: 'Thông tin Định giá',
       fields: [
         {
           name: 'pricing_type',
           type: 'select',
           required: true,
           options: [
-            { label: 'Appraisal', value: 'APPRAISAL' },
-            { label: 'Ask', value: 'ASK' },
-            { label: 'Auction', value: 'AUCTION' },
-            { label: 'Offer', value: 'OFFER' },
+            { label: 'Đánh giá', value: 'APPRAISAL' },
+            { label: 'Yêu cầu giá', value: 'ASK' },
+            { label: 'Đấu giá', value: 'AUCTION' },
+            { label: 'Chào hàng', value: 'OFFER' },
           ],
         },
         {
           name: 'asking_price',
           type: 'number',
-          label: 'Asking Price',
+          label: 'Giá yêu cầu',
           min: 0,
         },
         {
@@ -216,30 +219,30 @@ export const Technologies: CollectionConfig = {
           required: true,
           defaultValue: 'VND',
           options: [
-            { label: 'Vietnamese Dong (VND)', value: 'VND' },
-            { label: 'US Dollar (USD)', value: 'USD' },
+            { label: 'Đồng Việt Nam (VND)', value: 'VND' },
+            { label: 'Đô la Mỹ (USD)', value: 'USD' },
             { label: 'Euro (EUR)', value: 'EUR' },
           ],
         },
         {
           name: 'price_type',
           type: 'text',
-          label: 'Price Type',
+          label: 'Loại giá',
         },
         {
           name: 'appraisal_purpose',
           type: 'text',
-          label: 'Appraisal Purpose',
+          label: 'Mục đích đánh giá',
         },
         {
           name: 'appraisal_scope',
           type: 'text',
-          label: 'Appraisal Scope',
+          label: 'Phạm vi đánh giá',
         },
         {
           name: 'appraisal_deadline',
           type: 'date',
-          label: 'Appraisal Deadline',
+          label: 'Thời hạn đánh giá',
         },
       ],
     },
@@ -247,65 +250,68 @@ export const Technologies: CollectionConfig = {
     {
       name: 'investment_transfer',
       type: 'group',
-      label: 'Investment & Transfer Information',
+      label: 'Thông tin Đầu tư & Chuyển giao',
       fields: [
         {
           name: 'investment_stage',
           type: 'text',
-          label: 'Investment Stage',
+          label: 'Giai đoạn đầu tư',
         },
         {
           name: 'commercialization_methods',
           type: 'array',
-          label: 'Commercialization Methods',
+          label: 'Phương pháp thương mại hóa',
           fields: [
             {
               name: 'method',
               type: 'text',
+              label: 'Phương pháp',
             },
           ],
         },
         {
           name: 'transfer_methods',
           type: 'array',
-          label: 'Transfer Methods',
+          label: 'Phương pháp chuyển giao',
           fields: [
             {
               name: 'method',
               type: 'text',
+              label: 'Phương pháp',
             },
           ],
         },
         {
           name: 'territory_scope',
           type: 'text',
-          label: 'Territory Scope',
+          label: 'Phạm vi lãnh thổ',
         },
         {
           name: 'financial_methods',
           type: 'array',
-          label: 'Financial Methods',
+          label: 'Phương pháp tài chính',
           fields: [
             {
               name: 'method',
               type: 'text',
+              label: 'Phương pháp',
             },
           ],
         },
         {
           name: 'usage_limitations',
           type: 'textarea',
-          label: 'Usage Limitations',
+          label: 'Hạn chế sử dụng',
         },
         {
           name: 'current_partners',
           type: 'textarea',
-          label: 'Current Partners',
+          label: 'Đối tác hiện tại',
         },
         {
           name: 'potential_partners',
           type: 'textarea',
-          label: 'Potential Partners',
+          label: 'Đối tác tiềm năng',
         },
       ],
     },
@@ -313,22 +319,22 @@ export const Technologies: CollectionConfig = {
     {
       name: 'additional_data',
       type: 'group',
-      label: 'Additional Data',
+      label: 'Dữ liệu bổ sung',
       fields: [
         {
           name: 'test_results',
           type: 'richText',
-          label: 'Test Results',
+          label: 'Kết quả kiểm tra',
         },
         {
           name: 'economic_social_impact',
           type: 'richText',
-          label: 'Economic & Social Impact',
+          label: 'Tác động kinh tế & xã hội',
         },
         {
           name: 'financial_support_info',
           type: 'richText',
-          label: 'Financial Support Information',
+          label: 'Thông tin hỗ trợ tài chính',
         },
       ],
     },
@@ -338,7 +344,7 @@ export const Technologies: CollectionConfig = {
       type: 'relationship',
       relationTo: 'media',
       hasMany: true,
-      label: 'Related Documents',
+      label: 'Tài liệu liên quan',
     },
   ],
   timestamps: true,

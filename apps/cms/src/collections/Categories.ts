@@ -4,7 +4,7 @@ export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     useAsTitle: 'name',
-    group: 'Technology Management',
+    group: 'Quản lý Danh mục',
   },
   access: {
     read: () => true,
@@ -17,25 +17,25 @@ export const Categories: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
-      label: 'Category Name',
+      label: 'Tên danh mục',
     },
     {
       name: 'code',
       type: 'text',
       required: true,
       unique: true,
-      label: 'Category Code',
+      label: 'Mã danh mục',
       admin: {
-        description: 'Unique identifier code for this category',
+        description: 'Mã định danh duy nhất cho danh mục này',
       },
     },
     {
       name: 'parent',
       type: 'relationship',
       relationTo: 'categories',
-      label: 'Parent Category',
+      label: 'Danh mục cha',
       admin: {
-        description: 'Select parent category for hierarchical structure',
+        description: 'Chọn danh mục cha cho cấu trúc phân cấp',
       },
     },
     {
@@ -45,17 +45,17 @@ export const Categories: CollectionConfig = {
       defaultValue: 1,
       min: 1,
       max: 5,
-      label: 'Hierarchy Level',
+      label: 'Cấp độ phân cấp',
       admin: {
-        description: 'Category hierarchy level (1-5)',
+        description: 'Cấp độ phân cấp danh mục (1-5)',
       },
     },
     {
       name: 'description',
       type: 'textarea',
-      label: 'Description',
+      label: 'Mô tả',
       admin: {
-        description: 'Optional description for this category',
+        description: 'Mô tả tùy chọn cho danh mục này',
       },
     },
   ],

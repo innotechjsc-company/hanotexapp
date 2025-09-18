@@ -12,25 +12,25 @@ export type UserRole = 'USER' | 'ADMIN' | 'MODERATOR' | 'SUPPORT'
 
 // Main User Interface
 export interface User {
-  id: string
-  email: string
-  user_type: UserType
-  role: UserRole
-  is_verified: boolean
-  is_active: boolean
+  id: string // Mã định danh người dùng
+  email: string // Địa chỉ email
+  user_type: UserType // Loại người dùng (Cá nhân, Công ty, Viện nghiên cứu)
+  role: UserRole // Vai trò người dùng (Người dùng, Quản trị viên, Kiểm duyệt viên, Hỗ trợ)
+  is_verified: boolean // Trạng thái xác minh
+  is_active: boolean // Trạng thái hoạt động
 
   // Individual profile data (for INDIVIDUAL user_type)
-  full_name?: string
-  id_number?: string
-  phone?: string
-  profession?: string
-  bank_account?: string
+  full_name?: string // Tên đầy đủ
+  id_number?: string // Số CMND/CCCD
+  phone?: string // Số điện thoại
+  profession?: string // Nghề nghiệp
+  bank_account?: string // Tài khoản ngân hàng
 
   // Relationships to separate entities
-  company?: string | Company
-  research_institution?: string | ResearchInstitution
+  company?: string | Company // ID hoặc thông tin công ty liên quan
+  research_institution?: string | ResearchInstitution // ID hoặc thông tin viện nghiên cứu liên quan
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }

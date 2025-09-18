@@ -5,22 +5,22 @@
 
 // Main Category Interface
 export interface Category {
-  id: string
-  name: string
-  code: string
-  parent?: string | Category
-  level: number
-  description?: string
+  id: string // Mã định danh danh mục
+  name: string // Tên danh mục
+  code: string // Mã danh mục
+  parent?: string | Category // Danh mục cha
+  level: number // Cấp độ danh mục
+  description?: string // Mô tả danh mục
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Category hierarchy helpers
 export interface CategoryHierarchy extends Category {
-  children?: CategoryHierarchy[]
-  parent?: string | Category
+  children?: CategoryHierarchy[] // Danh mục con
+  parent?: string | Category // Danh mục cha
 }
 
 // Types for form data and API responses
@@ -29,9 +29,9 @@ export interface CategoryUpdateData extends Partial<CategoryCreateData> {}
 
 // Category tree structure for navigation
 export interface CategoryTree {
-  id: string
-  name: string
-  code: string
-  level: number
-  children: CategoryTree[]
+  id: string // Mã định danh danh mục
+  name: string // Tên danh mục
+  code: string // Mã danh mục
+  level: number // Cấp độ danh mục
+  children: CategoryTree[] // Danh mục con
 }

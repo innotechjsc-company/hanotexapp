@@ -4,7 +4,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
-    group: 'User Management',
+    group: 'Quản lý Người dùng',
     defaultColumns: ['email', 'user_type', 'role', 'is_verified'],
   },
   auth: true,
@@ -22,9 +22,9 @@ export const Users: CollectionConfig = {
       required: true,
       defaultValue: 'INDIVIDUAL',
       options: [
-        { label: 'Individual', value: 'INDIVIDUAL' },
-        { label: 'Company', value: 'COMPANY' },
-        { label: 'Research Institution', value: 'RESEARCH_INSTITUTION' },
+        { label: 'Cá nhân', value: 'INDIVIDUAL' },
+        { label: 'Công ty', value: 'COMPANY' },
+        { label: 'Viện nghiên cứu', value: 'RESEARCH_INSTITUTION' },
       ],
     },
     {
@@ -33,68 +33,68 @@ export const Users: CollectionConfig = {
       required: true,
       defaultValue: 'USER',
       options: [
-        { label: 'User', value: 'USER' },
-        { label: 'Admin', value: 'ADMIN' },
-        { label: 'Moderator', value: 'MODERATOR' },
-        { label: 'Support', value: 'SUPPORT' },
+        { label: 'Người dùng', value: 'USER' },
+        { label: 'Quản trị viên', value: 'ADMIN' },
+        { label: 'Kiểm duyệt viên', value: 'MODERATOR' },
+        { label: 'Hỗ trợ', value: 'SUPPORT' },
       ],
     },
     {
       name: 'is_verified',
       type: 'checkbox',
       defaultValue: false,
-      label: 'Email Verified',
+      label: 'Email đã xác minh',
     },
     {
       name: 'is_active',
       type: 'checkbox',
       defaultValue: true,
-      label: 'Account Active',
+      label: 'Tài khoản hoạt động',
     },
     // Individual Profile - for INDIVIDUAL users
     {
       name: 'full_name',
       type: 'text',
-      label: 'Full Name',
+      label: 'Họ và tên',
       admin: {
         condition: (data) => data.user_type === 'INDIVIDUAL',
-        description: 'Full name for individual users',
+        description: 'Tên đầy đủ của người dùng cá nhân',
       },
     },
     {
       name: 'id_number',
       type: 'text',
-      label: 'ID Number',
+      label: 'Số CMND/CCCD',
       admin: {
         condition: (data) => data.user_type === 'INDIVIDUAL',
-        description: 'National ID or passport number',
+        description: 'Số CMND hoặc hộ chiếu quốc gia',
       },
     },
     {
       name: 'phone',
       type: 'text',
-      label: 'Phone Number',
+      label: 'Số điện thoại',
       admin: {
         condition: (data) => data.user_type === 'INDIVIDUAL',
-        description: 'Personal phone number',
+        description: 'Số điện thoại cá nhân',
       },
     },
     {
       name: 'profession',
       type: 'text',
-      label: 'Profession',
+      label: 'Nghề nghiệp',
       admin: {
         condition: (data) => data.user_type === 'INDIVIDUAL',
-        description: 'Professional occupation',
+        description: 'Nghề nghiệp chuyên môn',
       },
     },
     {
       name: 'bank_account',
       type: 'text',
-      label: 'Bank Account',
+      label: 'Tài khoản ngân hàng',
       admin: {
         condition: (data) => data.user_type === 'INDIVIDUAL',
-        description: 'Bank account information for payments',
+        description: 'Thông tin tài khoản ngân hàng cho thanh toán',
       },
     },
 
@@ -103,10 +103,10 @@ export const Users: CollectionConfig = {
       name: 'company',
       type: 'relationship',
       relationTo: 'companies',
-      label: 'Company Profile',
+      label: 'Hồ sơ công ty',
       admin: {
         condition: (data) => data.user_type === 'COMPANY',
-        description: 'Link to company information',
+        description: 'Liên kết đến thông tin công ty',
       },
     },
 
@@ -115,10 +115,10 @@ export const Users: CollectionConfig = {
       name: 'research_institution',
       type: 'relationship',
       relationTo: 'research-institutions',
-      label: 'Research Institution Profile',
+      label: 'Hồ sơ viện nghiên cứu',
       admin: {
         condition: (data) => data.user_type === 'RESEARCH_INSTITUTION',
-        description: 'Link to research institution information',
+        description: 'Liên kết đến thông tin viện nghiên cứu',
       },
     },
   ],

@@ -4,7 +4,7 @@ export const Companies: CollectionConfig = {
   slug: 'companies',
   admin: {
     useAsTitle: 'company_name',
-    group: 'User Management',
+    group: 'Quản lý Người dùng',
     defaultColumns: ['company_name', 'tax_code', 'legal_representative'],
   },
   access: {
@@ -18,9 +18,9 @@ export const Companies: CollectionConfig = {
       name: 'company_name',
       type: 'text',
       required: true,
-      label: 'Company Name',
+      label: 'Tên công ty',
       admin: {
-        description: 'Official company name',
+        description: 'Tên chính thức của công ty',
       },
     },
     {
@@ -28,133 +28,134 @@ export const Companies: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
-      label: 'Tax Code',
+      label: 'Mã số thuế',
       admin: {
-        description: 'Unique tax identification code',
+        description: 'Mã số nhận dạng thuế duy nhất',
       },
     },
     {
       name: 'business_license',
       type: 'text',
-      label: 'Business License',
+      label: 'Giấy phép kinh doanh',
       admin: {
-        description: 'Business registration license number',
+        description: 'Số giấy phép đăng ký kinh doanh',
       },
     },
     {
       name: 'legal_representative',
       type: 'text',
       required: true,
-      label: 'Legal Representative',
+      label: 'Người đại diện pháp luật',
       admin: {
-        description: 'Name of the legal representative',
+        description: 'Tên người đại diện pháp luật',
       },
     },
     {
       name: 'contact_email',
       type: 'email',
-      label: 'Contact Email',
+      label: 'Email liên hệ',
       admin: {
-        description: 'Official company contact email',
+        description: 'Email liên hệ chính thức của công ty',
       },
     },
     {
       name: 'contact_phone',
       type: 'text',
-      label: 'Contact Phone',
+      label: 'Số điện thoại liên hệ',
       admin: {
-        description: 'Official company contact phone number',
+        description: 'Số điện thoại liên hệ chính thức của công ty',
       },
     },
     {
       name: 'address',
       type: 'group',
-      label: 'Company Address',
+      label: 'Địa chỉ công ty',
       fields: [
         {
           name: 'street',
           type: 'text',
-          label: 'Street Address',
+          label: 'Địa chỉ đường',
         },
         {
           name: 'city',
           type: 'text',
-          label: 'City',
+          label: 'Thành phố',
         },
         {
           name: 'state',
           type: 'text',
-          label: 'State/Province',
+          label: 'Tỉnh/Bang',
         },
         {
           name: 'country',
           type: 'text',
-          label: 'Country',
+          label: 'Quốc gia',
         },
         {
           name: 'postal_code',
           type: 'text',
-          label: 'Postal Code',
+          label: 'Mã bưu chính',
         },
       ],
     },
     {
       name: 'production_capacity',
       type: 'textarea',
-      label: 'Production Capacity',
+      label: 'Năng lực sản xuất',
       admin: {
-        description: 'Description of company production capabilities',
+        description: 'Mô tả năng lực sản xuất của công ty',
       },
     },
     {
       name: 'business_sectors',
       type: 'array',
-      label: 'Business Sectors',
+      label: 'Lĩnh vực kinh doanh',
       fields: [
         {
           name: 'sector',
           type: 'text',
           required: true,
+          label: 'Lĩnh vực',
         },
       ],
       admin: {
-        description: 'Main business sectors of the company',
+        description: 'Các lĩnh vực kinh doanh chính của công ty',
       },
     },
     {
       name: 'employee_count',
       type: 'number',
-      label: 'Employee Count',
+      label: 'Số lượng nhân viên',
       min: 0,
       admin: {
-        description: 'Number of employees',
+        description: 'Số lượng nhân viên',
       },
     },
     {
       name: 'established_year',
       type: 'number',
-      label: 'Established Year',
+      label: 'Năm thành lập',
       min: 1900,
       max: new Date().getFullYear(),
       admin: {
-        description: 'Year the company was established',
+        description: 'Năm thành lập công ty',
       },
     },
     {
       name: 'website',
       type: 'text',
-      label: 'Company Website',
+      label: 'Trang web công ty',
       admin: {
-        description: 'Official company website URL',
+        description: 'URL trang web chính thức của công ty',
       },
     },
     {
       name: 'is_active',
       type: 'checkbox',
       defaultValue: true,
-      label: 'Active Status',
+      label: 'Trạng thái hoạt động',
       admin: {
-        description: 'Whether the company is currently active',
+        description: 'Công ty có đang hoạt động hay không',
       },
     },
   ],

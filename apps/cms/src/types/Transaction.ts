@@ -13,22 +13,22 @@ export type TransactionCurrency = 'VND' | 'USD' | 'EUR'
 
 // Main Transaction Interface
 export interface Transaction {
-  id: string
-  technology?: string | Technology
-  buyer?: string | User
-  seller?: string | User
-  amount: number
-  currency: TransactionCurrency
-  status: TransactionStatus
-  payment_method?: string
-  transaction_fee?: number
-  completed_at?: string
-  notes?: string
-  auction?: string | Auction
+  id: string // Mã định danh giao dịch
+  technology?: string | Technology // Công nghệ liên quan
+  buyer?: string | User // Người mua
+  seller?: string | User // Người bán
+  amount: number // Số tiền giao dịch
+  currency: TransactionCurrency // Đơn vị tiền tệ
+  status: TransactionStatus // Trạng thái giao dịch
+  payment_method?: string // Phương thức thanh toán
+  transaction_fee?: number // Phí giao dịch
+  completed_at?: string // Thời gian hoàn thành
+  notes?: string // Ghi chú
+  auction?: string | Auction // Phiên đấu giá liên quan
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Types for form data and API responses
@@ -38,25 +38,25 @@ export interface TransactionUpdateData extends Partial<TransactionCreateData> {}
 
 // Transaction summary for lists
 export interface TransactionSummary {
-  id: string
-  technology?: string | Technology
-  buyer?: string | User
-  seller?: string | User
-  amount: number
-  currency: TransactionCurrency
-  status: TransactionStatus
-  completed_at?: string
-  createdAt: string
-  updatedAt: string
+  id: string // Mã định danh giao dịch
+  technology?: string | Technology // Công nghệ liên quan
+  buyer?: string | User // Người mua
+  seller?: string | User // Người bán
+  amount: number // Số tiền giao dịch
+  currency: TransactionCurrency // Đơn vị tiền tệ
+  status: TransactionStatus // Trạng thái giao dịch
+  completed_at?: string // Thời gian hoàn thành
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Financial report data
 export interface TransactionStats {
-  total_amount: number
-  currency: TransactionCurrency
-  transaction_count: number
-  completed_count: number
-  pending_count: number
-  failed_count: number
-  average_amount: number
+  total_amount: number // Tổng số tiền
+  currency: TransactionCurrency // Đơn vị tiền tệ
+  transaction_count: number // Số lượng giao dịch
+  completed_count: number // Số lượng giao dịch hoàn thành
+  pending_count: number // Số lượng giao dịch đang chờ
+  failed_count: number // Số lượng giao dịch thất bại
+  average_amount: number // Số tiền trung bình
 }

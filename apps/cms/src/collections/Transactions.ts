@@ -4,7 +4,7 @@ export const Transactions: CollectionConfig = {
   slug: 'transactions',
   admin: {
     useAsTitle: 'id',
-    group: 'Transaction Management',
+    group: 'Quản lý Giao dịch',
     defaultColumns: ['technology_id', 'buyer_id', 'seller_id', 'amount', 'status'],
   },
   access: {
@@ -18,27 +18,27 @@ export const Transactions: CollectionConfig = {
       name: 'technology',
       type: 'relationship',
       relationTo: 'technologies',
-      label: 'Technology',
+      label: 'Công nghệ',
       admin: {
-        description: 'The technology involved in this transaction',
+        description: 'Công nghệ liên quan đến giao dịch này',
       },
     },
     {
       name: 'buyer',
       type: 'relationship',
       relationTo: 'users',
-      label: 'Buyer',
+      label: 'Người mua',
       admin: {
-        description: 'User who is purchasing',
+        description: 'Người dùng thực hiện giao dịch mua',
       },
     },
     {
       name: 'seller',
       type: 'relationship',
       relationTo: 'users',
-      label: 'Seller',
+      label: 'Người bán',
       admin: {
-        description: 'User who is selling',
+        description: 'Người dùng thực hiện giao dịch bán',
       },
     },
     {
@@ -46,7 +46,7 @@ export const Transactions: CollectionConfig = {
       type: 'number',
       required: true,
       min: 0,
-      label: 'Transaction Amount',
+      label: 'Số tiền giao dịch',
     },
     {
       name: 'currency',
@@ -54,8 +54,8 @@ export const Transactions: CollectionConfig = {
       required: true,
       defaultValue: 'VND',
       options: [
-        { label: 'Vietnamese Dong (VND)', value: 'VND' },
-        { label: 'US Dollar (USD)', value: 'USD' },
+        { label: 'Đồng Việt Nam (VND)', value: 'VND' },
+        { label: 'Đô la Mỹ (USD)', value: 'USD' },
         { label: 'Euro (EUR)', value: 'EUR' },
       ],
     },
@@ -65,47 +65,48 @@ export const Transactions: CollectionConfig = {
       required: true,
       defaultValue: 'PENDING',
       options: [
-        { label: 'Pending', value: 'PENDING' },
-        { label: 'Completed', value: 'COMPLETED' },
-        { label: 'Failed', value: 'FAILED' },
-        { label: 'Refunded', value: 'REFUNDED' },
+        { label: 'Đang chờ', value: 'PENDING' },
+        { label: 'Đã hoàn thành', value: 'COMPLETED' },
+        { label: 'Thất bại', value: 'FAILED' },
+        { label: 'Đã hoàn tiền', value: 'REFUNDED' },
       ],
     },
     {
       name: 'payment_method',
       type: 'text',
-      label: 'Payment Method',
+      label: 'Phương thức thanh toán',
       admin: {
-        description: 'Method used for payment (e.g., bank transfer, credit card)',
+        description:
+          'Phương thức được sử dụng để thanh toán (ví dụ: chuyển khoản ngân hàng, thẻ tín dụng)',
       },
     },
     {
       name: 'transaction_fee',
       type: 'number',
-      label: 'Transaction Fee',
+      label: 'Phí giao dịch',
       min: 0,
       admin: {
-        description: 'Fee charged for processing this transaction',
+        description: 'Phí được tính để xử lý giao dịch này',
       },
     },
     {
       name: 'completed_at',
       type: 'date',
-      label: 'Completion Date',
+      label: 'Ngày hoàn thành',
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
         },
-        description: 'Date and time when transaction was completed',
+        description: 'Ngày và giờ khi giao dịch được hoàn thành',
       },
     },
     // Transaction Notes
     {
       name: 'notes',
       type: 'textarea',
-      label: 'Transaction Notes',
+      label: 'Ghi chú giao dịch',
       admin: {
-        description: 'Internal notes about this transaction',
+        description: 'Ghi chú nội bộ về giao dịch này',
       },
     },
     // Related auction if applicable
@@ -113,9 +114,9 @@ export const Transactions: CollectionConfig = {
       name: 'auction',
       type: 'relationship',
       relationTo: 'auctions',
-      label: 'Related Auction',
+      label: 'Phiên đấu giá liên quan',
       admin: {
-        description: 'If this transaction resulted from an auction',
+        description: 'Nếu giao dịch này phát sinh từ một phiên đấu giá',
       },
     },
   ],

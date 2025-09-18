@@ -4,7 +4,7 @@ export const Auctions: CollectionConfig = {
   slug: 'auctions',
   admin: {
     useAsTitle: 'id',
-    group: 'Auction Management',
+    group: 'Quản lý Đấu giá',
     defaultColumns: ['technology_id', 'auction_type', 'status', 'current_price', 'end_time'],
   },
   access: {
@@ -19,9 +19,9 @@ export const Auctions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'technologies',
       required: true,
-      label: 'Technology',
+      label: 'Công nghệ',
       admin: {
-        description: 'The technology being auctioned',
+        description: 'Công nghệ được đấu giá',
       },
     },
     {
@@ -29,43 +29,43 @@ export const Auctions: CollectionConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'English Auction', value: 'ENGLISH' },
-        { label: 'Dutch Auction', value: 'DUTCH' },
-        { label: 'Sealed Bid', value: 'SEALED_BID' },
+        { label: 'Đấu giá kiểu Anh', value: 'ENGLISH' },
+        { label: 'Đấu giá kiểu Hà Lan', value: 'DUTCH' },
+        { label: 'Chào giá kín', value: 'SEALED_BID' },
       ],
     },
     {
       name: 'start_price',
       type: 'number',
-      label: 'Starting Price',
+      label: 'Giá khởi điểm',
       min: 0,
       admin: {
-        description: 'Initial price for the auction',
+        description: 'Giá ban đầu cho phiên đấu giá',
       },
     },
     {
       name: 'reserve_price',
       type: 'number',
-      label: 'Reserve Price',
+      label: 'Giá sàn',
       min: 0,
       admin: {
-        description: 'Minimum acceptable price',
+        description: 'Giá tối thiểu chấp nhận được',
       },
     },
     {
       name: 'current_price',
       type: 'number',
-      label: 'Current Price',
+      label: 'Giá hiện tại',
       min: 0,
       admin: {
-        description: 'Current highest bid',
+        description: 'Lượt đặt giá cao nhất hiện tại',
         readOnly: true,
       },
     },
     {
       name: 'start_time',
       type: 'date',
-      label: 'Start Time',
+      label: 'Thời gian bắt đầu',
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
@@ -75,7 +75,7 @@ export const Auctions: CollectionConfig = {
     {
       name: 'end_time',
       type: 'date',
-      label: 'End Time',
+      label: 'Thời gian kết thúc',
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
@@ -88,10 +88,10 @@ export const Auctions: CollectionConfig = {
       required: true,
       defaultValue: 'SCHEDULED',
       options: [
-        { label: 'Scheduled', value: 'SCHEDULED' },
-        { label: 'Active', value: 'ACTIVE' },
-        { label: 'Ended', value: 'ENDED' },
-        { label: 'Cancelled', value: 'CANCELLED' },
+        { label: 'Đã lên lịch', value: 'SCHEDULED' },
+        { label: 'Đang hoạt động', value: 'ACTIVE' },
+        { label: 'Đã kết thúc', value: 'ENDED' },
+        { label: 'Đã hủy', value: 'CANCELLED' },
       ],
     },
     // Related Bids
@@ -100,10 +100,10 @@ export const Auctions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'bids',
       hasMany: true,
-      label: 'Auction Bids',
+      label: 'Các lượt đặt giá đấu giá',
       admin: {
         readOnly: true,
-        description: 'All bids placed on this auction',
+        description: 'Tất cả các lượt đặt giá cho phiên đấu giá này',
       },
     },
   ],

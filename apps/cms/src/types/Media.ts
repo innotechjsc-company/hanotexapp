@@ -5,18 +5,18 @@
 
 // Main Media Interface
 export interface Media {
-  id: string
-  alt: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  width?: number
-  height?: number
-  url?: string
+  id: string // Mã định danh media
+  alt: string // Văn bản thay thế
+  filename?: string // Tên tệp
+  mimeType?: string // Loại MIME
+  filesize?: number // Kích thước tệp
+  width?: number // Chiều rộng
+  height?: number // Chiều cao
+  url?: string // URL tệp
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Types for form data and API responses
@@ -25,18 +25,18 @@ export interface MediaUpdateData extends Partial<Pick<Media, 'alt'>> {}
 
 // Media summary for lists
 export interface MediaSummary {
-  id: string
-  alt: string
-  filename?: string
-  mimeType?: string
-  filesize?: number
-  url?: string
-  createdAt: string
+  id: string // Mã định danh media
+  alt: string // Văn bản thay thế
+  filename?: string // Tên tệp
+  mimeType?: string // Loại MIME
+  filesize?: number // Kích thước tệp
+  url?: string // URL tệp
+  createdAt: string // Thời gian tạo
 }
 
 // File upload response
 export interface FileUploadResponse {
-  media: Media
-  success: boolean
-  error?: string
+  media: Media // Thông tin media
+  success: boolean // Trạng thái thành công
+  error?: string // Thông báo lỗi
 }

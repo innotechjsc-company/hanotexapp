@@ -22,25 +22,25 @@ export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent'
 
 // Main Notification Interface
 export interface Notification {
-  id: string
-  user: string | User
-  title: string
-  message: string
-  type?: NotificationType
-  is_read: boolean
+  id: string // Mã định danh thông báo
+  user: string | User // Người dùng nhận thông báo
+  title: string // Tiêu đề thông báo
+  message: string // Nội dung thông báo
+  type?: NotificationType // Loại thông báo
+  is_read: boolean // Trạng thái đã đọc
 
   // Related entities
-  related_technology?: string | Technology
-  related_auction?: Auction
-  related_transaction?: Transaction
+  related_technology?: string | Technology // Công nghệ liên quan
+  related_auction?: Auction // Đấu giá liên quan
+  related_transaction?: Transaction // Giao dịch liên quan
 
   // Action and priority
-  action_url?: string
-  priority: NotificationPriority
+  action_url?: string // URL hành động
+  priority: NotificationPriority // Độ ưu tiên
 
   // Timestamps
-  createdAt: string
-  updatedAt: string
+  createdAt: string // Thời gian tạo
+  updatedAt: string // Thời gian cập nhật
 }
 
 // Types for form data and API responses
@@ -51,25 +51,25 @@ export interface NotificationUpdateData
 
 // Notification summary for lists
 export interface NotificationSummary {
-  id: string
-  title: string
-  type?: NotificationType
-  is_read: boolean
-  priority: NotificationPriority
-  action_url?: string
-  createdAt: string
+  id: string // Mã định danh thông báo
+  title: string // Tiêu đề thông báo
+  type?: NotificationType // Loại thông báo
+  is_read: boolean // Trạng thái đã đọc
+  priority: NotificationPriority // Độ ưu tiên
+  action_url?: string // URL hành động
+  createdAt: string // Thời gian tạo
 }
 
 // Notification counts for UI
 export interface NotificationCounts {
-  total: number
-  unread: number
-  by_type: Record<NotificationType, number>
-  by_priority: Record<NotificationPriority, number>
+  total: number // Tổng số thông báo
+  unread: number // Số thông báo chưa đọc
+  by_type: Record<NotificationType, number> // Số lượng theo loại
+  by_priority: Record<NotificationPriority, number> // Số lượng theo độ ưu tiên
 }
 
 // Real-time notification
 export interface NotificationUpdate {
-  notification: NotificationSummary
-  counts: NotificationCounts
+  notification: NotificationSummary // Thông báo tóm tắt
+  counts: NotificationCounts // Số lượng thông báo
 }

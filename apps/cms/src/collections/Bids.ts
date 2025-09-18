@@ -4,7 +4,7 @@ export const Bids: CollectionConfig = {
   slug: 'bids',
   admin: {
     useAsTitle: 'id',
-    group: 'Auction Management',
+    group: 'Quản lý Đấu giá',
     defaultColumns: ['auction_id', 'bidder_id', 'bid_amount', 'bid_time', 'is_winning'],
   },
   access: {
@@ -19,27 +19,27 @@ export const Bids: CollectionConfig = {
       type: 'relationship',
       relationTo: 'auctions',
       required: true,
-      label: 'Auction',
+      label: 'Phiên đấu giá',
     },
     {
       name: 'bidder',
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      label: 'Bidder',
+      label: 'Người đặt giá',
     },
     {
       name: 'bid_amount',
       type: 'number',
       required: true,
       min: 0,
-      label: 'Bid Amount',
+      label: 'Số tiền đặt giá',
     },
     {
       name: 'bid_time',
       type: 'date',
       required: true,
-      label: 'Bid Time',
+      label: 'Thời gian đặt giá',
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
@@ -50,9 +50,9 @@ export const Bids: CollectionConfig = {
       name: 'is_winning',
       type: 'checkbox',
       defaultValue: false,
-      label: 'Is Winning Bid',
+      label: 'Là lượt đặt giá thắng',
       admin: {
-        description: 'Indicates if this is currently the winning bid',
+        description: 'Cho biết đây có phải là lượt đặt giá thắng hiện tại không',
       },
     },
   ],
