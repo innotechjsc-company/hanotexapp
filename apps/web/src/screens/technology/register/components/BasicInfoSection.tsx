@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Upload, Eye, FileText, Trash2, AlertCircle } from "lucide-react";
 import {
   TechnologyFormData,
@@ -8,6 +8,7 @@ import {
 } from "../types";
 import { getTRLSuggestions } from "../utils";
 import { useCategories } from "@/hooks/useCategories";
+import { Category } from "@/types/categories";
 import {
   Card,
   CardHeader,
@@ -55,8 +56,44 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   const {
     categories,
     loading: categoriesLoading,
-    error: categoriesError
+    error: categoriesError,
   } = useCategories();
+  
+  // Helper functions for parent-child category filtering
+  const parentCategories = useMemo(() => {
+    return categories.filter(category => !category.parent);
+  }, [categories]);
+  
+  const getChildCategories = useMemo(() => {
+    return (parentId: string) => {
+      return categories.filter(category => {
+        if (typeof category.parent === 'string') {
+          return category.parent === parentId;
+        } else if (category.parent && typeof category.parent === 'object') {
+          // Handle both string and number ID comparison
+          return String(category.parent.id) === String(parentId);
+        }
+        return false;
+      });
+    };
+  }, [categories]);
+  
+  const childCategories = useMemo(() => {
+    if (formData.classification.parentCategory) {
+      return getChildCategories(formData.classification.parentCategory);
+    }
+    return [];
+  }, [formData.classification.parentCategory, getChildCategories]);
+  
+  // Debug logging
+  console.log("Categories state:", { 
+    categories, 
+    categoriesLoading, 
+    categoriesError, 
+    parentCategories,
+    childCategories,
+    selectedParent: formData.classification.parentCategory 
+  });
   return (
     <Card>
       <CardHeader className="px-6 py-4">
@@ -215,19 +252,39 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           )}
         </div>
 
-        {/* Thông tin phân loại - Lĩnh vực từ Categories API */}
+        {/* Thông tin phân loại - Lĩnh vực cha con từ Categories API */}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <div className="space-y-2">
+          <div className="space-y-4">
+            {/* Parent Category Selection */}
             <Select
-              label="Lĩnh vực *"
-              placeholder="Chọn lĩnh vực"
-              name="classification.field"
+              label="Lĩnh vực chính *"
+              placeholder="Chọn lĩnh vực chính"
+              name="classification.parentCategory"
               selectedKeys={
-                formData.classification.field
-                  ? [formData.classification.field]
+                formData.classification.parentCategory
+                  ? [formData.classification.parentCategory]
                   : []
               }
-              onChange={onChange}
+              onChange={(e) => {
+                // Handle parent category change and clear child category
+                const parentValue = e.target.value;
+                onChange({
+                  target: {
+                    name: "classification.parentCategory",
+                    value: parentValue,
+                  }
+                } as React.ChangeEvent<HTMLSelectElement>);
+                
+                // Clear child category when parent changes
+                if (formData.classification.childCategory) {
+                  onChange({
+                    target: {
+                      name: "classification.childCategory",
+                      value: "",
+                    }
+                  } as React.ChangeEvent<HTMLSelectElement>);
+                }
+              }}
               isRequired
               isDisabled={categoriesLoading}
               variant="bordered"
@@ -235,12 +292,65 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                 label: "text-sm font-medium text-gray-700 mb-1",
               }}
             >
-              {categories.map((category) => (
-                <SelectItem key={category.value}>{category.label}</SelectItem>
-              ))}
+              {parentCategories && parentCategories.length > 0 ? (
+                parentCategories.map((category) => {
+                  // Validate category structure
+                  if (!category.id || !category.name) {
+                    console.warn("Invalid parent category structure:", category);
+                    return null;
+                  }
+                  return (
+                    <SelectItem key={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  );
+                })
+              ) : (
+                <SelectItem key="no-data" isDisabled>
+                  {categoriesLoading ? "Đang tải..." : "Không có dữ liệu"}
+                </SelectItem>
+              )}
             </Select>
-            
-            {/* Categories loading state */}
+
+            {/* Child Category Selection - Only show if parent is selected */}
+            {formData.classification.parentCategory && (
+              <Select
+                label="Lĩnh vực con"
+                placeholder="Chọn lĩnh vực con (tùy chọn)"
+                name="classification.childCategory"
+                selectedKeys={
+                  formData.classification.childCategory
+                    ? [formData.classification.childCategory]
+                    : []
+                }
+                onChange={onChange}
+                variant="bordered"
+                classNames={{
+                  label: "text-sm font-medium text-gray-700 mb-1",
+                }}
+              >
+                {childCategories && childCategories.length > 0 ? (
+                  childCategories.map((category) => {
+                    // Validate category structure
+                    if (!category.id || !category.name) {
+                      console.warn("Invalid child category structure:", category);
+                      return null;
+                    }
+                    return (
+                      <SelectItem key={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    );
+                  })
+                ) : (
+                  <SelectItem key="no-children" isDisabled>
+                    Không có lĩnh vực con
+                  </SelectItem>
+                )}
+              </Select>
+            )}
+
+            {/* Categories loading and info state */}
             {categoriesLoading && (
               <div className="flex items-center text-sm text-blue-600">
                 <Spinner size="sm" className="mr-2" />
@@ -248,6 +358,12 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               </div>
             )}
             
+            {!categoriesLoading && !categoriesError && categories.length > 0 && (
+              <div className="text-xs text-gray-500">
+                Đã tải {categories.length} lĩnh vực (Cha: {parentCategories.length}, Con được chọn: {childCategories.length})
+              </div>
+            )}
+
             {/* Categories error state */}
             {categoriesError && (
               <Card className="bg-red-50 border-red-200">
@@ -292,7 +408,6 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
               </Card>
             )}
           </div>
-
         </div>
 
         <Textarea

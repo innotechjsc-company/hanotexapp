@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Primary Color</title>
+    <style>
+        body { 
+            font-family: Inter, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .color-box {
+            display: inline-block;
+            width: 100px;
+            height: 60px;
+            margin: 10px;
+            border-radius: 8px;
+            text-align: center;
+            line-height: 60px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .primary-500 { background-color: #3b82f6; }
+        .primary-600 { background-color: #2563eb; }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Debug Primary Color - HeroUI</h1>
+    
+    <div class="test-section">
+        <h2>Màu Primary mong muốn</h2>
+        <p>Màu này <strong>phải</strong> là xanh dương #3b82f6</p>
+        <div class="color-box primary-500">#3b82f6</div>
+        <div class="color-box primary-600">#2563eb</div>
+    </div>
+
+    <div class="test-section">
+        <h2>CSS Variables Check</h2>
+        <p>Mở Developer Tools → Console để xem output</p>
+        <button onclick="checkCSSVariables()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Check CSS Variables
+        </button>
+    </div>
+
+    <div class="test-section">
+        <h2>Chẩn đoán</h2>
+        <div id="diagnosis"></div>
+    </div>
+
+    <script>
+        function checkCSSVariables() {
+            const style = getComputedStyle(document.documentElement);
+            const diagnosis = document.getElementById('diagnosis');
+            
+            let output = '<h3>CSS Variables Status:</h3>';
+            
+            // Check HeroUI variables
+            const heroUIVars = [
+                '--heroui-primary',
+                '--heroui-primary-500',
+                '--heroui-primary-DEFAULT',
+                '--heroui-primary-foreground'
+            ];
+            
+            heroUIVars.forEach(varName => {
+                const value = style.getPropertyValue(varName);
+                const status = value ? '✅' : '❌';
+                output += `<p>${status} ${varName}: ${value || 'NOT FOUND'}</p>`;
+                console.log(`${varName}:`, value);
+            });
+            
+            // Check computed styles
+            const testEl = document.createElement('div');
+            testEl.className = 'bg-primary-500';
+            testEl.style.display = 'none';
+            document.body.appendChild(testEl);
+            
+            const bgColor = getComputedStyle(testEl).backgroundColor;
+            const expectedRGB = 'rgb(59, 130, 246)';
+            const isCorrect = bgColor === expectedRGB;
+            
+            output += `<h3>Tailwind Classes:</h3>`;
+            output += `<p>${isCorrect ? '✅' : '❌'} bg-primary-500: ${bgColor}</p>`;
+            output += `<p>Expected: ${expectedRGB}</p>`;
+            
+            document.body.removeChild(testEl);
+            
+            // Summary
+            output += '<h3>Kết luận:</h3>';
+            if (isCorrect) {
+                output += '<p style="color: green;">✅ Màu primary hoạt động chính xác!</p>';
+            } else {
+                output += '<p style="color: red;">❌ Có vấn đề với cấu hình màu primary</p>';
+                output += '<p>Có thể do: CSS conflicting, Tailwind không rebuild, hoặc HeroUI theme override</p>';
+            }
+            
+            diagnosis.innerHTML = output;
+        }
+        
+        // Auto run check when page loads
+        document.addEventListener('DOMContentLoaded', checkCSSVariables);
+    </script>
+</body>
+</html>

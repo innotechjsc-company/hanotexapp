@@ -1,6 +1,7 @@
 import { Category, User } from '@/payload-types'
 import { ID, DateTimeString } from './common'
 import { TRL } from './trl'
+import { IPType } from './IntellectualProperty'
 
 // Trạng thái công nghệ
 export type TechnologyStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE' // Trạng thái phê duyệt/hiển thị
@@ -18,21 +19,11 @@ export interface TechnologyOwner {
   ownership_percentage: number // Tỷ lệ sở hữu (0-100)
 }
 
-// Loại Sở hữu Trí tuệ
-export type IPType =
-  | 'PATENT'
-  | 'UTILITY_MODEL'
-  | 'INDUSTRIAL_DESIGN'
-  | 'TRADEMARK'
-  | 'SOFTWARE_COPYRIGHT'
-  | 'TRADE_SECRET' // Loại hình SHTT
-
 // Chi tiết Sở hữu Trí tuệ
 export interface IPDetail {
   ip_type: IPType // Loại SHTT
   ip_number?: string // Số/văn bằng SHTT
   status?: string // Trạng thái IP
-  territory?: string // Phạm vi lãnh thổ
 }
 
 // Nhóm Chứng nhận Pháp lý
@@ -62,6 +53,12 @@ export interface AdditionalData {
   financial_support_info?: unknown // Thông tin hỗ trợ tài chính (rich text)
 }
 
+// Chế độ hiển thị chi tiết công nghệ
+export type DisplayMode =
+  | 'public_summary_with_nda_details'
+  | 'fully_public'
+  | 'private_by_invitation'
+
 // Thực thể Công nghệ
 export interface Technology {
   id?: ID // ID duy nhất của công nghệ
@@ -81,4 +78,5 @@ export interface Technology {
   documents?: ID[] // Danh sách ID tài liệu/media liên quan
   createdAt?: DateTimeString // Thời điểm tạo bản ghi
   updatedAt?: DateTimeString // Thời điểm cập nhật bản ghi
+  display_mode?: DisplayMode // Chế độ hiển thị chi tiết công nghệ
 }

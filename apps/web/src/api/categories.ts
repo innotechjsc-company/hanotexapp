@@ -83,10 +83,10 @@ export async function deleteCategory(id: string): Promise<void> {
 /**
  * Get active categories only
  */
-export async function getActiveCategories(
+export async function getAllCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories({ is_active: true }, pagination);
+  return getCategories({}, pagination);
 }
 
 /**

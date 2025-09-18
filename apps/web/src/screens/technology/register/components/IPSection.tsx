@@ -1,5 +1,5 @@
-import React from "react";
-import { Plus, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { Plus, Trash2, Save, Download, AlertCircle } from "lucide-react";
 import { IPDetail, MasterData } from "../types";
 import { getIPTypeDescription } from "../utils";
 import {
@@ -11,6 +11,7 @@ import {
   SelectItem,
   Button,
   Chip,
+  Spinner,
 } from "@heroui/react";
 
 interface IPSectionProps {
@@ -20,6 +21,11 @@ interface IPSectionProps {
   onAddIPDetail: () => void;
   onRemoveIPDetail: (index: number) => void;
   onUpdateIPDetail: (index: number, field: string, value: string) => void;
+  // New props for API integration
+  onSaveAsDraft?: (ipDetails: IPDetail[]) => Promise<boolean>;
+  onLoadFromDraft?: () => IPDetail[];
+  ipSaveLoading?: boolean;
+  ipSaveError?: string;
 }
 
 export const IPSection: React.FC<IPSectionProps> = ({
@@ -29,7 +35,45 @@ export const IPSection: React.FC<IPSectionProps> = ({
   onAddIPDetail,
   onRemoveIPDetail,
   onUpdateIPDetail,
+  onSaveAsDraft,
+  onLoadFromDraft,
+  ipSaveLoading = false,
+  ipSaveError = "",
 }) => {
+  const [localError, setLocalError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+
+  const handleSaveAsDraft = async () => {
+    if (!onSaveAsDraft) return;
+
+    setLocalError("");
+    setSaveSuccess("");
+
+    const success = await onSaveAsDraft(ipDetails);
+    if (success) {
+      setSaveSuccess("Đã lưu bản nháp thành công!");
+      setTimeout(() => setSaveSuccess(""), 3000);
+    } else {
+      setLocalError("Không thể lưu bản nháp. Vui lòng thử lại.");
+    }
+  };
+
+  const handleLoadFromDraft = () => {
+    if (!onLoadFromDraft) return;
+
+    try {
+      const draftData = onLoadFromDraft();
+      if (draftData.length > 0) {
+        // This would trigger parent component to update the form
+        setSaveSuccess("Đã tải bản nháp thành công!");
+        setTimeout(() => setSaveSuccess(""), 3000);
+      } else {
+        setLocalError("Không có bản nháp nào được tìm thấy.");
+      }
+    } catch (error) {
+      setLocalError("Không thể tải bản nháp. Vui lòng thử lại.");
+    }
+  };
   return (
     <Card>
       <CardHeader className="px-6 py-4">
@@ -37,18 +81,38 @@ export const IPSection: React.FC<IPSectionProps> = ({
           <h2 className="text-lg font-semibold text-gray-900">
             4. Sở hữu trí tuệ (IP) *
           </h2>
-          <Button
-            variant="flat"
-            color="primary"
-            size="sm"
-            startContent={<Plus className="h-4 w-4" />}
-            onClick={onAddIPDetail}
-          >
-            Thêm IP
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="flat"
+              color="primary"
+              size="sm"
+              startContent={<Plus className="h-4 w-4" />}
+              onClick={onAddIPDetail}
+            >
+              Thêm IP
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardBody className="p-6 space-y-4">
+        {/* Error Messages */}
+        {(ipSaveError || localError) && (
+          <Card className="bg-red-50 border-red-200">
+            <CardBody className="p-3 flex flex-row items-center text-red-600">
+              <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="text-sm">{ipSaveError || localError}</span>
+            </CardBody>
+          </Card>
+        )}
+
+        {/* Success Messages */}
+        {saveSuccess && (
+          <Card className="bg-green-50 border-green-200">
+            <CardBody className="p-3 flex flex-row items-center text-green-600">
+              <span className="text-sm">{saveSuccess}</span>
+            </CardBody>
+          </Card>
+        )}
         {ipDetails.map((ip, index) => (
           <Card key={index} className="border border-gray-200">
             <CardBody className="p-4">

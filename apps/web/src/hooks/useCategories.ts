@@ -1,14 +1,9 @@
-import { useState, useEffect } from 'react';
-import { getActiveCategories } from '@/api/categories';
-import { Category } from '@/types/categories';
-
-export interface CategoryOption {
-  value: string;
-  label: string;
-}
+import { useState, useEffect } from "react";
+import { getAllCategories } from "@/api/categories";
+import { Category } from "@/types/categories";
 
 export interface UseCategoriesReturn {
-  categories: CategoryOption[];
+  categories: Category[];
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -19,7 +14,7 @@ export interface UseCategoriesReturn {
  * Fetches active categories and formats them for use in select components
  */
 export const useCategories = (): UseCategoriesReturn => {
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,25 +22,26 @@ export const useCategories = (): UseCategoriesReturn => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch active categories with pagination
-      const response = await getActiveCategories({ limit: 100 });
-      
-      if (response.success && response.data) {
+      const response = await getAllCategories({ limit: 100 });
+
+      console.log("Categories API response:", response);
+
+      if (response.docs && Array.isArray(response.docs)) {
         // Format categories for select component
-        const formattedCategories: CategoryOption[] = response.data.map((category: Category) => ({
-          value: category.id || category.code,
-          label: category.name
-        }));
-        
-        setCategories(formattedCategories);
+        setCategories(response.docs as unknown as Category[]);
+      } else if (response.data && Array.isArray(response.data)) {
+        // Fallback for different response format
+        setCategories(response.data as unknown as Category[]);
       } else {
-        setError('Failed to load categories');
+        console.warn("Categories response structure:", response);
+        setError("Failed to load categories - unexpected response format");
         setCategories([]);
       }
     } catch (err) {
-      console.error('Error fetching categories:', err);
-      setError('Network error while loading categories');
+      console.error("Error fetching categories:", err);
+      setError("Network error while loading categories");
       setCategories([]);
     } finally {
       setLoading(false);
@@ -60,6 +56,6 @@ export const useCategories = (): UseCategoriesReturn => {
     categories,
     loading,
     error,
-    refetch: fetchCategories
+    refetch: fetchCategories,
   };
 };
