@@ -17,6 +17,9 @@ import { Auctions } from './collections/Auctions'
 import { Bids } from './collections/Bids'
 import { Transactions } from './collections/Transactions'
 import { Notifications } from './collections/Notifications'
+import { Services } from './collections/Services'
+import { ServiceTicket } from './collections/ServiceTicket'
+import { TRL } from './collections/TRL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -49,6 +52,9 @@ export default buildConfig({
     Bids,
     Transactions,
     Notifications,
+    Services,
+    ServiceTicket,
+    TRL,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

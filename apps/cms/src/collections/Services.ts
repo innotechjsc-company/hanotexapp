@@ -20,5 +20,4 @@ export const Services: CollectionConfig = {
     },
     
   ],
-  upload: true,
 }

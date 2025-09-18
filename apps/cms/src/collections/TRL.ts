@@ -25,5 +25,4 @@ export const TRL: CollectionConfig = {
       label: 'Mô tả dịch vụ',
     },
   ],
-  upload: true,
 }
