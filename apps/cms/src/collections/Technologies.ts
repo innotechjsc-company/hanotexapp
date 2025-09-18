@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload';
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
@@ -9,9 +9,9 @@ export const Technologies: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => !!user,
-    update: ({ req: { user } }) => !!user,
-    delete: ({ req: { user } }) => !!user,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {

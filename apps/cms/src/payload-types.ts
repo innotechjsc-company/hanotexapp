@@ -77,6 +77,9 @@ export interface Config {
     bids: Bid;
     transactions: Transaction;
     notifications: Notification;
+    services: Service;
+    'service-ticket': ServiceTicket;
+    trl: Trl;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -93,6 +96,9 @@ export interface Config {
     bids: BidsSelect<false> | BidsSelect<true>;
     transactions: TransactionsSelect<false> | TransactionsSelect<true>;
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
+    trl: TrlSelect<false> | TrlSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -140,31 +146,31 @@ export interface User {
   is_verified?: boolean | null;
   is_active?: boolean | null;
   /**
-   * Full name for individual users
+   * Tên đầy đủ của người dùng cá nhân
    */
   full_name?: string | null;
   /**
-   * National ID or passport number
+   * Số CMND hoặc hộ chiếu quốc gia
    */
   id_number?: string | null;
   /**
-   * Personal phone number
+   * Số điện thoại cá nhân
    */
   phone?: string | null;
   /**
-   * Professional occupation
+   * Nghề nghiệp chuyên môn
    */
   profession?: string | null;
   /**
-   * Bank account information for payments
+   * Thông tin tài khoản ngân hàng cho thanh toán
    */
   bank_account?: string | null;
   /**
-   * Link to company information
+   * Liên kết đến thông tin công ty
    */
   company?: (number | null) | Company;
   /**
-   * Link to research institution information
+   * Liên kết đến thông tin viện nghiên cứu
    */
   research_institution?: (number | null) | ResearchInstitution;
   updatedAt: string;
@@ -192,27 +198,27 @@ export interface User {
 export interface Company {
   id: number;
   /**
-   * Official company name
+   * Tên chính thức của công ty
    */
   company_name: string;
   /**
-   * Unique tax identification code
+   * Mã số nhận dạng thuế duy nhất
    */
   tax_code: string;
   /**
-   * Business registration license number
+   * Số giấy phép đăng ký kinh doanh
    */
   business_license?: string | null;
   /**
-   * Name of the legal representative
+   * Tên người đại diện pháp luật
    */
   legal_representative: string;
   /**
-   * Official company contact email
+   * Email liên hệ chính thức của công ty
    */
   contact_email?: string | null;
   /**
-   * Official company contact phone number
+   * Số điện thoại liên hệ chính thức của công ty
    */
   contact_phone?: string | null;
   address?: {
@@ -223,11 +229,11 @@ export interface Company {
     postal_code?: string | null;
   };
   /**
-   * Description of company production capabilities
+   * Mô tả năng lực sản xuất của công ty
    */
   production_capacity?: string | null;
   /**
-   * Main business sectors of the company
+   * Các lĩnh vực kinh doanh chính của công ty
    */
   business_sectors?:
     | {
@@ -236,19 +242,19 @@ export interface Company {
       }[]
     | null;
   /**
-   * Number of employees
+   * Số lượng nhân viên
    */
   employee_count?: number | null;
   /**
-   * Year the company was established
+   * Năm thành lập công ty
    */
   established_year?: number | null;
   /**
-   * Official company website URL
+   * URL trang web chính thức của công ty
    */
   website?: string | null;
   /**
-   * Whether the company is currently active
+   * Công ty có đang hoạt động hay không
    */
   is_active?: boolean | null;
   updatedAt: string;
@@ -261,15 +267,15 @@ export interface Company {
 export interface ResearchInstitution {
   id: number;
   /**
-   * Official name of the research institution
+   * Tên chính thức của viện nghiên cứu
    */
   institution_name: string;
   /**
-   * Unique institution identification code
+   * Mã định danh duy nhất của viện nghiên cứu
    */
   institution_code: string;
   /**
-   * Government body or organization that oversees this institution
+   * Cơ quan chính phủ hoặc tổ chức giám sát viện nghiên cứu này
    */
   governing_body: string;
   institution_type: 'UNIVERSITY' | 'RESEARCH_INSTITUTE' | 'GOVERNMENT_LAB' | 'PRIVATE_RND' | 'INTERNATIONAL_ORG';
@@ -286,7 +292,7 @@ export interface ResearchInstitution {
     postal_code?: string | null;
   };
   /**
-   * Main research focus areas
+   * Các lĩnh vực trọng tâm nghiên cứu chính
    */
   research_areas?:
     | {
@@ -295,23 +301,23 @@ export interface ResearchInstitution {
       }[]
     | null;
   /**
-   * Current research project or task identification code
+   * Mã định danh đề tài hoặc nhiệm vụ nghiên cứu hiện tại
    */
   research_task_code?: string | null;
   /**
-   * Latest research acceptance report reference
+   * Tham chiếu báo cáo nghiệm thu nghiên cứu mới nhất
    */
   acceptance_report?: string | null;
   /**
-   * Specific research group or department within institution
+   * Nhóm hoặc phòng ban nghiên cứu cụ thể trong viện
    */
   research_group?: string | null;
   /**
-   * Year the institution was established
+   * Năm thành lập viện nghiên cứu
    */
   established_year?: number | null;
   /**
-   * Number of research staff
+   * Số lượng nhân viên nghiên cứu
    */
   staff_count?: number | null;
   accreditation_info?: {
@@ -321,7 +327,7 @@ export interface ResearchInstitution {
     accreditation_expiry?: string | null;
   };
   /**
-   * Whether the institution is currently active
+   * Viện nghiên cứu có đang hoạt động hay không
    */
   is_active?: boolean | null;
   updatedAt: string;
@@ -354,19 +360,19 @@ export interface Category {
   id: number;
   name: string;
   /**
-   * Unique identifier code for this category
+   * Mã định danh duy nhất cho danh mục này
    */
   code: string;
   /**
-   * Select parent category for hierarchical structure
+   * Chọn danh mục cha cho cấu trúc phân cấp
    */
   parent?: (number | null) | Category;
   /**
-   * Category hierarchy level (1-5)
+   * Cấp độ phân cấp danh mục (1-5)
    */
   level: number;
   /**
-   * Optional description for this category
+   * Mô tả tùy chọn cho danh mục này
    */
   description?: string | null;
   updatedAt: string;
@@ -380,32 +386,15 @@ export interface Technology {
   id: number;
   title: string;
   /**
-   * Summary visible to public users
+   * Tóm tắt hiển thị cho người dùng công khai
    */
   public_summary?: string | null;
-  /**
-   * Detailed information for authorized users only
-   */
-  confidential_detail?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Technology Readiness Level (1-9)
-   */
-  trl_level?: number | null;
   category?: (number | null) | Category;
+  /**
+   * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
+   */
+  confidential_detail?: string | null;
+  trl_level: number | Trl;
   submitter: number | User;
   status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE';
   visibility_mode?: ('public' | 'private' | 'restricted') | null;
@@ -414,7 +403,7 @@ export interface Technology {
         owner_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
         owner_name: string;
         /**
-         * Ownership percentage (0-100)
+         * Tỷ lệ sở hữu (0-100)
          */
         ownership_percentage: number;
         id?: string | null;
@@ -445,38 +434,10 @@ export interface Technology {
     local_certification_url?: string | null;
   };
   pricing: {
-    pricing_type: 'APPRAISAL' | 'ASK' | 'AUCTION' | 'OFFER';
-    asking_price?: number | null;
+    pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC';
+    price_from: number;
+    price_to: number;
     currency: 'VND' | 'USD' | 'EUR';
-    price_type?: string | null;
-    appraisal_purpose?: string | null;
-    appraisal_scope?: string | null;
-    appraisal_deadline?: string | null;
-  };
-  investment_transfer?: {
-    investment_stage?: string | null;
-    commercialization_methods?:
-      | {
-          method?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    transfer_methods?:
-      | {
-          method?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    territory_scope?: string | null;
-    financial_methods?:
-      | {
-          method?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    usage_limitations?: string | null;
-    current_partners?: string | null;
-    potential_partners?: string | null;
   };
   additional_data?: {
     test_results?: {
@@ -531,32 +492,44 @@ export interface Technology {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trl".
+ */
+export interface Trl {
+  id: number;
+  title: string;
+  value: number;
+  description: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auctions".
  */
 export interface Auction {
   id: number;
   /**
-   * The technology being auctioned
+   * Công nghệ được đấu giá
    */
   technology: number | Technology;
   auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
   /**
-   * Initial price for the auction
+   * Giá ban đầu cho phiên đấu giá
    */
   start_price?: number | null;
   /**
-   * Minimum acceptable price
+   * Giá tối thiểu chấp nhận được
    */
   reserve_price?: number | null;
   /**
-   * Current highest bid
+   * Lượt đặt giá cao nhất hiện tại
    */
   current_price?: number | null;
   start_time?: string | null;
   end_time?: string | null;
   status: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
   /**
-   * All bids placed on this auction
+   * Tất cả các lượt đặt giá cho phiên đấu giá này
    */
   bids?: (number | Bid)[] | null;
   updatedAt: string;
@@ -573,7 +546,7 @@ export interface Bid {
   bid_amount: number;
   bid_time: string;
   /**
-   * Indicates if this is currently the winning bid
+   * Cho biết đây có phải là lượt đặt giá thắng hiện tại không
    */
   is_winning?: boolean | null;
   updatedAt: string;
@@ -586,38 +559,38 @@ export interface Bid {
 export interface Transaction {
   id: number;
   /**
-   * The technology involved in this transaction
+   * Công nghệ liên quan đến giao dịch này
    */
   technology?: (number | null) | Technology;
   /**
-   * User who is purchasing
+   * Người dùng thực hiện giao dịch mua
    */
   buyer?: (number | null) | User;
   /**
-   * User who is selling
+   * Người dùng thực hiện giao dịch bán
    */
   seller?: (number | null) | User;
   amount: number;
   currency: 'VND' | 'USD' | 'EUR';
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
   /**
-   * Method used for payment (e.g., bank transfer, credit card)
+   * Phương thức được sử dụng để thanh toán (ví dụ: chuyển khoản ngân hàng, thẻ tín dụng)
    */
   payment_method?: string | null;
   /**
-   * Fee charged for processing this transaction
+   * Phí được tính để xử lý giao dịch này
    */
   transaction_fee?: number | null;
   /**
-   * Date and time when transaction was completed
+   * Ngày và giờ khi giao dịch được hoàn thành
    */
   completed_at?: string | null;
   /**
-   * Internal notes about this transaction
+   * Ghi chú nội bộ về giao dịch này
    */
   notes?: string | null;
   /**
-   * If this transaction resulted from an auction
+   * Nếu giao dịch này phát sinh từ một phiên đấu giá
    */
   auction?: (number | null) | Auction;
   updatedAt: string;
@@ -630,39 +603,63 @@ export interface Transaction {
 export interface Notification {
   id: number;
   /**
-   * The user who will receive this notification
+   * Người dùng sẽ nhận thông báo này
    */
   user_id: number | User;
   title: string;
   /**
-   * The main notification message
+   * Nội dung chính của thông báo
    */
   message: string;
   /**
-   * Category of notification for styling and filtering
+   * Phân loại thông báo để tạo kiểu và lọc
    */
   type?: ('info' | 'success' | 'warning' | 'error' | 'auction' | 'transaction' | 'technology' | 'system') | null;
   /**
-   * Whether the user has read this notification
+   * Người dùng đã đọc thông báo này hay chưa
    */
   is_read?: boolean | null;
   /**
-   * Technology related to this notification
+   * Công nghệ liên quan đến thông báo này
    */
   related_technology?: (number | null) | Technology;
   /**
-   * Auction related to this notification
+   * Phiên đấu giá liên quan đến thông báo này
    */
   related_auction?: (number | null) | Auction;
   /**
-   * Transaction related to this notification
+   * Giao dịch liên quan đến thông báo này
    */
   related_transaction?: (number | null) | Transaction;
   /**
-   * URL to navigate to when notification is clicked
+   * URL để điều hướng khi nhấp vào thông báo
    */
   action_url?: string | null;
   priority?: ('low' | 'normal' | 'high' | 'urgent') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  name: string;
+  description: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-ticket".
+ */
+export interface ServiceTicket {
+  id: number;
+  service: number | Service;
+  user: number | User;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
+  implementer: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -712,6 +709,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'notifications';
         value: number | Notification;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'service-ticket';
+        value: number | ServiceTicket;
+      } | null)
+    | ({
+        relationTo: 'trl';
+        value: number | Trl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -908,9 +917,9 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface TechnologiesSelect<T extends boolean = true> {
   title?: T;
   public_summary?: T;
+  category?: T;
   confidential_detail?: T;
   trl_level?: T;
-  category?: T;
   submitter?: T;
   status?: T;
   visibility_mode?: T;
@@ -952,39 +961,9 @@ export interface TechnologiesSelect<T extends boolean = true> {
     | T
     | {
         pricing_type?: T;
-        asking_price?: T;
+        price_from?: T;
+        price_to?: T;
         currency?: T;
-        price_type?: T;
-        appraisal_purpose?: T;
-        appraisal_scope?: T;
-        appraisal_deadline?: T;
-      };
-  investment_transfer?:
-    | T
-    | {
-        investment_stage?: T;
-        commercialization_methods?:
-          | T
-          | {
-              method?: T;
-              id?: T;
-            };
-        transfer_methods?:
-          | T
-          | {
-              method?: T;
-              id?: T;
-            };
-        territory_scope?: T;
-        financial_methods?:
-          | T
-          | {
-              method?: T;
-              id?: T;
-            };
-        usage_limitations?: T;
-        current_partners?: T;
-        potential_partners?: T;
       };
   additional_data?:
     | T
@@ -1061,6 +1040,39 @@ export interface NotificationsSelect<T extends boolean = true> {
   related_transaction?: T;
   action_url?: T;
   priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-ticket_select".
+ */
+export interface ServiceTicketSelect<T extends boolean = true> {
+  service?: T;
+  user?: T;
+  status?: T;
+  implementer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trl_select".
+ */
+export interface TrlSelect<T extends boolean = true> {
+  title?: T;
+  value?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
