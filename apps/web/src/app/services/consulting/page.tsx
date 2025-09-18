@@ -17,8 +17,7 @@ import {
   Handshake,
   Rocket,
   Lightbulb,
-  BarChart3,
-  Zap
+  BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 

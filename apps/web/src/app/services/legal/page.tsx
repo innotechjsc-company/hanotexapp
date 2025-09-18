@@ -14,7 +14,6 @@ import {
   Rocket,
   Lightbulb,
   TrendingUp,
-  Zap,
   Target,
   Brain
 } from 'lucide-react';
