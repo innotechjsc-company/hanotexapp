@@ -1,9 +1,4 @@
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Dịch vụ Sở hữu trí tuệ - HANOTEX',
-  description: 'Dịch vụ tư vấn và hỗ trợ về sở hữu trí tuệ, bảo hộ bằng sáng chế, nhãn hiệu, bản quyền và các quyền sở hữu trí tuệ khác.',
-};
+'use client';
 
 export default function IntellectualPropertyPage() {
   return (

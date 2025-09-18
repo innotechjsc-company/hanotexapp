@@ -1,9 +1,4 @@
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Đào tạo & Hỗ trợ - HANOTEX',
-  description: 'Các khóa đào tạo chuyên sâu về công nghệ, sở hữu trí tuệ, chuyển giao công nghệ và hỗ trợ phát triển năng lực.',
-};
+'use client';
 
 export default function TrainingPage() {
   return (

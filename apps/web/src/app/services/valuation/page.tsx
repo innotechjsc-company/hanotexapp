@@ -16,7 +16,7 @@ import {
   Rocket,
   Lightbulb,
   Users,
-  Zap
+  Zap as ZapIcon
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -311,7 +311,7 @@ export default function ValuationPage() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
-            <Zap className="h-5 w-5 mr-2" />
+            <ZapIcon className="h-5 w-5 mr-2" />
             <span className="text-sm font-medium">Bắt đầu ngay hôm nay</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
