@@ -7,11 +7,11 @@ import { useMasterData } from "@/hooks/useMasterData";
 import { ArrowLeft, Save, Eye, AlertCircle } from "lucide-react";
 import { useFormData, useRegisterTechnology, useOCR } from "./hooks";
 import {
-  SubmitterInfoSection,
   BasicInfoSection,
   TechnologyOwnersSection,
   IPSection,
 } from "./components";
+import { Card, CardBody, CardHeader, Button, Spinner } from "@heroui/react";
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
@@ -91,10 +91,10 @@ export default function RegisterTechnologyPage() {
 
   // Debug auth state
   useEffect(() => {
-    console.log('Auth State Debug:', { 
-      isAuthenticated, 
-      authLoading, 
-      hasCheckedAuth 
+    console.log("Auth State Debug:", {
+      isAuthenticated,
+      authLoading,
+      hasCheckedAuth,
     });
   }, [isAuthenticated, authLoading, hasCheckedAuth]);
 
@@ -104,7 +104,7 @@ export default function RegisterTechnologyPage() {
     if (!authLoading) {
       setHasCheckedAuth(true);
       if (!isAuthenticated) {
-        console.log('User not authenticated, redirecting to home');
+        console.log("User not authenticated, redirecting to home");
         router.push("/");
       }
     }
@@ -115,10 +115,8 @@ export default function RegisterTechnologyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            Đang kiểm tra xác thực...
-          </p>
+          <Spinner size="lg" color="primary" className="mb-4" />
+          <p className="text-gray-600">Đang kiểm tra xác thực...</p>
         </div>
       </div>
     );
@@ -129,10 +127,8 @@ export default function RegisterTechnologyPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">
-            Đang chuyển hướng về trang chủ...
-          </p>
+          <Spinner size="lg" color="primary" className="mb-4" />
+          <p className="text-gray-600">Đang chuyển hướng về trang chủ...</p>
         </div>
       </div>
     );
@@ -142,70 +138,68 @@ export default function RegisterTechnologyPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => router.back()}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ArrowLeft className="h-5 w-5 text-gray-600" />
-                </button>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Đăng ký công nghệ
-                  </h1>
-                  <p className="text-gray-600">
-                    Đăng ký công nghệ mới lên sàn giao dịch HANOTEX
-                  </p>
-                </div>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  type="button"
-                  className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Xem trước
-                </button>
+        <Card className="mb-6">
+          <CardHeader className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                isIconOnly
+                variant="light"
+                onClick={() => router.back()}
+                className="hover:bg-gray-100"
+              >
+                <ArrowLeft className="h-5 w-5 text-gray-600" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Đăng ký công nghệ
+                </h1>
+                <p className="text-gray-600">
+                  Đăng ký công nghệ mới lên sàn giao dịch HANOTEX
+                </p>
               </div>
             </div>
-          </div>
-        </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="bordered"
+                startContent={<Eye className="h-4 w-4" />}
+                className="text-gray-700"
+              >
+                Xem trước
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Messages */}
           {(submitError || masterDataError || ocrError) && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              {submitError || masterDataError || ocrError}
-            </div>
+            <Card className="bg-red-50 border-red-200">
+              <CardBody className="flex flex-row items-center text-red-600">
+                <AlertCircle className="h-5 w-5 mr-2" />
+                {submitError || masterDataError || ocrError}
+              </CardBody>
+            </Card>
           )}
 
           {/* Loading Messages */}
           {masterDataLoading && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-600 px-4 py-3 rounded-md flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
-              Đang tải dữ liệu...
-            </div>
+            <Card className="bg-blue-50 border-blue-200">
+              <CardBody className="flex flex-row items-center text-blue-600">
+                <Spinner size="sm" color="primary" className="mr-2" />
+                Đang tải dữ liệu...
+              </CardBody>
+            </Card>
           )}
 
           {/* Success Messages */}
           {submitSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md">
-              {submitSuccess}
-            </div>
+            <Card className="bg-green-50 border-green-200">
+              <CardBody className="text-green-600">{submitSuccess}</CardBody>
+            </Card>
           )}
 
-          {/* 1. Submitter Information */}
-          <SubmitterInfoSection
-            submitter={formManager.formData.submitter}
-            onChange={formManager.handleChange}
-          />
-
-          {/* 2. Basic Information */}
+          {/* 1. Basic Information */}
           <BasicInfoSection
             formData={formManager.formData}
             masterData={masterData as any}
@@ -219,7 +213,7 @@ export default function RegisterTechnologyPage() {
             onRemoveDocument={formManager.removeDocument}
           />
 
-          {/* 3. Technology Owners */}
+          {/* 2. Technology Owners */}
           <TechnologyOwnersSection
             owners={formManager.formData.owners}
             onAddOwner={formManager.addOwner}
@@ -227,7 +221,7 @@ export default function RegisterTechnologyPage() {
             onUpdateOwner={formManager.updateOwner}
           />
 
-          {/* 4. IP Details */}
+          {/* 3. IP Details */}
           <IPSection
             ipDetails={formManager.formData.ipDetails}
             masterData={masterData as any}
@@ -237,36 +231,20 @@ export default function RegisterTechnologyPage() {
             onUpdateIPDetail={formManager.updateIPDetail}
           />
 
-          {/* Note: For now, I'm including the main sections. The remaining sections 
-               (Legal Territory, Investment Transfer, Pricing, Visibility NDA) 
-               can be added as separate components later if needed */}
-
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <Button variant="bordered" onClick={() => router.back()}>
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={submitLoading}
-              className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              color="primary"
+              isLoading={submitLoading}
+              startContent={!submitLoading && <Save className="h-4 w-4" />}
+              isDisabled={submitLoading}
             >
-              {submitLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Đang xử lý...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Đăng ký công nghệ
-                </>
-              )}
-            </button>
+              {submitLoading ? "Đang xử lý..." : "Đăng ký công nghệ"}
+            </Button>
           </div>
         </form>
       </div>

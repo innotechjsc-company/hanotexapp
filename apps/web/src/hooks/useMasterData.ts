@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 
 export interface MasterData {
   fields: Array<{ value: string; label: string }>;
-  industries: Array<{ value: string; label: string }>;
-  specialties: Array<{ value: string; label: string }>;
   trlLevels: Array<{ value: string; label: string }>;
   categories: Array<{ value: string; label: string }>;
   ipTypes: Array<{ value: string; label: string; description: string }>;

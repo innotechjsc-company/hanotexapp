@@ -126,7 +126,7 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms'),
+    // require('@tailwindcss/forms'), // Commented out to avoid conflicts with HeroUI
     require('@tailwindcss/typography'),
     heroui({
       themes: {
