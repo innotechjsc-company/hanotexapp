@@ -73,6 +73,7 @@ export interface Config {
     media: Media;
     categories: Category;
     technologies: Technology;
+    intellectual_property: IntellectualProperty;
     auctions: Auction;
     bids: Bid;
     transactions: Transaction;
@@ -93,6 +94,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
+    intellectual_property: IntellectualPropertySelect<false> | IntellectualPropertySelect<true>;
     auctions: AuctionsSelect<false> | AuctionsSelect<true>;
     bids: BidsSelect<false> | BidsSelect<true>;
     transactions: TransactionsSelect<false> | TransactionsSelect<true>;
@@ -509,6 +511,31 @@ export interface Trl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property".
+ */
+export interface IntellectualProperty {
+  id: number;
+  /**
+   * Sản phẩm khoa học/công nghệ
+   */
+  technology?: (number | null) | Technology;
+  /**
+   * Số đơn/số bằng
+   */
+  code: string;
+  /**
+   * Loại sở hữu trí tuệ
+   */
+  type?: ('patent' | 'utility_solution' | 'industrial_design' | 'trademark' | 'copyright' | 'trade_secret') | null;
+  /**
+   * Tình trạng sở hữu trí tuệ
+   */
+  status?: ('pending' | 'granted' | 'expired' | 'rejected') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auctions".
  */
 export interface Auction {
@@ -723,6 +750,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'technologies';
         value: number | Technology;
+      } | null)
+    | ({
+        relationTo: 'intellectual_property';
+        value: number | IntellectualProperty;
       } | null)
     | ({
         relationTo: 'auctions';
@@ -1005,6 +1036,18 @@ export interface TechnologiesSelect<T extends boolean = true> {
         financial_support_info?: T;
       };
   display_mode?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property_select".
+ */
+export interface IntellectualPropertySelect<T extends boolean = true> {
+  technology?: T;
+  code?: T;
+  type?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

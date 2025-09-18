@@ -1,3 +1,5 @@
+import { DisplayMode } from "@/types";
+
 export interface FileUpload {
   id: number;
   name: string;
@@ -90,7 +92,7 @@ export interface TechnologyFormData {
   publicSummary: string;
   confidentialDetail: string;
   trlLevel: string;
-  visibilityMode: "PUBLIC_SUMMARY" | "PUBLIC_FULL" | "PRIVATE";
+  visibilityMode: DisplayMode;
   submitter: Submitter;
   owners: Owner[];
   ipDetails: IPDetail[];

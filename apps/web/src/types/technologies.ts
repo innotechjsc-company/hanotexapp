@@ -1,6 +1,8 @@
-import { Category, User } from "@/payload-types";
+import { IPType } from "@/api/intellectual-properties";
 import { ID, DateTimeString } from "./common";
 import { TRL } from "./trl";
+import { Category } from "./categories";
+import { User } from "./users";
 
 // Trạng thái công nghệ
 export type TechnologyStatus =
@@ -24,21 +26,11 @@ export interface TechnologyOwner {
   ownership_percentage: number; // Tỷ lệ sở hữu (0-100)
 }
 
-// Loại Sở hữu Trí tuệ
-export type IPType =
-  | "PATENT"
-  | "UTILITY_MODEL"
-  | "INDUSTRIAL_DESIGN"
-  | "TRADEMARK"
-  | "SOFTWARE_COPYRIGHT"
-  | "TRADE_SECRET"; // Loại hình SHTT
-
 // Chi tiết Sở hữu Trí tuệ
 export interface IPDetail {
   ip_type: IPType; // Loại SHTT
   ip_number?: string; // Số/văn bằng SHTT
   status?: string; // Trạng thái IP
-  territory?: string; // Phạm vi lãnh thổ
 }
 
 // Nhóm Chứng nhận Pháp lý

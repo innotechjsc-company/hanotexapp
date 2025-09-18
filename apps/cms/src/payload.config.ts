@@ -13,6 +13,7 @@ import { ResearchInstitutions } from './collections/ResearchInstitutions'
 import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Technologies } from './collections/Technologies'
+import { IntellectualProperty } from './collections/IntellectualProperty'
 import { Auctions } from './collections/Auctions'
 import { Bids } from './collections/Bids'
 import { Transactions } from './collections/Transactions'
@@ -20,7 +21,6 @@ import { Notifications } from './collections/Notifications'
 import { Services } from './collections/Services'
 import { ServiceTicket } from './collections/ServiceTicket'
 import { TRL } from './collections/TRL'
-import { IntellectualProperty } from './collections/IntellectualProperty'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,6 +43,7 @@ export default buildConfig({
     Media,
     Categories,
     Technologies,
+    IntellectualProperty,
     Auctions,
     Bids,
     Transactions,
@@ -50,7 +51,6 @@ export default buildConfig({
     Services,
     ServiceTicket,
     TRL,
-    IntellectualProperty,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
