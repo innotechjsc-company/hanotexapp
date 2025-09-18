@@ -2,6 +2,16 @@ import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { IPDetail, MasterData } from "../types";
 import { getIPTypeDescription } from "../utils";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
+  Select,
+  SelectItem,
+  Button,
+  Chip,
+} from "@heroui/react";
 
 interface IPSectionProps {
   ipDetails: IPDetail[];
@@ -21,104 +31,102 @@ export const IPSection: React.FC<IPSectionProps> = ({
   onUpdateIPDetail,
 }) => {
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+    <Card>
+      <CardHeader className="px-6 py-4">
+        <div className="flex items-center justify-between w-full">
           <h2 className="text-lg font-semibold text-gray-900">
             4. Sở hữu trí tuệ (IP) *
           </h2>
-          <button
-            type="button"
+          <Button
+            variant="flat"
+            color="primary"
+            size="sm"
+            startContent={<Plus className="h-4 w-4" />}
             onClick={onAddIPDetail}
-            className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
           >
-            <Plus className="h-4 w-4 mr-2" />
             Thêm IP
-          </button>
+          </Button>
         </div>
-      </div>
-      <div className="p-6 space-y-4">
+      </CardHeader>
+      <CardBody className="p-6 space-y-4">
         {ipDetails.map((ip, index) => (
-          <div
-            key={index}
-            className="p-4 border border-gray-200 rounded-lg"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Loại hình IP
-                </label>
-                <select
-                  value={ip.ipType}
+          <Card key={index} className="border border-gray-200">
+            <CardBody className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Select
+                  label="Loại hình IP"
+                  placeholder="Chọn loại hình IP"
+                  selectedKeys={ip.ipType ? [ip.ipType] : []}
                   onChange={(e) => {
                     onUpdateIPDetail(index, "ipType", e.target.value);
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  disabled={masterDataLoading}
+                  isDisabled={masterDataLoading}
+                  variant="bordered"
+                  classNames={{
+                    label: "text-sm font-medium text-gray-700 mb-1",
+                  }}
                 >
-                  <option value="">Chọn loại hình IP</option>
-                  {masterData?.ipTypes.map((ipType) => (
-                    <option key={ipType.value} value={ipType.value}>
-                      {ipType.label}
-                    </option>
+                  {(masterData?.ipTypes || []).map((ipType) => (
+                    <SelectItem key={ipType.value}>{ipType.label}</SelectItem>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Số đơn/Số bằng
-                </label>
-                <input
-                  type="text"
+                </Select>
+                <Input
+                  label="Số đơn/Số bằng"
+                  placeholder="VD: VN1-001234"
                   value={ip.ipNumber}
                   onChange={(e) =>
                     onUpdateIPDetail(index, "ipNumber", e.target.value)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="VD: VN1-001234"
+                  variant="bordered"
+                  classNames={{
+                    label: "text-sm font-medium text-gray-700 mb-1",
+                    input: "text-sm",
+                  }}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tình trạng
-                </label>
-                <select
-                  value={ip.status}
+                <Select
+                  label="Tình trạng"
+                  placeholder="Chọn tình trạng"
+                  selectedKeys={ip.status ? [ip.status] : []}
                   onChange={(e) =>
                     onUpdateIPDetail(index, "status", e.target.value)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  disabled={masterDataLoading}
+                  isDisabled={masterDataLoading}
+                  variant="bordered"
+                  classNames={{
+                    label: "text-sm font-medium text-gray-700 mb-1",
+                  }}
                 >
-                  <option value="">Chọn tình trạng</option>
-                  {masterData?.ipStatuses.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
+                  {(masterData?.ipStatuses || []).map((status) => (
+                    <SelectItem key={status.value}>{status.label}</SelectItem>
                   ))}
-                </select>
+                </Select>
+                <div className="flex items-end">
+                  <Button
+                    color="danger"
+                    variant="flat"
+                    startContent={<Trash2 className="h-4 w-4" />}
+                    onClick={() => onRemoveIPDetail(index)}
+                  >
+                    Xóa
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-end">
-                <button
-                  type="button"
-                  onClick={() => onRemoveIPDetail(index)}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Xóa
-                </button>
-              </div>
-            </div>
 
-            {/* Mô tả IP - nằm dưới grid */}
-            {ip.ipType && (
-              <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
-                <strong>💡</strong> {getIPTypeDescription(ip.ipType, masterData)}
-              </div>
-            )}
-          </div>
+              {/* Mô tả IP - nằm dưới grid */}
+              {ip.ipType && (
+                <Card className="mt-3 bg-blue-50 border-blue-200">
+                  <CardBody className="p-2">
+                    <p className="text-xs text-blue-700">
+                      <strong>💡</strong>{" "}
+                      {getIPTypeDescription(ip.ipType, masterData || undefined)}
+                    </p>
+                  </CardBody>
+                </Card>
+              )}
+            </CardBody>
+          </Card>
         ))}
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };

@@ -15,7 +15,7 @@ export const Notifications: CollectionConfig = {
   },
   fields: [
     {
-      name: 'user_id',
+      name: 'user',
       type: 'relationship',
       relationTo: 'users',
       required: true,

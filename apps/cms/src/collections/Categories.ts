@@ -8,9 +8,9 @@ export const Categories: CollectionConfig = {
   },
   access: {
     read: () => true,
-    create: ({ req: { user } }) => !!user,
-    update: ({ req: { user } }) => !!user,
-    delete: ({ req: { user } }) => !!user,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
@@ -20,13 +20,21 @@ export const Categories: CollectionConfig = {
       label: 'Tên danh mục',
     },
     {
-      name: 'code',
+      name: 'code_intl',
       type: 'text',
-      required: true,
       unique: true,
-      label: 'Mã danh mục',
+      label: 'Mã danh mục quốc tế',
       admin: {
-        description: 'Mã định danh duy nhất cho danh mục này',
+        description: 'Mã danh mục quốc tế',
+      },
+    },
+    {
+      name: 'code_vn',
+      type: 'text',
+      unique: true,
+      label: 'Tên danh mục Việt Nam',
+      admin: {
+        description: 'Tên danh mục Việt Nam',
       },
     },
     {
@@ -36,26 +44,6 @@ export const Categories: CollectionConfig = {
       label: 'Danh mục cha',
       admin: {
         description: 'Chọn danh mục cha cho cấu trúc phân cấp',
-      },
-    },
-    {
-      name: 'level',
-      type: 'number',
-      required: true,
-      defaultValue: 1,
-      min: 1,
-      max: 5,
-      label: 'Cấp độ phân cấp',
-      admin: {
-        description: 'Cấp độ phân cấp danh mục (1-5)',
-      },
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-      label: 'Mô tả',
-      admin: {
-        description: 'Mô tả tùy chọn cho danh mục này',
       },
     },
   ],

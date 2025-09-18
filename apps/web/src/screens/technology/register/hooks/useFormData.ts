@@ -7,7 +7,6 @@ const createInitialFormData = (): TechnologyFormData => ({
   publicSummary: "",
   confidentialDetail: "",
   trlLevel: "",
-  categoryId: "",
   visibilityMode: "PUBLIC_SUMMARY",
   submitter: {
     submitterType: "INDIVIDUAL",
@@ -67,8 +66,6 @@ const createInitialFormData = (): TechnologyFormData => ({
   },
   classification: {
     field: "",
-    industry: "",
-    specialty: "",
   },
   documents: [],
 });
@@ -259,8 +256,6 @@ export const useFormData = () => {
       classification: {
         ...prev.classification,
         field: extractedData.field || prev.classification.field,
-        industry: extractedData.industry || prev.classification.industry,
-        specialty: extractedData.specialty || prev.classification.specialty,
       },
     }));
   }, []);

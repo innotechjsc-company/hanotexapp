@@ -4,6 +4,9 @@ export const Services: CollectionConfig = {
   slug: 'services',
   access: {
     read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
@@ -18,6 +21,5 @@ export const Services: CollectionConfig = {
       required: true,
       label: 'Mô tả dịch vụ',
     },
-    
   ],
 }

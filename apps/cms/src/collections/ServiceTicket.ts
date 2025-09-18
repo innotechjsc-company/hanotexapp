@@ -4,6 +4,9 @@ export const ServiceTicket: CollectionConfig = {
   slug: 'service-ticket',
   access: {
     read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
@@ -14,29 +17,28 @@ export const ServiceTicket: CollectionConfig = {
       label: 'Dịch vụ',
     },
     {
-        name: 'user',
-        type: 'relationship',
-        relationTo: 'users',
-        required: true,
-        label: 'Người dùng',
+      name: 'user',
+      type: 'relationship',
+      relationTo: 'users',
+      required: true,
+      label: 'Người dùng',
     },
     {
-        name: 'status',
-        type: 'select',
-        required: true,
-        options: [
-            { label: 'Chờ xử lý', value: 'PENDING' },
-            { label: 'Đang xử lý', value: 'PROCESSING' },
-            { label: 'Đã hoàn thành', value: 'COMPLETED' },
-        ],
-        label: 'Trạng thái',
+      name: 'status',
+      type: 'select',
+      required: true,
+      options: [
+        { label: 'Chờ xử lý', value: 'PENDING' },
+        { label: 'Đang xử lý', value: 'PROCESSING' },
+        { label: 'Đã hoàn thành', value: 'COMPLETED' },
+      ],
+      label: 'Trạng thái',
     },
-		{
-            name: 'implementer',
-            type: 'text',
-            required: true,
-            label: 'Người thực hiện',
-        },
-		
-	],
+    {
+      name: 'implementer',
+      type: 'text',
+      required: true,
+      label: 'Người thực hiện',
+    },
+  ],
 }

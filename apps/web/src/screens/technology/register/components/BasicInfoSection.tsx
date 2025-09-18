@@ -1,13 +1,26 @@
 import React from "react";
+import { Upload, Eye, FileText, Trash2, AlertCircle } from "lucide-react";
 import {
-  Upload,
-  Eye,
-  FileText,
-  Trash2,
-  AlertCircle,
-} from "lucide-react";
-import { TechnologyFormData, FileUpload, MasterData, OCRResult } from "../types";
+  TechnologyFormData,
+  FileUpload,
+  MasterData,
+  OCRResult,
+} from "../types";
 import { getTRLSuggestions } from "../utils";
+import { useCategories } from "@/hooks/useCategories";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
+  Select,
+  SelectItem,
+  Textarea,
+  Button,
+  Chip,
+  Spinner,
+  Divider,
+} from "@heroui/react";
 
 interface BasicInfoSectionProps {
   formData: TechnologyFormData;
@@ -17,7 +30,11 @@ interface BasicInfoSectionProps {
   setShowOptionalFields: (show: boolean) => void;
   ocrLoading: boolean;
   ocrResult: OCRResult | null;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   onFileUpload: (files: FileList | null) => void;
   onRemoveDocument: (index: number) => void;
 }
@@ -34,32 +51,33 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   onFileUpload,
   onRemoveDocument,
 }) => {
+  // Fetch categories from API
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError
+  } = useCategories();
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
+    <Card>
+      <CardHeader className="px-6 py-4">
         <h2 className="text-lg font-semibold text-gray-900">
-          2. Thông tin cơ bản *
+          1. Thông tin cơ bản *
         </h2>
-      </div>
-      <div className="p-6 space-y-4">
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Tên sản phẩm Khoa học/ Công nghệ *
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            required
-            value={formData.title}
-            onChange={onChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Nhập tên sản phẩm khoa học/công nghệ"
-          />
-        </div>
+      </CardHeader>
+      <CardBody className="p-6 space-y-4">
+        <Input
+          label="Tên sản phẩm Khoa học/ Công nghệ *"
+          placeholder="Nhập tên sản phẩm khoa học/công nghệ"
+          name="title"
+          value={formData.title}
+          onChange={onChange}
+          isRequired
+          variant="bordered"
+          classNames={{
+            label: "text-sm font-medium text-gray-700 mb-1",
+            input: "text-sm",
+          }}
+        />
 
         {/* Upload tài liệu */}
         <div>
@@ -68,9 +86,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           </label>
           <div
             className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
-            onClick={() =>
-              document.getElementById("file-upload")?.click()
-            }
+            onClick={() => document.getElementById("file-upload")?.click()}
           >
             <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-600 mb-2">
@@ -92,9 +108,9 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
 
           {/* OCR Loading State */}
           {ocrLoading && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+            <Card className="bg-blue-50 border-blue-200">
+              <CardBody className="flex flex-row items-center">
+                <Spinner size="sm" color="primary" className="mr-3" />
                 <div>
                   <p className="text-sm font-medium text-blue-800">
                     Đang xử lý OCR...
@@ -103,410 +119,303 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
                     Vui lòng chờ trong giây lát
                   </p>
                 </div>
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           )}
 
           {/* OCR Result */}
           {ocrResult && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-green-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3 flex-1">
-                  <h4 className="text-sm font-medium text-green-800">
-                    OCR xử lý thành công!
-                  </h4>
-                  <div className="mt-2 text-sm text-green-700">
-                    <p>
-                      <strong>File:</strong> {ocrResult.fileInfo?.name}
-                    </p>
-                    <p>
-                      <strong>Thời gian xử lý:</strong>{" "}
-                      {ocrResult.processingTime}
-                    </p>
-                    {ocrResult.extractedData && (
-                      <div className="mt-2">
-                        <p>
-                          <strong>Thông tin đã trích xuất:</strong>
-                        </p>
-                        <ul className="list-disc list-inside mt-1 space-y-1">
-                          {ocrResult.extractedData.title && (
-                            <li>Tên: {ocrResult.extractedData.title}</li>
-                          )}
-                          {ocrResult.extractedData.field && (
-                            <li>
-                              Lĩnh vực: {ocrResult.extractedData.field}
-                            </li>
-                          )}
-                          {ocrResult.extractedData.industry && (
-                            <li>
-                              Ngành: {ocrResult.extractedData.industry}
-                            </li>
-                          )}
-                          {ocrResult.extractedData.specialty && (
-                            <li>
-                              Chuyên ngành:{" "}
-                              {ocrResult.extractedData.specialty}
-                            </li>
-                          )}
-                          {ocrResult.extractedData.trlSuggestion && (
-                            <li>
-                              TRL gợi ý:{" "}
-                              {ocrResult.extractedData.trlSuggestion}
-                            </li>
-                          )}
-                          {ocrResult.extractedData.confidence && (
-                            <li>
-                              Độ tin cậy:{" "}
-                              {Math.round(
-                                ocrResult.extractedData.confidence * 100
-                              )}
-                              %
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
+            <Card className="bg-green-50 border-green-200">
+              <CardBody>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="h-5 w-5 text-green-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <h4 className="text-sm font-medium text-green-800">
+                      OCR xử lý thành công!
+                    </h4>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>
+                        <strong>File:</strong> {ocrResult.fileInfo?.name}
+                      </p>
+                      <p>
+                        <strong>Thời gian xử lý:</strong>{" "}
+                        {ocrResult.processingTime}
+                      </p>
+                      {ocrResult.extractedData && (
+                        <div className="mt-2">
+                          <p>
+                            <strong>Thông tin đã trích xuất:</strong>
+                          </p>
+                          <ul className="list-disc list-inside mt-1 space-y-1">
+                            {ocrResult.extractedData.title && (
+                              <li>Tên: {ocrResult.extractedData.title}</li>
+                            )}
+                            {ocrResult.extractedData.field && (
+                              <li>Lĩnh vực: {ocrResult.extractedData.field}</li>
+                            )}
+                            {ocrResult.extractedData.trlSuggestion && (
+                              <li>
+                                TRL gợi ý:{" "}
+                                {ocrResult.extractedData.trlSuggestion}
+                              </li>
+                            )}
+                            {ocrResult.extractedData.confidence && (
+                              <li>
+                                Độ tin cậy:{" "}
+                                {Math.round(
+                                  ocrResult.extractedData.confidence * 100
+                                )}
+                                %
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardBody>
+            </Card>
           )}
 
           {formData.documents.length > 0 && (
             <div className="mt-3 space-y-2">
               {formData.documents.map((doc, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center">
-                    <FileText className="h-4 w-4 text-gray-500 mr-2" />
-                    <span className="text-sm text-gray-700">
-                      {doc.name}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveDocument(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+                <Card key={index} className="bg-gray-50">
+                  <CardBody className="p-2 flex flex-row items-center justify-between">
+                    <div className="flex items-center">
+                      <FileText className="h-4 w-4 text-gray-500 mr-2" />
+                      <span className="text-sm text-gray-700">{doc.name}</span>
+                    </div>
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      color="danger"
+                      variant="light"
+                      onClick={() => onRemoveDocument(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardBody>
+                </Card>
               ))}
             </div>
           )}
         </div>
 
-        {/* Thông tin phân loại */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label
-              htmlFor="classification.field"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Lĩnh vực *
-            </label>
-            <select
-              id="classification.field"
+        {/* Thông tin phân loại - Lĩnh vực từ Categories API */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+          <div className="space-y-2">
+            <Select
+              label="Lĩnh vực *"
+              placeholder="Chọn lĩnh vực"
               name="classification.field"
-              required
-              value={formData.classification.field}
+              selectedKeys={
+                formData.classification.field
+                  ? [formData.classification.field]
+                  : []
+              }
               onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={masterDataLoading}
+              isRequired
+              isDisabled={categoriesLoading}
+              variant="bordered"
+              classNames={{
+                label: "text-sm font-medium text-gray-700 mb-1",
+              }}
             >
-              <option value="">Chọn lĩnh vực</option>
-              {masterData?.fields.map((field) => (
-                <option key={field.value} value={field.value}>
-                  {field.label}
-                </option>
+              {categories.map((category) => (
+                <SelectItem key={category.value}>{category.label}</SelectItem>
               ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="classification.industry"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Ngành *
-            </label>
-            <select
-              id="classification.industry"
-              name="classification.industry"
-              required
-              value={formData.classification.industry}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={masterDataLoading}
-            >
-              <option value="">Chọn ngành</option>
-              {masterData?.industries.map((industry) => (
-                <option key={industry.value} value={industry.value}>
-                  {industry.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="classification.specialty"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Chuyên ngành *
-            </label>
-            <select
-              id="classification.specialty"
-              name="classification.specialty"
-              required
-              value={formData.classification.specialty}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={masterDataLoading}
-            >
-              <option value="">Chọn chuyên ngành</option>
-              {masterData?.specialties.map((specialty) => (
-                <option key={specialty.value} value={specialty.value}>
-                  {specialty.label}
-                </option>
-              ))}
-            </select>
+            </Select>
+            
+            {/* Categories loading state */}
+            {categoriesLoading && (
+              <div className="flex items-center text-sm text-blue-600">
+                <Spinner size="sm" className="mr-2" />
+                Đang tải danh sách lĩnh vực...
+              </div>
+            )}
+            
+            {/* Categories error state */}
+            {categoriesError && (
+              <Card className="bg-red-50 border-red-200">
+                <CardBody className="flex flex-row items-center p-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
+                  <p className="text-xs text-red-600">{categoriesError}</p>
+                </CardBody>
+              </Card>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           <div>
-            <label
-              htmlFor="trlLevel"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Mức độ phát triển (TRL) *
-            </label>
-            <select
-              id="trlLevel"
+            <Select
+              label="Mức độ phát triển (TRL) *"
+              placeholder="Chọn mức độ TRL"
               name="trlLevel"
-              required
-              value={formData.trlLevel}
+              selectedKeys={formData.trlLevel ? [formData.trlLevel] : []}
               onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={masterDataLoading}
+              isRequired
+              isDisabled={masterDataLoading}
+              variant="bordered"
+              classNames={{
+                label: "text-sm font-medium text-gray-700 mb-1",
+              }}
             >
-              <option value="">Chọn mức độ TRL</option>
-              {masterData?.trlLevels.map((trl) => (
-                <option key={trl.value} value={trl.value}>
-                  {trl.label}
-                </option>
+              {(masterData?.trlLevels || []).map((trl) => (
+                <SelectItem key={trl.value}>{trl.label}</SelectItem>
               ))}
-            </select>
+            </Select>
 
             {/* Gợi ý TRL */}
-            {formData.trlLevel &&
-              getTRLSuggestions(formData.trlLevel) && (
-                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+            {formData.trlLevel && getTRLSuggestions(formData.trlLevel) && (
+              <Card className="mt-2 bg-blue-50 border-blue-200">
+                <CardBody className="p-2">
                   <p className="text-xs text-blue-700">
                     <strong>Gợi ý:</strong>{" "}
-                    {getTRLSuggestions(formData.trlLevel)?.fields.join(
-                      ", "
-                    )}
+                    {getTRLSuggestions(formData.trlLevel)?.fields.join(", ")}
                   </p>
-                </div>
-              )}
+                </CardBody>
+              </Card>
+            )}
           </div>
 
-          <div>
-            <label
-              htmlFor="categoryId"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Danh mục *{" "}
-              <span className="text-xs text-gray-500">
-                (Phân loại chính thức theo hệ thống HANOTEX)
-              </span>
-            </label>
-            <select
-              id="categoryId"
-              name="categoryId"
-              required
-              value={formData.categoryId}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              disabled={masterDataLoading}
-            >
-              <option value="">Chọn danh mục</option>
-              {masterData?.categories.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              Danh mục giúp phân loại và tìm kiếm công nghệ dễ dàng hơn
-              trên sàn giao dịch
-            </p>
-          </div>
         </div>
 
-        <div>
-          <label
-            htmlFor="publicSummary"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Tóm tắt công khai *
-          </label>
-          <textarea
-            id="publicSummary"
-            name="publicSummary"
-            required
-            rows={4}
-            value={formData.publicSummary}
-            onChange={onChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Mô tả ngắn gọn về công nghệ (sẽ hiển thị công khai)"
-          />
-        </div>
+        <Textarea
+          label="Tóm tắt công khai *"
+          placeholder="Mô tả ngắn gọn về công nghệ (sẽ hiển thị công khai)"
+          name="publicSummary"
+          value={formData.publicSummary}
+          onChange={onChange}
+          isRequired
+          minRows={4}
+          variant="bordered"
+          classNames={{
+            label: "text-sm font-medium text-gray-700 mb-1",
+            input: "text-sm",
+          }}
+        />
 
-        <div>
-          <label
-            htmlFor="confidentialDetail"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Chi tiết bảo mật
-          </label>
-          <textarea
-            id="confidentialDetail"
-            name="confidentialDetail"
-            rows={6}
-            value={formData.confidentialDetail}
-            onChange={onChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Mô tả chi tiết về công nghệ (chỉ hiển thị cho người có quyền truy cập)"
-          />
-        </div>
+        <Textarea
+          label="Chi tiết bảo mật"
+          placeholder="Mô tả chi tiết về công nghệ (chỉ hiển thị cho người có quyền truy cập)"
+          name="confidentialDetail"
+          value={formData.confidentialDetail}
+          onChange={onChange}
+          minRows={6}
+          variant="bordered"
+          classNames={{
+            label: "text-sm font-medium text-gray-700 mb-1",
+            input: "text-sm",
+          }}
+        />
 
-        <div>
-          <label
-            htmlFor="visibilityMode"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Chế độ hiển thị
-          </label>
-          <select
-            id="visibilityMode"
-            name="visibilityMode"
-            value={formData.visibilityMode}
-            onChange={onChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="PUBLIC_SUMMARY">Chỉ hiển thị tóm tắt</option>
-            <option value="PUBLIC_FULL">Hiển thị đầy đủ</option>
-            <option value="PRIVATE">Riêng tư</option>
-          </select>
-        </div>
+        <Select
+          label="Chế độ hiển thị"
+          name="visibilityMode"
+          selectedKeys={[formData.visibilityMode]}
+          onChange={onChange}
+          variant="bordered"
+          classNames={{
+            label: "text-sm font-medium text-gray-700 mb-1",
+          }}
+        >
+          <SelectItem key="PUBLIC_SUMMARY">Chỉ hiển thị tóm tắt</SelectItem>
+          <SelectItem key="PUBLIC_FULL">Hiển thị đầy đủ</SelectItem>
+          <SelectItem key="PRIVATE">Riêng tư</SelectItem>
+        </Select>
 
         {/* Thông tin bổ sung (Optional) */}
-        <div className="border-t border-gray-200 pt-4">
+        <Divider className="my-4" />
+        <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-md font-medium text-gray-900">
               Thông tin bổ sung
             </h3>
-            <button
-              type="button"
+            <Button
+              variant="flat"
+              color="primary"
+              size="sm"
+              startContent={<Eye className="h-4 w-4" />}
               onClick={() => setShowOptionalFields(!showOptionalFields)}
-              className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
-              <Eye className="h-4 w-4 mr-2" />
               {showOptionalFields
                 ? "Ẩn thông tin bổ sung"
                 : "Hiển thị thông tin bổ sung"}
-            </button>
+            </Button>
           </div>
           {showOptionalFields && (
             <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="optionalInfo.team"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Đội ngũ / Nhân lực/ Cơ sở hạ tầng
-                </label>
-                <textarea
-                  id="optionalInfo.team"
-                  name="optionalInfo.team"
-                  value={formData.optionalInfo.team}
-                  onChange={onChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Mô tả về đội ngũ phát triển, nhân lực chuyên môn..."
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="optionalInfo.testResults"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Kết quả thử nghiệm / Triển khai
-                </label>
-                <textarea
-                  id="optionalInfo.testResults"
-                  name="optionalInfo.testResults"
-                  value={formData.optionalInfo.testResults}
-                  onChange={onChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Mô tả kết quả thử nghiệm, triển khai thực tế..."
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="optionalInfo.economicSocialImpact"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Hiệu quả kinh tế - xã hội
-                </label>
-                <textarea
-                  id="optionalInfo.economicSocialImpact"
-                  name="optionalInfo.economicSocialImpact"
-                  value={formData.optionalInfo.economicSocialImpact}
-                  onChange={onChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Mô tả tác động kinh tế, xã hội, môi trường..."
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="optionalInfo.financialSupport"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Thông tin quỹ tài chính hỗ trợ
-                </label>
-                <textarea
-                  id="optionalInfo.financialSupport"
-                  name="optionalInfo.financialSupport"
-                  value={formData.optionalInfo.financialSupport}
-                  onChange={onChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Thông tin về quỹ hỗ trợ, tài trợ, chương trình khuyến khích..."
-                />
-              </div>
+              <Textarea
+                label="Đội ngũ / Nhân lực/ Cơ sở hạ tầng"
+                placeholder="Mô tả về đội ngũ phát triển, nhân lực chuyên môn..."
+                name="optionalInfo.team"
+                value={formData.optionalInfo.team}
+                onChange={onChange}
+                minRows={3}
+                variant="bordered"
+                classNames={{
+                  label: "text-sm font-medium text-gray-700 mb-1",
+                  input: "text-sm",
+                }}
+              />
+              <Textarea
+                label="Kết quả thử nghiệm / Triển khai"
+                placeholder="Mô tả kết quả thử nghiệm, triển khai thực tế..."
+                name="optionalInfo.testResults"
+                value={formData.optionalInfo.testResults}
+                onChange={onChange}
+                minRows={3}
+                variant="bordered"
+                classNames={{
+                  label: "text-sm font-medium text-gray-700 mb-1",
+                  input: "text-sm",
+                }}
+              />
+              <Textarea
+                label="Hiệu quả kinh tế - xã hội"
+                placeholder="Mô tả tác động kinh tế, xã hội, môi trường..."
+                name="optionalInfo.economicSocialImpact"
+                value={formData.optionalInfo.economicSocialImpact}
+                onChange={onChange}
+                minRows={3}
+                variant="bordered"
+                classNames={{
+                  label: "text-sm font-medium text-gray-700 mb-1",
+                  input: "text-sm",
+                }}
+              />
+              <Textarea
+                label="Thông tin quỹ tài chính hỗ trợ"
+                placeholder="Thông tin về quỹ hỗ trợ, tài trợ, chương trình khuyến khích..."
+                name="optionalInfo.financialSupport"
+                value={formData.optionalInfo.financialSupport}
+                onChange={onChange}
+                minRows={3}
+                variant="bordered"
+                classNames={{
+                  label: "text-sm font-medium text-gray-700 mb-1",
+                  input: "text-sm",
+                }}
+              />
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </CardBody>
+    </Card>
   );
 };

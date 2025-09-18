@@ -79,25 +79,26 @@ export default function Header() {
       ],
     },
     {
-      name: "Đầu tư",
-      href: "/investment",
+      name: "Dịch vụ",
+      href: "/services",
       icon: Building2,
       submenu: [
-        { name: "Cơ hội đầu tư", href: "/investment/opportunities" },
-        { name: "Chuyển giao công nghệ", href: "/investment/transfer" },
-        { name: "Hợp tác nghiên cứu", href: "/investment/research" },
-        { name: "Đăng cơ hội đầu tư", href: "/investment/register" },
+        { name: "Tư vấn công nghệ", href: "/services/consulting" },
+        { name: "Thẩm định & định giá", href: "/services/valuation" },
+        { name: "Tư vấn pháp lý", href: "/services/legal" },
+        { name: "Sở hữu trí tuệ", href: "/services/intellectual-property" },
+        { name: "Kết nối đầu tư", href: "/services/investment" },
+        { name: "Đào tạo & Hỗ trợ", href: "/services/training" },
       ],
     },
     {
-      name: "Danh sách",
-      href: "/lists",
-      icon: User,
+      name: "Quỹ & Đầu tư",
+      href: "/funds",
+      icon: Target,
       submenu: [
-        { name: "Cá nhân", href: "/lists/individuals" },
-        { name: "Doanh nghiệp", href: "/lists/companies" },
-        { name: "Viện/Trường/Tổ chức", href: "/lists/institutions" },
-        { name: "Tất cả thành viên", href: "/lists/all" },
+        { name: "Dự án đang hoạt động", href: "/funds/active-projects" },
+        { name: "Dự án đang gọi vốn", href: "/funds/fundraising" },
+        { name: "Danh sách Quỹ đầu tư", href: "/funds/investment-funds" },
       ],
     },
     {
@@ -112,6 +113,19 @@ export default function Header() {
         { name: "Sự kiện sắp diễn ra", href: "/events" },
         { name: "Hội thảo", href: "/events?type=seminar" },
         { name: "Triển lãm", href: "/events?type=exhibition" },
+      ],
+    },
+    {
+      name: "Giới thiệu",
+      href: "/about",
+      icon: User,
+      submenu: [
+        { name: "Về HANOTEX", href: "/about" },
+        { name: "Liên hệ", href: "/contact" },
+        { name: "Hướng dẫn sử dụng", href: "/user-guide" },
+        { name: "Câu hỏi thường gặp", href: "/faq" },
+        { name: "Chính sách bảo mật", href: "/privacy" },
+        { name: "Điều khoản sử dụng", href: "/terms" },
       ],
     },
   ];
@@ -135,11 +149,11 @@ export default function Header() {
   return (
     <header className="bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center h-20 gap-6">
+        <div className="flex items-center h-20 gap-4">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center group">
-              <div className="w-24 h-16 flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+              <div className="w-28 h-16 min-w-[112px] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
                 <img 
                   src="/logo.png" 
                   alt="HANOTEX Logo" 
@@ -150,7 +164,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2 flex-1 justify-center max-w-3xl ml-4">
+          <nav className="hidden lg:flex items-center space-x-2 flex-1 justify-center max-w-4xl ml-2">
             {mainMenuItems.map((item) => (
               <div key={item.name} className="relative group">
                 <Link
@@ -189,24 +203,25 @@ export default function Header() {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-2 flex-shrink-0 ml-4">
-            {/* Search Button */}
-            <button
-              onClick={() => setIsSearchModalOpen(true)}
-              className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 hover:scale-110 group"
-            >
-              <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
-            </button>
-
-            {/* Notifications */}
-            <button className="p-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300 hover:scale-110 relative group">
-              <Bell className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full animate-pulse shadow-md"></span>
-            </button>
-
+          <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
             {/* User Menu or Auth Buttons */}
             {isAuthenticated ? (
-              <div className="relative">
+              <>
+                {/* Search Button - Only show when authenticated */}
+                <button
+                  onClick={() => setIsSearchModalOpen(true)}
+                  className="p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 hover:scale-110 group"
+                >
+                  <Search className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                </button>
+
+                {/* Notifications - Only show when authenticated */}
+                <button className="p-3 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all duration-300 hover:scale-110 relative group">
+                  <Bell className="h-5 w-5 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full animate-pulse shadow-md"></span>
+                </button>
+
+                <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:shadow-md group min-w-0"
@@ -275,7 +290,8 @@ export default function Header() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
+              </>
             ) : (
               <div className="flex items-center space-x-2">
                 <Link
