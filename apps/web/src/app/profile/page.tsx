@@ -757,6 +757,82 @@ export default function ProfilePage() {
                                   "Chưa cập nhật"}
                               </p>
                             </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Số điện thoại liên hệ
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.company.contact_phone ||
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Website
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.company.website ||
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Địa chỉ
+                              </p>
+                              <p className="text-sm">
+                                {[
+                                  organizationData.company.address?.street,
+                                  organizationData.company.address?.city,
+                                  organizationData.company.address?.state,
+                                  organizationData.company.address?.country,
+                                  organizationData.company.address?.postal_code,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ") || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Số lượng nhân viên
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.company.employee_count ??
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Năm thành lập
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.company.established_year ??
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Lĩnh vực kinh doanh
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {(
+                                  organizationData.company.business_sectors ||
+                                  []
+                                ).length > 0 ? (
+                                  organizationData.company.business_sectors!.map(
+                                    (s, i) => (
+                                      <span
+                                        key={i}
+                                        className="px-2 py-1 text-xs rounded bg-default-100"
+                                      >
+                                        {s.sector}
+                                      </span>
+                                    )
+                                  )
+                                ) : (
+                                  <span className="text-sm">Chưa cập nhật</span>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         ) : (
                           <div className="text-center py-8">
@@ -854,6 +930,158 @@ export default function ProfilePage() {
                                     .institution_type
                                 }
                               </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Email liên hệ
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .contact_info?.contact_email ||
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Số điện thoại liên hệ
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .contact_info?.contact_phone ||
+                                  "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Website
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .contact_info?.website || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Địa chỉ
+                              </p>
+                              <p className="text-sm">
+                                {[
+                                  organizationData.researchInstitution.address
+                                    ?.street,
+                                  organizationData.researchInstitution.address
+                                    ?.city,
+                                  organizationData.researchInstitution.address
+                                    ?.state,
+                                  organizationData.researchInstitution.address
+                                    ?.country,
+                                  organizationData.researchInstitution.address
+                                    ?.postal_code,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ") || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Số lượng nhân viên
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .staff_count ?? "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Năm thành lập
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .established_year ?? "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Lĩnh vực nghiên cứu
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {(
+                                  organizationData.researchInstitution
+                                    .research_areas || []
+                                ).length > 0 ? (
+                                  organizationData.researchInstitution.research_areas!.map(
+                                    (a, i) => (
+                                      <span
+                                        key={i}
+                                        className="px-2 py-1 text-xs rounded bg-default-100"
+                                      >
+                                        {a.area}
+                                      </span>
+                                    )
+                                  )
+                                ) : (
+                                  <span className="text-sm">Chưa cập nhật</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Mã số đề tài nghiên cứu
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .research_task_code || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Báo cáo nghiệm thu
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .acceptance_report || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Nhóm nghiên cứu
+                              </p>
+                              <p className="text-sm">
+                                {organizationData.researchInstitution
+                                  .research_group || "Chưa cập nhật"}
+                              </p>
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                              <p className="text-sm font-medium text-default-500">
+                                Thông tin chứng nhận
+                              </p>
+                              <div className="text-sm space-y-1">
+                                <div>
+                                  <span className="font-medium">Cơ quan:</span>{" "}
+                                  {organizationData.researchInstitution
+                                    .accreditation_info?.accreditation_body ||
+                                    "Chưa cập nhật"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Cấp độ:</span>{" "}
+                                  {organizationData.researchInstitution
+                                    .accreditation_info?.accreditation_level ||
+                                    "Chưa cập nhật"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Ngày cấp:</span>{" "}
+                                  {organizationData.researchInstitution
+                                    .accreditation_info?.accreditation_date ||
+                                    "Chưa cập nhật"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">
+                                    Ngày hết hạn:
+                                  </span>{" "}
+                                  {organizationData.researchInstitution
+                                    .accreditation_info?.accreditation_expiry ||
+                                    "Chưa cập nhật"}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ) : (
