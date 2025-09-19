@@ -4,9 +4,12 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Card, CardHeader, CardBody, Spinner } from "@heroui/react";
-import type { MasterData } from "@/hooks/useMasterData";
+import { Card, CardHeader, CardBody } from "@heroui/react";
 import type { InvestmentDesire, TransferType } from "@/types/technologies";
+import {
+  commercializationMethods as commercializationConstants,
+  transferMethods as transferConstants,
+} from "@/constants/technology";
 
 interface InvestmentTransferInitialData {
   investment_desire?: InvestmentDesire[];
@@ -14,8 +17,7 @@ interface InvestmentTransferInitialData {
 }
 
 interface InvestmentTransferSectionProps {
-  masterData: MasterData | null;
-  masterDataLoading: boolean;
+  // Optional for compatibility; not used anymore
   initialData?: InvestmentTransferInitialData;
   onChange?: (data: Required<InvestmentTransferInitialData>) => void;
 }
@@ -28,11 +30,13 @@ export interface InvestmentTransferSectionRef {
 export const InvestmentTransferSection = forwardRef<
   InvestmentTransferSectionRef,
   InvestmentTransferSectionProps
->(({ masterData, masterDataLoading, initialData, onChange }, ref) => {
+>(({ initialData, onChange }, ref) => {
   // Local state for selections
   const [selectedCommercialization, setSelectedCommercialization] = useState<
     string[]
-  >(() => initialData?.investment_desire?.map((i) => i.investment_option) || []);
+  >(
+    () => initialData?.investment_desire?.map((i) => i.investment_option) || []
+  );
   const [selectedTransferMethods, setSelectedTransferMethods] = useState<
     string[]
   >(() => initialData?.transfer_type?.map((t) => t.transfer_option) || []);
@@ -65,76 +69,9 @@ export const InvestmentTransferSection = forwardRef<
       })),
     });
   }, [onChange, selectedCommercialization, selectedTransferMethods]);
-  // Fallback data matching API structure
-  const defaultCommercializationMethods = [
-    {
-      value: "B2B",
-      label: "B2B",
-      description: "Bán cho doanh nghiệp khác",
-    },
-    {
-      value: "B2C",
-      label: "B2C",
-      description: "Bán trực tiếp cho người tiêu dùng",
-    },
-    {
-      value: "Licensing",
-      label: "Licensing",
-      description: "Cấp phép sử dụng công nghệ",
-    },
-    {
-      value: "OEM/ODM",
-      label: "OEM/ODM",
-      description: "Sản xuất theo đơn đặt hàng",
-    },
-    {
-      value: "Joint Venture",
-      label: "Joint Venture",
-      description: "Liên doanh với đối tác",
-    },
-    {
-      value: "Spin-off",
-      label: "Spin-off",
-      description: "Tách ra thành công ty riêng",
-    },
-  ];
-
-  const defaultTransferMethods = [
-    {
-      value: "Chuyển nhượng toàn bộ",
-      label: "Chuyển nhượng toàn bộ",
-      description: "Bán hoàn toàn quyền sở hữu",
-    },
-    {
-      value: "Chuyển nhượng một phần",
-      label: "Chuyển nhượng một phần",
-      description: "Bán một phần quyền sở hữu",
-    },
-    {
-      value: "License độc quyền",
-      label: "License độc quyền",
-      description: "Cấp phép độc quyền cho một bên",
-    },
-    {
-      value: "License không độc quyền",
-      label: "License không độc quyền",
-      description: "Cấp phép cho nhiều bên",
-    },
-    {
-      value: "Sub-license",
-      label: "Sub-license",
-      description: "Cho phép bên được cấp phép cấp lại",
-    },
-    {
-      value: "Kèm dịch vụ kỹ thuật",
-      label: "Kèm dịch vụ kỹ thuật",
-      description: "Bao gồm hỗ trợ kỹ thuật, training",
-    },
-  ];
-
-  const commercializationMethods =
-    masterData?.commercializationMethods || defaultCommercializationMethods;
-  const transferMethods = masterData?.transferMethods || defaultTransferMethods;
+  // Use constants (no master data)
+  const commercializationMethods = commercializationConstants;
+  const transferMethods = transferConstants;
 
   const handleCommercializationChange = (method: string, checked: boolean) => {
     setSelectedCommercialization((prev) =>
@@ -161,34 +98,31 @@ export const InvestmentTransferSection = forwardRef<
             Phương án thương mại hóa (chọn nhiều)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 border border-gray-200 rounded-lg p-4">
-            {masterDataLoading ? (
-              <div className="col-span-3 flex items-center text-gray-600">
-                <Spinner size="sm" className="mr-2" /> Đang tải...
+            {commercializationMethods.map((item) => (
+              <div key={item.value} className="w-full">
+                <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={selectedCommercialization.includes(item.value)}
+                    onChange={(e) =>
+                      handleCommercializationChange(
+                        item.value,
+                        e.target.checked
+                      )
+                    }
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <div className="flex flex-col w-full">
+                    <span className="font-medium text-sm">{item.value}</span>
+                    {item.tooltip && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {item.tooltip}
+                      </span>
+                    )}
+                  </div>
+                </label>
               </div>
-            ) : (
-              commercializationMethods.map((item) => (
-                <div key={item.value} className="w-full">
-                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={selectedCommercialization.includes(item.value)}
-                      onChange={(e) =>
-                        handleCommercializationChange(item.value, e.target.checked)
-                      }
-                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <div className="flex flex-col w-full">
-                      <span className="font-medium text-sm">{item.label}</span>
-                      {item.description && (
-                        <span className="text-xs text-gray-500 mt-0.5">
-                          {item.description}
-                        </span>
-                      )}
-                    </div>
-                  </label>
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
 
@@ -197,34 +131,28 @@ export const InvestmentTransferSection = forwardRef<
             Hình thức chuyển quyền (chọn nhiều)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 border border-gray-200 rounded-lg p-4">
-            {masterDataLoading ? (
-              <div className="col-span-3 flex items-center text-gray-600">
-                <Spinner size="sm" className="mr-2" /> Đang tải...
+            {transferMethods.map((item) => (
+              <div key={item.value} className="w-full">
+                <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={selectedTransferMethods.includes(item.value)}
+                    onChange={(e) =>
+                      handleTransferMethodChange(item.value, e.target.checked)
+                    }
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <div className="flex flex-col w-full">
+                    <span className="font-medium text-sm">{item.value}</span>
+                    {item.tooltip && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        {item.tooltip}
+                      </span>
+                    )}
+                  </div>
+                </label>
               </div>
-            ) : (
-              transferMethods.map((item) => (
-                <div key={item.value} className="w-full">
-                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={selectedTransferMethods.includes(item.value)}
-                      onChange={(e) =>
-                        handleTransferMethodChange(item.value, e.target.checked)
-                      }
-                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <div className="flex flex-col w-full">
-                      <span className="font-medium text-sm">{item.label}</span>
-                      {item.description && (
-                        <span className="text-xs text-gray-500 mt-0.5">
-                          {item.description}
-                        </span>
-                      )}
-                    </div>
-                  </label>
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </CardBody>
