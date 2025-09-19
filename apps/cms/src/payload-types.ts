@@ -81,6 +81,9 @@ export interface Config {
     services: Service;
     'service-ticket': ServiceTicket;
     trl: Trl;
+    demand: Demand;
+    'investment-fund': InvestmentFund;
+    project: Project;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -101,6 +104,9 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
     trl: TrlSelect<false> | TrlSelect<true>;
+    demand: DemandSelect<false> | DemandSelect<true>;
+    'investment-fund': InvestmentFundSelect<false> | InvestmentFundSelect<true>;
+    project: ProjectSelect<false> | ProjectSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -701,6 +707,57 @@ export interface Trl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demand".
+ */
+export interface Demand {
+  id: string;
+  title: string;
+  description: string;
+  category: string | Category;
+  user: string | User;
+  trl_level: number;
+  option?: string | null;
+  option_technology?: string | null;
+  option_rule?: string | null;
+  from_price?: number | null;
+  to_price?: number | null;
+  cooperation?: string | null;
+  documents?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "investment-fund".
+ */
+export interface InvestmentFund {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project".
+ */
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
+  technology: string | Technology;
+  investment_fund: string | InvestmentFund;
+  status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
+  goal_money?: number | null;
+  end_date?: string | null;
+  documents?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -761,6 +818,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trl';
         value: string | Trl;
+      } | null)
+    | ({
+        relationTo: 'demand';
+        value: string | Demand;
+      } | null)
+    | ({
+        relationTo: 'investment-fund';
+        value: string | InvestmentFund;
+      } | null)
+    | ({
+        relationTo: 'project';
+        value: string | Project;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1129,6 +1198,54 @@ export interface TrlSelect<T extends boolean = true> {
   title?: T;
   value?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demand_select".
+ */
+export interface DemandSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  user?: T;
+  trl_level?: T;
+  option?: T;
+  option_technology?: T;
+  option_rule?: T;
+  from_price?: T;
+  to_price?: T;
+  cooperation?: T;
+  documents?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "investment-fund_select".
+ */
+export interface InvestmentFundSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project_select".
+ */
+export interface ProjectSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  user?: T;
+  technology?: T;
+  investment_fund?: T;
+  status?: T;
+  goal_money?: T;
+  end_date?: T;
+  documents?: T;
   updatedAt?: T;
   createdAt?: T;
 }
