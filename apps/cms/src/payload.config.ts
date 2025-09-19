@@ -22,6 +22,8 @@ import { Services } from './collections/Services'
 import { ServiceTicket } from './collections/ServiceTicket'
 import { TRL } from './collections/TRL'
 import { Demand } from './collections/Demand'
+import { InvestmentFund } from './collections/InvestmentFund'
+import { Project } from './collections/Project'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -33,10 +35,12 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  // Allow web app at localhost:3000 to access the CMS API
-  cors: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  // Allow CSRF for cookie-based auth from the web app
-  csrf: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  cors: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    // Add production domains here when needed
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
+  ],
   collections: [
     Users,
     Companies,
@@ -53,6 +57,8 @@ export default buildConfig({
     ServiceTicket,
     TRL,
     Demand,
+    InvestmentFund,
+    Project,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
@@ -63,6 +69,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
+    idType: 'uuid',
   }),
   sharp,
   plugins: [

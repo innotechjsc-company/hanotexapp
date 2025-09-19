@@ -35,9 +35,10 @@ export const Technologies: CollectionConfig = {
     },
     {
       name: 'trl_level',
-      type: 'relationship',
+      type: 'number',
       required: true,
-      relationTo: 'trl',
+      min: 1,
+      max: 9,
       label: 'Mức TRL',
     },
     {

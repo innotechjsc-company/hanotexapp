@@ -1,6 +1,13 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+// CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
 export const POST = async (req: Request) => {
   const payload = await getPayload({ config: configPromise })
 
@@ -10,7 +17,7 @@ export const POST = async (req: Request) => {
   } catch (e) {
     return new Response(JSON.stringify({ success: false, error: 'Invalid JSON' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
   }
 
@@ -19,6 +26,9 @@ export const POST = async (req: Request) => {
       collection: 'technologies',
       data,
     })
+
+    // Log để verify UUID được tạo tự động
+    console.log('Technology created with UUID:', created.id, typeof created.id)
     // Optionally create related Intellectual Property records
     const ipInput = data?.intellectual_property ?? data?.intellectualProperty
     let createdIPs: any[] | undefined
@@ -44,14 +54,30 @@ export const POST = async (req: Request) => {
       }
     }
 
-    return new Response(JSON.stringify({ success: true, technology: created, intellectual_property: createdIPs, ipErrors }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({
+        success: true,
+        technology: created,
+        intellectual_property: createdIPs,
+        ipErrors,
+      }),
+      {
+        status: 201,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      },
+    )
   } catch (e: any) {
     return new Response(JSON.stringify({ success: false, error: e?.message ?? 'Create failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
   }
+}
+
+// Handle preflight requests for CORS
+export const OPTIONS = async () => {
+  return new Response(null, {
+    status: 200,
+    headers: corsHeaders,
+  })
 }
