@@ -106,7 +106,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {};
   globalsSelect: {};
@@ -142,7 +142,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   user_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
   role: 'USER' | 'ADMIN' | 'MODERATOR' | 'SUPPORT';
   is_verified?: boolean | null;
@@ -170,11 +170,11 @@ export interface User {
   /**
    * Liên kết đến thông tin công ty
    */
-  company?: (number | null) | Company;
+  company?: (string | null) | Company;
   /**
    * Liên kết đến thông tin viện nghiên cứu
    */
-  research_institution?: (number | null) | ResearchInstitution;
+  research_institution?: (string | null) | ResearchInstitution;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -198,7 +198,7 @@ export interface User {
  * via the `definition` "companies".
  */
 export interface Company {
-  id: number;
+  id: string;
   /**
    * Tên chính thức của công ty
    */
@@ -267,7 +267,7 @@ export interface Company {
  * via the `definition` "research-institutions".
  */
 export interface ResearchInstitution {
-  id: number;
+  id: string;
   /**
    * Tên chính thức của viện nghiên cứu
    */
@@ -342,7 +342,7 @@ export interface ResearchInstitution {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   /**
    * Mô tả ngắn gọn về file media (dùng cho SEO và accessibility). Sẽ tự động tạo từ tên file nếu để trống.
    */
@@ -372,7 +372,7 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   /**
    * Mã danh mục quốc tế
@@ -385,7 +385,7 @@ export interface Category {
   /**
    * Chọn danh mục cha cho cấu trúc phân cấp
    */
-  parent?: (number | null) | Category;
+  parent?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -394,11 +394,11 @@ export interface Category {
  * via the `definition` "technologies".
  */
 export interface Technology {
-  id: number;
+  id: string;
   title: string;
-  documents?: (number | Media)[] | null;
-  category?: (number | null) | Category;
-  trl_level: number | Trl;
+  documents?: (string | Media)[] | null;
+  category?: (string | null) | Category;
+  trl_level: number;
   description?: string | null;
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
@@ -428,7 +428,7 @@ export interface Technology {
           id?: string | null;
         }[]
       | null;
-    files?: (number | Media)[] | null;
+    files?: (string | Media)[] | null;
   };
   investment_desire?:
     | {
@@ -495,21 +495,9 @@ export interface Technology {
       [k: string]: unknown;
     } | null;
   };
-  submitter: number | User;
+  submitter: string | User;
   status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
   visibility_mode?: ('public' | 'private' | 'restricted') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trl".
- */
-export interface Trl {
-  id: number;
-  title: string;
-  value: number;
-  description: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -518,11 +506,11 @@ export interface Trl {
  * via the `definition` "intellectual_property".
  */
 export interface IntellectualProperty {
-  id: number;
+  id: string;
   /**
    * Sản phẩm khoa học/công nghệ
    */
-  technology?: (number | null) | Technology;
+  technology?: (string | null) | Technology;
   /**
    * Số đơn/số bằng
    */
@@ -543,11 +531,11 @@ export interface IntellectualProperty {
  * via the `definition` "auctions".
  */
 export interface Auction {
-  id: number;
+  id: string;
   /**
    * Công nghệ được đấu giá
    */
-  technology: number | Technology;
+  technology: string | Technology;
   auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
   /**
    * Giá ban đầu cho phiên đấu giá
@@ -567,7 +555,7 @@ export interface Auction {
   /**
    * Tất cả các lượt đặt giá cho phiên đấu giá này
    */
-  bids?: (number | Bid)[] | null;
+  bids?: (string | Bid)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -576,9 +564,9 @@ export interface Auction {
  * via the `definition` "bids".
  */
 export interface Bid {
-  id: number;
-  auction: number | Auction;
-  bidder: number | User;
+  id: string;
+  auction: string | Auction;
+  bidder: string | User;
   bid_amount: number;
   bid_time: string;
   /**
@@ -593,19 +581,19 @@ export interface Bid {
  * via the `definition` "transactions".
  */
 export interface Transaction {
-  id: number;
+  id: string;
   /**
    * Công nghệ liên quan đến giao dịch này
    */
-  technology?: (number | null) | Technology;
+  technology?: (string | null) | Technology;
   /**
    * Người dùng thực hiện giao dịch mua
    */
-  buyer?: (number | null) | User;
+  buyer?: (string | null) | User;
   /**
    * Người dùng thực hiện giao dịch bán
    */
-  seller?: (number | null) | User;
+  seller?: (string | null) | User;
   amount: number;
   currency: 'VND' | 'USD' | 'EUR';
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
@@ -628,7 +616,7 @@ export interface Transaction {
   /**
    * Nếu giao dịch này phát sinh từ một phiên đấu giá
    */
-  auction?: (number | null) | Auction;
+  auction?: (string | null) | Auction;
   updatedAt: string;
   createdAt: string;
 }
@@ -637,11 +625,11 @@ export interface Transaction {
  * via the `definition` "notifications".
  */
 export interface Notification {
-  id: number;
+  id: string;
   /**
    * Người dùng sẽ nhận thông báo này
    */
-  user: number | User;
+  user: string | User;
   title: string;
   /**
    * Nội dung chính của thông báo
@@ -658,15 +646,15 @@ export interface Notification {
   /**
    * Công nghệ liên quan đến thông báo này
    */
-  related_technology?: (number | null) | Technology;
+  related_technology?: (string | null) | Technology;
   /**
    * Phiên đấu giá liên quan đến thông báo này
    */
-  related_auction?: (number | null) | Auction;
+  related_auction?: (string | null) | Auction;
   /**
    * Giao dịch liên quan đến thông báo này
    */
-  related_transaction?: (number | null) | Transaction;
+  related_transaction?: (string | null) | Transaction;
   /**
    * URL để điều hướng khi nhấp vào thông báo
    */
@@ -680,7 +668,7 @@ export interface Notification {
  * via the `definition` "services".
  */
 export interface Service {
-  id: number;
+  id: string;
   name: string;
   description: string;
   updatedAt: string;
@@ -691,11 +679,23 @@ export interface Service {
  * via the `definition` "service-ticket".
  */
 export interface ServiceTicket {
-  id: number;
-  service: number | Service;
-  user: number | User;
+  id: string;
+  service: string | Service;
+  user: string | User;
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
   implementer: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trl".
+ */
+export interface Trl {
+  id: string;
+  title: string;
+  value: number;
+  description: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -704,68 +704,68 @@ export interface ServiceTicket {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'companies';
-        value: number | Company;
+        value: string | Company;
       } | null)
     | ({
         relationTo: 'research-institutions';
-        value: number | ResearchInstitution;
+        value: string | ResearchInstitution;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'technologies';
-        value: number | Technology;
+        value: string | Technology;
       } | null)
     | ({
         relationTo: 'intellectual_property';
-        value: number | IntellectualProperty;
+        value: string | IntellectualProperty;
       } | null)
     | ({
         relationTo: 'auctions';
-        value: number | Auction;
+        value: string | Auction;
       } | null)
     | ({
         relationTo: 'bids';
-        value: number | Bid;
+        value: string | Bid;
       } | null)
     | ({
         relationTo: 'transactions';
-        value: number | Transaction;
+        value: string | Transaction;
       } | null)
     | ({
         relationTo: 'notifications';
-        value: number | Notification;
+        value: string | Notification;
       } | null)
     | ({
         relationTo: 'services';
-        value: number | Service;
+        value: string | Service;
       } | null)
     | ({
         relationTo: 'service-ticket';
-        value: number | ServiceTicket;
+        value: string | ServiceTicket;
       } | null)
     | ({
         relationTo: 'trl';
-        value: number | Trl;
+        value: string | Trl;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -775,10 +775,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -798,7 +798,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
