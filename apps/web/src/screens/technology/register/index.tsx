@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   TechnologyOwnersSection,
   LegalTerritorySection,
@@ -38,13 +39,11 @@ export default function RegisterTechnologyPage() {
   const { masterData, loading: masterDataLoading } = useMasterData();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
     setSubmitError(null);
-    setSubmitSuccess(null);
 
     (async () => {
       try {
@@ -104,8 +103,10 @@ export default function RegisterTechnologyPage() {
 
         const created = await createTechnology(payload as any);
         console.log("Created technology:", created);
-        setSubmitSuccess("Tạo công nghệ thành công");
-        // Optionally navigate or reset form here
+
+        // Show success toast and navigate to technologies page
+        toast.success("Đăng ký công nghệ thành công!");
+        router.push("/technologies");
       } catch (err: any) {
         console.error("Submit error:", err);
         setSubmitError(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
