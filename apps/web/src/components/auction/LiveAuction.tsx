@@ -12,9 +12,9 @@ import {
   Timer,
 } from "lucide-react";
 import { useAuctionWebSocket } from "@/hooks/useWebSocket";
-import { Bid } from "@/types/Bid";
+import { Bid } from "@/types/bids";
 import { useAuth } from "@/store/auth";
-import { Auction } from "@/types/Auction";
+import { Auction } from "@/types/auctions";
 
 interface LiveAuctionProps {
   auction: Auction;

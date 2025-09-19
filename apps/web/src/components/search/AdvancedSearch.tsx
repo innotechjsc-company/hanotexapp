@@ -16,11 +16,11 @@ import {
   Save,
   History
 } from 'lucide-react';
-import { TechnologySearchParams } from '@/types';
+// import { TechnologySearchParams } from '@/types';
 import { useMasterData } from '@/hooks/useMasterData';
 
 interface AdvancedSearchProps {
-  onSearch?: (params: TechnologySearchParams) => void;
+  onSearch?: (params: any) => void;
   className?: string;
 }
 
@@ -31,7 +31,7 @@ export default function AdvancedSearch({ onSearch, className = '' }: AdvancedSea
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<TechnologySearchParams>({
+  const [filters, setFilters] = useState<any>({
     category_id: '',
     trl_level: undefined,
     user_type: undefined,
@@ -54,7 +54,7 @@ export default function AdvancedSearch({ onSearch, className = '' }: AdvancedSea
     const maxPrice = searchParams.get('max_price');
     
     setSearchQuery(query);
-    setFilters(prev => ({
+    setFilters((prev: any) => ({
       ...prev,
       query,
       category_id: category,
@@ -78,7 +78,7 @@ export default function AdvancedSearch({ onSearch, className = '' }: AdvancedSea
   }, []);
 
   const handleSearch = () => {
-    const searchParams: TechnologySearchParams = {
+    const searchParams: any = {
       ...filters,
       query: searchQuery,
       page: 1,
@@ -111,8 +111,8 @@ export default function AdvancedSearch({ onSearch, className = '' }: AdvancedSea
     }
   };
 
-  const handleFilterChange = (key: keyof TechnologySearchParams, value: any) => {
-    setFilters(prev => ({
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters((prev: any) => ({
       ...prev,
       [key]: value,
     }));

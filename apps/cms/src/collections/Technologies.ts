@@ -34,14 +34,6 @@ export const Technologies: CollectionConfig = {
       label: 'Lĩnh vực',
     },
     {
-      name: 'confidential_detail',
-      type: 'textarea',
-      label: 'Chi tiết Bảo mật',
-      admin: {
-        description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
-      },
-    },
-    {
       name: 'trl_level',
       type: 'relationship',
       required: true,
@@ -49,37 +41,19 @@ export const Technologies: CollectionConfig = {
       label: 'Mức TRL',
     },
     {
-      name: 'submitter',
-      type: 'relationship',
-      relationTo: 'users',
-      label: 'Người đăng tải',
-      required: true,
+      name: 'description',
+      type: 'textarea',
+      label: 'Tóm tắt công khai',
     },
     {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'DRAFT',
-      options: [
-        { label: 'Bản nháp', value: 'DRAFT' },
-        { label: 'Đang chờ duyệt', value: 'PENDING' },
-        { label: 'Đã duyệt', value: 'APPROVED' },
-        { label: 'Từ chối', value: 'REJECTED' },
-        { label: 'Hoạt động', value: 'ACTIVE' },
-        { label: 'Không hoạt động', value: 'INACTIVE' },
-      ],
+      name: 'confidential_detail',
+      type: 'textarea',
+      label: 'Chi tiết Bảo mật',
+      admin: {
+        description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
+      },
     },
-    {
-      name: 'visibility_mode',
-      type: 'select',
-      defaultValue: 'public',
-      options: [
-        { label: 'Công khai', value: 'public' },
-        { label: 'Riêng tư', value: 'private' },
-        { label: 'Hạn chế', value: 'restricted' },
-      ],
-    },
-    // Technology Owners
+    // Chủ sở hữu công nghệ
     {
       name: 'owners',
       type: 'array',
@@ -90,9 +64,9 @@ export const Technologies: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
-            { label: 'Cá nhân', value: 'INDIVIDUAL' },
-            { label: 'Công ty', value: 'COMPANY' },
-            { label: 'Viện nghiên cứu', value: 'RESEARCH_INSTITUTION' },
+            { label: 'Cá nhân', value: 'individual' },
+            { label: 'Công ty', value: 'company' },
+            { label: 'Viện/Trường', value: 'research_institution' },
           ],
         },
         {
@@ -113,7 +87,9 @@ export const Technologies: CollectionConfig = {
         },
       ],
     },
-    // Legal Certification
+    // Sở hữu trí tuệ (Bảng Intellectual Property)
+
+    // Pháp lý & Lãnh thổ
     {
       name: 'legal_certification',
       type: 'group',
@@ -144,13 +120,15 @@ export const Technologies: CollectionConfig = {
           ],
         },
         {
-          name: 'local_certification_url',
-          type: 'text',
+          name: 'files',
+          type: 'upload',
+          relationTo: 'media',
           label: 'File chứng nhận',
+          hasMany: true,
         },
       ],
     },
-    // Mong muốn đầu tư & Hình thức chuyển giao
+    // Mong muốn đầu tư
     {
       name: 'investment_desire',
       type: 'array',
@@ -160,6 +138,19 @@ export const Technologies: CollectionConfig = {
           name: 'investment_option',
           type: 'text',
           label: 'Mong muốn đầu tư & Hình thức chuyển giao',
+        },
+      ],
+    },
+    // Hình thức chuyển giao
+    {
+      name: 'transfer_type',
+      type: 'array',
+      label: 'Hình thức chuyển giao',
+      fields: [
+        {
+          name: 'transfer_option',
+          type: 'text',
+          label: 'Hình thức chuyển giao',
         },
       ],
     },
@@ -174,9 +165,9 @@ export const Technologies: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
-            { label: 'Grant/Seed (TRL 1–3)', value: 'GRANT_SEED' },
-            { label: 'VC/Joint Venture (TRL 4–6)', value: 'VC_JOINT_VENTURE' },
-            { label: 'Growth/Strategic (TRL 7–9)', value: 'GROWTH_STRATEGIC' },
+            { label: 'Grant/Seed (TRL 1–3)', value: 'grant_seed' },
+            { label: 'VC/Joint Venture (TRL 4–6)', value: 'vc_joint_venture' },
+            { label: 'Growth/Strategic (TRL 7–9)', value: 'growth_strategic' },
           ],
         },
         {
@@ -195,11 +186,11 @@ export const Technologies: CollectionConfig = {
           name: 'currency',
           type: 'select',
           required: true,
-          defaultValue: 'VND',
+          defaultValue: 'vnd',
           options: [
-            { label: 'Đồng Việt Nam (VND)', value: 'VND' },
-            { label: 'Đô la Mỹ (USD)', value: 'USD' },
-            { label: 'Euro (EUR)', value: 'EUR' },
+            { label: 'Đồng Việt Nam (VND)', value: 'vnd' },
+            { label: 'Đô la Mỹ (USD)', value: 'usd' },
+            { label: 'Euro (EUR)', value: 'eur' },
           ],
         },
       ],
@@ -228,13 +219,34 @@ export const Technologies: CollectionConfig = {
       ],
     },
     {
-      name: 'display_mode',
+      name: 'submitter',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Người đăng tải',
+      required: true,
+    },
+    {
+      name: 'status',
       type: 'select',
-      defaultValue: 'public_summary_with_nda_details',
+      required: true,
+      defaultValue: 'draft',
       options: [
-        { label: 'Tóm tắt công khai + Chi tiết sau NDA', value: 'public_summary_with_nda_details' },
-        { label: 'Hoàn toàn công khai', value: 'fully_public' },
-        { label: 'Riêng tư (chỉ theo lời mời)', value: 'private_by_invitation' },
+        { label: 'Bản nháp', value: 'draft' },
+        { label: 'Đang chờ duyệt', value: 'pending' },
+        { label: 'Đã duyệt', value: 'approved' },
+        { label: 'Từ chối', value: 'rejected' },
+        { label: 'Hoạt động', value: 'active' },
+        { label: 'Không hoạt động', value: 'inactive' },
+      ],
+    },
+    {
+      name: 'visibility_mode',
+      type: 'select',
+      defaultValue: 'public',
+      options: [
+        { label: 'Công khai', value: 'public' },
+        { label: 'Riêng tư', value: 'private' },
+        { label: 'Hạn chế', value: 'restricted' },
       ],
     },
   ],

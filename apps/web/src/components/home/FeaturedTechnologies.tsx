@@ -75,8 +75,8 @@ export default function FeaturedTechnologies() {
                       {getStatusText(tech.status)}
                     </span>
                     {tech.trl_level && (
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTRLColor(tech.trl_level)}`}>
-                        TRL {tech.trl_level}
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTRLColor(Number(tech.trl_level))}`}>
+                        TRL {String(tech.trl_level)}
                       </span>
                     )}
                   </div>
@@ -94,23 +94,23 @@ export default function FeaturedTechnologies() {
                   )}
 
                   {/* Category */}
-                  {tech.category_name && (
+                  {tech.category && (
                     <div className="text-sm text-gray-500 mb-4">
-                      <span className="font-medium">Danh mục:</span> {tech.category_name}
+                      <span className="font-medium">Danh mục:</span> {typeof tech.category === 'object' ? tech.category.name : 'N/A'}
                     </div>
                   )}
 
                   {/* Price */}
-                  {tech.asking_price && (
+                  {tech.pricing && (
                     <div className="text-lg font-bold text-primary-600 mb-4">
-                      {formatCurrency(tech.asking_price, tech.currency || 'VND')}
+                      {formatCurrency(tech.pricing.price_from, tech.pricing.currency)}
                     </div>
                   )}
 
                   {/* Meta Info */}
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>{formatDate(tech.created_at)}</span>
-                    <span>{getUserTypeLabel(tech.submitter_type || '')}</span>
+                    <span>{formatDate(tech.createdAt || '')}</span>
+                    <span>{getUserTypeLabel(typeof tech.submitter === 'object' ? tech.submitter.user_type : '')}</span>
                   </div>
 
                   {/* Actions */}

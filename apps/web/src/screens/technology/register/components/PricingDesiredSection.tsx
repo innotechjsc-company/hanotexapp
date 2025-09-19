@@ -1,5 +1,9 @@
-import React from "react";
-import { Pricing } from "../types";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+} from "react";
 import {
   Card,
   CardHeader,
@@ -8,36 +12,81 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
+import type { PricingInfo, Currency, PricingType } from "@/types/technologies";
 
-interface PricingDesiredSectionProps {
-  pricing: Pricing;
-  investmentStage: string;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => void;
+interface PricingDesiredInitialData {
+  pricing?: Partial<PricingInfo>;
+  investmentStage?: string;
 }
 
-export const PricingDesiredSection: React.FC<PricingDesiredSectionProps> = ({
-  pricing,
-  investmentStage,
-  onChange,
-}) => {
-  // Hardcoded options as requested
+interface PricingDesiredSectionProps {
+  initialData?: PricingDesiredInitialData;
+  onChange?: (data: { pricing: PricingInfo }) => void;
+}
+
+export interface PricingDesiredSectionRef {
+  getData: () => PricingInfo;
+  reset: () => void;
+}
+
+export const PricingDesiredSection = forwardRef<
+  PricingDesiredSectionRef,
+  PricingDesiredSectionProps
+>(({ initialData, onChange }, ref) => {
+  const [pricingType, setPricingType] = useState<PricingType>(
+    initialData?.pricing?.pricing_type || ("grant_seed" as PricingType)
+  );
+  const [priceFrom, setPriceFrom] = useState<string>(
+    initialData?.pricing?.price_from != null
+      ? String(initialData.pricing.price_from)
+      : ""
+  );
+  const [priceTo, setPriceTo] = useState<string>(
+    initialData?.pricing?.price_to != null
+      ? String(initialData.pricing.price_to)
+      : ""
+  );
+  const [currency, setCurrency] = useState<Currency>(
+    initialData?.pricing?.currency || ("vnd" as Currency)
+  );
+
+  useImperativeHandle(ref, () => ({
+    getData: () => ({
+      pricing_type: pricingType,
+      price_from: priceFrom ? Number(priceFrom) : 0,
+      price_to: priceTo ? Number(priceTo) : 0,
+      currency,
+    }),
+    reset: () => {
+      setPriceFrom("");
+      setPriceTo("");
+      setCurrency("vnd");
+    },
+  }));
+
+  useEffect(() => {
+    if (!onChange) return;
+    onChange({
+      pricing: {
+        pricing_type: pricingType,
+        price_from: priceFrom ? Number(priceFrom) : 0,
+        price_to: priceTo ? Number(priceTo) : 0,
+        currency,
+      },
+    });
+  }, [onChange, pricingType, priceFrom, priceTo, currency]);
+
+  // Options
   const investmentStages = [
-    { value: "SEED_TRL_1_3", label: "Seed (TRL 1-3)" },
-    { value: "SERIES_A_TRL_4_6", label: "Series A (TRL 4-6)" },
-    { value: "SERIES_B_TRL_7_9", label: "Series B (TRL 7-9)" },
+    { value: "grant_seed", label: "Grant/Seed (TRL 1–3)" },
+    { value: "vc_joint_venture", label: "VC/Joint Venture (TRL 4–6)" },
+    { value: "growth_strategic", label: "Growth/Strategic (TRL 7–9)" },
   ];
 
   const currencies = [
-    { value: "VND", label: "VND" },
-    { value: "USD", label: "USD" },
-    { value: "EUR", label: "EUR" },
-  ];
-
-  const priceTypes = [
-    { value: "INDICATIVE", label: "Indicative (không ràng buộc)" },
-    { value: "FIRM", label: "Firm (ràng buộc)" },
+    { value: "vnd", label: "VND" },
+    { value: "usd", label: "USD" },
+    { value: "eur", label: "EUR" },
   ];
 
   return (
@@ -48,16 +97,14 @@ export const PricingDesiredSection: React.FC<PricingDesiredSectionProps> = ({
         </h2>
       </CardHeader>
       <CardBody className="p-6 space-y-6">
-        {/* Investment Stage */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             Giai đoạn đầu tư mong muốn
           </label>
           <Select
             aria-label="Giai đoạn đầu tư mong muốn"
-            selectedKeys={investmentStage ? [investmentStage] : []}
-            onChange={onChange as any}
-            name="investmentTransfer.investmentStage"
+            selectedKeys={pricingType ? [pricingType] : []}
+            onChange={(e) => setPricingType(e.target.value as PricingType)}
             variant="bordered"
             placeholder="Chọn giai đoạn đầu tư"
             classNames={{
@@ -72,27 +119,33 @@ export const PricingDesiredSection: React.FC<PricingDesiredSectionProps> = ({
           </Select>
         </div>
 
-        {/* Desired Pricing */}
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-gray-700">
             Thông tin giá mong muốn
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
-              label="Giá mong muốn"
-              placeholder="Nhập số tiền"
-              name="pricing.askingPrice"
-              value={pricing.askingPrice}
-              onChange={onChange}
+              label="Giá từ"
+              placeholder="Nhập giá tối thiểu"
+              value={priceFrom}
+              onChange={(e) => setPriceFrom(e.target.value)}
+              type="number"
+              variant="bordered"
+              classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
+            />
+            <Input
+              label="Đến"
+              placeholder="Nhập giá tối đa"
+              value={priceTo}
+              onChange={(e) => setPriceTo(e.target.value)}
               type="number"
               variant="bordered"
               classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
             />
             <Select
               label="Tiền tệ"
-              name="pricing.currency"
-              selectedKeys={pricing.currency ? [pricing.currency] : []}
-              onChange={onChange as any}
+              selectedKeys={currency ? [currency] : []}
+              onChange={(e) => setCurrency(e.target.value as Currency)}
               variant="bordered"
               classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
             >
@@ -102,26 +155,11 @@ export const PricingDesiredSection: React.FC<PricingDesiredSectionProps> = ({
                 </SelectItem>
               ))}
             </Select>
-            <Select
-              label="Loại giá"
-              name="pricing.priceType"
-              selectedKeys={pricing.priceType ? [pricing.priceType] : []}
-              onChange={onChange as any}
-              variant="bordered"
-              classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
-            >
-              {priceTypes.map((p) => (
-                <SelectItem key={p.value} value={p.value}>
-                  {p.label}
-                </SelectItem>
-              ))}
-            </Select>
           </div>
-          <p className="text-xs text-gray-500">
-            Khuyến nghị kèm thẩm định để tăng độ tin cậy.
-          </p>
         </div>
       </CardBody>
     </Card>
   );
-};
+});
+
+export type { PricingDesiredSectionRef as PricingDesiredRef };

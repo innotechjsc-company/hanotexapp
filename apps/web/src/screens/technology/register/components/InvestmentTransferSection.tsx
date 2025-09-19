@@ -1,22 +1,70 @@
-import React from "react";
-import { InvestmentTransfer, MasterData } from "../types";
-import { Card, CardHeader, CardBody, Checkbox, Spinner } from "@heroui/react";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
+import { Card, CardHeader, CardBody, Spinner } from "@heroui/react";
+import type { MasterData } from "@/hooks/useMasterData";
+import type { InvestmentDesire, TransferType } from "@/types/technologies";
 
-interface InvestmentTransferSectionProps {
-  investmentTransfer: InvestmentTransfer;
-  masterData: MasterData | null;
-  masterDataLoading: boolean;
-  onCommercializationChange: (method: string, checked: boolean) => void;
-  onTransferMethodChange: (method: string, checked: boolean) => void;
+interface InvestmentTransferInitialData {
+  investment_desire?: InvestmentDesire[];
+  transfer_type?: TransferType[];
 }
 
-export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps> = ({
-  investmentTransfer,
-  masterData,
-  masterDataLoading,
-  onCommercializationChange,
-  onTransferMethodChange,
-}) => {
+interface InvestmentTransferSectionProps {
+  masterData: MasterData | null;
+  masterDataLoading: boolean;
+  initialData?: InvestmentTransferInitialData;
+  onChange?: (data: Required<InvestmentTransferInitialData>) => void;
+}
+
+export interface InvestmentTransferSectionRef {
+  getData: () => Required<InvestmentTransferInitialData>;
+  reset: () => void;
+}
+
+export const InvestmentTransferSection = forwardRef<
+  InvestmentTransferSectionRef,
+  InvestmentTransferSectionProps
+>(({ masterData, masterDataLoading, initialData, onChange }, ref) => {
+  // Local state for selections
+  const [selectedCommercialization, setSelectedCommercialization] = useState<
+    string[]
+  >(() => initialData?.investment_desire?.map((i) => i.investment_option) || []);
+  const [selectedTransferMethods, setSelectedTransferMethods] = useState<
+    string[]
+  >(() => initialData?.transfer_type?.map((t) => t.transfer_option) || []);
+
+  // Expose data getter to parent (collect on submit)
+  useImperativeHandle(ref, () => ({
+    getData: () => ({
+      investment_desire: selectedCommercialization.map((value) => ({
+        investment_option: value,
+      })),
+      transfer_type: selectedTransferMethods.map((value) => ({
+        transfer_option: value,
+      })),
+    }),
+    reset: () => {
+      setSelectedCommercialization([]);
+      setSelectedTransferMethods([]);
+    },
+  }));
+
+  // Notify parent on change if needed (optional)
+  useEffect(() => {
+    if (!onChange) return;
+    onChange({
+      investment_desire: selectedCommercialization.map((value) => ({
+        investment_option: value,
+      })),
+      transfer_type: selectedTransferMethods.map((value) => ({
+        transfer_option: value,
+      })),
+    });
+  }, [onChange, selectedCommercialization, selectedTransferMethods]);
   // Fallback data matching API structure
   const defaultCommercializationMethods = [
     {
@@ -88,6 +136,18 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
     masterData?.commercializationMethods || defaultCommercializationMethods;
   const transferMethods = masterData?.transferMethods || defaultTransferMethods;
 
+  const handleCommercializationChange = (method: string, checked: boolean) => {
+    setSelectedCommercialization((prev) =>
+      checked ? [...prev, method] : prev.filter((m) => m !== method)
+    );
+  };
+
+  const handleTransferMethodChange = (method: string, checked: boolean) => {
+    setSelectedTransferMethods((prev) =>
+      checked ? [...prev, method] : prev.filter((m) => m !== method)
+    );
+  };
+
   return (
     <Card>
       <CardHeader className="px-6 py-4">
@@ -108,20 +168,15 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
             ) : (
               commercializationMethods.map((item) => (
                 <div key={item.value} className="w-full">
-                  <Checkbox
-                    isSelected={investmentTransfer.commercializationMethods.includes(
-                      item.value
-                    )}
-                    onValueChange={(checked) =>
-                      onCommercializationChange(item.value, checked)
-                    }
-                    size="sm"
-                    classNames={{
-                      base: "inline-flex max-w-full w-full bg-content1",
-                      wrapper: "flex-shrink-0",
-                      label: "text-sm text-gray-700 w-full",
-                    }}
-                  >
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedCommercialization.includes(item.value)}
+                      onChange={(e) =>
+                        handleCommercializationChange(item.value, e.target.checked)
+                      }
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
                     <div className="flex flex-col w-full">
                       <span className="font-medium text-sm">{item.label}</span>
                       {item.description && (
@@ -130,7 +185,7 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
                         </span>
                       )}
                     </div>
-                  </Checkbox>
+                  </label>
                 </div>
               ))
             )}
@@ -149,20 +204,15 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
             ) : (
               transferMethods.map((item) => (
                 <div key={item.value} className="w-full">
-                  <Checkbox
-                    isSelected={investmentTransfer.transferMethods.includes(
-                      item.value
-                    )}
-                    onValueChange={(checked) =>
-                      onTransferMethodChange(item.value, checked)
-                    }
-                    size="sm"
-                    classNames={{
-                      base: "inline-flex max-w-full w-full bg-content1",
-                      wrapper: "flex-shrink-0",
-                      label: "text-sm text-gray-700 w-full",
-                    }}
-                  >
+                  <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedTransferMethods.includes(item.value)}
+                      onChange={(e) =>
+                        handleTransferMethodChange(item.value, e.target.checked)
+                      }
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
                     <div className="flex flex-col w-full">
                       <span className="font-medium text-sm">{item.label}</span>
                       {item.description && (
@@ -171,7 +221,7 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
                         </span>
                       )}
                     </div>
-                  </Checkbox>
+                  </label>
                 </div>
               ))
             )}
@@ -180,5 +230,6 @@ export const InvestmentTransferSection: React.FC<InvestmentTransferSectionProps>
       </CardBody>
     </Card>
   );
-};
+});
 
+export type { InvestmentTransferSectionRef as InvestmentTransferRef };

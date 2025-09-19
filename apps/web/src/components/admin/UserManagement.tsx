@@ -25,9 +25,7 @@ import {
   User,
   UserType,
   UserRole,
-  CompanyProfile,
-  IndividualProfile,
-  ResearchProfile,
+  Company,
 } from "@/types";
 
 interface UserManagementProps {
@@ -59,17 +57,11 @@ export default function UserManagement({
         role: "USER",
         is_verified: true,
         is_active: true,
-        created_at: "2024-01-15T10:30:00Z",
-        updated_at: "2024-01-15T10:30:00Z",
-        profile: {
-          id: "1",
-          user_id: "1",
-          created_at: "2024-01-15T10:30:00Z",
-          updated_at: "2024-01-15T10:30:00Z",
-          full_name: "John Doe",
-          phone: "+84 123 456 789",
-          profession: "Software Engineer",
-        } as IndividualProfile,
+        createdAt: "2024-01-15T10:30:00Z",
+        updatedAt: "2024-01-15T10:30:00Z",
+        full_name: "John Doe",
+        phone: "+84 123 456 789",
+        profession: "Software Engineer",
       },
       {
         id: "2",
@@ -78,18 +70,15 @@ export default function UserManagement({
         role: "USER",
         is_verified: false,
         is_active: true,
-        created_at: "2024-01-20T14:15:00Z",
-        updated_at: "2024-01-20T14:15:00Z",
-        profile: {
+        createdAt: "2024-01-20T14:15:00Z",
+        updatedAt: "2024-01-20T14:15:00Z",
+        company: {
           id: "2",
-          user_id: "2",
-          created_at: "2024-01-20T14:15:00Z",
-          updated_at: "2024-01-20T14:15:00Z",
           company_name: "TechCorp Vietnam",
           tax_code: "0123456789",
           legal_representative: "Jane Smith",
           contact_email: "contact@techcorp.com",
-        } as CompanyProfile,
+        } as Company,
       },
       {
         id: "3",
@@ -98,18 +87,14 @@ export default function UserManagement({
         role: "USER",
         is_verified: true,
         is_active: true,
-        created_at: "2024-01-25T09:45:00Z",
-        updated_at: "2024-01-25T09:45:00Z",
-        profile: {
+        createdAt: "2024-01-25T09:45:00Z",
+        updatedAt: "2024-01-25T09:45:00Z",
+        research_institution: {
           id: "3",
-          user_id: "3",
-          created_at: "2024-01-25T09:45:00Z",
-          updated_at: "2024-01-25T09:45:00Z",
           institution_name: "Hanoi University of Technology",
           institution_code: "HUST001",
           governing_body: "Ministry of Education",
-          research_group: "AI Research Lab",
-        } as ResearchProfile,
+        },
       },
     ];
 
@@ -132,11 +117,11 @@ export default function UserManagement({
               <p className="font-medium text-gray-900">{row.original.email}</p>
               <p className="text-sm text-gray-500">
                 {row.original.user_type === "INDIVIDUAL" &&
-                  (row.original.profile as any)?.full_name}
+                  row.original.full_name}
                 {row.original.user_type === "COMPANY" &&
-                  (row.original.profile as any)?.company_name}
+                  (row.original.company as any)?.company_name}
                 {row.original.user_type === "RESEARCH_INSTITUTION" &&
-                  (row.original.profile as any)?.institution_name}
+                  (row.original.research_institution as any)?.institution_name}
               </p>
             </div>
           </div>
@@ -217,10 +202,10 @@ export default function UserManagement({
           );
         },
       }),
-      columnHelper.accessor("created_at", {
+      columnHelper.accessor("createdAt", {
         header: "Joined",
         cell: ({ getValue }) => {
-          const date = new Date(getValue());
+          const date = new Date(getValue() || '');
           return (
             <div>
               <p className="text-sm text-gray-900">
@@ -258,13 +243,13 @@ export default function UserManagement({
     return users.filter((user) => {
       const matchesSearch =
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (user.profile as any)?.full_name
+        user.full_name
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        (user.profile as any)?.company_name
+        (user.company as any)?.company_name
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        (user.profile as any)?.institution_name
+        (user.research_institution as any)?.institution_name
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase());
 

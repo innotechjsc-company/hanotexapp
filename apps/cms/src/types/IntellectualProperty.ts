@@ -1,3 +1,6 @@
+import { ID } from './common'
+import { Technology } from './technologies'
+
 export type IPType =
   | 'patent'
   | 'utility_solution'
@@ -9,7 +12,7 @@ export type IPType =
 export type IPStatus = 'pending' | 'granted' | 'expired' | 'rejected'
 
 export interface IntellectualProperty {
-  technology: string
+  technology: ID | Technology
   code: string
   type: IPType
   status: IPStatus

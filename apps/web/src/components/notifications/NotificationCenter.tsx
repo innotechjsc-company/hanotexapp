@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuthStore } from '@/store/auth';
 import { 
   Bell, 
   X, 
@@ -34,7 +34,7 @@ interface NotificationCenterProps {
 }
 
 export default function NotificationCenter({ isOpen, onClose }: NotificationCenterProps) {
-  const { data: session } = useSession();
+  const { user } = useAuthStore();
   const { notifications, markAsRead, clearNotifications, unreadCount } = useNotifications();
   const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
 

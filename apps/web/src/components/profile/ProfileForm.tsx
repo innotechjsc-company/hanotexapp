@@ -42,17 +42,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
   useEffect(() => {
     if (user) {
       setProfileData({
-        fullName: user.profile?.full_name || "",
+        fullName: user.full_name || "",
         email: user.email || "",
-        phone: user.profile?.phone || "",
-        profession: user.profile?.profession || "",
-        companyName: user.profile?.company_name || "",
-        taxCode: user.profile?.tax_code || "",
-        legalRepresentative: user.profile?.legal_representative || "",
-        contactEmail: user.profile?.contact_email || "",
-        institutionName: user.profile?.institution_name || "",
-        institutionCode: user.profile?.institution_code || "",
-        governingBody: user.profile?.governing_body || "",
+        phone: user.phone || "",
+        profession: user.profession || "",
+        companyName: (user as any).company?.company_name || "",
+        taxCode: (user as any).company?.tax_code || "",
+        legalRepresentative: (user as any).company?.legal_representative || "",
+        contactEmail: (user as any).company?.contact_email || "",
+        institutionName: (user as any).research_institution?.institution_name || "",
+        institutionCode: (user as any).research_institution?.institution_code || "",
+        governingBody: (user as any).research_institution?.governing_body || "",
       });
     }
   }, [user]);
@@ -64,7 +64,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
         await onSave(profileData);
       } else {
         // Default save behavior
-        updateUser({ profile: profileData as any });
+        updateUser(profileData as any);
       }
       setIsEditing(false);
     } catch (error) {
@@ -77,17 +77,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
   const handleCancel = () => {
     if (user) {
       setProfileData({
-        fullName: user.profile?.full_name || "",
+        fullName: user.full_name || "",
         email: user.email || "",
-        phone: user.profile?.phone || "",
-        profession: user.profile?.profession || "",
-        companyName: user.profile?.company_name || "",
-        taxCode: user.profile?.tax_code || "",
-        legalRepresentative: user.profile?.legal_representative || "",
-        contactEmail: user.profile?.contact_email || "",
-        institutionName: user.profile?.institution_name || "",
-        institutionCode: user.profile?.institution_code || "",
-        governingBody: user.profile?.governing_body || "",
+        phone: user.phone || "",
+        profession: user.profession || "",
+        companyName: (user as any).company?.company_name || "",
+        taxCode: (user as any).company?.tax_code || "",
+        legalRepresentative: (user as any).company?.legal_representative || "",
+        contactEmail: (user as any).company?.contact_email || "",
+        institutionName: (user as any).research_institution?.institution_name || "",
+        institutionCode: (user as any).research_institution?.institution_code || "",
+        governingBody: (user as any).research_institution?.governing_body || "",
       });
     }
     setIsEditing(false);
@@ -158,7 +158,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
                   Tham gia:{" "}
-                  {new Date(user.created_at).toLocaleDateString("vi-VN")}
+                  {new Date(user.createdAt).toLocaleDateString("vi-VN")}
                 </div>
               </div>
             </div>
