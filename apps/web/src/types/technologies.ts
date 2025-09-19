@@ -1,7 +1,6 @@
 import { Category } from "./categories";
 import { ID, DateTimeString } from "./common";
 import { Media } from "./media";
-import { TRL } from "./trl";
 import { User } from "./users";
 
 // Trạng thái công nghệ
@@ -70,7 +69,7 @@ export interface Technology {
   title: string; // Tiêu đề công nghệ
   documents?: Media[]; // Danh sách ID tài liệu/media liên quan
   category?: ID | Category; // ID danh mục/lĩnh vực
-  trl_level: ID | TRL; // ID mức TRL
+  trl_level: number; // ID mức TRL
   description?: string; // Tóm tắt công khai
   confidential_detail?: string; // Chi tiết bảo mật (nội bộ)
   owners?: TechnologyOwner[]; // Danh sách chủ sở hữu công nghệ

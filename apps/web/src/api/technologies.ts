@@ -29,12 +29,46 @@ export async function getTechnologies(
   filters: TechnologyFilters = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Technology[]>> {
-  const params = {
-    ...filters,
+  // Map friendly filters to PayloadCMS REST 'where' syntax
+  const params: Record<string, any> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
   };
+
+  // Visibility mode
+  if (filters.visibility_mode) {
+    params["where[visibility_mode][equals]"] = filters.visibility_mode;
+  }
+
+  // Status
+  if (filters.status) {
+    params["where[status][equals]"] = filters.status;
+  }
+
+  // Category relationship (map category_id -> category field)
+  if (filters.category_id) {
+    params["where[category][equals]"] = filters.category_id;
+  }
+
+  // TRL level (exact)
+  if (typeof filters.trl_level === "number") {
+    params["where[trl_level][equals]"] = filters.trl_level;
+  }
+
+  // Pricing type (if any)
+  if (filters.pricing_type) {
+    params["where[pricing][pricing_type][equals]"] = filters.pricing_type;
+  }
+
+  // Text search: match title or public_summary using [like]
+  if (filters.search && filters.search.trim()) {
+    const q = filters.search.trim();
+    params["where[or][0][title][like]"] = q;
+    params["where[or][1][public_summary][like]"] = q;
+    // Fallback generic search param (Payload supports a top-level 'search' in some configs)
+    params["search"] = q;
+  }
 
   return payloadApiClient.get<Technology[]>(API_ENDPOINTS.TECHNOLOGIES, params);
 }

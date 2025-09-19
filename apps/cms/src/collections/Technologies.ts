@@ -1,4 +1,6 @@
 import type { CollectionConfig } from 'payload'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 
 export const Technologies: CollectionConfig = {
   slug: 'technologies',
@@ -12,6 +14,80 @@ export const Technologies: CollectionConfig = {
     create: () => true,
     update: () => true,
     delete: () => true,
+  },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req, operation }) => {
+        // Only apply to create operations
+        if (operation !== 'create') return data
+
+        // Get authenticated user from PayloadCMS context
+        let user: any
+        try {
+          if (req.user) {
+            user = req.user
+          } else {
+            const payload = await getPayload({ config: configPromise })
+            const authResult = await payload.auth({ headers: req.headers })
+            user = authResult.user
+          }
+        } catch (e) {
+          throw new Error('Authentication failed')
+        }
+
+        // Check if user is authenticated
+        if (!user) {
+          throw new Error('User not authenticated')
+        }
+
+        // Store IP data in req context for later use
+        const ipInput = (data as any)?.intellectual_property ?? (data as any)?.intellectualProperty
+        if (ipInput) {
+          ;(req as any).ipData = ipInput
+          // Remove from main data to avoid validation issues
+          const { intellectual_property, intellectualProperty, ...cleanData } = data as any
+          data = cleanData
+        }
+
+        // Add authenticated user as submitter
+        return {
+          ...data,
+          submitter: user.id,
+        }
+      },
+    ],
+    afterChange: [
+      async ({ doc, req, operation }) => {
+        // Only apply to create operations
+        if (operation !== 'create') return
+
+        const payload = await getPayload({ config: configPromise })
+
+        // Get IP data stored from beforeValidate hook
+        const ipInput = (req as any).ipData
+
+        if (Array.isArray(ipInput) && ipInput.length > 0) {
+          const ipPromises = ipInput.map(async (item: any) => {
+            try {
+              return await payload.create({
+                collection: 'intellectual_property',
+                data: {
+                  technology: doc.id,
+                  code: item?.code,
+                  type: item?.type,
+                  status: item?.status,
+                },
+              })
+            } catch (err: any) {
+              console.error(`Failed to create IP record: ${err?.message ?? String(err)}`)
+              return null
+            }
+          })
+
+          await Promise.allSettled(ipPromises)
+        }
+      },
+    ],
   },
   fields: [
     {

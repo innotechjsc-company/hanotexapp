@@ -36,7 +36,6 @@ export default function RegisterTechnologyPage() {
   const pricingRef = useRef<PricingDesiredSectionRef>(null);
   const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
-  const { masterData, loading: masterDataLoading } = useMasterData();
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -52,14 +51,6 @@ export default function RegisterTechnologyPage() {
         const investmentTransfer = investmentTransferRef.current?.getData();
         const pricingDesired = pricingRef.current?.getData();
         const visibility = visibilityRef.current?.getData();
-
-        console.log("Basic info:", basic);
-        console.log("Owners data:", owners);
-        console.log("IP details:", ipDetails);
-        console.log("Legal details:", legalDetails);
-        console.log("Investment & Transfer:", investmentTransfer);
-        console.log("Pricing Desired:", pricingDesired);
-        console.log("Visibility:", visibility);
 
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
@@ -146,8 +137,6 @@ export default function RegisterTechnologyPage() {
           {/* 1. Basic Information */}
           <BasicInfoSection
             ref={basicRef}
-            masterData={masterData}
-            masterDataLoading={masterDataLoading}
             onChange={(data) => console.log("Changed:", data)} // optional
           />
 
@@ -174,8 +163,6 @@ export default function RegisterTechnologyPage() {
           {/* 6. Investment & Transfer (Optional) */}
           <InvestmentTransferSection
             ref={investmentTransferRef}
-            masterData={masterData}
-            masterDataLoading={masterDataLoading}
             onChange={(data) => console.log("Changed:", data)} // optional
           />
 
