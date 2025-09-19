@@ -11,6 +11,26 @@ const corsHeaders = {
 export const POST = async (req: Request) => {
   const payload = await getPayload({ config: configPromise })
 
+  // Get authenticated user
+  let user: any
+  try {
+    const authResult = await payload.auth({ headers: req.headers })
+    user = authResult.user
+  } catch (e) {
+    return new Response(JSON.stringify({ success: false, error: 'Authentication failed' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    })
+  }
+
+  // Check if user is authenticated
+  if (!user) {
+    return new Response(JSON.stringify({ success: false, error: 'User not authenticated' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    })
+  }
+
   let data: any
   try {
     data = await req.json()
@@ -22,9 +42,15 @@ export const POST = async (req: Request) => {
   }
 
   try {
+    // Add authenticated user as submitter
+    const dataWithSubmitter = {
+      ...data,
+      submitter: user.id,
+    }
+
     const created = await payload.create({
       collection: 'technologies',
-      data,
+      data: dataWithSubmitter,
     })
 
     // Log để verify UUID được tạo tự động
