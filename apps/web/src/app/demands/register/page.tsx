@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore, useUser } from "@/store/auth";
 import { ArrowLeft, Save, Eye, Plus, Trash2, AlertCircle } from "lucide-react";
 import { Demand } from "@/types/demand";
 import { useCategories } from "@/hooks/useCategories";
+import { createDemand } from "@/api/demands";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function RegisterDemandPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const user = useUser();
 
   // Fetch categories from API
   const {
@@ -57,12 +59,26 @@ export default function RegisterDemandPage() {
     setSuccess("");
 
     try {
+      // Validate required fields
+      if (!formData.title || !formData.description || !formData.categoryId) {
+        setError("Vui lòng điền đầy đủ thông tin bắt buộc");
+        return;
+      }
+
+      // Validate user authentication and get user ID
+      if (!user || !user.id) {
+        setError(
+          "Không thể xác định thông tin người dùng. Vui lòng đăng nhập lại."
+        );
+        return;
+      }
+
       // Prepare demand data according to Demand interface
-      const demandData: Omit<Demand, "id" | "createdAt" | "updatedAt"> = {
-        title: formData.title || "",
-        description: formData.description || "",
+      const demandData: Partial<Demand> = {
+        title: formData.title,
+        description: formData.description,
         category: formData.categoryId, // This will be mapped to category relationship
-        user: "current-user-id", // This should be set from authenticated user
+        user: user.id, // Get user ID from authenticated user
         trl_level: formData.trl_level || 1,
         option: formData.option || "",
         option_technology: formData.option_technology || "",
@@ -73,18 +89,20 @@ export default function RegisterDemandPage() {
         documents: formData.documents || [],
       };
 
-      // TODO: Implement demand registration API call
       console.log("Submitting demand:", demandData);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Call API to create demand
+      const createdDemand = await createDemand(demandData);
 
-      setSuccess("Nhu cầu đã được đăng ký thành công!");
+      console.log("Demand created successfully:", createdDemand);
+      setSuccess(`Nhu cầu "${formData.title}" đã được đăng ký thành công!`);
+
+      // Reset form after successful submission
       setFormData({
         title: "",
         description: "",
         categoryId: "",
-        user: "",
+        user: user.id, // User ID is already validated above
         trl_level: 1,
         option: "",
         option_technology: "",
@@ -96,12 +114,43 @@ export default function RegisterDemandPage() {
         cooperation: "",
         documents: [],
       });
+
+      // Optional: Redirect to demands list or detail page after a delay
+      setTimeout(() => {
+        router.push("/demands");
+      }, 2000);
     } catch (err: any) {
-      setError(err.message || "Có lỗi xảy ra khi đăng ký nhu cầu");
+      console.error("Error creating demand:", err);
+
+      // Handle different types of errors
+      if (err.status === 400) {
+        setError("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.");
+      } else if (err.status === 401) {
+        setError("Bạn cần đăng nhập để thực hiện chức năng này.");
+      } else if (err.status === 403) {
+        setError("Bạn không có quyền thực hiện chức năng này.");
+      } else if (err.status === 500) {
+        setError("Lỗi hệ thống. Vui lòng thử lại sau.");
+      } else {
+        setError(
+          err.message || "Có lỗi xảy ra khi đăng ký nhu cầu. Vui lòng thử lại."
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("user-----------user", user);
+    // Update formData user field when user changes
+    if (user?.id) {
+      setFormData((prev) => ({
+        ...prev,
+        user: user.id,
+      }));
+    }
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<
