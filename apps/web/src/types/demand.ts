@@ -3,6 +3,7 @@ import { Media } from "./media";
 import { User } from "./users";
 
 export interface Demand {
+  id?: string;
   title: string;
   description: string;
   category: string | Category;
@@ -15,4 +16,6 @@ export interface Demand {
   to_price: number;
   cooperation: string;
   documents: Media[];
+  createdAt?: string;
+  updatedAt?: string;
 }
