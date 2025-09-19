@@ -31,7 +31,7 @@ export const useCategories = (): UseCategoriesReturn => {
       // Fetch active categories with pagination
       const response = await getActiveCategories({ limit: 100 });
       
-      if (response.success && response.data) {
+      if (response.data) {
         // Format categories for select component
         const formattedCategories: CategoryOption[] = response.data.map((category: Category) => ({
           value: category.id || category.code,

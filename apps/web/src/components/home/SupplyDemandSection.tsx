@@ -121,7 +121,7 @@ export default function SupplyDemandSection() {
                       </div>
                       <div className="ml-4 flex-shrink-0">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          TRL {tech.trl_level}
+                          TRL {String(tech.trl_level)}
                         </span>
                       </div>
                     </div>

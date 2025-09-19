@@ -92,23 +92,15 @@ export default function CategoriesSection() {
                       </h3>
 
                       {/* Description */}
-                      {category.description && (
-                        <p className="text-gray-600 mb-4 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>
-                          {category.description}
-                        </p>
-                      )}
+                      <p className="text-gray-600 mb-4 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>                                                                             
+                        {category.name}
+                      </p>
 
                       {/* Code */}
                       <div className="text-sm text-gray-500 mb-4">
-                        Mã: {category.code}
+                        Mã: {category.code_vn}
                       </div>
 
-                      {/* Children Count */}
-                      {category.children && category.children.length > 0 && (
-                        <div className="text-sm text-gray-500 mb-4">
-                          {category.children.length} danh mục con
-                        </div>
-                      )}
 
                       {/* Arrow */}
                       <div className="flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform">

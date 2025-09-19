@@ -3,7 +3,7 @@
  * Các function để quản lý auctions với PayloadCMS
  */
 
-import { Auction } from "@/types/Auction";
+import { Auction } from "@/types/auctions";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 

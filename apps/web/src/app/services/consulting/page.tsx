@@ -10,7 +10,7 @@ import {
   Award,
   Clock,
   Star,
-  Handshake,
+  UserPlus,
   Rocket,
   Lightbulb
 } from 'lucide-react';
@@ -94,7 +94,7 @@ export default function ConsultingPage() {
                 href="/contact"
                 className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center"
               >
-                <Handshake className="h-5 w-5 mr-2" />
+                <UserPlus className="h-5 w-5 mr-2" />
                 Liên hệ tư vấn
               </Link>
               <Link

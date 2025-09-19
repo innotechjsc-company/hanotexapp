@@ -45,17 +45,17 @@ export default function ProfilePage() {
     // Load user profile data
     if (user) {
       setProfileData({
-        fullName: (user.profile as any)?.full_name || "",
+        fullName: (user as any)?.profile?.full_name || "",
         email: user.email || "",
-        phone: (user.profile as any)?.phone || "",
-        profession: (user.profile as any)?.profession || "",
-        companyName: (user.profile as any)?.company_name || "",
-        taxCode: (user.profile as any)?.tax_code || "",
-        legalRepresentative: (user.profile as any)?.legal_representative || "",
-        contactEmail: (user.profile as any)?.contact_email || "",
-        institutionName: (user.profile as any)?.institution_name || "",
-        institutionCode: (user.profile as any)?.institution_code || "",
-        governingBody: (user.profile as any)?.governing_body || "",
+        phone: (user as any)?.profile?.phone || "",
+        profession: (user as any)?.profile?.profession || "",
+        companyName: (user as any)?.profile?.company_name || "",
+        taxCode: (user as any)?.profile?.tax_code || "",
+        legalRepresentative: (user as any)?.profile?.legal_representative || "",
+        contactEmail: (user as any)?.profile?.contact_email || "",
+        institutionName: (user as any)?.profile?.institution_name || "",
+        institutionCode: (user as any)?.profile?.institution_code || "",
+        governingBody: (user as any)?.profile?.governing_body || "",
       });
     }
   }, [user, isAuthenticated, router]);
@@ -75,20 +75,20 @@ export default function ProfilePage() {
     if (user) {
       setProfileData({
         fullName:
-          (user.profile as any)?.full_name ||
-          (user.profile as any)?.company_name ||
-          (user.profile as any)?.institution_name ||
+          (user as any)?.profile?.full_name ||
+          (user as any)?.profile?.company_name ||
+          (user as any)?.profile?.institution_name ||
           "",
         email: user.email || "",
-        phone: (user.profile as any)?.phone || "",
-        profession: (user.profile as any)?.profession || "",
-        companyName: (user.profile as any)?.company_name || "",
-        taxCode: (user.profile as any)?.tax_code || "",
-        legalRepresentative: (user.profile as any)?.legal_representative || "",
-        contactEmail: (user.profile as any)?.contact_email || "",
-        institutionName: (user.profile as any)?.institution_name || "",
-        institutionCode: (user.profile as any)?.institution_code || "",
-        governingBody: (user.profile as any)?.governing_body || "",
+        phone: (user as any)?.profile?.phone || "",
+        profession: (user as any)?.profile?.profession || "",
+        companyName: (user as any)?.profile?.company_name || "",
+        taxCode: (user as any)?.profile?.tax_code || "",
+        legalRepresentative: (user as any)?.profile?.legal_representative || "",
+        contactEmail: (user as any)?.profile?.contact_email || "",
+        institutionName: (user as any)?.profile?.institution_name || "",
+        institutionCode: (user as any)?.profile?.institution_code || "",
+        governingBody: (user as any)?.profile?.governing_body || "",
       });
     }
     setIsEditing(false);
@@ -207,7 +207,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-center text-sm text-gray-600">
                     <Calendar className="h-4 w-4 mr-2" />
                     Tham gia:{" "}
-                    {new Date(user.created_at).toLocaleDateString("vi-VN")}
+                    {new Date(user.createdAt).toLocaleDateString("vi-VN")}
                   </div>
                 </div>
               </div>

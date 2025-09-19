@@ -86,7 +86,7 @@ export default function TechnologiesPage() {
           if (searchQuery.trim()) {
             const searchLower = searchQuery.toLowerCase();
             filteredData = filteredData.filter(
-              (tech) =>
+              (tech: any) =>
                 (tech.title &&
                   tech.title.toLowerCase().includes(searchLower)) ||
                 (tech.public_summary &&
@@ -104,7 +104,7 @@ export default function TechnologiesPage() {
 
           // 2. Category filtering
           if (filters.category) {
-            filteredData = filteredData.filter((tech) => {
+            filteredData = filteredData.filter((tech: any) => {
               // Map category ID to category name for comparison
               const categoryMap: { [key: string]: string } = {
                 "1": "Điện – Điện tử – CNTT",
@@ -125,7 +125,7 @@ export default function TechnologiesPage() {
 
           // 3. TRL Level filtering
           if (filters.trl_level) {
-            filteredData = filteredData.filter((tech) => {
+            filteredData = filteredData.filter((tech: any) => {
               const [min, max] = filters.trl_level.split("-").map(Number);
               return tech.trl_level >= min && tech.trl_level <= max;
             });
@@ -134,7 +134,7 @@ export default function TechnologiesPage() {
           // 4. Status filtering
           if (filters.status) {
             filteredData = filteredData.filter(
-              (tech) => tech.status === filters.status
+              (tech: any) => tech.status === filters.status
             );
           }
 
@@ -416,7 +416,7 @@ export default function TechnologiesPage() {
                 : "space-y-4"
             }
           >
-            {technologies.map((tech) => (
+            {technologies.map((tech: any) => (
               <div
                 key={tech.id}
                 className={`bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow ${
