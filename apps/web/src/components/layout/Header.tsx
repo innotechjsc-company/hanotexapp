@@ -134,6 +134,7 @@ export default function Header() {
     { name: "Hồ sơ cá nhân", href: "/profile" },
     { name: "Công nghệ của tôi", href: "/my-technologies" },
     { name: "Nhu cầu của tôi", href: "/my-demands" },
+    { name: "Quỹ & Đầu tư của tôi", href: "/my-investments" },
     { name: "Tin nhắn", href: "/messages" },
     { name: "Cài đặt", href: "/settings" },
     { name: "Đăng xuất", href: "#", action: logout },
@@ -154,9 +155,9 @@ export default function Header() {
           <div className="flex items-center flex-shrink-0">
             <Link href="/" className="flex items-center group">
               <div className="w-28 h-16 min-w-[112px] flex items-center justify-center group-hover:scale-105 transition-all duration-300">
-                <img 
-                  src="/logo.png" 
-                  alt="HANOTEX Logo" 
+                <img
+                  src="/logo.png"
+                  alt="HANOTEX Logo"
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -222,74 +223,75 @@ export default function Header() {
                 </button>
 
                 <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:shadow-md group min-w-0"
-                >
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 flex-shrink-0">
-                    <UserIcon className="h-5 w-5" />
-                  </div>
-                  <div className="hidden md:block text-left min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-gray-800 truncate">
-                      {getDisplayName()}
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-3 p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 hover:shadow-md group min-w-0"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300 flex-shrink-0">
+                      <UserIcon className="h-5 w-5" />
                     </div>
-                    <div className="text-xs text-gray-500 capitalize truncate">
-                      {user?.user_type?.toLowerCase().replace("_", " ") ||
-                        "User"}
+                    <div className="hidden md:block text-left min-w-0 flex-1">
+                      <div className="text-sm font-semibold text-gray-800 truncate">
+                        {getDisplayName()}
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize truncate">
+                        {user?.user_type?.toLowerCase().replace("_", " ") ||
+                          "User"}
+                      </div>
                     </div>
-                  </div>
-                  <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300 flex-shrink-0" />
-                </button>
+                    <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300 flex-shrink-0" />
+                  </button>
 
-                {/* User Dropdown */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-gray-100 z-50">
-                    <div className="p-4 border-b border-gray-100">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg">
-                          <UserIcon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-gray-800 truncate">
-                            {getDisplayName()}
+                  {/* User Dropdown */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-64 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-gray-100 z-50">
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg">
+                            <UserIcon className="h-6 w-6" />
                           </div>
-                          <div className="text-xs text-gray-500 capitalize">
-                            {user?.user_type?.toLowerCase().replace("_", " ") ||
-                              "User"}
-                          </div>
-                          <div className="text-xs text-gray-400 truncate">
-                            {user?.email}
+                          <div>
+                            <div className="text-sm font-semibold text-gray-800 truncate">
+                              {getDisplayName()}
+                            </div>
+                            <div className="text-xs text-gray-500 capitalize">
+                              {user?.user_type
+                                ?.toLowerCase()
+                                .replace("_", " ") || "User"}
+                            </div>
+                            <div className="text-xs text-gray-400 truncate">
+                              {user?.email}
+                            </div>
                           </div>
                         </div>
                       </div>
+                      <div className="py-2">
+                        {userMenuItems.map((item) =>
+                          item.action ? (
+                            <button
+                              key={item.name}
+                              onClick={() => {
+                                item.action();
+                                setIsUserMenuOpen(false);
+                              }}
+                              className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 hover:text-red-700 transition-all duration-200 font-medium"
+                            >
+                              {item.name}
+                            </button>
+                          ) : (
+                            <Link
+                              key={item.name}
+                              href={item.href}
+                              className="block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 transition-all duration-200 font-medium"
+                              onClick={() => setIsUserMenuOpen(false)}
+                            >
+                              {item.name}
+                            </Link>
+                          )
+                        )}
+                      </div>
                     </div>
-                    <div className="py-2">
-                      {userMenuItems.map((item) =>
-                        item.action ? (
-                          <button
-                            key={item.name}
-                            onClick={() => {
-                              item.action();
-                              setIsUserMenuOpen(false);
-                            }}
-                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 hover:text-red-700 transition-all duration-200 font-medium"
-                          >
-                            {item.name}
-                          </button>
-                        ) : (
-                          <Link
-                            key={item.name}
-                            href={item.href}
-                            className="block px-4 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 transition-all duration-200 font-medium"
-                            onClick={() => setIsUserMenuOpen(false)}
-                          >
-                            {item.name}
-                          </Link>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
+                  )}
                 </div>
               </>
             ) : (
