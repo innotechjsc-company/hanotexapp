@@ -3,7 +3,7 @@ services:
     image: postgres:15
     container_name: hanotex-postgres
     environment:
-      POSTGRES_DB: hanotex-dev-huy
+      POSTGRES_DB: hanotex-dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
     ports:
@@ -34,63 +34,36 @@ services:
       - postgres
     restart: unless-stopped
 
-  # api:
-  #   build:
-  #     context: ./apps/api
-  #     dockerfile: Dockerfile
-  #   container_name: hanotex-api
-  #   environment:
-  #     - NODE_ENV=development
-  #     - DB_HOST=hanotex-postgres
-  #     - DB_PORT=5432
-  #     - DB_NAME=hanotex
-  #     - DB_USER=postgres
-  #     - DB_PASSWORD=123456
-  #     - REDIS_HOST=hanotex-redis
-  #     - REDIS_PORT=6379
-  #     - PORT=3001
-  #     - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-  #     - CORS_ORIGIN=http://localhost:3000
-  #   ports:
-  #     - "3001:3001"
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #   volumes:
-  #     - ./apps/api:/app
-  #     - /app/node_modules
-  #   restart: unless-stopped
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: hanotex-web
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 
-  # web:
-  #   build:
-  #     context: ./apps/web
-  #     dockerfile: Dockerfile
-  #   container_name: hanotex-web
-  #   environment:
-  #     - NODE_ENV=development
-  #     - NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-  #     - NEXT_PUBLIC_APP_URL=http://localhost:3000
-  #     - NEXTAUTH_URL=http://localhost:3000
-  #     - NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
-  #   ports:
-  #     - "3000:3000"
-  #   restart: unless-stopped
-
-  # cms:
-  #   build:
-  #     context: ./apps/cms
-  #     dockerfile: Dockerfile
-  #   container_name: hanotex-cms
-  #   environment:
-  #     - NODE_ENV=development
-  #     - DATABASE_URI=postgres://postgres:123456@hanotex-postgres:5432/hanotex
-  #     - PAYLOAD_SECRET=your-super-secret-payload-key-change-this-in-production
-  #     - PORT=4000
-  #   ports:
-  #     - "4000:4000"
-  #   depends_on:
-  #     - postgres
-  #   restart: unless-stopped
+  cms:
+    build:
+      context: ./apps/cms
+      dockerfile: Dockerfile
+    container_name: hanotex-cms
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URI=postgres://postgres:123456@hanotex-postgres:5432/hanotex-dev
+      - PAYLOAD_SECRET=your-super-secret-payload-key-change-this-in-production
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
 volumes:
   postgres_data:
