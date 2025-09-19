@@ -21,6 +21,7 @@ import { Notifications } from './collections/Notifications'
 import { Services } from './collections/Services'
 import { ServiceTicket } from './collections/ServiceTicket'
 import { TRL } from './collections/TRL'
+import { Demand } from './collections/Demand'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -51,6 +52,7 @@ export default buildConfig({
     Services,
     ServiceTicket,
     TRL,
+    Demand,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

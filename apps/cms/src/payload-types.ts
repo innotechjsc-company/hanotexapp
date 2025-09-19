@@ -81,6 +81,7 @@ export interface Config {
     services: Service;
     'service-ticket': ServiceTicket;
     trl: Trl;
+    demand: Demand;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -101,6 +102,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     'service-ticket': ServiceTicketSelect<false> | ServiceTicketSelect<true>;
     trl: TrlSelect<false> | TrlSelect<true>;
+    demand: DemandSelect<false> | DemandSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -701,6 +703,27 @@ export interface ServiceTicket {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demand".
+ */
+export interface Demand {
+  id: number;
+  title: string;
+  description: string;
+  category: number | Category;
+  user: number | User;
+  trl_level: number;
+  option?: string | null;
+  option_technology?: string | null;
+  option_rule?: string | null;
+  from_price?: number | null;
+  to_price?: number | null;
+  cooperation?: string | null;
+  documents?: (number | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -761,6 +784,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'trl';
         value: number | Trl;
+      } | null)
+    | ({
+        relationTo: 'demand';
+        value: number | Demand;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1129,6 +1156,26 @@ export interface TrlSelect<T extends boolean = true> {
   title?: T;
   value?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "demand_select".
+ */
+export interface DemandSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  category?: T;
+  user?: T;
+  trl_level?: T;
+  option?: T;
+  option_technology?: T;
+  option_rule?: T;
+  from_price?: T;
+  to_price?: T;
+  cooperation?: T;
+  documents?: T;
   updatedAt?: T;
   createdAt?: T;
 }

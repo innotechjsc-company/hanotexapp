@@ -266,6 +266,67 @@ class ApiClient {
     });
   }
 
+  // Demand endpoints
+  async getDemands(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    category?: string;
+    user?: string;
+    trl_level?: number;
+    min_price?: number;
+    max_price?: number;
+  }) {
+    return this.request({
+      method: "GET",
+      url: "/demands",
+      params,
+    });
+  }
+
+  async getDemand(id: string) {
+    return this.request({
+      method: "GET",
+      url: `/demands/${id}`,
+    });
+  }
+
+  async createDemand(data: {
+    title: string;
+    description: string;
+    category: string;
+    user: string;
+    trl_level: number;
+    option?: string;
+    option_technology?: string;
+    option_rule?: string;
+    from_price?: number;
+    to_price?: number;
+    cooperation?: string;
+    documents?: string[];
+  }) {
+    return this.request({
+      method: "POST",
+      url: "/demands",
+      data,
+    });
+  }
+
+  async updateDemand(id: string, data: any) {
+    return this.request({
+      method: "PUT",
+      url: `/demands/${id}`,
+      data,
+    });
+  }
+
+  async deleteDemand(id: string) {
+    return this.request({
+      method: "DELETE",
+      url: `/demands/${id}`,
+    });
+  }
+
   // Auction endpoints
   async getAuctions(params?: {
     page?: number;
@@ -421,6 +482,11 @@ export const {
   getCategories,
   getCategory,
   getCategoryTechnologies,
+  getDemands,
+  getDemand,
+  createDemand,
+  updateDemand,
+  deleteDemand,
   getAuctions,
   getAuction,
   createAuction,
