@@ -94,7 +94,7 @@ export default function FAQPage() {
         {
           question: "Làm thế nào để liên hệ tư vấn?",
           answer:
-            "Bạn có thể liên hệ qua: hotline 024 3825 1234, email info@hanotex.gov.vn, hoặc đặt lịch tư vấn trực tiếp tại văn phòng.",
+            "Bạn có thể liên hệ qua: hotline 024 3825 1234, email contact@hanotex.vn, hoặc đặt lịch tư vấn trực tiếp tại văn phòng.",
         },
       ],
     },
@@ -199,7 +199,7 @@ export default function FAQPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Gửi email
                   </h3>
-                  <p className="text-gray-600 mb-4">support@hanotex.gov.vn</p>
+                  <p className="text-gray-600 mb-4">contact@hanotex.vn</p>
                   <div className="flex flex-col items-center gap-3">
                     <Button
                       color="primary"

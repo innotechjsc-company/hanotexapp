@@ -51,7 +51,7 @@ describe('CTASection', () => {
     render(<CTASection />)
     
     expect(screen.getByText('Cần hỗ trợ? Liên hệ với chúng tôi')).toBeInTheDocument()
-    expect(screen.getByText('📧 support@hanotex.com')).toBeInTheDocument()
+    expect(screen.getByText('📧 contact@hanotex.vn')).toBeInTheDocument()
     expect(screen.getByText('📞 +84 123 456 789')).toBeInTheDocument()
     expect(screen.getByText('🕒 24/7 Hỗ trợ')).toBeInTheDocument()
   })
@@ -59,10 +59,10 @@ describe('CTASection', () => {
   it('has correct contact links', () => {
     render(<CTASection />)
     
-    const emailLink = screen.getByText('📧 support@hanotex.com')
+    const emailLink = screen.getByText('📧 contact@hanotex.vn')
     const phoneLink = screen.getByText('📞 +84 123 456 789')
     
-    expect(emailLink.closest('a')).toHaveAttribute('href', 'mailto:support@hanotex.com')
+    expect(emailLink.closest('a')).toHaveAttribute('href', 'mailto:contact@hanotex.vn')
     expect(phoneLink.closest('a')).toHaveAttribute('href', 'tel:+84123456789')
   })
 

@@ -130,7 +130,7 @@ export default function TermsPage() {
                   vui lòng liên hệ với chúng tôi:
                 </p>
                 <ul className="space-y-1 text-gray-600 mt-2">
-                  <li>• Email: legal@hanotex.gov.vn</li>
+                  <li>• Email: contact@hanotex.vn</li>
                   <li>• Điện thoại: 024 3825 1234</li>
                   <li>• Địa chỉ: Sở KH&CN Hà Nội, 15 Lê Thánh Tông, Hoàn Kiếm, Hà Nội</li>
                 </ul>

@@ -180,7 +180,7 @@ export default function PrivacyPage() {
                   hoặc muốn thực hiện quyền của mình, vui lòng liên hệ:
                 </p>
                 <ul className="space-y-1 text-gray-600">
-                  <li>• Email: privacy@hanotex.gov.vn</li>
+                  <li>• Email: contact@hanotex.vn</li>
                   <li>• Điện thoại: 024 3825 1234</li>
                   <li>• Địa chỉ: Sở KH&CN Hà Nội, 15 Lê Thánh Tông, Hoàn Kiếm, Hà Nội</li>
                 </ul>

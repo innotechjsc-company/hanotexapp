@@ -24,7 +24,7 @@ describe('Footer', () => {
     expect(screen.getByText('Sở KH&CN Hà Nội')).toBeInTheDocument();
     expect(screen.getByText('15 Lê Thánh Tông, Hoàn Kiếm, Hà Nội')).toBeInTheDocument();
     expect(screen.getByText('024 3825 1234')).toBeInTheDocument();
-    expect(screen.getByText('info@hanotex.gov.vn')).toBeInTheDocument();
+    expect(screen.getByText('contact@hanotex.vn')).toBeInTheDocument();
     expect(screen.getByText('www.hanotex.gov.vn')).toBeInTheDocument();
   });
 

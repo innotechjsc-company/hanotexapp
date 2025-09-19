@@ -1,0 +1,55 @@
+Page/Menu,Vietnamese,English,Test Status,Priority,Notes
+Trang chủ,Trang chủ,Homepage,Not Started,High,Main landing page
+Đăng nhập,Đăng nhập,Login,Not Started,High,Authentication
+Đăng ký,Đăng ký,Register,Not Started,High,User registration
+Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,Not Started,High,User profile management
+Công nghệ,Công nghệ,Technologies,Not Started,High,Technology listing
+Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,Not Started,High,Individual technology page
+Đăng công nghệ,Đăng công nghệ,Register Technology,Not Started,High,Add new technology
+Công nghệ của tôi,Công nghệ của tôi,My Technologies,Not Started,High,User's technologies
+Dịch vụ,Dịch vụ,Services,Not Started,High,Services overview
+Tư vấn công nghệ,Tư vấn công nghệ,Consulting,Not Started,High,Consulting services
+Thẩm định & định giá,Thẩm định & định giá,Valuation,Not Started,High,Valuation services
+Tư vấn pháp lý,Tư vấn pháp lý,Legal,Not Started,High,Legal services
+Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,Not Started,High,IP services
+Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,Not Started,High,Training services
+Kết nối đầu tư,Kết nối đầu tư,Investment,Not Started,High,Investment services
+Giới thiệu,Giới thiệu,About,Not Started,High,Company information
+Liên hệ,Liên hệ,Contact,Not Started,High,Contact page
+Tin tức & Sự kiện,Tin tức & Sự kiện,News & Events,Not Started,High,News and events listing
+Chi tiết tin tức,Chi tiết tin tức,News Detail,Not Started,High,Individual news article
+Sự kiện,Sự kiện,Events,Not Started,High,Events listing
+Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,Not Started,High,Event signup
+FAQ,FAQ,FAQ,Not Started,Medium,Frequently asked questions
+Hướng dẫn sử dụng,Hướng dẫn sử dụng,User Guide,Not Started,Medium,User instructions
+Quỹ & Đầu tư,Quỹ & Đầu tư,Funds & Investment,Not Started,High,Investment overview
+Dự án đang hoạt động,Dự án đang hoạt động,Active Projects,Not Started,High,Current projects
+Dự án đang gọi vốn,Dự án đang gọi vốn,Fundraising,Not Started,High,Fundraising projects
+Danh sách Quỹ đầu tư,Danh sách Quỹ đầu tư,Investment Funds,Not Started,High,Fund directory
+Nhu cầu công nghệ,Nhu cầu công nghệ,Demands,Not Started,High,Technology demands
+Đăng nhu cầu,Đăng nhu cầu,Register Demand,Not Started,High,Create new demand
+Chi tiết nhu cầu,Chi tiết nhu cầu,Demand Detail,Not Started,High,Individual demand
+Đề xuất giải pháp,Đề xuất giải pháp,Propose Solution,Not Started,High,Submit proposals
+Nhu cầu của tôi,Nhu cầu của tôi,My Demands,Not Started,High,User's demands
+Đấu giá,Đấu giá,Auctions,Not Started,High,Auction listing
+Đấu giá trực tiếp,Đấu giá trực tiếp,Live Auction,In Progress,High,Real-time bidding
+Chi tiết đấu giá,Chi tiết đấu giá,Auction Detail,Not Started,High,Individual auction
+Hệ thống đấu giá,Hệ thống đấu giá,Bidding System,Not Started,High,Bid management
+Admin Dashboard,Admin Dashboard,Admin Dashboard,Not Started,High,Admin main page
+Quản lý người dùng,Quản lý người dùng,User Management,Not Started,High,Manage users
+Quản lý nội dung,Quản lý nội dung,Content Management,Not Started,Medium,Manage content
+Báo cáo & Phân tích,Báo cáo & Phân tích,Analytics Dashboard,Not Started,Medium,Reports and KPIs
+Cài đặt,Cài đặt,Settings,In Progress,Medium,User preferences
+Tin nhắn,Tin nhắn,Messages,Not Started,Medium,User messaging
+Quy tắc đăng tin,Quy tắc đăng tin,Posting Rules,Not Started,Low,Posting guidelines
+Chính sách bảo mật,Chính sách bảo mật,Privacy Policy,Not Started,Low,Privacy policy
+Điều khoản sử dụng,Điều khoản sử dụng,Terms of Service,Not Started,Low,Terms of service
+Chính sách hoàn tiền,Chính sách hoàn tiền,Refund Policy,Not Started,Low,Refund policy
+Header Navigation,Header Navigation,Header Navigation,Not Started,High,Main navigation
+Footer,Footer,Footer,In Progress,Medium,Footer information
+Search Functionality,Search Functionality,Search Functionality,Not Started,High,Global search
+Responsive Design,Responsive Design,Responsive Design,Not Started,High,Cross-device compatibility
+Loading Performance,Loading Performance,Loading Performance,Not Started,High,Performance optimization
+Accessibility,Accessibility,Accessibility,Not Started,Medium,Accessibility compliance
+Security,Security,Security,Not Started,High,Security measures
+Error Handling,Error Handling,Error Handling,Not Started,High,Error management

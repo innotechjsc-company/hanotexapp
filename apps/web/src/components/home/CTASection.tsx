@@ -91,10 +91,10 @@ export default function CTASection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center text-white">
               <a
-                href="mailto:support@hanotex.com"
+                href="mailto:contact@hanotex.vn"
                 className="hover:text-primary-100 transition-colors"
               >
-                📧 support@hanotex.com
+                📧 contact@hanotex.vn
               </a>
               <span className="hidden sm:block">•</span>
               <a

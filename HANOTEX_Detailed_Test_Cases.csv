@@ -1,0 +1,101 @@
+Test ID,Page/Menu,Vietnamese,English,Test Case,Expected Result,Status,Priority,Notes
+TC001,Trang chủ,Trang chủ,Homepage,"Kiểm tra hiển thị Hero Section với tiêu đề chính","Hero Section hiển thị đầy đủ với tiêu đề, mô tả và CTA button",Not Started,High,Main landing page
+TC002,Trang chủ,Trang chủ,Homepage,"Kiểm tra Categories Section hiển thị các danh mục","Hiển thị danh sách các danh mục công nghệ với icon và tên",Not Started,High,Technology categories
+TC003,Trang chủ,Trang chủ,Homepage,"Kiểm tra Featured Technologies section","Hiển thị danh sách công nghệ nổi bật với hình ảnh và thông tin",Not Started,High,Featured content
+TC004,Trang chủ,Trang chủ,Homepage,"Kiểm tra News & Events Section","Hiển thị tin tức và sự kiện mới nhất",Not Started,High,Latest content
+TC005,Trang chủ,Trang chủ,Homepage,"Kiểm tra responsive design trên mobile","Giao diện hiển thị đúng trên màn hình mobile",Not Started,High,Mobile compatibility
+TC006,Đăng nhập,Đăng nhập,Login,"Kiểm tra form validation với email không hợp lệ","Hiển thị thông báo lỗi khi nhập email không đúng định dạng",Not Started,High,Form validation
+TC007,Đăng nhập,Đăng nhập,Login,"Kiểm tra đăng nhập với thông tin đúng","Chuyển hướng đến trang chủ sau khi đăng nhập thành công",Not Started,High,Successful login
+TC008,Đăng nhập,Đăng nhập,Login,"Kiểm tra đăng nhập với thông tin sai","Hiển thị thông báo lỗi khi nhập sai email/password",Not Started,High,Failed login
+TC009,Đăng nhập,Đăng nhập,Login,"Kiểm tra chức năng Remember Me","Giữ trạng thái đăng nhập sau khi đóng trình duyệt",Not Started,Medium,Session persistence
+TC010,Đăng nhập,Đăng nhập,Login,"Kiểm tra link Quên mật khẩu","Chuyển hướng đến trang reset password",Not Started,High,Password recovery
+TC011,Đăng ký,Đăng ký,Register,"Kiểm tra validation form đăng ký","Hiển thị thông báo lỗi khi thiếu thông tin bắt buộc",Not Started,High,Form validation
+TC012,Đăng ký,Đăng ký,Register,"Kiểm tra đăng ký tài khoản Cá nhân","Tạo tài khoản thành công với loại Cá nhân",Not Started,High,Individual registration
+TC013,Đăng ký,Đăng ký,Register,"Kiểm tra đăng ký tài khoản Doanh nghiệp","Tạo tài khoản thành công với loại Doanh nghiệp",Not Started,High,Company registration
+TC014,Đăng ký,Đăng ký,Register,"Kiểm tra đăng ký tài khoản Viện nghiên cứu","Tạo tài khoản thành công với loại Viện nghiên cứu",Not Started,High,Research institution registration
+TC015,Đăng ký,Đăng ký,Register,"Kiểm tra xác thực email","Gửi email xác thực và xác thực thành công",Not Started,High,Email verification
+TC016,Đăng ký,Đăng ký,Register,"Kiểm tra độ mạnh password","Hiển thị indicator độ mạnh password",Not Started,Medium,Password strength
+TC017,Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"Kiểm tra hiển thị thông tin cá nhân","Hiển thị đầy đủ thông tin người dùng",Not Started,High,Profile display
+TC018,Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"Kiểm tra chỉnh sửa thông tin cá nhân","Cập nhật thông tin thành công",Not Started,High,Profile editing
+TC019,Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"Kiểm tra upload avatar","Upload và hiển thị avatar mới",Not Started,Medium,Avatar upload
+TC020,Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"Kiểm tra thông tin công ty (nếu có)","Hiển thị thông tin công ty của user",Not Started,High,Company information
+TC021,Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"Kiểm tra thông tin viện nghiên cứu (nếu có)","Hiển thị thông tin viện nghiên cứu của user",Not Started,High,Research institution info
+TC022,Công nghệ,Công nghệ,Technologies,"Kiểm tra danh sách công nghệ","Hiển thị danh sách công nghệ với pagination",Not Started,High,Technology listing
+TC023,Công nghệ,Công nghệ,Technologies,"Kiểm tra filter theo danh mục","Lọc công nghệ theo danh mục được chọn",Not Started,High,Category filter
+TC024,Công nghệ,Công nghệ,Technologies,"Kiểm tra search công nghệ","Tìm kiếm công nghệ theo từ khóa",Not Started,High,Search functionality
+TC025,Công nghệ,Công nghệ,Technologies,"Kiểm tra sort theo ngày đăng","Sắp xếp công nghệ theo ngày đăng mới nhất",Not Started,Medium,Sort by date
+TC026,Công nghệ,Công nghệ,Technologies,"Kiểm tra sort theo TRL level","Sắp xếp công nghệ theo TRL level",Not Started,Medium,Sort by TRL
+TC027,Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"Kiểm tra hiển thị thông tin chi tiết","Hiển thị đầy đủ thông tin công nghệ",Not Started,High,Technology details
+TC028,Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"Kiểm tra hiển thị hình ảnh và tài liệu","Hiển thị gallery hình ảnh và danh sách tài liệu",Not Started,High,Media display
+TC029,Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"Kiểm tra thông tin chủ sở hữu","Hiển thị thông tin người đăng công nghệ",Not Started,High,Owner information
+TC030,Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"Kiểm tra nút liên hệ","Nút liên hệ hoạt động và mở form liên hệ",Not Started,High,Contact button
+TC031,Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"Kiểm tra nút yêu cầu NDA","Nút yêu cầu NDA hoạt động",Not Started,High,NDA request
+TC032,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra multi-step form","Form chia thành nhiều bước với navigation",Not Started,High,Multi-step form
+TC033,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra validation từng bước","Validation thông tin ở mỗi bước",Not Started,High,Step validation
+TC034,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra upload tài liệu","Upload và hiển thị tài liệu",Not Started,High,Document upload
+TC035,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra upload hình ảnh","Upload và hiển thị hình ảnh",Not Started,High,Image upload
+TC036,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra thông tin IP","Nhập và hiển thị thông tin sở hữu trí tuệ",Not Started,High,IP information
+TC037,Đăng công nghệ,Đăng công nghệ,Register Technology,"Kiểm tra preview trước khi submit","Xem trước thông tin trước khi gửi",Not Started,High,Preview functionality
+TC038,Công nghệ của tôi,Công nghệ của tôi,My Technologies,"Kiểm tra danh sách công nghệ đã đăng","Hiển thị danh sách công nghệ của user",Not Started,High,User's technologies
+TC039,Công nghệ của tôi,Công nghệ của tôi,My Technologies,"Kiểm tra trạng thái công nghệ","Hiển thị trạng thái Draft/Published/Rejected",Not Started,High,Status display
+TC040,Công nghệ của tôi,Công nghệ của tôi,My Technologies,"Kiểm tra chỉnh sửa công nghệ","Chỉnh sửa thông tin công nghệ",Not Started,High,Edit technology
+TC041,Công nghệ của tôi,Công nghệ của tôi,My Technologies,"Kiểm tra xóa công nghệ","Xóa công nghệ với xác nhận",Not Started,High,Delete technology
+TC042,Công nghệ của tôi,Công nghệ của tôi,My Technologies,"Kiểm tra thống kê views/likes","Hiển thị số lượt xem và like",Not Started,Medium,Statistics
+TC043,Dịch vụ,Dịch vụ,Services,"Kiểm tra trang chính dịch vụ","Hiển thị tổng quan các dịch vụ",Not Started,High,Services overview
+TC044,Dịch vụ,Dịch vụ,Services,"Kiểm tra các loại dịch vụ","Hiển thị danh sách các dịch vụ",Not Started,High,Services list
+TC045,Dịch vụ,Dịch vụ,Services,"Kiểm tra CTA buttons","Các nút call-to-action hoạt động",Not Started,High,Call-to-action
+TC046,Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"Kiểm tra landing page","Hiển thị trang dịch vụ tư vấn",Not Started,High,Consulting page
+TC047,Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"Kiểm tra thông tin dịch vụ","Hiển thị chi tiết dịch vụ tư vấn",Not Started,High,Service information
+TC048,Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"Kiểm tra quy trình tư vấn","Hiển thị các bước trong quy trình",Not Started,High,Process steps
+TC049,Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"Kiểm tra form liên hệ","Form liên hệ hoạt động",Not Started,High,Contact form
+TC050,Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"Kiểm tra testimonials","Hiển thị đánh giá khách hàng",Not Started,Medium,Customer testimonials
+TC051,Thẩm định & định giá,Thẩm định & định giá,Valuation,"Kiểm tra landing page","Hiển thị trang dịch vụ định giá",Not Started,High,Valuation page
+TC052,Thẩm định & định giá,Thẩm định & định giá,Valuation,"Kiểm tra thông tin dịch vụ","Hiển thị chi tiết dịch vụ định giá",Not Started,High,Service details
+TC053,Thẩm định & định giá,Thẩm định & định giá,Valuation,"Kiểm tra quy trình định giá","Hiển thị các bước trong quy trình",Not Started,High,Valuation process
+TC054,Thẩm định & định giá,Thẩm định & định giá,Valuation,"Kiểm tra form yêu cầu","Form yêu cầu định giá hoạt động",Not Started,High,Request form
+TC055,Thẩm định & định giá,Thẩm định & định giá,Valuation,"Kiểm tra báo cáo mẫu","Hiển thị báo cáo định giá mẫu",Not Started,Medium,Sample reports
+TC056,Tư vấn pháp lý,Tư vấn pháp lý,Legal,"Kiểm tra landing page","Hiển thị trang dịch vụ pháp lý",Not Started,High,Legal services page
+TC057,Tư vấn pháp lý,Tư vấn pháp lý,Legal,"Kiểm tra thông tin dịch vụ","Hiển thị chi tiết dịch vụ pháp lý",Not Started,High,Legal service details
+TC058,Tư vấn pháp lý,Tư vấn pháp lý,Legal,"Kiểm tra quy trình pháp lý","Hiển thị các bước trong quy trình",Not Started,High,Legal process
+TC059,Tư vấn pháp lý,Tư vấn pháp lý,Legal,"Kiểm tra form liên hệ","Form liên hệ hoạt động",Not Started,High,Contact form
+TC060,Tư vấn pháp lý,Tư vấn pháp lý,Legal,"Kiểm tra chuyên gia","Hiển thị thông tin chuyên gia",Not Started,Medium,Expert information
+TC061,Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"Kiểm tra landing page","Hiển thị trang dịch vụ IP",Not Started,High,IP services page
+TC062,Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"Kiểm tra thông tin dịch vụ","Hiển thị chi tiết dịch vụ IP",Not Started,High,IP service details
+TC063,Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"Kiểm tra quy trình IP","Hiển thị các bước trong quy trình",Not Started,High,IP process
+TC064,Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"Kiểm tra form yêu cầu","Form yêu cầu dịch vụ IP hoạt động",Not Started,High,Request form
+TC065,Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"Kiểm tra tài liệu mẫu","Hiển thị tài liệu mẫu",Not Started,Medium,Sample documents
+TC066,Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"Kiểm tra landing page","Hiển thị trang dịch vụ đào tạo",Not Started,High,Training services page
+TC067,Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"Kiểm tra thông tin khóa học","Hiển thị danh sách khóa học",Not Started,High,Course information
+TC068,Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"Kiểm tra đăng ký khóa học","Form đăng ký khóa học hoạt động",Not Started,High,Course registration
+TC069,Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"Kiểm tra tài liệu học tập","Hiển thị tài liệu học tập",Not Started,Medium,Learning materials
+TC070,Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"Kiểm tra chứng chỉ","Hiển thị thông tin chứng chỉ",Not Started,Medium,Certification info
+TC071,Kết nối đầu tư,Kết nối đầu tư,Investment,"Kiểm tra landing page","Hiển thị trang dịch vụ đầu tư",Not Started,High,Investment services page
+TC072,Kết nối đầu tư,Kết nối đầu tư,Investment,"Kiểm tra thông tin dịch vụ","Hiển thị chi tiết dịch vụ đầu tư",Not Started,High,Investment details
+TC073,Kết nối đầu tư,Kết nối đầu tư,Investment,"Kiểm tra quy trình đầu tư","Hiển thị các bước trong quy trình",Not Started,High,Investment process
+TC074,Kết nối đầu tư,Kết nối đầu tư,Investment,"Kiểm tra form đăng ký","Form đăng ký đầu tư hoạt động",Not Started,High,Registration form
+TC075,Kết nối đầu tư,Kết nối đầu tư,Investment,"Kiểm tra portfolio","Hiển thị portfolio đầu tư",Not Started,Medium,Investment portfolio
+TC076,Giới thiệu,Giới thiệu,About,"Kiểm tra thông tin công ty","Hiển thị thông tin về công ty",Not Started,High,Company information
+TC077,Giới thiệu,Giới thiệu,About,"Kiểm tra giá trị cốt lõi","Hiển thị các giá trị cốt lõi",Not Started,High,Core values
+TC078,Giới thiệu,Giới thiệu,About,"Kiểm tra đội ngũ","Hiển thị thông tin đội ngũ",Not Started,Medium,Team information
+TC079,Giới thiệu,Giới thiệu,About,"Kiểm tra lịch sử phát triển","Hiển thị timeline phát triển",Not Started,Medium,Development history
+TC080,Liên hệ,Liên hệ,Contact,"Kiểm tra form liên hệ","Form liên hệ hoạt động và gửi email",Not Started,High,Contact form
+TC081,Liên hệ,Liên hệ,Contact,"Kiểm tra thông tin liên hệ","Hiển thị thông tin liên hệ",Not Started,High,Contact information
+TC082,Liên hệ,Liên hệ,Contact,"Kiểm tra bản đồ","Hiển thị bản đồ vị trí",Not Started,Medium,Map display
+TC083,Liên hệ,Liên hệ,Contact,"Kiểm tra validation form","Validation thông tin form",Not Started,High,Form validation
+TC084,Liên hệ,Liên hệ,Contact,"Kiểm tra gửi email","Gửi email thành công",Not Started,High,Email sending
+TC085,Tin tức & Sự kiện,Tin tức & Sự kiện,News & Events,"Kiểm tra danh sách tin tức","Hiển thị danh sách tin tức",Not Started,High,News listing
+TC086,Tin tức & Sự kiện,Tin tức & Sự kiện,News & Events,"Kiểm tra filter và search","Lọc và tìm kiếm tin tức",Not Started,High,Filter and search
+TC087,Tin tức & Sự kiện,Tin tức & Sự kiện,News & Events,"Kiểm tra pagination","Phân trang danh sách tin tức",Not Started,Medium,Pagination
+TC088,Chi tiết tin tức,Chi tiết tin tức,News Detail,"Kiểm tra hiển thị bài viết","Hiển thị nội dung bài viết",Not Started,High,Article content
+TC089,Chi tiết tin tức,Chi tiết tin tức,News Detail,"Kiểm tra hình ảnh và media","Hiển thị hình ảnh và video",Not Started,High,Media content
+TC090,Chi tiết tin tức,Chi tiết tin tức,News Detail,"Kiểm tra tác giả và ngày đăng","Hiển thị thông tin tác giả",Not Started,Medium,Author information
+TC091,Chi tiết tin tức,Chi tiết tin tức,News Detail,"Kiểm tra related articles","Hiển thị bài viết liên quan",Not Started,Medium,Related articles
+TC092,Chi tiết tin tức,Chi tiết tin tức,News Detail,"Kiểm tra social sharing","Chia sẻ lên mạng xã hội",Not Started,Low,Social sharing
+TC093,Sự kiện,Sự kiện,Events,"Kiểm tra danh sách sự kiện","Hiển thị danh sách sự kiện",Not Started,High,Events listing
+TC094,Sự kiện,Sự kiện,Events,"Kiểm tra filter theo ngày","Lọc sự kiện theo ngày",Not Started,High,Date filter
+TC095,Sự kiện,Sự kiện,Events,"Kiểm tra thông tin sự kiện","Hiển thị chi tiết sự kiện",Not Started,High,Event details
+TC096,Sự kiện,Sự kiện,Events,"Kiểm tra đăng ký sự kiện","Form đăng ký sự kiện hoạt động",Not Started,High,Event registration
+TC097,Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,"Kiểm tra form đăng ký","Form đăng ký hoạt động",Not Started,High,Registration form
+TC098,Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,"Kiểm tra validation","Validation thông tin đăng ký",Not Started,High,Form validation
+TC099,Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,"Kiểm tra thông tin sự kiện","Hiển thị thông tin sự kiện",Not Started,High,Event information
+TC100,Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,"Kiểm tra xác nhận đăng ký","Xác nhận đăng ký thành công",Not Started,High,Registration confirmation
