@@ -67,6 +67,34 @@ class MediaApi {
     const uploads = list.map((f) => this.upload(f, fields));
     return Promise.all(uploads);
   }
+
+  /**
+   * Delete a media file by ID from Payload CMS `/api/media/{id}`.
+   */
+  async delete(id: number | string): Promise<void> {
+    const config: AxiosRequestConfig = {
+      method: "DELETE",
+      url: `${API_ENDPOINTS.MEDIA}/${id}`,
+    };
+
+    await this.axios.request(config);
+  }
 }
 
+// Create and export a singleton instance
+const mediaApiInstance = new MediaApi();
+
 export default MediaApi;
+
+// Export convenient functions
+export const uploadFile = (
+  file: File | Blob,
+  fields?: Partial<Pick<Media, "alt" | "caption" | "type">>
+) => mediaApiInstance.upload(file, fields);
+
+export const uploadFiles = (
+  files: Array<File | Blob> | FileList,
+  fields?: Partial<Pick<Media, "alt" | "caption" | "type">>
+) => mediaApiInstance.uploadMulti(files, fields);
+
+export const deleteFile = (id: number | string) => mediaApiInstance.delete(id);
