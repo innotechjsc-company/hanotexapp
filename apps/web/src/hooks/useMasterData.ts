@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 
+export interface MasterDataItem {
+  value: string;
+  label: string;
+  description?: string;
+  tooltip?: string;
+}
+
 export interface MasterData {
-  fields: Array<{ value: string; label: string }>;
-  trlLevels: Array<{ value: string; label: string }>;
-  categories: Array<{ value: string; label: string }>;
-  ipTypes: Array<{ value: string; label: string; description: string }>;
-  ipStatuses: Array<{ value: string; label: string }>;
-  protectionTerritories: Array<{ value: string; tooltip: string }>;
-  certifications: Array<{ value: string; tooltip: string }>;
-  commercializationMethods: Array<{ value: string; tooltip: string }>;
-  transferMethods: Array<{ value: string; tooltip: string }>;
+  fields: MasterDataItem[];
+  trlLevels: MasterDataItem[];
+  categories: MasterDataItem[];
+  ipTypes: MasterDataItem[];
+  ipStatuses: MasterDataItem[];
+  protectionTerritories: MasterDataItem[];
+  certifications: MasterDataItem[];
+  commercializationMethods: MasterDataItem[];
+  transferMethods: MasterDataItem[];
 }
 
 export const useMasterData = () => {
@@ -27,7 +34,35 @@ export const useMasterData = () => {
         const result = await response.json();
         
         if (result.success) {
-          setMasterData(result.data);
+          // Transform API data to match component expectations
+          const transformedData = {
+            ...result.data,
+            protectionTerritories: result.data.protectionTerritories.map((item: any) => ({
+              value: item.value,
+              label: item.value,
+              description: item.tooltip,
+              tooltip: item.tooltip
+            })),
+            certifications: result.data.certifications.map((item: any) => ({
+              value: item.value,
+              label: item.value,
+              description: item.tooltip,
+              tooltip: item.tooltip
+            })),
+            commercializationMethods: result.data.commercializationMethods.map((item: any) => ({
+              value: item.value,
+              label: item.value,
+              description: item.tooltip,
+              tooltip: item.tooltip
+            })),
+            transferMethods: result.data.transferMethods.map((item: any) => ({
+              value: item.value,
+              label: item.value,
+              description: item.tooltip,
+              tooltip: item.tooltip
+            }))
+          };
+          setMasterData(transformedData);
         } else {
           setError(result.error || 'Failed to load master data');
         }

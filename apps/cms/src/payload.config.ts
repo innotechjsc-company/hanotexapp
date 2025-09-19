@@ -13,6 +13,7 @@ import { ResearchInstitutions } from './collections/ResearchInstitutions'
 import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Technologies } from './collections/Technologies'
+import { IntellectualProperty } from './collections/IntellectualProperty'
 import { Auctions } from './collections/Auctions'
 import { Bids } from './collections/Bids'
 import { Transactions } from './collections/Transactions'
@@ -32,15 +33,9 @@ export default buildConfig({
     },
   },
   // Allow web app at localhost:3000 to access the CMS API
-  cors: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ],
+  cors: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   // Allow CSRF for cookie-based auth from the web app
-  csrf: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ],
+  csrf: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   collections: [
     Users,
     Companies,
@@ -48,6 +43,7 @@ export default buildConfig({
     Media,
     Categories,
     Technologies,
+    IntellectualProperty,
     Auctions,
     Bids,
     Transactions,

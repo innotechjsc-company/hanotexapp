@@ -1,138 +1,88 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useIsAuthenticated, useIsLoading } from "@/store/auth";
-import { useMasterData } from "@/hooks/useMasterData";
-import { ArrowLeft, Save, Eye, AlertCircle } from "lucide-react";
-import { useFormData, useRegisterTechnology, useOCR } from "./hooks";
+import { ArrowLeft, Save, Eye } from "lucide-react";
 import {
-  BasicInfoSection,
   TechnologyOwnersSection,
+  LegalTerritorySection,
+  InvestmentTransferSection,
+  PricingDesiredSection,
+  VisibilityNDASection,
   IPSection,
+  LegalTerritorySectionRef,
+  InvestmentTransferSectionRef,
+  PricingDesiredSectionRef,
+  VisibilityNDASectionRef,
 } from "./components";
-import { Card, CardBody, CardHeader, Button, Spinner } from "@heroui/react";
+import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
+import { IPSectionRef } from "./components/IPSection";
+import { useMasterData } from "@/hooks/useMasterData";
+import { Technology } from "@/types/technologies";
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
-  const isAuthenticated = useIsAuthenticated();
-  const authLoading = useIsLoading();
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
-  const {
-    masterData,
-    loading: masterDataLoading,
-    error: masterDataError,
-  } = useMasterData();
+  const [confirmUpload, setConfirmUpload] = useState(false);
+  const ownersRef = useRef<TechnologyOwnersSectionRef>(null);
+  const ipRef = useRef<IPSectionRef>(null);
+  const legalTerritoryRef = useRef<LegalTerritorySectionRef>(null);
+  const investmentTransferRef = useRef<InvestmentTransferSectionRef>(null);
+  const pricingRef = useRef<PricingDesiredSectionRef>(null);
+  const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
-  // Custom hooks for form management
-  const formManager = useFormData();
-  const {
-    loading: submitLoading,
-    error: submitError,
-    success: submitSuccess,
-    showOptionalFields,
-    setShowOptionalFields,
-    submitTechnology,
-    handleFileUpload,
-    clearMessages,
-  } = useRegisterTechnology();
+  const { masterData, loading: masterDataLoading } = useMasterData();
 
-  const {
-    loading: ocrLoading,
-    result: ocrResult,
-    error: ocrError,
-    processOCR,
-  } = useOCR();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault(); // Ngăn chặn hành vi submit form mặc định
+    const owners = ownersRef.current?.getOwners();
+    console.log("Owners data:", owners);
+    const ipDetails = ipRef.current?.getIPDetails();
+    console.log("IP details:", ipDetails);
+    const legalDetails = legalTerritoryRef.current?.getData();
+    console.log("Legal details:", legalDetails);
+    const investmentTransfer = investmentTransferRef.current?.getData();
+    console.log("Investment & Transfer:", investmentTransfer);
+    const pricingDesired = pricingRef.current?.getData();
+    console.log("Pricing Desired:", pricingDesired);
+    const visibility = visibilityRef.current?.getData();
+    console.log("Visibility:", visibility);
 
-  // File upload handler with OCR processing
-  const handleFileUploadWithOCR = useCallback(
-    async (files: FileList | null) => {
-      if (!files) return;
-
-      handleFileUpload(
-        files,
-        (file) => {
-          formManager.addDocument(file);
-
-          // Process OCR for PDF and image files
-          if (
-            file.type === "application/pdf" ||
-            file.type.startsWith("image/")
-          ) {
-            processOCR(file).then((result) => {
-              if (result && result.success && result.extractedData) {
-                formManager.updateFormDataFromOCR(result.extractedData);
-              }
-            });
-          }
-        },
-        (error) => {
-          // Handle file upload errors through the form manager or show alerts
-          console.error("File upload error:", error);
-        }
-      );
-    },
-    [handleFileUpload, formManager, processOCR]
-  );
-
-  // Form submission handler
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      clearMessages();
-
-      const success = await submitTechnology(formManager.formData);
-      if (success) {
-        formManager.resetForm();
-      }
-    },
-    [submitTechnology, formManager, clearMessages]
-  );
-
-  // Debug auth state
-  useEffect(() => {
-    console.log("Auth State Debug:", {
-      isAuthenticated,
-      authLoading,
-      hasCheckedAuth,
-    });
-  }, [isAuthenticated, authLoading, hasCheckedAuth]);
-
-  // Authentication check with proper loading handling
-  useEffect(() => {
-    // Wait for auth to finish loading
-    if (!authLoading) {
-      setHasCheckedAuth(true);
-      if (!isAuthenticated) {
-        console.log("User not authenticated, redirecting to home");
-        router.push("/");
-      }
-    }
-  }, [authLoading, isAuthenticated, router]);
+    const data = {
+      owners,
+      legal_certification: legalDetails,
+      investment_desire: investmentTransfer?.investment_desire,
+      transfer_type: investmentTransfer?.transfer_type,
+      pricing: pricingDesired,
+      status: "draft",
+      visibility_mode: visibility?.visibility_mode,
+    };
+    console.log("Data:", data);
+  };
 
   // Show loading while auth is being checked
-  if (authLoading || !hasCheckedAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Spinner size="lg" color="primary" className="mb-4" />
-          <p className="text-gray-600">Đang kiểm tra xác thực...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (authLoading || !hasCheckedAuth) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="text-center">
+  //         <Spinner size="lg" color="primary" className="mb-4" />
+  //         <p className="text-gray-600">Đang kiểm tra xác thực...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Spinner size="lg" color="primary" className="mb-4" />
-          <p className="text-gray-600">Đang chuyển hướng về trang chủ...</p>
-        </div>
-      </div>
-    );
-  }
+  // // Redirect if not authenticated
+  // if (!isAuthenticated) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center">
+  //       <div className="text-center">
+  //         <Spinner size="lg" color="primary" className="mb-4" />
+  //         <p className="text-gray-600">Đang chuyển hướng về trang chủ...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -158,94 +108,122 @@ export default function RegisterTechnologyPage() {
                 </p>
               </div>
             </div>
-            <div className="flex space-x-3">
-              <Button
-                variant="bordered"
-                startContent={<Eye className="h-4 w-4" />}
-                className="text-gray-700"
-              >
-                Xem trước
-              </Button>
-            </div>
           </CardHeader>
         </Card>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Error Messages */}
-          {(submitError || masterDataError || ocrError) && (
+          {/* {(submitError || masterDataError || ocrError) && (
             <Card className="bg-red-50 border-red-200">
               <CardBody className="flex flex-row items-center text-red-600">
                 <AlertCircle className="h-5 w-5 mr-2" />
                 {submitError || masterDataError || ocrError}
               </CardBody>
             </Card>
-          )}
+          )} */}
 
           {/* Loading Messages */}
-          {masterDataLoading && (
+          {/* {masterDataLoading && (
             <Card className="bg-blue-50 border-blue-200">
               <CardBody className="flex flex-row items-center text-blue-600">
                 <Spinner size="sm" color="primary" className="mr-2" />
                 Đang tải dữ liệu...
               </CardBody>
             </Card>
-          )}
+          )} */}
 
           {/* Success Messages */}
-          {submitSuccess && (
+          {/* {submitSuccess && (
             <Card className="bg-green-50 border-green-200">
               <CardBody className="text-green-600">{submitSuccess}</CardBody>
             </Card>
-          )}
+          )} */}
 
           {/* 1. Basic Information */}
-          <BasicInfoSection
-            formData={formManager.formData}
+          {/* <BasicInfoSection
+            formData={formData}
             masterData={masterData as any}
             masterDataLoading={masterDataLoading}
             showOptionalFields={showOptionalFields}
-            setShowOptionalFields={setShowOptionalFields}
+            setShowOptionalFields={actions.setShowOptionalFields}
             ocrLoading={ocrLoading}
             ocrResult={ocrResult}
-            onChange={formManager.handleChange}
+            onChange={actions.handleFieldChange}
             onFileUpload={handleFileUploadWithOCR}
-            onRemoveDocument={formManager.removeDocument}
-          />
+            onRemoveDocument={actions.removeDocument}
+          /> */}
 
           {/* 2. Technology Owners */}
           <TechnologyOwnersSection
-            owners={formManager.formData.owners}
-            onAddOwner={formManager.addOwner}
-            onRemoveOwner={formManager.removeOwner}
-            onUpdateOwner={formManager.updateOwner}
+            ref={ownersRef}
+            initialOwners={[]} // Dữ liệu khởi tạo (tùy chọn)
+            onChange={(owners) => console.log("Changed:", owners)} // Callback khi có thay đổi (tùy chọn)
           />
 
           {/* 3. IP Details */}
           <IPSection
-            ipDetails={formManager.formData.ipDetails}
-            masterData={masterData as any}
-            masterDataLoading={masterDataLoading}
-            onAddIPDetail={formManager.addIPDetail}
-            onRemoveIPDetail={formManager.removeIPDetail}
-            onUpdateIPDetail={formManager.updateIPDetail}
+            ref={ipRef}
+            onChange={(ipDetails) => console.log("Changed:", ipDetails)} // Callback khi có thay đổi (tùy chọn)
           />
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-3">
-            <Button variant="bordered" onClick={() => router.back()}>
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              color="primary"
-              isLoading={submitLoading}
-              startContent={!submitLoading && <Save className="h-4 w-4" />}
-              isDisabled={submitLoading}
-            >
-              {submitLoading ? "Đang xử lý..." : "Đăng ký công nghệ"}
-            </Button>
-          </div>
+          {/* 4. Legal Territory */}
+          <LegalTerritorySection
+            ref={legalTerritoryRef}
+            initialData={{}} // optional
+            onChange={(legalDetails) => console.log("Changed:", legalDetails)} // optional
+          />
+
+          {/* 6. Investment & Transfer (Optional) */}
+          <InvestmentTransferSection
+            ref={investmentTransferRef}
+            masterData={masterData}
+            masterDataLoading={masterDataLoading}
+            onChange={(data) => console.log("Changed:", data)} // optional
+          />
+
+          {/* 7. Pricing & Desired Price (Optional) */}
+          <PricingDesiredSection ref={pricingRef} />
+
+          {/* 8. Visibility */}
+          <VisibilityNDASection ref={visibilityRef} />
+
+          {/* Confirmation checkbox */}
+          <Card>
+            <CardBody className="p-4">
+              <label className="flex items-start gap-3 cursor-pointer p-2 rounded-md transition-colors">
+                <input
+                  type="checkbox"
+                  checked={confirmUpload}
+                  onChange={(e) => setConfirmUpload(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">
+                  Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm công
+                  nghệ theo đúng quy định.
+                </span>
+              </label>
+            </CardBody>
+          </Card>
+
+          {/* Submit Button - only visible when confirmed */}
+          {
+            <div className="flex justify-end space-x-3">
+              <Button variant="bordered" onClick={() => router.back()}>
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
+                isLoading={false}
+                startContent={<Save className="h-4 w-4" />}
+                isDisabled={confirmUpload === false}
+              >
+                {"Đăng ký công nghệ"}
+              </Button>
+            </div>
+          }
         </form>
       </div>
     </div>

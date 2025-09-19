@@ -73,6 +73,7 @@ export interface Config {
     media: Media;
     categories: Category;
     technologies: Technology;
+    intellectual_property: IntellectualProperty;
     auctions: Auction;
     bids: Bid;
     transactions: Transaction;
@@ -92,6 +93,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     technologies: TechnologiesSelect<false> | TechnologiesSelect<true>;
+    intellectual_property: IntellectualPropertySelect<false> | IntellectualPropertySelect<true>;
     auctions: AuctionsSelect<false> | AuctionsSelect<true>;
     bids: BidsSelect<false> | BidsSelect<true>;
     transactions: TransactionsSelect<false> | TransactionsSelect<true>;
@@ -334,12 +336,25 @@ export interface ResearchInstitution {
   createdAt: string;
 }
 /**
+ * Quản lý tất cả file media (ảnh, video, documents)
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Mô tả ngắn gọn về file media (dùng cho SEO và accessibility). Sẽ tự động tạo từ tên file nếu để trống.
+   */
   alt: string;
+  /**
+   * Chú thích hiển thị dưới ảnh (tùy chọn)
+   */
+  caption?: string | null;
+  /**
+   * Loại file media
+   */
+  type?: ('image' | 'video' | 'document' | 'other') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -381,36 +396,22 @@ export interface Category {
 export interface Technology {
   id: number;
   title: string;
-  /**
-   * Tóm tắt hiển thị cho người dùng công khai
-   */
-  public_summary?: string | null;
+  documents?: (number | Media)[] | null;
   category?: (number | null) | Category;
+  trl_level: number | Trl;
+  description?: string | null;
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
    */
   confidential_detail?: string | null;
-  trl_level: number | Trl;
-  submitter: number | User;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ACTIVE' | 'INACTIVE';
-  visibility_mode?: ('public' | 'private' | 'restricted') | null;
   owners?:
     | {
-        owner_type: 'INDIVIDUAL' | 'COMPANY' | 'RESEARCH_INSTITUTION';
+        owner_type: 'individual' | 'company' | 'research_institution';
         owner_name: string;
         /**
          * Tỷ lệ sở hữu (0-100)
          */
         ownership_percentage: number;
-        id?: string | null;
-      }[]
-    | null;
-  ip_details?:
-    | {
-        ip_type: 'PATENT' | 'UTILITY_MODEL' | 'INDUSTRIAL_DESIGN' | 'TRADEMARK' | 'SOFTWARE_COPYRIGHT' | 'TRADE_SECRET';
-        ip_number?: string | null;
-        status?: string | null;
-        territory?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -427,13 +428,25 @@ export interface Technology {
           id?: string | null;
         }[]
       | null;
-    local_certification_url?: string | null;
+    files?: (number | Media)[] | null;
   };
+  investment_desire?:
+    | {
+        investment_option?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  transfer_type?:
+    | {
+        transfer_option?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   pricing: {
-    pricing_type: 'GRANT_SEED' | 'VC_JOINT_VENTURE' | 'GROWTH_STRATEGIC';
+    pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
     price_to: number;
-    currency: 'VND' | 'USD' | 'EUR';
+    currency: 'vnd' | 'usd' | 'eur';
   };
   additional_data?: {
     test_results?: {
@@ -482,7 +495,9 @@ export interface Technology {
       [k: string]: unknown;
     } | null;
   };
-  documents?: (number | Media)[] | null;
+  submitter: number | User;
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
+  visibility_mode?: ('public' | 'private' | 'restricted') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -495,6 +510,31 @@ export interface Trl {
   title: string;
   value: number;
   description: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property".
+ */
+export interface IntellectualProperty {
+  id: number;
+  /**
+   * Sản phẩm khoa học/công nghệ
+   */
+  technology?: (number | null) | Technology;
+  /**
+   * Số đơn/số bằng
+   */
+  code: string;
+  /**
+   * Loại sở hữu trí tuệ
+   */
+  type?: ('patent' | 'utility_solution' | 'industrial_design' | 'trademark' | 'copyright' | 'trade_secret') | null;
+  /**
+   * Tình trạng sở hữu trí tuệ
+   */
+  status?: ('pending' | 'granted' | 'expired' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -691,6 +731,10 @@ export interface PayloadLockedDocument {
         value: number | Technology;
       } | null)
     | ({
+        relationTo: 'intellectual_property';
+        value: number | IntellectualProperty;
+      } | null)
+    | ({
         relationTo: 'auctions';
         value: number | Auction;
       } | null)
@@ -881,6 +925,8 @@ export interface ResearchInstitutionsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
+  type?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -911,28 +957,17 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface TechnologiesSelect<T extends boolean = true> {
   title?: T;
-  public_summary?: T;
+  documents?: T;
   category?: T;
-  confidential_detail?: T;
   trl_level?: T;
-  submitter?: T;
-  status?: T;
-  visibility_mode?: T;
+  description?: T;
+  confidential_detail?: T;
   owners?:
     | T
     | {
         owner_type?: T;
         owner_name?: T;
         ownership_percentage?: T;
-        id?: T;
-      };
-  ip_details?:
-    | T
-    | {
-        ip_type?: T;
-        ip_number?: T;
-        status?: T;
-        territory?: T;
         id?: T;
       };
   legal_certification?:
@@ -950,7 +985,19 @@ export interface TechnologiesSelect<T extends boolean = true> {
               certification?: T;
               id?: T;
             };
-        local_certification_url?: T;
+        files?: T;
+      };
+  investment_desire?:
+    | T
+    | {
+        investment_option?: T;
+        id?: T;
+      };
+  transfer_type?:
+    | T
+    | {
+        transfer_option?: T;
+        id?: T;
       };
   pricing?:
     | T
@@ -967,7 +1014,21 @@ export interface TechnologiesSelect<T extends boolean = true> {
         economic_social_impact?: T;
         financial_support_info?: T;
       };
-  documents?: T;
+  submitter?: T;
+  status?: T;
+  visibility_mode?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "intellectual_property_select".
+ */
+export interface IntellectualPropertySelect<T extends boolean = true> {
+  technology?: T;
+  code?: T;
+  type?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

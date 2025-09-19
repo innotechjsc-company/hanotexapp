@@ -21,26 +21,17 @@ export const Technologies: CollectionConfig = {
       label: 'Tiêu đề Công nghệ',
     },
     {
-      name: 'public_summary',
-      type: 'textarea',
-      label: 'Tóm tắt Công khai',
-      admin: {
-        description: 'Tóm tắt hiển thị cho người dùng công khai',
-      },
+      name: 'documents',
+      type: 'relationship',
+      relationTo: 'media',
+      hasMany: true,
+      label: 'Tài liệu chứng minh',
     },
     {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
       label: 'Lĩnh vực',
-    },
-    {
-      name: 'confidential_detail',
-      type: 'textarea',
-      label: 'Chi tiết Bảo mật',
-      admin: {
-        description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
-      },
     },
     {
       name: 'trl_level',
@@ -50,37 +41,19 @@ export const Technologies: CollectionConfig = {
       label: 'Mức TRL',
     },
     {
-      name: 'submitter',
-      type: 'relationship',
-      relationTo: 'users',
-      label: 'Người đăng tải',
-      required: true,
+      name: 'description',
+      type: 'textarea',
+      label: 'Tóm tắt công khai',
     },
     {
-      name: 'status',
-      type: 'select',
-      required: true,
-      defaultValue: 'DRAFT',
-      options: [
-        { label: 'Bản nháp', value: 'DRAFT' },
-        { label: 'Đang chờ duyệt', value: 'PENDING' },
-        { label: 'Đã duyệt', value: 'APPROVED' },
-        { label: 'Từ chối', value: 'REJECTED' },
-        { label: 'Hoạt động', value: 'ACTIVE' },
-        { label: 'Không hoạt động', value: 'INACTIVE' },
-      ],
+      name: 'confidential_detail',
+      type: 'textarea',
+      label: 'Chi tiết Bảo mật',
+      admin: {
+        description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
+      },
     },
-    {
-      name: 'visibility_mode',
-      type: 'select',
-      defaultValue: 'public',
-      options: [
-        { label: 'Công khai', value: 'public' },
-        { label: 'Riêng tư', value: 'private' },
-        { label: 'Hạn chế', value: 'restricted' },
-      ],
-    },
-    // Technology Owners
+    // Chủ sở hữu công nghệ
     {
       name: 'owners',
       type: 'array',
@@ -91,9 +64,9 @@ export const Technologies: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
-            { label: 'Cá nhân', value: 'INDIVIDUAL' },
-            { label: 'Công ty', value: 'COMPANY' },
-            { label: 'Viện nghiên cứu', value: 'RESEARCH_INSTITUTION' },
+            { label: 'Cá nhân', value: 'individual' },
+            { label: 'Công ty', value: 'company' },
+            { label: 'Viện/Trường', value: 'research_institution' },
           ],
         },
         {
@@ -114,47 +87,13 @@ export const Technologies: CollectionConfig = {
         },
       ],
     },
-    // Intellectual Property Details
-    {
-      name: 'ip_details',
-      type: 'array',
-      label: 'Chi tiết Sở hữu Trí tuệ',
-      fields: [
-        {
-          name: 'ip_type',
-          type: 'select',
-          required: true,
-          options: [
-            { label: 'Bằng sáng chế', value: 'PATENT' },
-            { label: 'Giải pháp hữu ích', value: 'UTILITY_MODEL' },
-            { label: 'Kiểu dáng công nghiệp', value: 'INDUSTRIAL_DESIGN' },
-            { label: 'Nhãn hiệu', value: 'TRADEMARK' },
-            { label: 'Bản quyền phần mềm', value: 'SOFTWARE_COPYRIGHT' },
-            { label: 'Bí mật kinh doanh', value: 'TRADE_SECRET' },
-          ],
-        },
-        {
-          name: 'ip_number',
-          type: 'text',
-          label: 'Số IP',
-        },
-        {
-          name: 'status',
-          type: 'text',
-          label: 'Trạng thái IP',
-        },
-        {
-          name: 'territory',
-          type: 'text',
-          label: 'Lãnh thổ',
-        },
-      ],
-    },
-    // Legal Certification
+    // Sở hữu trí tuệ (Bảng Intellectual Property)
+
+    // Pháp lý & Lãnh thổ
     {
       name: 'legal_certification',
       type: 'group',
-      label: 'Chứng nhận Pháp lý',
+      label: 'Pháp lý & Lãnh thổ',
       fields: [
         {
           name: 'protection_scope',
@@ -181,9 +120,37 @@ export const Technologies: CollectionConfig = {
           ],
         },
         {
-          name: 'local_certification_url',
-          type: 'text',
+          name: 'files',
+          type: 'upload',
+          relationTo: 'media',
           label: 'File chứng nhận',
+          hasMany: true,
+        },
+      ],
+    },
+    // Mong muốn đầu tư
+    {
+      name: 'investment_desire',
+      type: 'array',
+      label: 'Mong muốn đầu tư & Hình thức chuyển giao',
+      fields: [
+        {
+          name: 'investment_option',
+          type: 'text',
+          label: 'Mong muốn đầu tư & Hình thức chuyển giao',
+        },
+      ],
+    },
+    // Hình thức chuyển giao
+    {
+      name: 'transfer_type',
+      type: 'array',
+      label: 'Hình thức chuyển giao',
+      fields: [
+        {
+          name: 'transfer_option',
+          type: 'text',
+          label: 'Hình thức chuyển giao',
         },
       ],
     },
@@ -198,9 +165,9 @@ export const Technologies: CollectionConfig = {
           type: 'select',
           required: true,
           options: [
-            { label: 'Grant/Seed (TRL 1–3)', value: 'GRANT_SEED' },
-            { label: 'VC/Joint Venture (TRL 4–6)', value: 'VC_JOINT_VENTURE' },
-            { label: 'Growth/Strategic (TRL 7–9)', value: 'GROWTH_STRATEGIC' },
+            { label: 'Grant/Seed (TRL 1–3)', value: 'grant_seed' },
+            { label: 'VC/Joint Venture (TRL 4–6)', value: 'vc_joint_venture' },
+            { label: 'Growth/Strategic (TRL 7–9)', value: 'growth_strategic' },
           ],
         },
         {
@@ -219,11 +186,11 @@ export const Technologies: CollectionConfig = {
           name: 'currency',
           type: 'select',
           required: true,
-          defaultValue: 'VND',
+          defaultValue: 'vnd',
           options: [
-            { label: 'Đồng Việt Nam (VND)', value: 'VND' },
-            { label: 'Đô la Mỹ (USD)', value: 'USD' },
-            { label: 'Euro (EUR)', value: 'EUR' },
+            { label: 'Đồng Việt Nam (VND)', value: 'vnd' },
+            { label: 'Đô la Mỹ (USD)', value: 'usd' },
+            { label: 'Euro (EUR)', value: 'eur' },
           ],
         },
       ],
@@ -251,13 +218,36 @@ export const Technologies: CollectionConfig = {
         },
       ],
     },
-    // Related Documents
     {
-      name: 'documents',
+      name: 'submitter',
       type: 'relationship',
-      relationTo: 'media',
-      hasMany: true,
-      label: 'Tài liệu liên quan',
+      relationTo: 'users',
+      label: 'Người đăng tải',
+      required: true,
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'draft',
+      options: [
+        { label: 'Bản nháp', value: 'draft' },
+        { label: 'Đang chờ duyệt', value: 'pending' },
+        { label: 'Đã duyệt', value: 'approved' },
+        { label: 'Từ chối', value: 'rejected' },
+        { label: 'Hoạt động', value: 'active' },
+        { label: 'Không hoạt động', value: 'inactive' },
+      ],
+    },
+    {
+      name: 'visibility_mode',
+      type: 'select',
+      defaultValue: 'public',
+      options: [
+        { label: 'Công khai', value: 'public' },
+        { label: 'Riêng tư', value: 'private' },
+        { label: 'Hạn chế', value: 'restricted' },
+      ],
     },
   ],
   timestamps: true,
