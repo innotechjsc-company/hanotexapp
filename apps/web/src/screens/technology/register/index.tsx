@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import {
   TechnologyOwnersSection,
   LegalTerritorySection,
@@ -70,7 +70,9 @@ export default function RegisterTechnologyPage() {
           ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
           : [];
         const legalMedia = legalDetails?.files?.length
-          ? await mediaApi.uploadMulti(legalDetails!.files, { type: "document" })
+          ? await mediaApi.uploadMulti(legalDetails!.files, {
+              type: "document",
+            })
           : [];
 
         // 3. Aggregate payload aligned with Technology type
@@ -94,7 +96,8 @@ export default function RegisterTechnologyPage() {
           transfer_type: investmentTransfer?.transfer_type,
           pricing: pricingDesired,
           // Server route will create related IP docs if provided
-          intellectual_property: ipDetails && ipDetails.length ? ipDetails : undefined,
+          intellectual_property:
+            ipDetails && ipDetails.length ? ipDetails : undefined,
           status: "draft" as const,
           visibility_mode: visibility?.visibility_mode,
         };
