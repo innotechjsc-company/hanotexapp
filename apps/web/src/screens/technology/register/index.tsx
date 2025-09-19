@@ -38,12 +38,10 @@ export default function RegisterTechnologyPage() {
 
   const { masterData, loading: masterDataLoading } = useMasterData();
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
-    setSubmitError(null);
 
     (async () => {
       try {
@@ -109,36 +107,12 @@ export default function RegisterTechnologyPage() {
         router.push("/technologies");
       } catch (err: any) {
         console.error("Submit error:", err);
-        setSubmitError(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
+        toast.error(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
       } finally {
         setSubmitting(false);
       }
     })();
   };
-
-  // Show loading while auth is being checked
-  // if (authLoading || !hasCheckedAuth) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <Spinner size="lg" color="primary" className="mb-4" />
-  //         <p className="text-gray-600">Đang kiểm tra xác thực...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // // Redirect if not authenticated
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <Spinner size="lg" color="primary" className="mb-4" />
-  //         <p className="text-gray-600">Đang chuyển hướng về trang chủ...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -169,33 +143,6 @@ export default function RegisterTechnologyPage() {
 
         {/* Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Error Messages */}
-          {/* {(submitError || masterDataError || ocrError) && (
-            <Card className="bg-red-50 border-red-200">
-              <CardBody className="flex flex-row items-center text-red-600">
-                <AlertCircle className="h-5 w-5 mr-2" />
-                {submitError || masterDataError || ocrError}
-              </CardBody>
-            </Card>
-          )} */}
-
-          {/* Loading Messages */}
-          {/* {masterDataLoading && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardBody className="flex flex-row items-center text-blue-600">
-                <Spinner size="sm" color="primary" className="mr-2" />
-                Đang tải dữ liệu...
-              </CardBody>
-            </Card>
-          )} */}
-
-          {/* Success Messages */}
-          {/* {submitSuccess && (
-            <Card className="bg-green-50 border-green-200">
-              <CardBody className="text-green-600">{submitSuccess}</CardBody>
-            </Card>
-          )} */}
-
           {/* 1. Basic Information */}
           <BasicInfoSection
             ref={basicRef}
