@@ -113,6 +113,17 @@ export const Propose: CollectionConfig = {
         description: 'Tài liệu',
       },
     },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      label: 'Trạng thái',
+      options: ['pending', 'accepted', 'rejected'],
+      defaultValue: 'pending',
+      admin: {
+        description: 'Trạng thái',
+      },
+    },
   ],
   timestamps: true,
 }
