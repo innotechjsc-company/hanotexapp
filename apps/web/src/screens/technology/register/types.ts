@@ -142,3 +142,9 @@ export interface TRLSuggestion {
   title: string;
   fields: string[];
 }
+
+// OCR result interface
+export interface OCRResult {
+  text: string;
+  confidence: number;
+}

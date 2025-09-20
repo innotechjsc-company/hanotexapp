@@ -1,12 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Eye, Heart, TrendingUp } from 'lucide-react';
-import { Technology } from '@/types';
-import { formatCurrency, formatDate, getTRLLabel, getTRLColor, getStatusText, getStatusColor } from '@/lib/utils';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import apiClient from '@/lib/api';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Eye, Heart, TrendingUp } from "lucide-react";
+import { Technology } from "@/types";
+import {
+  formatCurrency,
+  formatDate,
+  getTRLLabel,
+  getTRLColor,
+  getStatusText,
+  getStatusColor,
+} from "@/lib/utils";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { getTechnologies } from "@/api/technologies";
 
 export default function FeaturedTechnologies() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
@@ -15,18 +22,20 @@ export default function FeaturedTechnologies() {
   useEffect(() => {
     const fetchFeaturedTechnologies = async () => {
       try {
-        const response = await apiClient.getTechnologies({
-          limit: 6,
-          status: 'ACTIVE',
-          sort: 'created_at',
-          order: 'DESC'
-        });
+        const response = await getTechnologies(
+          {
+            status: "active",
+          },
+          {
+            limit: 6,
+          }
+        );
 
-        if (response.success && response.data && Array.isArray(response.data)) {
+        if (response.data && Array.isArray(response.data)) {
           setTechnologies(response.data);
         }
       } catch (error) {
-        console.error('Error fetching featured technologies:', error);
+        console.error("Error fetching featured technologies:", error);
       } finally {
         setLoading(false);
       }
@@ -56,7 +65,8 @@ export default function FeaturedTechnologies() {
             Công nghệ nổi bật
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Khám phá những công nghệ mới nhất và tiên tiến nhất được đăng tải trên sàn giao dịch
+            Khám phá những công nghệ mới nhất và tiên tiến nhất được đăng tải
+            trên sàn giao dịch
           </p>
         </div>
 
@@ -71,11 +81,15 @@ export default function FeaturedTechnologies() {
                 <div className="px-6 py-4">
                   {/* Status Badge */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(tech.status)}`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(tech.status)}`}
+                    >
                       {getStatusText(tech.status)}
                     </span>
                     {tech.trl_level && (
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTRLColor(Number(tech.trl_level))}`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTRLColor(Number(tech.trl_level))}`}
+                      >
                         TRL {String(tech.trl_level)}
                       </span>
                     )}
@@ -87,30 +101,49 @@ export default function FeaturedTechnologies() {
                   </h3>
 
                   {/* Summary */}
-                  {tech.public_summary && (
-                    <p className="text-gray-600 mb-4 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'}}>
-                      {tech.public_summary}
+                  {tech.description && (
+                    <p
+                      className="text-gray-600 mb-4 overflow-hidden"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {tech.description}
                     </p>
                   )}
 
                   {/* Category */}
                   {tech.category && (
                     <div className="text-sm text-gray-500 mb-4">
-                      <span className="font-medium">Danh mục:</span> {typeof tech.category === 'object' ? tech.category.name : 'N/A'}
+                      <span className="font-medium">Danh mục:</span>{" "}
+                      {typeof tech.category === "object"
+                        ? tech.category.name
+                        : "N/A"}
                     </div>
                   )}
 
                   {/* Price */}
                   {tech.pricing && (
                     <div className="text-lg font-bold text-primary-600 mb-4">
-                      {formatCurrency(tech.pricing.price_from, tech.pricing.currency)}
+                      {formatCurrency(
+                        tech.pricing.price_from,
+                        tech.pricing.currency
+                      )}
                     </div>
                   )}
 
                   {/* Meta Info */}
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>{formatDate(tech.createdAt || '')}</span>
-                    <span>{getUserTypeLabel(typeof tech.submitter === 'object' ? tech.submitter.user_type : '')}</span>
+                    <span>{formatDate(tech.createdAt || "")}</span>
+                    <span>
+                      {getUserTypeLabel(
+                        typeof tech.submitter === "object"
+                          ? tech.submitter.user_type
+                          : ""
+                      )}
+                    </span>
                   </div>
 
                   {/* Actions */}
@@ -122,7 +155,7 @@ export default function FeaturedTechnologies() {
                       Xem chi tiết
                       <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
-                    
+
                     <div className="flex items-center space-x-3">
                       <button className="flex items-center space-x-1 text-gray-400 hover:text-red-500 transition-colors">
                         <Heart className="h-4 w-4" />
@@ -168,10 +201,10 @@ export default function FeaturedTechnologies() {
 // Helper function for user type label
 function getUserTypeLabel(userType: string): string {
   const userTypeLabels: Record<string, string> = {
-    INDIVIDUAL: 'Cá nhân',
-    COMPANY: 'Doanh nghiệp',
-    RESEARCH_INSTITUTION: 'Viện/Trường',
+    INDIVIDUAL: "Cá nhân",
+    COMPANY: "Doanh nghiệp",
+    RESEARCH_INSTITUTION: "Viện/Trường",
   };
-  
+
   return userTypeLabels[userType] || userType;
 }

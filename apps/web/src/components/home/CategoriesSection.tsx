@@ -1,23 +1,34 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Brain, FlaskConical, Cpu, Leaf, Zap, Shield, Heart, Wheat, Wind } from 'lucide-react';
-import { Category } from '@/types';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import apiClient from '@/lib/api';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Brain,
+  FlaskConical,
+  Cpu,
+  Leaf,
+  Zap,
+  Shield,
+  Heart,
+  Wheat,
+  Wind,
+} from "lucide-react";
+import { Category } from "@/types";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { getCategories } from "@/api/categories";
 
 const categoryIcons: Record<string, any> = {
-  'AI': Brain,
-  'Công nghệ sinh học': FlaskConical,
-  'Vật liệu mới': Cpu,
-  'Y tế': Heart,
-  'Nông nghiệp CNC': Wheat,
-  'Năng lượng sạch': Wind,
-  'Công nghệ thông tin': Cpu,
-  'Công nghệ môi trường': Leaf,
-  'Công nghệ năng lượng': Zap,
-  'Công nghệ an ninh': Shield,
+  AI: Brain,
+  "Công nghệ sinh học": FlaskConical,
+  "Vật liệu mới": Cpu,
+  "Y tế": Heart,
+  "Nông nghiệp CNC": Wheat,
+  "Năng lượng sạch": Wind,
+  "Công nghệ thông tin": Cpu,
+  "Công nghệ môi trường": Leaf,
+  "Công nghệ năng lượng": Zap,
+  "Công nghệ an ninh": Shield,
 };
 
 export default function CategoriesSection() {
@@ -27,14 +38,14 @@ export default function CategoriesSection() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await apiClient.getCategories();
-        if (response.success && response.data && Array.isArray(response.data)) {
+        const response = await getCategories();
+        if (response.data && Array.isArray(response.data)) {
           // Get top-level categories (no parent)
           const topCategories = response.data.slice(0, 6);
           setCategories(topCategories);
         }
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       } finally {
         setLoading(false);
       }
@@ -64,7 +75,8 @@ export default function CategoriesSection() {
             Danh mục nổi bật
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Khám phá các lĩnh vực công nghệ đa dạng và tìm kiếm giải pháp phù hợp với nhu cầu của bạn
+            Khám phá các lĩnh vực công nghệ đa dạng và tìm kiếm giải pháp phù
+            hợp với nhu cầu của bạn
           </p>
         </div>
 
@@ -72,8 +84,9 @@ export default function CategoriesSection() {
         {categories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {categories.map((category, index) => {
-              const IconComponent = categoryIcons[category.name] || FlaskConical;
-              
+              const IconComponent =
+                categoryIcons[category.name] || FlaskConical;
+
               return (
                 <div key={category.id}>
                   <Link
@@ -92,7 +105,14 @@ export default function CategoriesSection() {
                       </h3>
 
                       {/* Description */}
-                      <p className="text-gray-600 mb-4 overflow-hidden" style={{display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'}}>                                                                             
+                      <p
+                        className="text-gray-600 mb-4 overflow-hidden"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
                         {category.name}
                       </p>
 
@@ -101,10 +121,11 @@ export default function CategoriesSection() {
                         Mã: {category.code_vn}
                       </div>
 
-
                       {/* Arrow */}
                       <div className="flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform">
-                        <span className="text-sm font-medium mr-1">Khám phá</span>
+                        <span className="text-sm font-medium mr-1">
+                          Khám phá
+                        </span>
                         <ArrowRight className="h-4 w-4" />
                       </div>
                     </div>

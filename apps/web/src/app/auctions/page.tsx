@@ -3,21 +3,15 @@
 import { useState, useEffect } from "react";
 import {
   Search,
-  Filter,
   Calendar,
-  Clock,
   Gavel,
-  Users,
   ArrowRight,
   Plus,
   ExternalLink,
-  TrendingUp,
-  DollarSign,
 } from "lucide-react";
 import {
   Card,
   CardBody,
-  CardHeader,
   Button,
   Input,
   Chip,
@@ -25,11 +19,7 @@ import {
   SelectItem,
   Spinner,
   Avatar,
-  Divider,
-  Badge,
 } from "@heroui/react";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import apiClient from "@/lib/api";
 
 interface Auction {
   id: number;

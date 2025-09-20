@@ -112,9 +112,7 @@ export const PricingDesiredSection = forwardRef<
             }}
           >
             {investmentStages.map((stg) => (
-              <SelectItem key={stg.value} value={stg.value}>
-                {stg.label}
-              </SelectItem>
+              <SelectItem key={stg.value}>{stg.label}</SelectItem>
             ))}
           </Select>
         </div>
@@ -150,9 +148,7 @@ export const PricingDesiredSection = forwardRef<
               classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
             >
               {currencies.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
+                <SelectItem key={c.value}>{c.label}</SelectItem>
               ))}
             </Select>
           </div>

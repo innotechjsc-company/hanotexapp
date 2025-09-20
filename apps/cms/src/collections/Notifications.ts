@@ -66,34 +66,6 @@ export const Notifications: CollectionConfig = {
         description: 'Người dùng đã đọc thông báo này hay chưa',
       },
     },
-    // Related entities
-    {
-      name: 'related_technology',
-      type: 'relationship',
-      relationTo: 'technologies',
-      label: 'Công nghệ liên quan',
-      admin: {
-        description: 'Công nghệ liên quan đến thông báo này',
-      },
-    },
-    {
-      name: 'related_auction',
-      type: 'relationship',
-      relationTo: 'auctions',
-      label: 'Phiên đấu giá liên quan',
-      admin: {
-        description: 'Phiên đấu giá liên quan đến thông báo này',
-      },
-    },
-    {
-      name: 'related_transaction',
-      type: 'relationship',
-      relationTo: 'transactions',
-      label: 'Giao dịch liên quan',
-      admin: {
-        description: 'Giao dịch liên quan đến thông báo này',
-      },
-    },
     // Action URL for clickable notifications
     {
       name: 'action_url',

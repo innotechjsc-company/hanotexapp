@@ -135,8 +135,8 @@ export async function getUserOrganizations(userId: string): Promise<{
   researchInstitution: ResearchInstitution | null;
 }> {
   const user = await getUserById(userId);
-  const companyId = (user?.company?.id as unknown as string) || "";
-  const riId = (user?.research_institution?.id as unknown as string) || "";
+  const companyId = (user?.company as unknown as string) || "";
+  const riId = (user?.research_institution as unknown as string) || "";
 
   const [companyRes, riRes] = await Promise.all([
     companyId
