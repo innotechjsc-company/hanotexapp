@@ -11,14 +11,7 @@ import { initializeAuth } from "@/store/auth";
 function HeroUIWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
-  return (
-    <HeroUIProvider 
-      navigate={router.push}
-      theme="custom-light"
-    >
-      {children}
-    </HeroUIProvider>
-  );
+  return <HeroUIProvider navigate={router.push}>{children}</HeroUIProvider>;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {

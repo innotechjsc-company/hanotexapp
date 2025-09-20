@@ -27,7 +27,7 @@ export interface PaginationParams {
 export async function getIntellectualProperties(
   filters: IntellectualPropertyFilters = {},
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   const params = {
     ...filters,
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
@@ -35,7 +35,7 @@ export async function getIntellectualProperties(
     sort: pagination.sort || "-createdAt",
   };
 
-  return payloadApiClient.get<IntellectualProperty[]>(
+  return payloadApiClient.get<IntellectualProperty>(
     API_ENDPOINTS.INTELLECTUAL_PROPERTIES,
     params
   );
@@ -96,7 +96,7 @@ export async function searchIntellectualProperties(
   query: string,
   filters: IntellectualPropertyFilters = {},
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties({ ...filters, search: query }, pagination);
 }
 
@@ -106,7 +106,7 @@ export async function searchIntellectualProperties(
 export async function getIntellectualPropertiesByTechnology(
   technology: string,
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties({ technology }, pagination);
 }
 
@@ -116,7 +116,7 @@ export async function getIntellectualPropertiesByTechnology(
 export async function getIntellectualPropertiesByType(
   type: string,
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties({ type }, pagination);
 }
 
@@ -126,7 +126,7 @@ export async function getIntellectualPropertiesByType(
 export async function getIntellectualPropertiesByStatus(
   status: string,
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties({ status }, pagination);
 }
 
@@ -136,7 +136,7 @@ export async function getIntellectualPropertiesByStatus(
 export async function getIntellectualPropertiesByCode(
   code: string,
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties({ code }, pagination);
 }
 
@@ -151,6 +151,6 @@ export async function getFilteredIntellectualProperties(
     code?: string;
   },
   pagination: PaginationParams = {}
-): Promise<ApiResponse<IntellectualProperty[]>> {
+): Promise<ApiResponse<IntellectualProperty>> {
   return getIntellectualProperties(filters, pagination);
 }

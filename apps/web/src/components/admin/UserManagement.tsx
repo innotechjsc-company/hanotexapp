@@ -21,12 +21,7 @@ import {
 } from "lucide-react";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@/components/ui/DataTable";
-import {
-  User,
-  UserType,
-  UserRole,
-  Company,
-} from "@/types";
+import { User, UserType, UserRole, Company } from "@/types";
 
 interface UserManagementProps {
   className?: string;
@@ -89,12 +84,7 @@ export default function UserManagement({
         is_active: true,
         createdAt: "2024-01-25T09:45:00Z",
         updatedAt: "2024-01-25T09:45:00Z",
-        research_institution: {
-          id: "3",
-          institution_name: "Hanoi University of Technology",
-          institution_code: "HUST001",
-          governing_body: "Ministry of Education",
-        },
+        research_institution: "3",
       },
     ];
 
@@ -205,7 +195,7 @@ export default function UserManagement({
       columnHelper.accessor("createdAt", {
         header: "Joined",
         cell: ({ getValue }) => {
-          const date = new Date(getValue() || '');
+          const date = new Date(getValue() || "");
           return (
             <div>
               <p className="text-sm text-gray-900">
@@ -243,9 +233,7 @@ export default function UserManagement({
     return users.filter((user) => {
       const matchesSearch =
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.full_name
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (user.company as any)?.company_name
           ?.toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
