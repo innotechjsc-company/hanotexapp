@@ -232,12 +232,24 @@ export default function DemandsPage() {
             size="lg"
             startContent={<Plus className="h-5 w-5" />}
             className="font-medium"
+            onPress={() => {
+              if (isAuthenticated) {
+                router.push("/demands/register");
+              } else {
+                router.push("/auth/login?redirect=/demands/register");
+              }
+            }}
             style={{
               backgroundColor: "#006FEE",
               color: "#ffffff",
               minHeight: "44px",
               fontWeight: "500",
             }}
+            title={
+              isAuthenticated
+                ? "Đăng nhu cầu công nghệ mới"
+                : "Đăng nhập để đăng nhu cầu"
+            }
           >
             Đăng nhu cầu
           </Button>
@@ -681,6 +693,35 @@ export default function DemandsPage() {
             </CardBody>
           </Card>
         )}
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          color="primary"
+          size="lg"
+          isIconOnly
+          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+          onPress={() => {
+            if (isAuthenticated) {
+              router.push("/demands/register");
+            } else {
+              router.push("/auth/login?redirect=/demands/register");
+            }
+          }}
+          style={{
+            backgroundColor: "#006FEE",
+            color: "#ffffff",
+            border: "none",
+          }}
+          title={
+            isAuthenticated
+              ? "Đăng nhu cầu công nghệ mới"
+              : "Đăng nhập để đăng nhu cầu"
+          }
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
       </div>
     </div>
   );
