@@ -50,6 +50,7 @@ export default function MyDemandsPage() {
 
   // File management states for edit modal
   const [existingDocuments, setExistingDocuments] = useState<any[]>([]);
+  const [originalDocuments, setOriginalDocuments] = useState<any[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [deletingFileIds, setDeletingFileIds] = useState<Set<number>>(
@@ -106,7 +107,9 @@ export default function MyDemandsPage() {
     });
 
     // Load existing documents
-    setExistingDocuments(demand.documents || []);
+    const documents = demand.documents || [];
+    setExistingDocuments(documents);
+    setOriginalDocuments(documents);
     setSelectedFiles([]);
     setDeletingFileIds(new Set());
 
@@ -138,7 +141,10 @@ export default function MyDemandsPage() {
     const files = event.target.files;
     if (files) {
       const newFiles = Array.from(files);
-      setSelectedFiles((prev) => [...prev, ...newFiles]);
+      // Replace all existing documents when new files are selected
+      setSelectedFiles(newFiles);
+      // Clear existing documents as they will be replaced
+      setExistingDocuments([]);
     }
     // Reset input value to allow selecting the same file again
     event.target.value = "";
@@ -147,6 +153,12 @@ export default function MyDemandsPage() {
   // Handle removing selected file (before upload)
   const handleRemoveSelectedFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle restoring original documents
+  const handleRestoreOriginalDocuments = () => {
+    setExistingDocuments(originalDocuments);
+    setSelectedFiles([]);
   };
 
   // Handle removing existing document
@@ -222,9 +234,11 @@ export default function MyDemandsPage() {
         }
       }
 
-      // Combine existing documents (not deleted) with new document IDs
-      const remainingExistingIds = existingDocuments.map((doc) => doc.id);
-      const allDocumentIds = [...remainingExistingIds, ...newDocumentIds];
+      // Use only new document IDs (replacing existing documents)
+      const allDocumentIds =
+        newDocumentIds.length > 0
+          ? newDocumentIds
+          : existingDocuments.map((doc) => doc.id);
 
       // Update demand with new document IDs
       const updateData = {
@@ -251,6 +265,7 @@ export default function MyDemandsPage() {
       // Reset file states
       setSelectedFiles([]);
       setExistingDocuments([]);
+      setOriginalDocuments([]);
     } catch (err: any) {
       console.error("Error updating demand:", err);
       setError(err.message || "Lỗi khi cập nhật nhu cầu");
@@ -958,6 +973,17 @@ export default function MyDemandsPage() {
 
                 {/* File Upload Section */}
                 <div className="space-y-3">
+                  {existingDocuments.length > 0 && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+                      <div className="flex items-center">
+                        <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                        <p className="text-sm text-yellow-800">
+                          <strong>Lưu ý:</strong> Khi chọn tài liệu mới, tất cả
+                          tài liệu hiện có sẽ được thay thế.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center space-x-3">
                     <input
                       type="file"
@@ -972,8 +998,21 @@ export default function MyDemandsPage() {
                       className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Chọn tài liệu
+                      {existingDocuments.length > 0
+                        ? "Thay thế tài liệu"
+                        : "Chọn tài liệu"}
                     </label>
+                    {selectedFiles.length > 0 &&
+                      existingDocuments.length === 0 &&
+                      originalDocuments.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleRestoreOriginalDocuments}
+                          className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          Khôi phục tài liệu gốc
+                        </button>
+                      )}
                     {selectedFiles.length > 0 && (
                       <span className="text-sm text-gray-500">
                         {selectedFiles.length} file đã chọn
