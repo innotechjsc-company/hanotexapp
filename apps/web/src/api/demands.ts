@@ -49,7 +49,7 @@ export async function getDemandById(id: string): Promise<Demand> {
   const response = await payloadApiClient.get<Demand>(
     `${API_ENDPOINTS.DEMANDS}/${id}`
   );
-  return response.data!;
+  return response as any as Demand;
 }
 
 /**
