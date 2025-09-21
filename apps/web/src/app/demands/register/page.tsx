@@ -27,8 +27,9 @@ export default function RegisterDemandPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [uploadingFiles, setUploadingFiles] = useState(false);
-  const [deletingFiles, setDeletingFiles] = useState<Set<number>>(new Set());
   const [uploadedDocuments, setUploadedDocuments] = useState<Media[]>([]);
+  // New state to store selected files (not uploaded yet)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const user = useUser();
 
   // Fetch categories from API
@@ -88,7 +89,54 @@ export default function RegisterDemandPage() {
         return;
       }
 
-      // Prepare demand data according to Demand interface
+      // Step 1: Upload selected files first
+      let uploadedMediaData: Media[] = [];
+
+      if (selectedFiles.length > 0) {
+        console.log("Uploading selected files before creating demand...");
+        setUploadingFiles(true);
+
+        try {
+          const uploadPromises = selectedFiles.map(async (file) => {
+            // Determine file type based on MIME type
+            let fileType: Media["type"] = "other";
+            if (file.type.startsWith("image/")) {
+              fileType = "image";
+            } else if (file.type.startsWith("video/")) {
+              fileType = "video";
+            } else if (
+              file.type.includes("pdf") ||
+              file.type.includes("document") ||
+              file.type.includes("text") ||
+              file.type.includes("application")
+            ) {
+              fileType = "document";
+            }
+
+            return await uploadFile(file, {
+              alt: file.name,
+              type: fileType,
+              caption: `Tài liệu đính kèm: ${file.name}`,
+            });
+          });
+
+          uploadedMediaData = await Promise.all(uploadPromises);
+          console.log(
+            "Files uploaded successfully:",
+            uploadedMediaData.map((f) => ({ id: f.id, filename: f.filename }))
+          );
+        } catch (err: any) {
+          console.error("Error uploading files:", err);
+          setError(`Lỗi tải file: ${err.message || "Vui lòng thử lại"}`);
+          return;
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
+      // Step 2: Prepare demand data with uploaded media IDs
+      const documentIds = uploadedMediaData.map((media) => media.id);
+
       const demandData: Partial<Demand> = {
         title: formData.title,
         description: formData.description,
@@ -101,15 +149,17 @@ export default function RegisterDemandPage() {
         from_price: formData.from_price || 0,
         to_price: formData.to_price || 0,
         cooperation: formData.cooperation || "",
-        documents: uploadedDocuments,
+        documents: documentIds as any, // Send uploaded media IDs
       };
 
-      console.log("Submitting demand:", demandData);
+      console.log("Creating demand with uploaded media:", {
+        documentIds,
+        uploadedMediaData: uploadedMediaData.length,
+      });
 
-      // Call API to create demand
+      // Step 3: Call API to create demand
       const createdDemand = await createDemand(demandData);
 
-      console.log("Demand created successfully:", createdDemand);
       setSuccess(`Nhu cầu "${formData.title}" đã được đăng ký thành công!`);
 
       // Reset form after successful submission
@@ -130,9 +180,9 @@ export default function RegisterDemandPage() {
         documents: [],
       });
 
-      // Reset uploaded documents
+      // Reset file states
+      setSelectedFiles([]);
       setUploadedDocuments([]);
-      setDeletingFiles(new Set());
 
       // Optional: Redirect to demands list or detail page after a delay
       setTimeout(() => {
@@ -170,21 +220,7 @@ export default function RegisterDemandPage() {
     }
   }, [user]);
 
-  // Cleanup uploaded files when component unmounts (user leaves page without submitting)
-  useEffect(() => {
-    return () => {
-      // Only cleanup if there are uploaded documents and no successful submission
-      if (uploadedDocuments.length > 0 && !success) {
-        uploadedDocuments.forEach(async (doc) => {
-          try {
-            await deleteFile(doc.id);
-          } catch (error) {
-            console.warn("Failed to cleanup uploaded file:", doc.id, error);
-          }
-        });
-      }
-    };
-  }, [uploadedDocuments, success]);
+  // No longer need cleanup since files are only uploaded on successful form submission
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -207,79 +243,41 @@ export default function RegisterDemandPage() {
     }
   };
 
-  // Handle file upload
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // No longer need to sync uploadedDocuments to formData since we upload on submit
+
+  // Handle file selection (not upload yet)
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    setUploadingFiles(true);
     setError("");
 
-    try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        // Determine file type based on MIME type
-        let fileType: Media["type"] = "other";
-        if (file.type.startsWith("image/")) {
-          fileType = "image";
-        } else if (file.type.startsWith("video/")) {
-          fileType = "video";
-        } else if (
-          file.type.includes("pdf") ||
-          file.type.includes("document") ||
-          file.type.includes("text") ||
-          file.type.includes("application")
-        ) {
-          fileType = "document";
-        }
+    // Add selected files to state
+    const newFiles = Array.from(files);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
 
-        return await uploadFile(file, {
-          alt: file.name,
-          type: fileType,
-          caption: `Tài liệu đính kèm: ${file.name}`,
-        });
-      });
+    console.log(
+      "Files selected:",
+      newFiles.map((f) => ({ name: f.name, size: f.size }))
+    );
 
-      const uploadedFiles = await Promise.all(uploadPromises);
-      setUploadedDocuments((prev) => [...prev, ...uploadedFiles]);
-
-      // Reset file input
-      event.target.value = "";
-    } catch (err: any) {
-      console.error("Error uploading files:", err);
-      setError(`Lỗi tải file: ${err.message || "Vui lòng thử lại"}`);
-    } finally {
-      setUploadingFiles(false);
-    }
+    // Reset file input
+    event.target.value = "";
   };
 
-  // Remove uploaded document
-  const handleRemoveDocument = async (documentId: number) => {
-    // Add to deleting set to show loading state
-    setDeletingFiles((prev) => new Set(prev).add(documentId));
-    setError("");
-
-    try {
-      // Call API to delete the file from server
-      await deleteFile(documentId);
-
-      // Remove from local state only after successful deletion
-      setUploadedDocuments((prev) =>
-        prev.filter((doc) => doc.id !== documentId)
+  // Remove selected file (before upload)
+  const handleRemoveSelectedFile = (fileIndex: number) => {
+    setSelectedFiles((prev) => {
+      const newFiles = prev.filter((_, index) => index !== fileIndex);
+      console.log(
+        "File removed, remaining:",
+        newFiles.map((f) => ({ name: f.name, size: f.size }))
       );
-    } catch (err: any) {
-      console.error("Error deleting file:", err);
-      setError(`Lỗi xóa file: ${err.message || "Vui lòng thử lại"}`);
-    } finally {
-      // Remove from deleting set
-      setDeletingFiles((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(documentId);
-        return newSet;
-      });
-    }
+      return newFiles;
+    });
   };
+
+  // No longer need handleRemoveDocument since we only work with selected files before upload
 
   // Get file size in readable format
   const formatFileSize = (bytes: number | null | undefined): string => {
@@ -621,7 +619,7 @@ export default function RegisterDemandPage() {
                   id="file-upload"
                   multiple
                   accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.mp4,.avi,.mov"
-                  onChange={handleFileUpload}
+                  onChange={handleFileSelection}
                   className="hidden"
                   disabled={uploadingFiles}
                 />
@@ -654,25 +652,25 @@ export default function RegisterDemandPage() {
                 </label>
               </div>
 
-              {/* Uploaded Documents List */}
-              {uploadedDocuments.length > 0 && (
+              {/* Selected Files List */}
+              {selectedFiles.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-medium text-gray-700">
-                    Tài liệu đã tải lên ({uploadedDocuments.length})
+                    Tài liệu đã chọn ({selectedFiles.length})
                   </h3>
                   <div className="grid gap-3">
-                    {uploadedDocuments.map((document) => (
+                    {selectedFiles.map((file, index) => (
                       <div
-                        key={document.id}
+                        key={`${file.name}-${index}`}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
                       >
                         <div className="flex items-center space-x-3">
                           <div className="flex-shrink-0">
-                            {document.type === "image" ? (
+                            {file.type.startsWith("image/") ? (
                               <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <File className="h-5 w-5 text-blue-600" />
                               </div>
-                            ) : document.type === "video" ? (
+                            ) : file.type.startsWith("video/") ? (
                               <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
                                 <File className="h-5 w-5 text-purple-600" />
                               </div>
@@ -684,38 +682,29 @@ export default function RegisterDemandPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">
-                              {document.filename || document.alt || "Untitled"}
+                              {file.name}
                             </p>
                             <div className="flex items-center space-x-2 text-xs text-gray-500">
-                              <span>{formatFileSize(document.filesize)}</span>
-                              {document.mimeType && (
-                                <>
-                                  <span>•</span>
-                                  <span>{document.mimeType}</span>
-                                </>
-                              )}
+                              <span>{formatFileSize(file.size)}</span>
+                              <span>•</span>
+                              <span>{file.type}</span>
                             </div>
                           </div>
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleRemoveDocument(document.id)}
-                          disabled={deletingFiles.has(document.id)}
-                          className="flex-shrink-0 p-1 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={
-                            deletingFiles.has(document.id)
-                              ? "Đang xóa..."
-                              : "Xóa tài liệu"
-                          }
+                          onClick={() => handleRemoveSelectedFile(index)}
+                          className="flex-shrink-0 p-1 text-red-400 hover:text-red-600 transition-colors"
+                          title="Xóa tài liệu"
                         >
-                          {deletingFiles.has(document.id) ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
-                          ) : (
-                            <X className="h-4 w-4" />
-                          )}
+                          <X className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    <strong>Lưu ý:</strong> Các file sẽ được tải lên khi bạn ấn
+                    "Đăng nhu cầu"
                   </div>
                 </div>
               )}
@@ -733,18 +722,28 @@ export default function RegisterDemandPage() {
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || uploadingFiles}
               className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {uploadingFiles ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Đang xử lý...
+                  Đang tải file...
+                </>
+              ) : loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Đang tạo nhu cầu...
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
                   Đăng nhu cầu
+                  {selectedFiles.length > 0 && (
+                    <span className="ml-1 text-xs bg-blue-500 px-2 py-0.5 rounded-full">
+                      +{selectedFiles.length} file
+                    </span>
+                  )}
                 </>
               )}
             </button>
