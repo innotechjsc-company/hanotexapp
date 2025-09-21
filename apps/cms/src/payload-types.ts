@@ -650,18 +650,6 @@ export interface Notification {
    */
   is_read?: boolean | null;
   /**
-   * Công nghệ liên quan đến thông báo này
-   */
-  related_technology?: (string | null) | Technology;
-  /**
-   * Phiên đấu giá liên quan đến thông báo này
-   */
-  related_auction?: (string | null) | Auction;
-  /**
-   * Giao dịch liên quan đến thông báo này
-   */
-  related_transaction?: (string | null) | Transaction;
-  /**
    * URL để điều hướng khi nhấp vào thông báo
    */
   action_url?: string | null;
@@ -1160,9 +1148,6 @@ export interface NotificationsSelect<T extends boolean = true> {
   message?: T;
   type?: T;
   is_read?: T;
-  related_technology?: T;
-  related_auction?: T;
-  related_transaction?: T;
   action_url?: T;
   priority?: T;
   updatedAt?: T;
