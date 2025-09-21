@@ -248,16 +248,9 @@ export default function MyDemandsPage() {
 
       const updatedDemand = await updateDemand(selectedDemand.id, updateData);
 
-      // Update local state
-      setDemands((prev) =>
-        prev.map((demand) =>
-          demand.id === selectedDemand.id
-            ? { ...demand, ...updatedDemand }
-            : demand
-        )
-      );
-
       console.log("Demand updated successfully:", updatedDemand);
+
+      // Close modal and reset states
       setEditModalOpen(false);
       setSelectedDemand(null);
       setEditFormData({});
@@ -266,6 +259,9 @@ export default function MyDemandsPage() {
       setSelectedFiles([]);
       setExistingDocuments([]);
       setOriginalDocuments([]);
+
+      // Fetch fresh data from API
+      await fetchUserDemands();
     } catch (err: any) {
       console.error("Error updating demand:", err);
       setError(err.message || "Lỗi khi cập nhật nhu cầu");
