@@ -17,9 +17,12 @@ import {
   Calendar,
   DollarSign,
   ExternalLink,
+  Upload,
+  Trash,
 } from "lucide-react";
 import { useUser, useAuthStore } from "@/store/auth";
 import { getDemandsByUser, deleteDemand, updateDemand } from "@/api/demands";
+import { uploadFile, deleteFile } from "@/api/media";
 import { Demand } from "@/types/demand";
 import { Category } from "@/types/categories";
 import { useCategories } from "@/hooks/useCategories";
@@ -44,6 +47,14 @@ export default function MyDemandsPage() {
     Partial<Demand> & { category?: string }
   >({});
   const [editLoading, setEditLoading] = useState(false);
+
+  // File management states for edit modal
+  const [existingDocuments, setExistingDocuments] = useState<any[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [deletingFileIds, setDeletingFileIds] = useState<Set<number>>(
+    new Set()
+  );
 
   // Get categories for edit form
   const { categories } = useCategories();
@@ -93,6 +104,12 @@ export default function MyDemandsPage() {
       to_price: demand.to_price,
       cooperation: demand.cooperation,
     });
+
+    // Load existing documents
+    setExistingDocuments(demand.documents || []);
+    setSelectedFiles([]);
+    setDeletingFileIds(new Set());
+
     setEditModalOpen(true);
   };
 
@@ -113,6 +130,43 @@ export default function MyDemandsPage() {
       window.open(fullUrl, "_blank", "noopener,noreferrer");
     } else {
       console.warn("Document URL not available:", document);
+    }
+  };
+
+  // Handle file selection for edit modal
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
+    }
+    // Reset input value to allow selecting the same file again
+    event.target.value = "";
+  };
+
+  // Handle removing selected file (before upload)
+  const handleRemoveSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle removing existing document
+  const handleRemoveExistingDocument = async (documentId: number) => {
+    setDeletingFileIds((prev) => new Set(prev).add(documentId));
+
+    try {
+      await deleteFile(documentId);
+      setExistingDocuments((prev) =>
+        prev.filter((doc) => doc.id !== documentId)
+      );
+      console.log("Document deleted successfully:", documentId);
+    } catch (error) {
+      console.error("Error deleting document:", error);
+    } finally {
+      setDeletingFileIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(documentId);
+        return newSet;
+      });
     }
   };
 
@@ -150,7 +204,35 @@ export default function MyDemandsPage() {
 
     try {
       setEditLoading(true);
-      const updatedDemand = await updateDemand(selectedDemand.id, editFormData);
+
+      // Upload new files if any
+      let newDocumentIds: number[] = [];
+      if (selectedFiles.length > 0) {
+        setUploadingFiles(true);
+        try {
+          const uploadPromises = selectedFiles.map((file) => uploadFile(file));
+          const uploadedFiles = await Promise.all(uploadPromises);
+          newDocumentIds = uploadedFiles.map((file) => file.id);
+          console.log("Files uploaded successfully:", uploadedFiles);
+        } catch (uploadError) {
+          console.error("Error uploading files:", uploadError);
+          throw new Error("Lỗi khi tải lên tài liệu");
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
+      // Combine existing documents (not deleted) with new document IDs
+      const remainingExistingIds = existingDocuments.map((doc) => doc.id);
+      const allDocumentIds = [...remainingExistingIds, ...newDocumentIds];
+
+      // Update demand with new document IDs
+      const updateData = {
+        ...editFormData,
+        documents: allDocumentIds as any, // Send only document IDs for relationship field
+      };
+
+      const updatedDemand = await updateDemand(selectedDemand.id, updateData);
 
       // Update local state
       setDemands((prev) =>
@@ -165,11 +247,16 @@ export default function MyDemandsPage() {
       setEditModalOpen(false);
       setSelectedDemand(null);
       setEditFormData({});
+
+      // Reset file states
+      setSelectedFiles([]);
+      setExistingDocuments([]);
     } catch (err: any) {
       console.error("Error updating demand:", err);
-      setError(err.message || "Có lỗi xảy ra khi cập nhật nhu cầu");
+      setError(err.message || "Lỗi khi cập nhật nhu cầu");
     } finally {
       setEditLoading(false);
+      setUploadingFiles(false);
     }
   };
 
@@ -805,6 +892,132 @@ export default function MyDemandsPage() {
                 />
               </div>
 
+              {/* Document Management Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tài liệu đính kèm
+                </label>
+
+                {/* Existing Documents */}
+                {existingDocuments.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-600 mb-2">
+                      Tài liệu hiện có:
+                    </h4>
+                    <div className="space-y-2">
+                      {existingDocuments.map((doc, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileText className="h-4 w-4 text-gray-500" />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900">
+                                {doc.filename || doc.alt}
+                              </span>
+                              {doc.mimeType && (
+                                <p className="text-xs text-gray-500">
+                                  {doc.mimeType}{" "}
+                                  {doc.filesize &&
+                                    `• ${(doc.filesize / 1024).toFixed(1)} KB`}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDocument(doc)}
+                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                              title="Xem tài liệu"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveExistingDocument(doc.id)
+                              }
+                              disabled={deletingFileIds.has(doc.id)}
+                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Xóa tài liệu"
+                            >
+                              {deletingFileIds.has(doc.id) ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* File Upload Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="file"
+                      id="edit-file-upload"
+                      multiple
+                      onChange={handleFileSelection}
+                      className="hidden"
+                      accept="*/*"
+                    />
+                    <label
+                      htmlFor="edit-file-upload"
+                      className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Chọn tài liệu
+                    </label>
+                    {selectedFiles.length > 0 && (
+                      <span className="text-sm text-gray-500">
+                        {selectedFiles.length} file đã chọn
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Selected Files Display */}
+                  {selectedFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-600">
+                        Tài liệu mới:
+                      </h4>
+                      {selectedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Upload className="h-4 w-4 text-blue-500" />
+                            <div>
+                              <span className="text-sm font-medium text-gray-900">
+                                {file.name}
+                              </span>
+                              <p className="text-xs text-gray-500">
+                                {file.type} • {(file.size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSelectedFile(index)}
+                            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Xóa file"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
@@ -815,10 +1028,15 @@ export default function MyDemandsPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={editLoading}
+                  disabled={editLoading || uploadingFiles}
                   className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editLoading ? (
+                  {uploadingFiles ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Đang tải file lên...
+                    </>
+                  ) : editLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Đang cập nhật...
