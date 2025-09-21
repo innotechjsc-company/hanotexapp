@@ -185,11 +185,11 @@ export default function RegisterDemandPage() {
       setSelectedFiles([]);
       setUploadedDocuments([]);
 
-      // Keep loading state to show success animation, then redirect
+      // Keep loading state to show success animation, then go back to previous page
       setTimeout(() => {
         setLoading(false);
         setSuccess("");
-        router.push("/demands");
+        router.back();
       }, 2000);
     } catch (err: any) {
       console.error("Error creating demand:", err);
@@ -323,7 +323,7 @@ export default function RegisterDemandPage() {
                       Thành công!
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Đang chuyển đến trang danh sách nhu cầu...
+                      Đang quay lại trang trước...
                     </p>
                   </div>
                 </>
