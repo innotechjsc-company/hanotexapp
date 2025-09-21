@@ -37,6 +37,7 @@ import {
 } from "@heroui/react";
 import { getDemandById } from "@/api/demands";
 import { Demand } from "@/types/demand";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
 
 export default function DemandDetailPage() {
   const router = useRouter();
@@ -48,6 +49,28 @@ export default function DemandDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const demandId = params.id as string;
+
+  // Helper function to get document URL
+  const getDocumentUrl = (doc: any): string | null => {
+    if (typeof doc !== "object" || !doc) return null;
+
+    // If doc has a direct URL
+    if (doc.url) {
+      // If URL is already absolute, use it as is
+      if (doc.url.startsWith("http")) {
+        return doc.url;
+      }
+      // If URL is relative, prepend CMS base URL
+      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${doc.url}`;
+    }
+
+    // If doc has an ID, construct media URL
+    if (doc.id) {
+      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}/api/media/${doc.id}`;
+    }
+
+    return null;
+  };
 
   // Fetch demand details
   const fetchDemandDetail = async () => {
@@ -440,37 +463,63 @@ export default function DemandDetailPage() {
                   </h3>
                 </CardHeader>
                 <CardBody className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {demand.documents.map((doc, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-3 p-4 border border-default-200 rounded-lg hover:border-primary-200 transition-colors"
-                      >
-                        <div className="flex-shrink-0">
-                          <FileText className="h-8 w-8 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            {typeof doc === "object" && doc.filename
-                              ? doc.filename
-                              : `Tài liệu ${index + 1}`}
-                          </p>
-                          <p className="text-xs text-default-500">
-                            {typeof doc === "object" && doc.filesize
-                              ? `${(doc.filesize / 1024).toFixed(1)} KB`
-                              : "Không rõ kích thước"}
-                          </p>
-                        </div>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="bordered"
-                          className="flex-shrink-0"
+                  <div className="grid grid-cols-1 gap-3">
+                    {demand.documents.map((doc, index) => {
+                      const documentUrl = getDocumentUrl(doc);
+                      const documentName =
+                        typeof doc === "object" && doc.filename
+                          ? doc.filename
+                          : `Tài liệu ${index + 1}`;
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-3 p-4 border border-default-200 rounded-lg hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 cursor-pointer group"
+                          onClick={() => {
+                            if (documentUrl) {
+                              console.log("Opening document URL:", documentUrl);
+                              window.open(documentUrl, "_blank");
+                            } else {
+                              console.warn(
+                                "No document URL available for:",
+                                doc
+                              );
+                            }
+                          }}
                         >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                          <div className="flex-shrink-0">
+                            <FileText className="h-8 w-8 text-primary group-hover:text-primary-600 transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary-700 truncate transition-colors">
+                              {documentName}
+                            </p>
+                            <div className="flex items-center space-x-2 text-xs text-default-500">
+                              {typeof doc === "object" && doc.filesize && (
+                                <span>
+                                  {(doc.filesize / 1024).toFixed(1)} KB
+                                </span>
+                              )}
+                              {typeof doc === "object" && doc.mimeType && (
+                                <>
+                                  <span>•</span>
+                                  <span className="uppercase">
+                                    {doc.mimeType.split("/")[1] || "FILE"}
+                                  </span>
+                                </>
+                              )}
+                              <span>•</span>
+                              <span className="text-primary-500 group-hover:text-primary-600">
+                                Click để xem
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <ExternalLink className="h-5 w-5 text-primary-500" />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardBody>
               </Card>
