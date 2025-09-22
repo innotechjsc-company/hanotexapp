@@ -144,8 +144,7 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
             return (
               <DropdownItem
                 key={item.key}
-                color="danger"
-                className="text-danger"
+                className="text-danger hover:bg-danger/10"
               >
                 Đăng xuất
               </DropdownItem>
