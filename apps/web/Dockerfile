@@ -16,14 +16,11 @@ RUN bun install
 # Copy source code
 COPY . .
 
-# Set environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV development
+# Build the application
+RUN bun run build
 
 # Expose port
 EXPOSE 3000
 
-ENV PORT 3000
-
 # Start development server
-CMD ["bun", "run", "dev"]
+CMD ["bun", "start"]

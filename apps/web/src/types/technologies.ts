@@ -1,7 +1,7 @@
 import { Category } from "./categories";
 import { ID, DateTimeString } from "./common";
-import { Media } from "./Media";
 import { User } from "./users";
+import { Media } from "./media";
 
 // Trạng thái công nghệ
 export type TechnologyStatus =

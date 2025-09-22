@@ -22,9 +22,5 @@ RUN bun run build
 # Expose port
 EXPOSE 4000
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=4000
-
 # Start the application
 CMD ["bun", "start"]
