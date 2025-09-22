@@ -6,6 +6,7 @@ import { User } from "./users";
 export type ProposeStatus = "pending" | "accepted" | "rejected";
 
 export interface Propose {
+  id?: string;
   title: string;
   demand: Demand;
   user: User;
@@ -16,4 +17,6 @@ export interface Propose {
   cooperation_conditions: string;
   document: Media;
   status: ProposeStatus;
+  createdAt?: string;
+  updatedAt?: string;
 }
