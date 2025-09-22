@@ -96,11 +96,9 @@ export default function DemandsPage() {
       if (response.docs && response.docs.length > 0) {
         // response.docs is Demand[][], so we need to flatten it
         const flattenedDemands = response.docs.flat();
-        console.log("Flattened demands:", flattenedDemands);
         setDemands(flattenedDemands);
       } else if (response.data) {
         // Fallback if data is returned instead of docs
-        console.log("Response data:", response.data);
         setDemands(
           Array.isArray(response.data) ? response.data : [response.data]
         );
@@ -679,17 +677,14 @@ export default function DemandsPage() {
             ))}
           </div>
         ) : (
-          <Card className="text-center py-12">
-            <CardBody>
+          <Card className="py-12">
+            <CardBody className="flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="h-8 w-8 text-default-400" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 Không tìm thấy nhu cầu nào
               </h3>
-              <p className="text-default-600">
-                Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc
-              </p>
             </CardBody>
           </Card>
         )}

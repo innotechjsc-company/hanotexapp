@@ -27,6 +27,21 @@ import { Demand } from "@/types/demand";
 import { Category } from "@/types/categories";
 import { useCategories } from "@/hooks/useCategories";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import {
+  Button as HButton,
+  Modal as HModal,
+  ModalContent as HModalContent,
+  ModalHeader as HModalHeader,
+  ModalBody as HModalBody,
+  ModalFooter as HModalFooter,
+  Spinner as HSpinner,
+  Input as HInput,
+  Textarea as HTextarea,
+  Select as HSelect,
+  SelectItem as HSelectItem,
+  Card as HCard,
+  CardBody as HCardBody,
+} from "@heroui/react";
 
 export default function MyDemandsPage() {
   const router = useRouter();
@@ -331,13 +346,13 @@ export default function MyDemandsPage() {
                 Quản lý và theo dõi các nhu cầu công nghệ bạn đã đăng
               </p>
             </div>
-            <button
-              onClick={() => router.push("/demands/register")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center"
+            <HButton
+              color="primary"
+              onPress={() => router.push("/demands/register")}
+              startContent={<Plus className="h-5 w-5" />}
             >
-              <Plus className="h-5 w-5 mr-2" />
               Đăng nhu cầu mới
-            </button>
+            </HButton>
           </div>
         </div>
       </div>
@@ -348,12 +363,14 @@ export default function MyDemandsPage() {
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md flex items-center">
             <AlertCircle className="h-5 w-5 mr-2" />
             {error}
-            <button
-              onClick={fetchUserDemands}
-              className="ml-4 text-sm underline hover:no-underline"
+            <HButton
+              size="sm"
+              variant="light"
+              className="ml-2"
+              onPress={fetchUserDemands}
             >
               Thử lại
-            </button>
+            </HButton>
           </div>
         </div>
       )}
@@ -361,7 +378,7 @@ export default function MyDemandsPage() {
       {/* Stats */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+          <HCard className="p-6">
             <div className="flex items-center">
               <div className="bg-green-100 p-3 rounded-lg">
                 <Target className="h-6 w-6 text-green-600" />
@@ -371,17 +388,13 @@ export default function MyDemandsPage() {
                   Tổng nhu cầu
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    stats.total
-                  )}
+                  {loading ? <HSpinner size="sm" /> : stats.total}
                 </p>
               </div>
             </div>
-          </div>
+          </HCard>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <HCard className="p-6">
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg">
                 <MoreVertical className="h-6 w-6 text-blue-600" />
@@ -389,17 +402,13 @@ export default function MyDemandsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Tài liệu</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    stats.documents
-                  )}
+                  {loading ? <HSpinner size="sm" /> : stats.documents}
                 </p>
               </div>
             </div>
-          </div>
+          </HCard>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <HCard className="p-6">
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-lg">
                 <Eye className="h-6 w-6 text-purple-600" />
@@ -407,17 +416,13 @@ export default function MyDemandsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Có giá cả</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    stats.withPrice
-                  )}
+                  {loading ? <HSpinner size="sm" /> : stats.withPrice}
                 </p>
               </div>
             </div>
-          </div>
+          </HCard>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <HCard className="p-6">
             <div className="flex items-center">
               <div className="bg-yellow-100 p-3 rounded-lg">
                 <Edit className="h-6 w-6 text-yellow-600" />
@@ -425,15 +430,11 @@ export default function MyDemandsPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Có tài liệu</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {loading ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    stats.withDocuments
-                  )}
+                  {loading ? <HSpinner size="sm" /> : stats.withDocuments}
                 </p>
               </div>
             </div>
-          </div>
+          </HCard>
         </div>
 
         {/* Demands List */}
@@ -446,7 +447,7 @@ export default function MyDemandsPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <HSpinner color="primary" size="lg" />
               <span className="ml-3 text-gray-600">Đang tải dữ liệu...</span>
             </div>
           ) : (
@@ -503,33 +504,40 @@ export default function MyDemandsPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleViewDemand(demand)}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                    <div className="flex items-center gap-1">
+                      <HButton
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleViewDemand(demand)}
                         title="Xem chi tiết"
                       >
                         <Eye className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleEditDemand(demand)}
-                        className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                      </HButton>
+                      <HButton
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleEditDemand(demand)}
                         title="Chỉnh sửa"
                       >
                         <Edit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(demand)}
-                        disabled={deletingIds.has(demand.id!)}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      </HButton>
+                      <HButton
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        color="danger"
+                        onPress={() => handleDeleteClick(demand)}
+                        isDisabled={deletingIds.has(demand.id!)}
                         title="Xóa"
                       >
                         {deletingIds.has(demand.id!) ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <HSpinner size="sm" />
                         ) : (
                           <Trash2 className="h-5 w-5" />
                         )}
-                      </button>
+                      </HButton>
                     </div>
                   </div>
                 </div>
@@ -546,6 +554,13 @@ export default function MyDemandsPage() {
               <p className="text-gray-600 mb-6">
                 Bắt đầu đăng nhu cầu đầu tiên của bạn
               </p>
+              <HButton
+                color="primary"
+                onPress={() => router.push("/demands/register")}
+                startContent={<Plus className="h-5 w-5" />}
+              >
+                Đăng nhu cầu ngay
+              </HButton>
             </div>
           )}
         </div>
@@ -936,30 +951,33 @@ export default function MyDemandsPage() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenDocument(doc)}
-                              className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                          <div className="flex items-center gap-1">
+                            <HButton
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleOpenDocument(doc)}
                               title="Xem tài liệu"
                             >
                               <ExternalLink className="h-4 w-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
+                            </HButton>
+                            <HButton
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              color="danger"
+                              onPress={() =>
                                 handleRemoveExistingDocument(doc.id)
                               }
-                              disabled={deletingFileIds.has(doc.id)}
-                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              isDisabled={deletingFileIds.has(doc.id)}
                               title="Xóa tài liệu"
                             >
                               {deletingFileIds.has(doc.id) ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <HSpinner size="sm" />
                               ) : (
                                 <Trash className="h-4 w-4" />
                               )}
-                            </button>
+                            </HButton>
                           </div>
                         </div>
                       ))}

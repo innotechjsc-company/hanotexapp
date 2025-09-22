@@ -121,7 +121,15 @@ export async function getDemandsByUser(
   userId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Demand[]>> {
-  return getDemands({ user: userId }, pagination);
+  const params = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    // Payload CMS filter format: where[user][equals]=<id>
+    "where[user][equals]": userId,
+  } as Record<string, any>;
+
+  return payloadApiClient.get<Demand[]>(API_ENDPOINTS.DEMANDS, params);
 }
 
 /**
