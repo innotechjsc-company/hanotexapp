@@ -1,8 +1,9 @@
-export default {
+module.exports = {
   apps: [
     {
       name: 'cms-dev',
-      script: 'bun run dev',
+      script: 'bun',
+      args: 'run dev',
       watch: true,
       watch_delay: 1000,
       ignore_watch: ['node_modules', '.next', 'uploads', '.git', '*.log', '.env*'],

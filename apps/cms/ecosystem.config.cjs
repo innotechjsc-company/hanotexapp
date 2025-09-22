@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'cms-dev',
-      script: '/Users/duynguyen/.bun/bin/bun',
+      script: 'bun',
       args: 'run dev',
       watch: true,
       watch_delay: 1000,
