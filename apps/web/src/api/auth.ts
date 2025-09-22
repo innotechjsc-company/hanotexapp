@@ -66,27 +66,27 @@ export async function login(
     API_ENDPOINTS.AUTH.LOGIN,
     credentials
   );
-  
+
   // The response is the direct data, not wrapped in response.data
   const authData = response as any as AuthResponse;
-  
+
   // Add defensive checks
   if (!authData) {
     throw new Error("Không nhận được phản hồi từ server");
   }
-  
+
   if (!authData.token) {
     throw new Error("Token xác thực không hợp lệ");
   }
-  
+
   if (!authData.user) {
     throw new Error("Thông tin người dùng không hợp lệ");
   }
-  
+
   // Set token for future requests
   payloadApiClient.setToken(authData.token);
 
-  // Store auth data using localStorageService
+  // Store auth data using localStorageService - unified storage
   const storageData = {
     token: authData.token,
     user: authData.user,
@@ -94,16 +94,14 @@ export async function login(
   };
 
   // Lưu token với TTL dựa trên exp (nếu có)
-  const ttl = authData.exp
-    ? authData.exp * 1000 - Date.now()
-    : undefined;
-  localStorageService.set("auth_token", authData.token, { ttl });
+  const ttl = authData.exp ? authData.exp * 1000 - Date.now() : undefined;
 
-  // Lưu thông tin user
-  localStorageService.set("auth_user", authData.user, { ttl });
-
-  // Lưu toàn bộ auth data
+  // Chỉ lưu một key duy nhất cho tất cả auth data
   localStorageService.set("auth_data", storageData, { ttl });
+
+  // Tạm thời giữ các key riêng lẻ để tương thích với code hiện tại
+  localStorageService.set("auth_token", authData.token, { ttl });
+  localStorageService.set("auth_user", authData.user, { ttl });
 
   // Vẫn giữ token trong localStorage cũ để tương thích
   if (typeof window !== "undefined") {
@@ -136,9 +134,11 @@ export async function logout(): Promise<void> {
     payloadApiClient.clearToken();
 
     // Remove auth data from localStorageService
+    localStorageService.remove("auth_data");
+
+    // Xóa các key riêng lẻ để tương thích
     localStorageService.remove("auth_token");
     localStorageService.remove("auth_user");
-    localStorageService.remove("auth_data");
 
     // Remove token from localStorage (để tương thích)
     if (typeof window !== "undefined") {
@@ -150,9 +150,9 @@ export async function logout(): Promise<void> {
 /**
  * Get current user info
  */
-export async function getCurrentUser(): Promise<User> {
+export async function getCurrentUser(): Promise<AuthResponse> {
   const response = await payloadApiClient.get<User>(API_ENDPOINTS.AUTH.ME);
-  return response as any as User;
+  return response as any as AuthResponse;
 }
 
 /**
@@ -169,7 +169,7 @@ export async function refreshToken(): Promise<AuthResponse> {
   if (authData?.token) {
     payloadApiClient.setToken(authData.token);
 
-    // Update auth data using localStorageService
+    // Update auth data using localStorageService - unified storage
     const storageData = {
       token: authData.token,
       user: authData.user,
@@ -177,16 +177,14 @@ export async function refreshToken(): Promise<AuthResponse> {
     };
 
     // Lưu token với TTL dựa trên exp (nếu có)
-    const ttl = authData.exp
-      ? authData.exp * 1000 - Date.now()
-      : undefined;
-    localStorageService.set("auth_token", authData.token, { ttl });
+    const ttl = authData.exp ? authData.exp * 1000 - Date.now() : undefined;
 
-    // Lưu thông tin user
-    localStorageService.set("auth_user", authData.user, { ttl });
-
-    // Lưu toàn bộ auth data
+    // Chỉ lưu một key duy nhất cho tất cả auth data
     localStorageService.set("auth_data", storageData, { ttl });
+
+    // Tạm thời giữ các key riêng lẻ để tương thích với code hiện tại
+    localStorageService.set("auth_token", authData.token, { ttl });
+    localStorageService.set("auth_user", authData.user, { ttl });
 
     // Vẫn giữ token trong localStorage cũ để tương thích
     if (typeof window !== "undefined") {
@@ -279,4 +277,22 @@ export function getStoredToken(): string | null {
  */
 export function getStoredAuthData(): AuthResponse | null {
   return localStorageService.get<AuthResponse>("auth_data");
+}
+
+/**
+ * Kiểm tra xem auth data có hợp lệ không (tồn tại và chưa hết hạn)
+ */
+export function hasValidAuthData(): boolean {
+  const authData = getStoredAuthData();
+  if (!authData || !authData.token || !authData.user) {
+    return false;
+  }
+
+  // Kiểm tra TTL nếu có exp
+  if (authData.exp) {
+    const currentTime = Date.now() / 1000;
+    return authData.exp > currentTime;
+  }
+
+  return true;
 }
