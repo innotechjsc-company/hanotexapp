@@ -1,4 +1,4 @@
-import { Media } from "./media";
+import { Media } from "./media1";
 import { Technology } from "./technologies";
 import { User } from "./users";
 

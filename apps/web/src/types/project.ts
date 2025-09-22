@@ -1,6 +1,6 @@
 import { User } from "./users";
 import { Technology } from "./technologies";
-import { Media } from "./media";
+import { Media } from "./media1";
 import { InvestmentFund } from "./investment_fund";
 
 export type Project = {

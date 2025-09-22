@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { API_ENDPOINTS, PAYLOAD_API_BASE_URL } from "./config";
 import { getStoredToken } from "./auth";
-import { Media } from "@/types";
+import type { Media } from "@/types/media1";
 
 class MediaApi {
   private axios: AxiosInstance;
