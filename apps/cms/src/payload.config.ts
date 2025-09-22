@@ -24,6 +24,7 @@ import { TRL } from './collections/TRL'
 import { Demand } from './collections/Demand'
 import { InvestmentFund } from './collections/InvestmentFund'
 import { Project } from './collections/Project'
+import { Propose } from './collections/Propose'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -59,6 +60,7 @@ export default buildConfig({
     Demand,
     InvestmentFund,
     Project,
+    Propose,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
