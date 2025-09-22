@@ -19,7 +19,7 @@ module.exports = {
         NEXT_PUBLIC_APP_URL: "http://localhost:3000",
         NEXT_PUBLIC_WS_URL: "http://localhost:3001",
 
-        NEXT_PUBLIC_PAYLOAD_API_URL: "http://34.142.238.176:4000/api",
+        NEXT_PUBLIC_PAYLOAD_API_URL: "https://api.hanotex.vn/api",
       },
       env_development: {
         NODE_ENV: "development",
@@ -29,7 +29,7 @@ module.exports = {
         NEXT_PUBLIC_APP_URL: "http://localhost:3000",
         NEXT_PUBLIC_WS_URL: "http://localhost:3001",
 
-        NEXT_PUBLIC_PAYLOAD_API_URL: "http://34.142.238.176:4000/api",
+        NEXT_PUBLIC_PAYLOAD_API_URL: "https://api.hanotex.vn/api",
       },
     },
   ],
