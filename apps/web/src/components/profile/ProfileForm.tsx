@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { Button, Card, CardContent, CardHeader, Input } from "@/components/ui";
 import { useAuthStore } from "@/store/auth";
@@ -50,8 +51,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
         taxCode: (user as any).company?.tax_code || "",
         legalRepresentative: (user as any).company?.legal_representative || "",
         contactEmail: (user as any).company?.contact_email || "",
-        institutionName: (user as any).research_institution?.institution_name || "",
-        institutionCode: (user as any).research_institution?.institution_code || "",
+        institutionName:
+          (user as any).research_institution?.institution_name || "",
+        institutionCode:
+          (user as any).research_institution?.institution_code || "",
         governingBody: (user as any).research_institution?.governing_body || "",
       });
     }
@@ -85,8 +88,10 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ onSave, onCancel }) => {
         taxCode: (user as any).company?.tax_code || "",
         legalRepresentative: (user as any).company?.legal_representative || "",
         contactEmail: (user as any).company?.contact_email || "",
-        institutionName: (user as any).research_institution?.institution_name || "",
-        institutionCode: (user as any).research_institution?.institution_code || "",
+        institutionName:
+          (user as any).research_institution?.institution_name || "",
+        institutionCode:
+          (user as any).research_institution?.institution_code || "",
         governingBody: (user as any).research_institution?.governing_body || "",
       });
     }
