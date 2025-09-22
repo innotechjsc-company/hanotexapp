@@ -51,6 +51,7 @@ interface Technology {
 }
 
 interface Proposal {
+  title: string;
   technology_id: string;
   technology_title: string;
   match_score: number;
@@ -67,6 +68,7 @@ function ProposeSolutionPage() {
   const { user } = useAuth();
   const [demand, setDemand] = useState<Demand | null>(null);
   const [proposal, setProposal] = useState<Proposal>({
+    title: "",
     technology_id: "",
     technology_title: "",
     match_score: 5,
@@ -255,6 +257,21 @@ function ProposeSolutionPage() {
               </CardHeader>
 
               <CardBody className="space-y-6">
+                {/* Proposal Title */}
+                <Input
+                  label="Tiêu đề đề xuất *"
+                  placeholder="Nhập tiêu đề ngắn gọn cho đề xuất của bạn"
+                  value={proposal.title}
+                  onChange={(e) =>
+                    setProposal((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="w-full"
+                  description="Tiêu đề sẽ giúp dễ dàng nhận diện đề xuất của bạn"
+                />
+
                 {/* Technology Selection */}
                 <Select
                   label="Chọn công nghệ đề xuất *"
@@ -480,6 +497,7 @@ function ProposeSolutionPage() {
                     onPress={handleSubmitProposal}
                     isDisabled={
                       isSubmitting ||
+                      !proposal.title ||
                       !proposal.technology_id ||
                       !proposal.solution_description
                     }
