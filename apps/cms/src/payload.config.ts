@@ -41,7 +41,7 @@ export default buildConfig({
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://34.142.238.176:3000',
-    'https://hanotex.online',
+    'https://hanotex.vn',
     // Add production domains here when needed
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
   ],
