@@ -1,6 +1,6 @@
 import { Category } from "./categories";
 import { ID, DateTimeString } from "./common";
-import { Media } from "./media";
+import { Media } from "./Media";
 import { User } from "./users";
 
 // Trạng thái công nghệ

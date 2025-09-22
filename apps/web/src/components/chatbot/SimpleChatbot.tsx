@@ -83,7 +83,7 @@ Bạn muốn tìm hiểu gì?`,
     }
     
     if (message.includes('liên hệ') || message.includes('hỗ trợ')) {
-      return 'Bạn có thể liên hệ với chúng tôi:\n\n• Email: support@hanotex.vn\n• Hotline: 1900-xxxx\n• Chat trực tiếp (như hiện tại)\n• Trung tâm hỗ trợ online\n\nCần hỗ trợ gì cụ thể?';
+      return 'Bạn có thể liên hệ với chúng tôi:\n\n• Email: contact@hanotex.vn\n• Hotline: 1900-xxxx\n• Chat trực tiếp (như hiện tại)\n• Trung tâm hỗ trợ online\n\nCần hỗ trợ gì cụ thể?';
     }
     
     if (message.includes('quy trình') || message.includes('cách thức')) {

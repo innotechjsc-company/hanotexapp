@@ -216,6 +216,6 @@ if (DEBUG) {
 ## Support
 
 Để được hỗ trợ hoặc báo cáo lỗi, vui lòng liên hệ:
-- Email: support@hanotex.com
+- Email: contact@hanotex.vn
 - GitHub Issues: [Link to repository]
 - Documentation: [Link to docs]

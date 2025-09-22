@@ -346,11 +346,11 @@ export default function LegalPage() {
               024 3825 1234
             </a>
             <a 
-              href="mailto:legal@hanotex.gov.vn"
+              href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center hover:bg-white/10"
             >
               <Mail className="h-5 w-5 mr-2" />
-              legal@hanotex.gov.vn
+              contact@hanotex.vn
             </a>
           </div>
         </div>

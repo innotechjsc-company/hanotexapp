@@ -244,11 +244,11 @@ export default function PostingRulesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:legal@hanotex.gov.vn"
+              href="mailto:contact@hanotex.vn"
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
             >
               <FileText className="h-5 w-5 mr-2" />
-              legal@hanotex.gov.vn
+              contact@hanotex.vn
             </a>
             <a 
               href="/contact"

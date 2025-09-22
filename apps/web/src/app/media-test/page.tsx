@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import MediaApi from "@/api/media";
-import type { Media } from "@/types/media";
+import type { Media } from "@/types/Media";
 import { getStoredToken } from "@/api/auth";
 
 type MediaType = Media["type"];
