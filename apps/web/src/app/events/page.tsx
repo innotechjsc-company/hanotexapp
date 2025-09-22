@@ -69,6 +69,7 @@ export default function EventsPage() {
       organizer: "Sở KH&CN Hà Nội",
       contact_email: "contact@hanotex.vn",
       contact_phone: "024 3825 1234",
+      image_url: "/images/events/techmart-2025.jpg",
     },
     {
       id: 2,
@@ -86,6 +87,7 @@ export default function EventsPage() {
       organizer: "HANOTEX",
       contact_email: "contact@hanotex.vn",
       contact_phone: "024 3825 1234",
+      image_url: "/images/events/ai-auction.jpg",
     },
     {
       id: 3,
@@ -103,6 +105,7 @@ export default function EventsPage() {
       organizer: "Đại học Bách Khoa Hà Nội",
       contact_email: "contact@hanotex.vn",
       contact_phone: "024 3869 1234",
+      image_url: "/images/events/tech-transfer-workshop.jpg",
     },
     {
       id: 4,

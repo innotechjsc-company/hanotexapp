@@ -21,6 +21,9 @@ import {
   UserPlus,
   Briefcase,
   GraduationCap,
+  Database,
+  Users,
+  Lightbulb,
 } from "lucide-react";
 
 export default function Header() {
@@ -116,16 +119,13 @@ export default function Header() {
       ],
     },
     {
-      name: "Giới thiệu",
-      href: "/about",
-      icon: User,
+      name: "Dữ Liệu CKCN",
+      href: "/data",
+      icon: Database,
       submenu: [
-        { name: "Về HANOTEX", href: "/about" },
-        { name: "Liên hệ", href: "/contact" },
-        { name: "Hướng dẫn sử dụng", href: "/user-guide" },
-        { name: "Câu hỏi thường gặp", href: "/faq" },
-        { name: "Chính sách bảo mật", href: "/privacy" },
-        { name: "Điều khoản sử dụng", href: "/terms" },
+        { name: "Danh sách Tổ chức/Viện/Trường", href: "/data/organizations" },
+        { name: "Danh sách Nhà sáng chế/Phát minh", href: "/data/inventors" },
+        { name: "Danh sách Công Nghệ & Nhu cầu", href: "/data/technologies" },
       ],
     },
   ];

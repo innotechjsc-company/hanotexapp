@@ -1,5 +1,5 @@
 import { Demand } from "./demand";
-import { Media } from "./media";
+import { Media } from "./Media";
 import { Technology } from "./technologies";
 import { User } from "./users";
 

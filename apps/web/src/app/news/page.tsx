@@ -55,11 +55,11 @@ export default function NewsPage() {
       published_at: '2025-01-15',
       category: 'Tin tức',
       read_time: '3 phút',
-      featured_image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop&crop=center',
+      featured_image: '/images/news/hanotex-launch.jpg',
       gallery_images: [
-        'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=400&fit=crop&crop=center',
-        'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=400&fit=crop&crop=center',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop&crop=center'
+        '/images/news/hanotex-launch.jpg',
+        '/images/news/tech-trends-2025.jpg',
+        '/images/news/startup-policy.jpg'
       ],
       tags: ['HANOTEX', 'Ra mắt', 'Công nghệ'],
       views: 1250,
@@ -75,10 +75,10 @@ export default function NewsPage() {
       published_at: '2025-01-12',
       category: 'Sự kiện',
       read_time: '5 phút',
-      featured_image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop&crop=center',
+      featured_image: '/images/news/tech-trends-2025.jpg',
       gallery_images: [
-        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop&crop=center',
-        'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=400&fit=crop&crop=center'
+        '/images/news/tech-trends-2025.jpg',
+        '/images/news/hanotex-launch.jpg'
       ],
       tags: ['Hội thảo', 'AI', 'IoT', '2025'],
       views: 890,
@@ -94,10 +94,10 @@ export default function NewsPage() {
       published_at: '2025-01-10',
       category: 'Chính sách',
       read_time: '4 phút',
-      featured_image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop&crop=center',
+      featured_image: '/images/news/startup-policy.jpg',
       gallery_images: [
-        'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=400&fit=crop&crop=center',
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop&crop=center'
+        '/images/news/startup-policy.jpg',
+        '/images/news/hanotex-launch.jpg'
       ],
       tags: ['Chính sách', 'Khởi nghiệp', 'Hỗ trợ'],
       views: 1560,
