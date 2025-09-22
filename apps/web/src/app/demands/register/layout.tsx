@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = false;
 
-export default function AdminLayout({
+export default function RegisterDemandLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -111,14 +111,16 @@ export default function DemandDetailPage() {
         await navigator.share({
           title: demand?.title || "Nhu cầu công nghệ",
           text: demand?.description || "",
-          url: window.location.href,
+          url: typeof window !== "undefined" ? window.location.href : "",
         });
       } catch (err) {
         console.log("Error sharing:", err);
       }
     } else {
       // Fallback - copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
+      if (typeof window !== "undefined") {
+        navigator.clipboard.writeText(window.location.href);
+      }
     }
   };
 

@@ -1,32 +1,53 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Search, ArrowRight, TrendingUp, Users, Award, Zap, Plus, Target } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Search,
+  ArrowRight,
+  TrendingUp,
+  Users,
+  Award,
+  Zap,
+  Plus,
+  Target,
+} from "lucide-react";
 
 export default function HeroSection() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       // Navigate to search results
-      window.location.href = `/technologies?q=${encodeURIComponent(searchQuery.trim())}`;
+      if (typeof window !== "undefined") {
+        window.location.href = `/technologies?q=${encodeURIComponent(searchQuery.trim())}`;
+      }
     }
   };
 
   const stats = [
-    { icon: TrendingUp, label: 'Công nghệ', value: '500+', color: 'text-blue-600' },
-    { icon: Users, label: 'Người dùng', value: '2,500+', color: 'text-blue-600' },
-    { icon: Award, label: 'Giao dịch', value: '150+', color: 'text-blue-600' },
-    { icon: Zap, label: 'TRL Level', value: '1-9', color: 'text-blue-600' },
+    {
+      icon: TrendingUp,
+      label: "Công nghệ",
+      value: "500+",
+      color: "text-blue-600",
+    },
+    {
+      icon: Users,
+      label: "Người dùng",
+      value: "2,500+",
+      color: "text-blue-600",
+    },
+    { icon: Award, label: "Giao dịch", value: "150+", color: "text-blue-600" },
+    { icon: Zap, label: "TRL Level", value: "1-9", color: "text-blue-600" },
   ];
 
   return (
     <section className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
         <div className="text-center">
           {/* Logo & Slogan */}
@@ -89,19 +110,16 @@ export default function HeroSection() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                className="text-center"
-              >
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg mb-3 ${stat.color}`}>
+              <div key={stat.label} className="text-center">
+                <div
+                  className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg mb-3 ${stat.color}`}
+                >
                   <stat.icon className="h-6 w-6" />
                 </div>
                 <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500">
-                  {stat.label}
-                </div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
             ))}
           </div>
