@@ -646,6 +646,19 @@ export default function DemandDetailPage() {
                 variant="bordered"
                 size="lg"
                 className="w-full"
+                onPress={() => router.push(`/demands/${demandId}/solutions`)}
+                style={{
+                  minHeight: "48px",
+                  fontWeight: "500",
+                }}
+              >
+                Tất cả giải pháp
+              </Button>
+
+              <Button
+                variant="bordered"
+                size="lg"
+                className="w-full"
                 onPress={() => router.push("/demands")}
                 style={{
                   minHeight: "48px",
