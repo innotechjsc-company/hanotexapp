@@ -4,7 +4,7 @@ module.exports = {
       name: "hanotex-web",
       cwd: __dirname,
       script: "bun",
-      args: "run dev",
+      args: "start",
       exec_mode: "fork",
       instances: 1,
       autorestart: true,
