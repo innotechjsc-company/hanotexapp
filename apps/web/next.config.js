@@ -1,19 +1,18 @@
 // Load environment variables from .env files
-require('dotenv').config({ path: '.env.local' });
-require('dotenv').config();
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
   images: {
     domains: ["localhost", "hanotex.com"],
     formats: ["image/webp", "image/avif"],
   },
-  transpilePackages: [
-    "@heroui/react",
-    "@heroui/theme",
-    "@heroui/system",
-  ],
+  transpilePackages: ["@heroui/react", "@heroui/theme", "@heroui/system"],
   env: {
     NEXT_PUBLIC_API_URL:
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",

@@ -1,0 +1,325 @@
+Page/Menu,Vietnamese,English,Test Cases,Status,Priority,Notes
+Trang chủ,Trang chủ,Homepage,"1. Kiểm tra hiển thị Hero Section
+2. Kiểm tra Categories Section
+3. Kiểm tra Featured Technologies
+4. Kiểm tra News & Events Section
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Main landing page
+Đăng nhập,Đăng nhập,Login,"1. Kiểm tra form validation
+2. Kiểm tra đăng nhập thành công
+3. Kiểm tra đăng nhập thất bại
+4. Kiểm tra remember me
+5. Kiểm tra forgot password link
+6. Kiểm tra redirect sau login",Not Started,High,Authentication
+Đăng ký,Đăng ký,Register,"1. Kiểm tra form validation
+2. Kiểm tra các loại tài khoản (Cá nhân/Doanh nghiệp/Viện)
+3. Kiểm tra email verification
+4. Kiểm tra password strength
+5. Kiểm tra terms acceptance
+6. Kiểm tra captcha (nếu có)",Not Started,High,User registration
+Hồ sơ cá nhân,Hồ sơ cá nhân,Profile,"1. Kiểm tra hiển thị thông tin cá nhân
+2. Kiểm tra chỉnh sửa profile
+3. Kiểm tra upload avatar
+4. Kiểm tra thông tin công ty (nếu có)
+5. Kiểm tra thông tin viện nghiên cứu (nếu có)
+6. Kiểm tra lưu thay đổi",Not Started,High,User profile management
+Công nghệ,Công nghệ,Technologies,"1. Kiểm tra danh sách công nghệ
+2. Kiểm tra filter và search
+3. Kiểm tra pagination
+4. Kiểm tra sort options
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Technology listing
+Chi tiết công nghệ,Chi tiết công nghệ,Technology Detail,"1. Kiểm tra hiển thị thông tin chi tiết
+2. Kiểm tra hình ảnh và tài liệu
+3. Kiểm tra thông tin chủ sở hữu
+4. Kiểm tra nút liên hệ
+5. Kiểm tra nút yêu cầu NDA
+6. Kiểm tra responsive design",Not Started,High,Individual technology page
+Đăng công nghệ,Đăng công nghệ,Register Technology,"1. Kiểm tra multi-step form
+2. Kiểm tra validation từng bước
+3. Kiểm tra upload tài liệu
+4. Kiểm tra upload hình ảnh
+5. Kiểm tra thông tin IP
+6. Kiểm tra preview trước khi submit",Not Started,High,Add new technology
+Công nghệ của tôi,Công nghệ của tôi,My Technologies,"1. Kiểm tra danh sách công nghệ đã đăng
+2. Kiểm tra trạng thái (Draft/Published/Rejected)
+3. Kiểm tra chỉnh sửa công nghệ
+4. Kiểm tra xóa công nghệ
+5. Kiểm tra thống kê views/likes
+6. Kiểm tra responsive design",Not Started,High,User's technologies
+Dịch vụ,Dịch vụ,Services,"1. Kiểm tra trang chính dịch vụ
+2. Kiểm tra các loại dịch vụ
+3. Kiểm tra responsive design
+4. Kiểm tra navigation
+5. Kiểm tra CTA buttons
+6. Kiểm tra loading performance",Not Started,High,Services overview
+Tư vấn công nghệ,Tư vấn công nghệ,Consulting,"1. Kiểm tra landing page
+2. Kiểm tra thông tin dịch vụ
+3. Kiểm tra quy trình tư vấn
+4. Kiểm tra form liên hệ
+5. Kiểm tra testimonials
+6. Kiểm tra responsive design",Not Started,High,Consulting services
+Thẩm định & định giá,Thẩm định & định giá,Valuation,"1. Kiểm tra landing page
+2. Kiểm tra thông tin dịch vụ
+3. Kiểm tra quy trình định giá
+4. Kiểm tra form yêu cầu
+5. Kiểm tra báo cáo mẫu
+6. Kiểm tra responsive design",Not Started,High,Valuation services
+Tư vấn pháp lý,Tư vấn pháp lý,Legal,"1. Kiểm tra landing page
+2. Kiểm tra thông tin dịch vụ
+3. Kiểm tra quy trình pháp lý
+4. Kiểm tra form liên hệ
+5. Kiểm tra chuyên gia
+6. Kiểm tra responsive design",Not Started,High,Legal services
+Sở hữu trí tuệ,Sở hữu trí tuệ,Intellectual Property,"1. Kiểm tra landing page
+2. Kiểm tra thông tin dịch vụ
+3. Kiểm tra quy trình IP
+4. Kiểm tra form yêu cầu
+5. Kiểm tra tài liệu mẫu
+6. Kiểm tra responsive design",Not Started,High,IP services
+Đào tạo & Hỗ trợ,Đào tạo & Hỗ trợ,Training,"1. Kiểm tra landing page
+2. Kiểm tra thông tin khóa học
+3. Kiểm tra đăng ký khóa học
+4. Kiểm tra tài liệu học tập
+5. Kiểm tra chứng chỉ
+6. Kiểm tra responsive design",Not Started,High,Training services
+Kết nối đầu tư,Kết nối đầu tư,Investment,"1. Kiểm tra landing page
+2. Kiểm tra thông tin dịch vụ
+3. Kiểm tra quy trình đầu tư
+4. Kiểm tra form đăng ký
+5. Kiểm tra portfolio
+6. Kiểm tra responsive design",Not Started,High,Investment services
+Giới thiệu,Giới thiệu,About,"1. Kiểm tra thông tin công ty
+2. Kiểm tra giá trị cốt lõi
+3. Kiểm tra đội ngũ
+4. Kiểm tra lịch sử phát triển
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Company information
+Liên hệ,Liên hệ,Contact,"1. Kiểm tra form liên hệ
+2. Kiểm tra thông tin liên hệ
+3. Kiểm tra bản đồ
+4. Kiểm tra validation form
+5. Kiểm tra gửi email
+6. Kiểm tra responsive design",Not Started,High,Contact page
+Tin tức & Sự kiện,Tin tức & Sự kiện,News & Events,"1. Kiểm tra danh sách tin tức
+2. Kiểm tra filter và search
+3. Kiểm tra pagination
+4. Kiểm tra responsive design
+5. Kiểm tra loading performance
+6. Kiểm tra navigation",Not Started,High,News and events listing
+Chi tiết tin tức,Chi tiết tin tức,News Detail,"1. Kiểm tra hiển thị bài viết
+2. Kiểm tra hình ảnh và media
+3. Kiểm tra tác giả và ngày đăng
+4. Kiểm tra related articles
+5. Kiểm tra social sharing
+6. Kiểm tra responsive design",Not Started,High,Individual news article
+Sự kiện,Sự kiện,Events,"1. Kiểm tra danh sách sự kiện
+2. Kiểm tra filter theo ngày
+3. Kiểm tra thông tin sự kiện
+4. Kiểm tra đăng ký sự kiện
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Events listing
+Đăng ký sự kiện,Đăng ký sự kiện,Event Registration,"1. Kiểm tra form đăng ký
+2. Kiểm tra validation
+3. Kiểm tra thông tin sự kiện
+4. Kiểm tra xác nhận đăng ký
+5. Kiểm tra email confirmation
+6. Kiểm tra responsive design",Not Started,High,Event signup
+FAQ,FAQ,FAQ,"1. Kiểm tra danh sách câu hỏi
+2. Kiểm tra search FAQ
+3. Kiểm tra expand/collapse
+4. Kiểm tra responsive design
+5. Kiểm tra navigation
+6. Kiểm tra loading performance",Not Started,Medium,Frequently asked questions
+Hướng dẫn sử dụng,Hướng dẫn sử dụng,User Guide,"1. Kiểm tra hướng dẫn từng bước
+2. Kiểm tra video tutorials
+3. Kiểm tra screenshots
+4. Kiểm tra responsive design
+5. Kiểm tra navigation
+6. Kiểm tra loading performance",Not Started,Medium,User instructions
+Quỹ & Đầu tư,Quỹ & Đầu tư,Funds & Investment,"1. Kiểm tra trang chính quỹ
+2. Kiểm tra navigation menu
+3. Kiểm tra responsive design
+4. Kiểm tra CTA buttons
+5. Kiểm tra loading performance
+6. Kiểm tra thông tin tổng quan",Not Started,High,Investment overview
+Dự án đang hoạt động,Dự án đang hoạt động,Active Projects,"1. Kiểm tra danh sách dự án
+2. Kiểm tra filter và search
+3. Kiểm tra thông tin dự án
+4. Kiểm tra progress tracking
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Current projects
+Dự án đang gọi vốn,Dự án đang gọi vốn,Fundraising,"1. Kiểm tra danh sách dự án gọi vốn
+2. Kiểm tra thông tin đầu tư
+3. Kiểm tra form đăng ký đầu tư
+4. Kiểm tra tài liệu dự án
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Fundraising projects
+Danh sách Quỹ đầu tư,Danh sách Quỹ đầu tư,Investment Funds,"1. Kiểm tra danh sách quỹ
+2. Kiểm tra thông tin quỹ
+3. Kiểm tra filter và search
+4. Kiểm tra responsive design
+5. Kiểm tra loading performance
+6. Kiểm tra navigation",Not Started,High,Fund directory
+Nhu cầu công nghệ,Nhu cầu công nghệ,Demands,"1. Kiểm tra danh sách nhu cầu
+2. Kiểm tra filter và search
+3. Kiểm tra pagination
+4. Kiểm tra responsive design
+5. Kiểm tra loading performance
+6. Kiểm tra navigation",Not Started,High,Technology demands
+Đăng nhu cầu,Đăng nhu cầu,Register Demand,"1. Kiểm tra form đăng nhu cầu
+2. Kiểm tra validation
+3. Kiểm tra multi-step form
+4. Kiểm tra upload tài liệu
+5. Kiểm tra preview
+6. Kiểm tra responsive design",Not Started,High,Create new demand
+Chi tiết nhu cầu,Chi tiết nhu cầu,Demand Detail,"1. Kiểm tra hiển thị thông tin nhu cầu
+2. Kiểm tra tài liệu đính kèm
+3. Kiểm tra thông tin người đăng
+4. Kiểm tra nút đề xuất giải pháp
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Individual demand
+Đề xuất giải pháp,Đề xuất giải pháp,Propose Solution,"1. Kiểm tra form đề xuất
+2. Kiểm tra validation
+3. Kiểm tra upload tài liệu
+4. Kiểm tra preview
+5. Kiểm tra gửi đề xuất
+6. Kiểm tra responsive design",Not Started,High,Submit proposals
+Nhu cầu của tôi,Nhu cầu của tôi,My Demands,"1. Kiểm tra danh sách nhu cầu đã đăng
+2. Kiểm tra trạng thái nhu cầu
+3. Kiểm tra chỉnh sửa nhu cầu
+4. Kiểm tra xóa nhu cầu
+5. Kiểm tra thống kê
+6. Kiểm tra responsive design",Not Started,High,User's demands
+Đấu giá,Đấu giá,Auctions,"1. Kiểm tra danh sách đấu giá
+2. Kiểm tra filter và search
+3. Kiểm tra thông tin đấu giá
+4. Kiểm tra trạng thái đấu giá
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Auction listing
+Đấu giá trực tiếp,Đấu giá trực tiếp,Live Auction,"1. Kiểm tra real-time bidding
+2. Kiểm tra countdown timer
+3. Kiểm tra current bid
+4. Kiểm tra bid history
+5. Kiểm tra responsive design
+6. Kiểm tra performance",In Progress,High,Real-time bidding
+Chi tiết đấu giá,Chi tiết đấu giá,Auction Detail,"1. Kiểm tra thông tin đấu giá
+2. Kiểm tra tài liệu đấu giá
+3. Kiểm tra lịch sử bid
+4. Kiểm tra thông tin người tham gia
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Individual auction
+Hệ thống đấu giá,Hệ thống đấu giá,Bidding System,"1. Kiểm tra đặt bid
+2. Kiểm tra validation bid
+3. Kiểm tra auto-bid
+4. Kiểm tra bid notifications
+5. Kiểm tra bid history
+6. Kiểm tra responsive design",Not Started,High,Bid management
+Admin Dashboard,Admin Dashboard,Admin Dashboard,"1. Kiểm tra dashboard chính
+2. Kiểm tra thống kê tổng quan
+3. Kiểm tra navigation menu
+4. Kiểm tra responsive design
+5. Kiểm tra loading performance
+6. Kiểm tra permissions",Not Started,High,Admin main page
+Quản lý người dùng,Quản lý người dùng,User Management,"1. Kiểm tra danh sách người dùng
+2. Kiểm tra filter và search
+3. Kiểm tra thông tin chi tiết
+4. Kiểm tra chỉnh sửa user
+5. Kiểm tra xóa user
+6. Kiểm tra responsive design",Not Started,High,Manage users
+Quản lý nội dung,Quản lý nội dung,Content Management,"1. Kiểm tra quản lý tin tức
+2. Kiểm tra quản lý sự kiện
+3. Kiểm tra quản lý media
+4. Kiểm tra workflow publish
+5. Kiểm tra responsive design
+6. Kiểm tra permissions",Not Started,Medium,Manage content
+Báo cáo & Phân tích,Báo cáo & Phân tích,Analytics Dashboard,"1. Kiểm tra KPI dashboard
+2. Kiểm tra báo cáo người dùng
+3. Kiểm tra báo cáo công nghệ
+4. Kiểm tra báo cáo giao dịch
+5. Kiểm tra export reports
+6. Kiểm tra responsive design",Not Started,Medium,Reports and KPIs
+Cài đặt,Cài đặt,Settings,"1. Kiểm tra cài đặt tài khoản
+2. Kiểm tra cài đặt thông báo
+3. Kiểm tra cài đặt bảo mật
+4. Kiểm tra cài đặt ngôn ngữ
+5. Kiểm tra responsive design
+6. Kiểm tra lưu cài đặt",In Progress,Medium,User preferences
+Tin nhắn,Tin nhắn,Messages,"1. Kiểm tra danh sách tin nhắn
+2. Kiểm tra gửi tin nhắn
+3. Kiểm tra nhận tin nhắn
+4. Kiểm tra đánh dấu đã đọc
+5. Kiểm tra responsive design
+6. Kiểm tra real-time updates",Not Started,Medium,User messaging
+Quy tắc đăng tin,Quy tắc đăng tin,Posting Rules,"1. Kiểm tra hiển thị quy tắc
+2. Kiểm tra navigation
+3. Kiểm tra responsive design
+4. Kiểm tra loading performance
+5. Kiểm tra content
+6. Kiểm tra formatting",Not Started,Low,Posting guidelines
+Chính sách bảo mật,Chính sách bảo mật,Privacy Policy,"1. Kiểm tra hiển thị chính sách
+2. Kiểm tra navigation
+3. Kiểm tra responsive design
+4. Kiểm tra loading performance
+5. Kiểm tra content
+6. Kiểm tra formatting",Not Started,Low,Privacy policy
+Điều khoản sử dụng,Điều khoản sử dụng,Terms of Service,"1. Kiểm tra hiển thị điều khoản
+2. Kiểm tra navigation
+3. Kiểm tra responsive design
+4. Kiểm tra loading performance
+5. Kiểm tra content
+6. Kiểm tra formatting",Not Started,Low,Terms of service
+Chính sách hoàn tiền,Chính sách hoàn tiền,Refund Policy,"1. Kiểm tra hiển thị chính sách
+2. Kiểm tra navigation
+3. Kiểm tra responsive design
+4. Kiểm tra loading performance
+5. Kiểm tra content
+6. Kiểm tra formatting",Not Started,Low,Refund policy
+Header Navigation,Header Navigation,Header Navigation,"1. Kiểm tra logo và branding
+2. Kiểm tra menu navigation
+3. Kiểm tra search bar
+4. Kiểm tra user menu
+5. Kiểm tra responsive design
+6. Kiểm tra loading performance",Not Started,High,Main navigation
+Footer,Footer,Footer,"1. Kiểm tra links và thông tin
+2. Kiểm tra social media links
+3. Kiểm tra contact information
+4. Kiểm tra responsive design
+5. Kiểm tra loading performance
+6. Kiểm tra accessibility",In Progress,Medium,Footer information
+Search Functionality,Search Functionality,Search Functionality,"1. Kiểm tra global search
+2. Kiểm tra search suggestions
+3. Kiểm tra search results
+4. Kiểm tra filter options
+5. Kiểm tra responsive design
+6. Kiểm tra performance",Not Started,High,Global search
+Responsive Design,Responsive Design,Responsive Design,"1. Kiểm tra mobile view
+2. Kiểm tra tablet view
+3. Kiểm tra desktop view
+4. Kiểm tra touch interactions
+5. Kiểm tra navigation
+6. Kiểm tra performance",Not Started,High,Cross-device compatibility
+Loading Performance,Loading Performance,Loading Performance,"1. Kiểm tra page load time
+2. Kiểm tra image optimization
+3. Kiểm tra lazy loading
+4. Kiểm tra caching
+5. Kiểm tra bundle size
+6. Kiểm tra Core Web Vitals",Not Started,High,Performance optimization
+Accessibility,Accessibility,Accessibility,"1. Kiểm tra keyboard navigation
+2. Kiểm tra screen reader
+3. Kiểm tra color contrast
+4. Kiểm tra alt text
+5. Kiểm tra focus indicators
+6. Kiểm tra ARIA labels",Not Started,Medium,Accessibility compliance
+Security,Security,Security,"1. Kiểm tra HTTPS
+2. Kiểm tra input validation
+3. Kiểm tra XSS protection
+4. Kiểm tra CSRF protection
+5. Kiểm tra authentication
+6. Kiểm tra authorization",Not Started,High,Security measures
+Error Handling,Error Handling,Error Handling,"1. Kiểm tra 404 page
+2. Kiểm tra 500 page
+3. Kiểm tra network errors
+4. Kiểm tra validation errors
+5. Kiểm tra user-friendly messages
+6. Kiểm tra error logging",Not Started,High,Error management

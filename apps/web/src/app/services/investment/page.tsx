@@ -214,11 +214,11 @@ export default function InvestmentPage() {
               024 3825 1234
             </a>
             <a 
-              href="mailto:investment@hanotex.gov.vn"
+              href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
             >
               <Mail className="h-5 w-5 mr-2" />
-              investment@hanotex.gov.vn
+              contact@hanotex.vn
             </a>
           </div>
         </div>

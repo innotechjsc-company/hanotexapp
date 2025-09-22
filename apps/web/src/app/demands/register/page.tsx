@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore, useUser } from "@/store/auth";
@@ -18,7 +20,7 @@ import { Demand } from "@/types/demand";
 import { useCategories } from "@/hooks/useCategories";
 import { createDemand } from "@/api/demands";
 import { uploadFile, deleteFile } from "@/api/media";
-import { Media } from "@/types/media";
+import { Media } from "@/types/Media";
 
 export default function RegisterDemandPage() {
   const router = useRouter();

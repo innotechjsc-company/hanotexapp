@@ -74,12 +74,12 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
     published_at: '2025-01-15',
     category: 'Tin tức',
     read_time: '3 phút',
-    featured_image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=600&fit=crop&crop=center',
+    featured_image: '/images/news/hanotex-launch.jpg',
     gallery_images: [
-      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=1200&h=600&fit=crop&crop=center',
-      'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1200&h=600&fit=crop&crop=center',
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=600&fit=crop&crop=center',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=600&fit=crop&crop=center'
+      '/images/news/hanotex-launch.jpg',
+      '/images/news/tech-trends-2025.jpg',
+      '/images/news/startup-policy.jpg',
+      '/images/news/hanotex-launch.jpg'
     ],
     tags: ['HANOTEX', 'Ra mắt', 'Công nghệ', 'Đổi mới sáng tạo'],
     views: 1250,

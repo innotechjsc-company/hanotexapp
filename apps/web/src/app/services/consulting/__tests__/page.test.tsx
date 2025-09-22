@@ -28,6 +28,6 @@ describe('ConsultingPage', () => {
     render(<ConsultingPage />)
     
     expect(screen.getByText('024 3825 1234')).toBeInTheDocument()
-    expect(screen.getByText('consulting@hanotex.gov.vn')).toBeInTheDocument()
+    expect(screen.getByText('contact@hanotex.vn')).toBeInTheDocument()
   })
 })

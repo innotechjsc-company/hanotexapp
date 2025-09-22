@@ -49,21 +49,21 @@ services:
   #     - "3000:3000"
   #   restart: unless-stopped
 
-  # cms:
-  #   build:
-  #     context: ./apps/cms
-  #     dockerfile: Dockerfile
-  #   container_name: hanotex-cms
-  #   environment:
-  #     - NODE_ENV=development
-  #     - DATABASE_URI=postgres://postgres:123456@hanotex-postgres:5432/hanotex-dev
-  #     - PAYLOAD_SECRET=your-super-secret-payload-key-change-this-in-production
-  #     - PORT=4000
-  #   ports:
-  #     - "4000:4000"
-  #   depends_on:
-  #     - postgres
-  #   restart: unless-stopped
+  cms:
+    build:
+      context: ./apps/cms
+      dockerfile: Dockerfile
+    container_name: hanotex-cms
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URI=postgres://postgres:123456@hanotex-postgres:5432/hanotex-dev
+      - PAYLOAD_SECRET=your-super-secret-payload-key-change-this-in-production
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
 
 volumes:
   postgres_data:

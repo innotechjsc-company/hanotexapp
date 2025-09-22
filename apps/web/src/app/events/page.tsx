@@ -67,8 +67,9 @@ export default function EventsPage() {
       registration_required: true,
       registration_deadline: "2025-02-20",
       organizer: "Sở KH&CN Hà Nội",
-      contact_email: "techmart@hanoi.gov.vn",
+      contact_email: "contact@hanotex.vn",
       contact_phone: "024 3825 1234",
+      image_url: "/images/events/techmart-2025.jpg",
     },
     {
       id: 2,
@@ -84,8 +85,9 @@ export default function EventsPage() {
       registration_required: true,
       registration_deadline: "2025-03-10",
       organizer: "HANOTEX",
-      contact_email: "auction@hanotex.gov.vn",
+      contact_email: "contact@hanotex.vn",
       contact_phone: "024 3825 1234",
+      image_url: "/images/events/ai-auction.jpg",
     },
     {
       id: 3,
@@ -101,8 +103,9 @@ export default function EventsPage() {
       registration_required: true,
       registration_deadline: "2025-03-15",
       organizer: "Đại học Bách Khoa Hà Nội",
-      contact_email: "seminar@hust.edu.vn",
+      contact_email: "contact@hanotex.vn",
       contact_phone: "024 3869 1234",
+      image_url: "/images/events/tech-transfer-workshop.jpg",
     },
     {
       id: 4,
@@ -118,7 +121,7 @@ export default function EventsPage() {
       registration_required: true,
       registration_deadline: "2025-03-20",
       organizer: "Viện Hàn lâm KH&CN VN",
-      contact_email: "workshop@vast.vn",
+      contact_email: "contact@hanotex.vn",
       contact_phone: "024 3791 1234",
     },
     {
@@ -134,7 +137,7 @@ export default function EventsPage() {
       status: "completed",
       registration_required: false,
       organizer: "Hiệp hội Doanh nghiệp CNTT",
-      contact_email: "conference@vietnamsoftware.org",
+      contact_email: "contact@hanotex.vn",
       contact_phone: "024 3775 1234",
     },
   ];

@@ -72,7 +72,7 @@ export default function Error({
             <p className="text-sm text-gray-500">
               Nếu lỗi vẫn tiếp tục xảy ra, vui lòng{' '}
               <a
-                href="mailto:support@hanotex.vn"
+                href="mailto:contact@hanotex.vn"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 liên hệ hỗ trợ

@@ -70,7 +70,7 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: "Email",
-      details: ["info@hanotex.gov.vn", "support@hanotex.gov.vn"],
+      details: ["contact@hanotex.vn"],
     },
     {
       icon: Clock,
@@ -124,7 +124,7 @@ export default function ContactPage() {
               </div>
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <Mail className="h-4 w-4 mr-2" />
-                <span className="text-sm">info@hanotex.gov.vn</span>
+                <span className="text-sm">contact@hanotex.vn</span>
               </div>
             </div>
           </div>

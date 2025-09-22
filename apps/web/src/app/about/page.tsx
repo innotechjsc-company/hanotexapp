@@ -332,7 +332,7 @@ export default function AboutPage() {
                 <h3 className="text-lg font-semibold mb-2">
                   Email
                 </h3>
-                <p className="text-primary-100">info@hanotex.gov.vn</p>
+                <p className="text-primary-100">contact@hanotex.vn</p>
               </CardBody>
             </Card>
 
