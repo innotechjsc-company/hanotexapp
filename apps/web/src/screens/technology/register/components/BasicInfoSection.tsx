@@ -50,8 +50,8 @@ export const BasicInfoSection = forwardRef<
   const [parentCategoryId, setParentCategoryId] = useState<string>("");
   const [childCategoryId, setChildCategoryId] = useState<string>("");
   const [trlLevel, setTrlLevel] = useState<string>(
-    (typeof initialData?.trl_level === "string"
-      ? (initialData?.trl_level as string)
+    (typeof initialData?.trl_level === "number"
+      ? String(initialData?.trl_level)
       : "") || ""
   );
   const [description, setDescription] = useState<string>(
@@ -325,6 +325,8 @@ export const BasicInfoSection = forwardRef<
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           <div>
             <Select
+              // ađ init value
+              value={trlLevel}
               label="Mức độ phát triển (TRL) *"
               placeholder="Chọn mức độ TRL"
               selectedKeys={trlLevel ? [trlLevel] : []}

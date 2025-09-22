@@ -92,7 +92,7 @@ const getStatusColor = (status: string) => {
     case "pending":
       return "warning";
     case "in_progress":
-      return "primary";
+      return "warning";
     case "completed":
       return "success";
     case "cancelled":
@@ -116,6 +116,44 @@ const getStatusLabel = (status: string) => {
     default:
       return status;
   }
+};
+
+// Normalize id from either string id or populated object
+const getIdFromMaybeObject = (maybeObject: any): string | undefined => {
+  if (!maybeObject) return undefined;
+  if (typeof maybeObject === "string") return maybeObject;
+  const possibleId = (maybeObject as any).id ?? (maybeObject as any)._id;
+  return typeof possibleId !== "undefined" ? String(possibleId) : undefined;
+};
+
+// Resolve display name for technology from either id or object
+const getTechnologyTitleFromValue = (
+  value: string | Technology | undefined,
+  list: Technology[]
+): string => {
+  if (!value) return "Chưa chọn";
+  if (typeof value === "string") {
+    const found = list.find(
+      (t) => String((t as any).id || (t as any)._id) === value
+    );
+    return found?.title || "Không xác định";
+  }
+  return (value as any).title || "Không xác định";
+};
+
+// Resolve display name for investment fund from either id or object
+const getInvestmentFundNameFromValue = (
+  value: string | InvestmentFund | undefined,
+  list: InvestmentFund[]
+): string => {
+  if (!value) return "Chưa chọn";
+  if (typeof value === "string") {
+    const found = list.find(
+      (f) => String((f as any).id || (f as any)._id) === value
+    );
+    return found?.name || "Không xác định";
+  }
+  return (value as any).name || "Không xác định";
 };
 
 function AddProjectModal({
@@ -176,7 +214,7 @@ function AddProjectModal({
                 placeholder="Chọn công nghệ"
                 selectedKeys={
                   current?.technology
-                    ? new Set([String(current.technology)])
+                    ? new Set([getIdFromMaybeObject(current.technology) || ""])
                     : new Set()
                 }
                 onSelectionChange={(keys) => {
@@ -199,7 +237,9 @@ function AddProjectModal({
                 placeholder="Chọn quỹ đầu tư"
                 selectedKeys={
                   current?.investment_fund
-                    ? new Set([String(current.investment_fund)])
+                    ? new Set([
+                        getIdFromMaybeObject(current.investment_fund) || "",
+                      ])
                     : new Set()
                 }
                 onSelectionChange={(keys) => {
@@ -287,6 +327,13 @@ function EditProjectModal({
   technologies: Technology[];
   investmentFunds: InvestmentFund[];
 }) {
+  const [investmentFund, setInvestmentFund] = useState<string>("");
+  const [technology, setTechnology] = useState<string>("");
+
+  useEffect(() => {
+    setInvestmentFund(getIdFromMaybeObject(current?.investment_fund) || "");
+    setTechnology(getIdFromMaybeObject(current?.technology) || "");
+  }, [current]);
   return (
     <Modal
       isOpen={disclosure.isOpen}
@@ -326,13 +373,11 @@ function EditProjectModal({
               <Select
                 label="Công nghệ"
                 placeholder="Chọn công nghệ"
-                selectedKeys={
-                  current?.technology
-                    ? new Set([String(current.technology)])
-                    : new Set()
-                }
+                value={technology}
+                selectedKeys={technology ? new Set([technology]) : new Set()}
                 onSelectionChange={(keys) => {
                   const key = Array.from(keys as Set<string>)[0];
+                  setTechnology(key);
                   setCurrent((p) => ({ ...(p || {}), technology: key }));
                 }}
                 isRequired
@@ -349,27 +394,28 @@ function EditProjectModal({
               <Select
                 label="Quỹ đầu tư"
                 placeholder="Chọn quỹ đầu tư"
+                value={investmentFund}
                 selectedKeys={
-                  current?.investment_fund
-                    ? new Set([String(current.investment_fund)])
-                    : new Set()
+                  investmentFund ? new Set([investmentFund]) : new Set()
                 }
                 onSelectionChange={(keys) => {
                   const key = Array.from(keys as Set<string>)[0];
+                  setInvestmentFund(key);
                   setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
                 }}
                 isRequired
                 variant="bordered"
+                items={investmentFunds}
               >
-                {investmentFunds.map((fund) => (
+                {(item) => (
                   <SelectItem
-                    key={String((fund as any).id || (fund as any)._id)}
+                    key={String((item as any).id || (item as any)._id)}
                   >
-                    {fund.name}
+                    {item.name}
                   </SelectItem>
-                ))}
+                )}
               </Select>
-              <Select
+              {/* <Select
                 label="Trạng thái"
                 placeholder="Chọn trạng thái"
                 selectedKeys={
@@ -385,7 +431,7 @@ function EditProjectModal({
                 <SelectItem key="in_progress">Đang thực hiện</SelectItem>
                 <SelectItem key="completed">Hoàn thành</SelectItem>
                 <SelectItem key="cancelled">Đã hủy</SelectItem>
-              </Select>
+              </Select> */}
               <Input
                 label="Số tiền đầu tư kêu gọi (VND)"
                 type="number"
@@ -631,15 +677,15 @@ export default function MyProjectsPage() {
   const selectedCount = useMemo(() => selectedKeys.size, [selectedKeys]);
 
   // Check authentication on component mount
-  useEffect(() => {
-    if (!user) {
-      toast.error("Vui lòng đăng nhập để xem dự án của bạn", {
-        duration: 3000,
-      });
-      router.push("/auth/login");
-      return;
-    }
-  }, [user, router]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     toast.error("Vui lòng đăng nhập để xem dự án của bạn", {
+  //       duration: 3000,
+  //     });
+  //     router.push("/auth/login");
+  //     return;
+  //   }
+  // }, [user, router]);
 
   const fetchList = async () => {
     if (!user) return;
@@ -969,10 +1015,16 @@ export default function MyProjectsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-gray-600">
-                          {item.technology?.title || "Chưa chọn"}
+                          {getTechnologyTitleFromValue(
+                            (item as any).technology,
+                            technologies
+                          )}
                         </TableCell>
                         <TableCell className="text-gray-600">
-                          {item.investment_fund?.name || "Chưa chọn"}
+                          {getInvestmentFundNameFromValue(
+                            (item as any).investment_fund,
+                            investmentFunds
+                          )}
                         </TableCell>
                         <TableCell className="text-gray-600">
                           {item.goal_money

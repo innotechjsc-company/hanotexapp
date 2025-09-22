@@ -252,3 +252,22 @@ export async function getHighFundingProjects(
 ): Promise<ApiResponse<Project[]>> {
   return getProjects({ min_goal_money: threshold }, pagination);
 }
+
+/**
+ * Get all active projects (exclude pending and cancelled)
+ * Lấy tất cả dự án đang hoạt động: gồm in_progress và completed
+ */
+export async function getActiveProjectsAll(
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<Project[]>> {
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    // status in [in_progress, completed]
+    "where[or][0][status][equals]": "in_progress",
+    "where[or][1][status][equals]": "completed",
+  };
+
+  return payloadApiClient.get<Project[]>(API_ENDPOINTS.PROJECTS, params);
+}

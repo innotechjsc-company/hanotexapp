@@ -90,7 +90,7 @@ export function AddTechnologyModal({
   const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
   const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState<TechnologyStatus>("draft");
+  const [status, setStatus] = useState<TechnologyStatus>("pending");
 
   const handleSubmit = (event: React.FormEvent, onClose: () => void) => {
     event.preventDefault();
@@ -182,7 +182,7 @@ export function AddTechnologyModal({
                   onChange={(data) => console.log("Changed:", data)} // optional
                 />
 
-                <Card>
+                {/* <Card>
                   <CardHeader className="px-6 py-4">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Trạng thái *
@@ -213,7 +213,7 @@ export function AddTechnologyModal({
                       <SelectItem key="rejected">Từ chối</SelectItem>
                     </Select>
                   </CardBody>
-                </Card>
+                </Card> */}
 
                 {/* 2. Technology Owners */}
                 <TechnologyOwnersSection
@@ -309,7 +309,9 @@ export function EditTechnologyModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<TechnologyStatus>(
-    (current?.status as TechnologyStatus) || "draft"
+    (current?.status as TechnologyStatus)
+      ? (current?.status as TechnologyStatus)
+      : "pending"
   );
 
   const handleSubmit = (event: React.FormEvent, onClose: () => void) => {
@@ -379,7 +381,6 @@ export function EditTechnologyModal({
           visibility_mode:
             visibility?.visibility_mode ?? current?.visibility_mode,
         } as any;
-
         const id = String((current as any)?.id || (current as any)?._id);
         const updated = await updateTechnology(id, payload);
         console.log("Updated technology:", updated);
@@ -418,7 +419,7 @@ export function EditTechnologyModal({
                   ref={basicRef}
                 />
 
-                <Card>
+                {/* <Card>
                   <CardHeader className="px-6 py-4">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Trạng thái *
@@ -451,7 +452,7 @@ export function EditTechnologyModal({
                       <SelectItem key="rejected">Từ chối</SelectItem>
                     </Select>
                   </CardBody>
-                </Card>
+                </Card> */}
 
                 <TechnologyOwnersSection
                   ref={ownersRef}

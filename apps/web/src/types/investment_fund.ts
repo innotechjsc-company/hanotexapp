@@ -1,7 +1,8 @@
-import { User } from './users'
+import { User } from "./users";
 
 export type InvestmentFund = {
-  name: string
-  description: string
-  user: string | User
-}
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
+};
