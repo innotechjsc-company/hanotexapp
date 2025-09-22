@@ -3,7 +3,7 @@ import { CollectionConfig } from 'payload'
 export const Propose: CollectionConfig = {
   slug: 'propose',
   admin: {
-    useAsTitle: 'name',
+    useAsTitle: 'title',
     group: 'Đề xuất yêu cầu',
   },
   access: {
@@ -35,7 +35,6 @@ export const Propose: CollectionConfig = {
                   type: 'info',
                   priority: 'normal',
                   is_read: false,
-                  related_technology: doc.technology,
                 },
               })
             }
@@ -47,6 +46,15 @@ export const Propose: CollectionConfig = {
     ],
   },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      label: 'Tiêu đề đề xuất',
+      admin: {
+        description: 'Tiêu đề ngắn gọn cho đề xuất này',
+      },
+    },
     {
       name: 'demand',
       type: 'relationship',

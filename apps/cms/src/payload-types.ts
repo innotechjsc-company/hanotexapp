@@ -84,6 +84,7 @@ export interface Config {
     demand: Demand;
     'investment-fund': InvestmentFund;
     project: Project;
+    propose: Propose;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -107,6 +108,7 @@ export interface Config {
     demand: DemandSelect<false> | DemandSelect<true>;
     'investment-fund': InvestmentFundSelect<false> | InvestmentFundSelect<true>;
     project: ProjectSelect<false> | ProjectSelect<true>;
+    propose: ProposeSelect<false> | ProposeSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -746,6 +748,46 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "propose".
+ */
+export interface Propose {
+  id: string;
+  /**
+   * Tiêu đề ngắn gọn cho đề xuất này
+   */
+  title: string;
+  /**
+   * Thuộc yêu cầu nào
+   */
+  demand: string | Demand;
+  user: string | User;
+  technology: string | Technology;
+  description: string;
+  /**
+   * Thời gian thực hiện (tháng)
+   */
+  execution_time: string;
+  /**
+   * Chi phí ước tính (VND)
+   */
+  estimated_cost: number;
+  /**
+   * Điều kiện hợp tác
+   */
+  cooperation_conditions: string;
+  /**
+   * Tài liệu
+   */
+  document?: (string | null) | Media;
+  /**
+   * Trạng thái
+   */
+  status: 'pending' | 'accepted' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -818,6 +860,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'project';
         value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'propose';
+        value: string | Propose;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1231,6 +1277,24 @@ export interface ProjectSelect<T extends boolean = true> {
   goal_money?: T;
   end_date?: T;
   documents?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "propose_select".
+ */
+export interface ProposeSelect<T extends boolean = true> {
+  title?: T;
+  demand?: T;
+  user?: T;
+  technology?: T;
+  description?: T;
+  execution_time?: T;
+  estimated_cost?: T;
+  cooperation_conditions?: T;
+  document?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

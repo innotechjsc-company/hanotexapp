@@ -6,6 +6,7 @@ import { User } from "./users";
 export type ProposeStatus = "pending" | "accepted" | "rejected";
 
 export interface Propose {
+  title: string;
   demand: Demand;
   user: User;
   technology: Technology;
