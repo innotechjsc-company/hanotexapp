@@ -1,5 +1,5 @@
 import { Category } from "./categories";
-import { Media } from "./media";
+import { Media } from "./media1";
 import { User } from "./users";
 
 export interface Demand {

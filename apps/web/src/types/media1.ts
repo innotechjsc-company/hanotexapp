@@ -1,4 +1,4 @@
-export type Media = {
+export interface Media {
   id: number;
   /**
    * Mô tả ngắn gọn về file media (dùng cho SEO và accessibility). Sẽ tự động tạo từ tên file nếu để trống.
@@ -23,4 +23,4 @@ export type Media = {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-};
+}
