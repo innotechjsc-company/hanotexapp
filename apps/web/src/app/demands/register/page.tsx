@@ -20,7 +20,7 @@ import { Demand } from "@/types/demand";
 import { useCategories } from "@/hooks/useCategories";
 import { createDemand } from "@/api/demands";
 import { uploadFile, deleteFile } from "@/api/media";
-import { Media } from "../../../types/media";
+import { Media } from "@/types/media";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
