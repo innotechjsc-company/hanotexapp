@@ -166,8 +166,6 @@ function ProposeSolutionPage() {
             caption: `Tài liệu đính kèm từ ${user?.full_name || user?.email}`,
             type: "document",
           });
-
-          console.log("File uploaded successfully:", uploadedDocument);
         } catch (uploadError) {
           console.error("File upload failed:", uploadError);
           setError("Không thể tải lên tài liệu. Vui lòng thử lại.");
