@@ -118,10 +118,6 @@ function ProposeSolutionPage() {
     fetchTechnologies();
   }, [params.id]);
 
-  useEffect(() => {
-    console.log("demand-----demand", demand);
-  }, [demand]);
-
   // Helper function to convert form data to Propose format
   const convertFormDataToPropose = (
     formData: ProposalFormData,
