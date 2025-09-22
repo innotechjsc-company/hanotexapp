@@ -34,7 +34,7 @@ import { createPropose } from "@/api/propose";
 import { uploadFile } from "@/api/media";
 import { getDemandById } from "@/api/demands";
 import { getTechnologies } from "@/api/technologies";
-import { Media } from "@/types/media";
+import { Media } from "../../../../types/media";
 import { Technology } from "@/types/technologies";
 import { Demand } from "@/types/demand";
 
