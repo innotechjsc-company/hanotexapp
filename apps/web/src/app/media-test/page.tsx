@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import MediaApi from "@/api/media";
-import type { Media } from "@/types/Media";
+import type { Media } from "@/types/media";
 import { getStoredToken } from "@/api/auth";
 
 type MediaType = Media["type"];
@@ -120,13 +120,27 @@ export default function MediaTestPage() {
         </div>
       )}
       <div className="text-sm">
-        <div><b>ID:</b> {String(item.id)}</div>
-        <div><b>Filename:</b> {item.filename || "-"}</div>
-        <div><b>MIME:</b> {item.mimeType || "-"}</div>
-        <div><b>Alt:</b> {item.alt || "-"}</div>
-        <div><b>Caption:</b> {item.caption || "-"}</div>
-        <div><b>Type:</b> {item.type || "-"}</div>
-        <div><b>URL:</b> {item.url || "-"}</div>
+        <div>
+          <b>ID:</b> {String(item.id)}
+        </div>
+        <div>
+          <b>Filename:</b> {item.filename || "-"}
+        </div>
+        <div>
+          <b>MIME:</b> {item.mimeType || "-"}
+        </div>
+        <div>
+          <b>Alt:</b> {item.alt || "-"}
+        </div>
+        <div>
+          <b>Caption:</b> {item.caption || "-"}
+        </div>
+        <div>
+          <b>Type:</b> {item.type || "-"}
+        </div>
+        <div>
+          <b>URL:</b> {item.url || "-"}
+        </div>
       </div>
     </div>
   );
@@ -135,7 +149,8 @@ export default function MediaTestPage() {
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-2xl font-semibold mb-2">MediaApi Test</h1>
       <div className="mb-6 text-sm">
-        Trạng thái xác thực: {hasToken ? (
+        Trạng thái xác thực:{" "}
+        {hasToken ? (
           <span className="text-green-700">Đã có token</span>
         ) : (
           <span className="text-red-700">Chưa có token (cần đăng nhập)</span>

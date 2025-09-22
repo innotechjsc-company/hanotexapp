@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  Building2, 
-  MapPin, 
-  Users, 
-  Phone, 
-  Mail, 
+import React, { useState } from "react";
+import {
+  Building2,
+  MapPin,
+  Users,
+  Phone,
+  Mail,
   Globe,
   Search,
   Filter,
@@ -14,46 +14,48 @@ import {
   List,
   ArrowLeft,
   Star,
-  Award
-} from 'lucide-react';
-import Link from 'next/link';
+  Award,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function OrganizationsPage() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Mock data - trong thực tế sẽ lấy từ API
   const organizations = [
-        {
-          id: 1,
-          name: "Viện Khoa học và Công nghệ Việt Nam",
-          type: "Viện nghiên cứu",
-          category: "Khoa học tự nhiên",
-          location: "Hà Nội",
-          description: "Viện nghiên cứu hàng đầu về khoa học và công nghệ tại Việt Nam",
-          website: "https://vast.vn",
-          email: "info@vast.vn",
-          phone: "024-3791-1234",
-          technologies: 45,
-          rating: 4.8,
-          verified: true,
-          logo: "/images/organizations/placeholder.svg"
-        },
+    {
+      id: 1,
+      name: "Viện Khoa học và Công nghệ Việt Nam",
+      type: "Viện nghiên cứu",
+      category: "Khoa học tự nhiên",
+      location: "Hà Nội",
+      description:
+        "Viện nghiên cứu hàng đầu về khoa học và công nghệ tại Việt Nam",
+      website: "https://vast.vn",
+      email: "info@vast.vn",
+      phone: "024-3791-1234",
+      technologies: 45,
+      rating: 4.8,
+      verified: true,
+      logo: "/images/organizations/placeholder.svg",
+    },
     {
       id: 2,
       name: "Trường Đại học Bách khoa Hà Nội",
       type: "Trường đại học",
       category: "Kỹ thuật",
       location: "Hà Nội",
-      description: "Trường đại học kỹ thuật hàng đầu Việt Nam với nhiều nghiên cứu đột phá",
+      description:
+        "Trường đại học kỹ thuật hàng đầu Việt Nam với nhiều nghiên cứu đột phá",
       website: "https://hust.edu.vn",
       email: "contact@hust.edu.vn",
       phone: "024-3868-1234",
       technologies: 78,
       rating: 4.9,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 3,
@@ -68,7 +70,7 @@ export default function OrganizationsPage() {
       technologies: 156,
       rating: 4.7,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 4,
@@ -83,7 +85,7 @@ export default function OrganizationsPage() {
       technologies: 92,
       rating: 4.9,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 5,
@@ -91,14 +93,15 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Công nghệ thông tin",
       location: "TP. Hồ Chí Minh",
-      description: "Trường đại học chuyên về công nghệ thông tin và truyền thông",
+      description:
+        "Trường đại học chuyên về công nghệ thông tin và truyền thông",
       website: "https://uit.edu.vn",
       email: "info@uit.edu.vn",
       phone: "028-3725-1234",
       technologies: 63,
       rating: 4.6,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 6,
@@ -112,7 +115,7 @@ export default function OrganizationsPage() {
       phone: "0254-3856-1234",
       technologies: 34,
       rating: 4.5,
-      verified: true
+      verified: true,
     },
     {
       id: 7,
@@ -126,7 +129,7 @@ export default function OrganizationsPage() {
       phone: "024-3754-1234",
       technologies: 67,
       rating: 4.7,
-      verified: true
+      verified: true,
     },
     {
       id: 8,
@@ -134,13 +137,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Công nghệ thông tin",
       location: "Hà Nội",
-      description: "Viện nghiên cứu chuyên sâu về công nghệ thông tin và truyền thông",
+      description:
+        "Viện nghiên cứu chuyên sâu về công nghệ thông tin và truyền thông",
       website: "https://ioit.ac.vn",
       email: "info@ioit.ac.vn",
       phone: "024-3791-2345",
       technologies: 89,
       rating: 4.8,
-      verified: true
+      verified: true,
     },
     {
       id: 9,
@@ -154,7 +158,7 @@ export default function OrganizationsPage() {
       phone: "028-3865-1234",
       technologies: 95,
       rating: 4.8,
-      verified: true
+      verified: true,
     },
     {
       id: 10,
@@ -162,14 +166,15 @@ export default function OrganizationsPage() {
       type: "Doanh nghiệp",
       category: "Kỹ thuật",
       location: "Hà Nội",
-      description: "Tập đoàn đa ngành hàng đầu Việt Nam với nhiều dự án công nghệ",
+      description:
+        "Tập đoàn đa ngành hàng đầu Việt Nam với nhiều dự án công nghệ",
       website: "https://vingroup.net",
       email: "info@vingroup.net",
       phone: "024-3974-1234",
       technologies: 124,
       rating: 4.6,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 11,
@@ -177,13 +182,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Năng lượng",
       location: "Đà Lạt",
-      description: "Viện nghiên cứu chuyên sâu về công nghệ hạt nhân và ứng dụng",
+      description:
+        "Viện nghiên cứu chuyên sâu về công nghệ hạt nhân và ứng dụng",
       website: "https://dalat.vn",
       email: "info@dalat.vn",
       phone: "0263-3821-1234",
       technologies: 28,
       rating: 4.4,
-      verified: true
+      verified: true,
     },
     {
       id: 12,
@@ -191,13 +197,14 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Y tế",
       location: "Hà Nội",
-      description: "Trường đại học y khoa hàng đầu Việt Nam với nhiều nghiên cứu y học",
+      description:
+        "Trường đại học y khoa hàng đầu Việt Nam với nhiều nghiên cứu y học",
       website: "https://hmu.edu.vn",
       email: "info@hmu.edu.vn",
       phone: "024-3852-1234",
       technologies: 52,
       rating: 4.7,
-      verified: true
+      verified: true,
     },
     {
       id: 13,
@@ -205,13 +212,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Nông nghiệp",
       location: "Hải Phòng",
-      description: "Viện nghiên cứu chuyên sâu về nuôi trồng thủy sản và công nghệ sinh học",
+      description:
+        "Viện nghiên cứu chuyên sâu về nuôi trồng thủy sản và công nghệ sinh học",
       website: "https://ria1.org",
       email: "info@ria1.org",
       phone: "0225-3861-1234",
       technologies: 41,
       rating: 4.5,
-      verified: true
+      verified: true,
     },
     {
       id: 14,
@@ -219,13 +227,14 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Nông nghiệp",
       location: "TP. Hồ Chí Minh",
-      description: "Trường đại học chuyên về nông nghiệp, lâm nghiệp và công nghệ sinh học",
+      description:
+        "Trường đại học chuyên về nông nghiệp, lâm nghiệp và công nghệ sinh học",
       website: "https://hcmuaf.edu.vn",
       email: "info@hcmuaf.edu.vn",
       phone: "028-3896-1234",
       technologies: 73,
       rating: 4.6,
-      verified: true
+      verified: true,
     },
     {
       id: 15,
@@ -240,7 +249,7 @@ export default function OrganizationsPage() {
       technologies: 87,
       rating: 4.7,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 16,
@@ -248,13 +257,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Khoa học tự nhiên",
       location: "Hà Nội",
-      description: "Viện nghiên cứu chuyên sâu về địa chất, khoáng sản và tài nguyên",
+      description:
+        "Viện nghiên cứu chuyên sâu về địa chất, khoáng sản và tài nguyên",
       website: "https://imgm.gov.vn",
       email: "info@imgm.gov.vn",
       phone: "024-3856-1234",
       technologies: 38,
       rating: 4.3,
-      verified: true
+      verified: true,
     },
     {
       id: 17,
@@ -268,7 +278,7 @@ export default function OrganizationsPage() {
       phone: "024-3754-5678",
       technologies: 29,
       rating: 4.2,
-      verified: true
+      verified: true,
     },
     {
       id: 18,
@@ -276,13 +286,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Nông nghiệp",
       location: "Hà Nội",
-      description: "Viện nghiên cứu chuyên sâu về chăn nuôi và công nghệ sinh học động vật",
+      description:
+        "Viện nghiên cứu chuyên sâu về chăn nuôi và công nghệ sinh học động vật",
       website: "https://vcn.vn",
       email: "info@vcn.vn",
       phone: "024-3854-1234",
       technologies: 46,
       rating: 4.4,
-      verified: true
+      verified: true,
     },
     {
       id: 19,
@@ -290,13 +301,14 @@ export default function OrganizationsPage() {
       type: "Doanh nghiệp",
       category: "Kỹ thuật",
       location: "Hà Nội",
-      description: "Tập đoàn công nghiệp hàng đầu với nhiều dự án công nghệ tiên tiến",
+      description:
+        "Tập đoàn công nghiệp hàng đầu với nhiều dự án công nghệ tiên tiến",
       website: "https://hoaphat.com.vn",
       email: "info@hoaphat.com.vn",
       phone: "024-3868-5678",
       technologies: 112,
       rating: 4.5,
-      verified: true
+      verified: true,
     },
     {
       id: 20,
@@ -304,13 +316,14 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Kỹ thuật",
       location: "Hà Nội",
-      description: "Trường đại học chuyên về thủy lợi, thủy điện và công nghệ môi trường",
+      description:
+        "Trường đại học chuyên về thủy lợi, thủy điện và công nghệ môi trường",
       website: "https://tlu.edu.vn",
       email: "info@tlu.edu.vn",
       phone: "024-3854-5678",
       technologies: 58,
       rating: 4.3,
-      verified: true
+      verified: true,
     },
     {
       id: 21,
@@ -318,13 +331,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Nông nghiệp",
       location: "Cần Thơ",
-      description: "Viện nghiên cứu chuyên sâu về lúa và công nghệ nông nghiệp vùng ĐBSCL",
+      description:
+        "Viện nghiên cứu chuyên sâu về lúa và công nghệ nông nghiệp vùng ĐBSCL",
       website: "https://clrri.org",
       email: "info@clrri.org",
       phone: "0292-3891-1234",
       technologies: 64,
       rating: 4.6,
-      verified: true
+      verified: true,
     },
     {
       id: 22,
@@ -332,13 +346,14 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Kinh tế",
       location: "Hà Nội",
-      description: "Trường đại học kinh tế hàng đầu với nghiên cứu về fintech và công nghệ tài chính",
+      description:
+        "Trường đại học kinh tế hàng đầu với nghiên cứu về fintech và công nghệ tài chính",
       website: "https://neu.edu.vn",
       email: "info@neu.edu.vn",
       phone: "024-3869-1234",
       technologies: 35,
       rating: 4.4,
-      verified: true
+      verified: true,
     },
     {
       id: 23,
@@ -346,14 +361,15 @@ export default function OrganizationsPage() {
       type: "Doanh nghiệp",
       category: "Công nghệ thông tin",
       location: "TP. Hồ Chí Minh",
-      description: "Công ty phần mềm hàng đầu Việt Nam với nhiều giải pháp công nghệ",
+      description:
+        "Công ty phần mềm hàng đầu Việt Nam với nhiều giải pháp công nghệ",
       website: "https://fptsoftware.com",
       email: "info@fptsoftware.com",
       phone: "028-7300-5678",
       technologies: 143,
       rating: 4.8,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 24,
@@ -361,13 +377,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Nông nghiệp",
       location: "TP. Hồ Chí Minh",
-      description: "Viện nghiên cứu chuyên sâu về cao su và công nghệ vật liệu polyme",
+      description:
+        "Viện nghiên cứu chuyên sâu về cao su và công nghệ vật liệu polyme",
       website: "https://vrri.vn",
       email: "info@vrri.vn",
       phone: "028-3895-1234",
       technologies: 42,
       rating: 4.3,
-      verified: true
+      verified: true,
     },
     {
       id: 25,
@@ -375,13 +392,14 @@ export default function OrganizationsPage() {
       type: "Trường đại học",
       category: "Kỹ thuật",
       location: "Hà Nội",
-      description: "Trường đại học chuyên về giao thông vận tải và công nghệ logistics",
+      description:
+        "Trường đại học chuyên về giao thông vận tải và công nghệ logistics",
       website: "https://utc.edu.vn",
       email: "info@utc.edu.vn",
       phone: "024-3869-5678",
       technologies: 49,
       rating: 4.2,
-      verified: true
+      verified: true,
     },
     {
       id: 26,
@@ -395,7 +413,7 @@ export default function OrganizationsPage() {
       phone: "024-3857-1234",
       technologies: 53,
       rating: 4.5,
-      verified: true
+      verified: true,
     },
     {
       id: 27,
@@ -403,14 +421,15 @@ export default function OrganizationsPage() {
       type: "Doanh nghiệp",
       category: "Thực phẩm",
       location: "TP. Hồ Chí Minh",
-      description: "Tập đoàn sữa hàng đầu với nhiều công nghệ chế biến thực phẩm",
+      description:
+        "Tập đoàn sữa hàng đầu với nhiều công nghệ chế biến thực phẩm",
       website: "https://vinamilk.com.vn",
       email: "info@vinamilk.com.vn",
       phone: "028-3894-1234",
       technologies: 67,
       rating: 4.4,
       verified: true,
-          logo: "/images/organizations/placeholder.svg"
+      logo: "/images/organizations/placeholder.svg",
     },
     {
       id: 28,
@@ -424,7 +443,7 @@ export default function OrganizationsPage() {
       phone: "0236-3841-1234",
       technologies: 71,
       rating: 4.5,
-      verified: true
+      verified: true,
     },
     {
       id: 29,
@@ -432,13 +451,14 @@ export default function OrganizationsPage() {
       type: "Viện nghiên cứu",
       category: "Nông nghiệp",
       location: "Hải Phòng",
-      description: "Viện nghiên cứu chuyên sâu về hải sản và công nghệ thủy sản",
+      description:
+        "Viện nghiên cứu chuyên sâu về hải sản và công nghệ thủy sản",
       website: "https://risp.org.vn",
       email: "info@risp.org.vn",
       phone: "0225-3862-1234",
       technologies: 38,
       rating: 4.3,
-      verified: true
+      verified: true,
     },
     {
       id: 30,
@@ -446,36 +466,39 @@ export default function OrganizationsPage() {
       type: "Doanh nghiệp",
       category: "Vật liệu",
       location: "TP. Hồ Chí Minh",
-      description: "Tập đoàn chuyên về vật liệu xây dựng và công nghệ vật liệu tiên tiến",
+      description:
+        "Tập đoàn chuyên về vật liệu xây dựng và công nghệ vật liệu tiên tiến",
       website: "https://hoaan.com.vn",
       email: "info@hoaan.com.vn",
       phone: "028-3897-1234",
       technologies: 56,
       rating: 4.4,
-      verified: true
-    }
+      verified: true,
+    },
   ];
 
   const categories = [
-    { value: 'all', label: 'Tất cả' },
-    { value: 'Khoa học tự nhiên', label: 'Khoa học tự nhiên' },
-    { value: 'Kỹ thuật', label: 'Kỹ thuật' },
-    { value: 'Công nghệ thông tin', label: 'Công nghệ thông tin' },
-    { value: 'Năng lượng', label: 'Năng lượng' },
-    { value: 'Y tế', label: 'Y tế' },
-    { value: 'Nông nghiệp', label: 'Nông nghiệp' },
-    { value: 'Khoa học xã hội', label: 'Khoa học xã hội' },
-    { value: 'Kinh tế', label: 'Kinh tế' },
-    { value: 'Thực phẩm', label: 'Thực phẩm' },
-    { value: 'Môi trường', label: 'Môi trường' },
-    { value: 'Vật liệu', label: 'Vật liệu' }
+    { value: "all", label: "Tất cả" },
+    { value: "Khoa học tự nhiên", label: "Khoa học tự nhiên" },
+    { value: "Kỹ thuật", label: "Kỹ thuật" },
+    { value: "Công nghệ thông tin", label: "Công nghệ thông tin" },
+    { value: "Năng lượng", label: "Năng lượng" },
+    { value: "Y tế", label: "Y tế" },
+    { value: "Nông nghiệp", label: "Nông nghiệp" },
+    { value: "Khoa học xã hội", label: "Khoa học xã hội" },
+    { value: "Kinh tế", label: "Kinh tế" },
+    { value: "Thực phẩm", label: "Thực phẩm" },
+    { value: "Môi trường", label: "Môi trường" },
+    { value: "Vật liệu", label: "Vật liệu" },
   ];
 
-  const filteredOrganizations = organizations.filter(org => {
-    const matchesSearch = org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         org.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         org.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || org.category === selectedCategory;
+  const filteredOrganizations = organizations.filter((org) => {
+    const matchesSearch =
+      org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || org.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -486,8 +509,8 @@ export default function OrganizationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Link 
-                href="/data" 
+              <Link
+                href="/data"
                 className="mr-4 p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -498,12 +521,15 @@ export default function OrganizationsPage() {
                   Danh sách Tổ chức/Viện/Trường
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  Khám phá các tổ chức, viện nghiên cứu và trường đại học tham gia sàn giao dịch
+                  Khám phá các tổ chức, viện nghiên cứu và trường đại học tham
+                  gia sàn giao dịch
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-blue-600">{organizations.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {organizations.length}
+              </div>
               <div className="text-sm text-gray-600">Tổ chức</div>
             </div>
           </div>
@@ -534,7 +560,7 @@ export default function OrganizationsPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
@@ -545,17 +571,21 @@ export default function OrganizationsPage() {
             {/* View Mode */}
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-lg transition-colors duration-200 ${
-                  viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                  viewMode === "grid"
+                    ? "bg-blue-100 text-blue-600"
+                    : "text-gray-400 hover:text-gray-600"
                 }`}
               >
                 <Grid className="h-5 w-5" />
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`p-2 rounded-lg transition-colors duration-200 ${
-                  viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                  viewMode === "list"
+                    ? "bg-blue-100 text-blue-600"
+                    : "text-gray-400 hover:text-gray-600"
                 }`}
               >
                 <List className="h-5 w-5" />
@@ -567,30 +597,36 @@ export default function OrganizationsPage() {
 
       {/* Results */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {viewMode === 'grid' ? (
+        {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOrganizations.map((org) => (
-              <div key={org.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+              <div
+                key={org.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                {org.logo ? (
-                  <img 
-                    src={org.logo} 
-                    alt={`${org.name} logo`}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling.style.display = 'flex';
-                    }}
-                  />
-                ) : null}
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
-                  <span className="text-white font-bold text-xs">
-                    {org.name.split(' ').map(word => word[0]).join('').slice(0, 3)}
-                  </span>
-                </div>
-              </div>
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {org.logo ? (
+                        <img
+                          src={org.logo}
+                          alt={`${org.name} logo`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : null}
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+                        <span className="text-white font-bold text-xs">
+                          {org.name
+                            .split(" ")
+                            .map((word) => word[0])
+                            .join("")
+                            .slice(0, 3)}
+                        </span>
+                      </div>
+                    </div>
                     {org.verified && (
                       <div className="flex items-center text-green-600">
                         <Award className="h-4 w-4 mr-1" />
@@ -598,21 +634,21 @@ export default function OrganizationsPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                     {org.name}
                   </h3>
-                  
+
                   <div className="flex items-center text-sm text-gray-600 mb-2">
                     <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-medium">
                       {org.type}
                     </span>
                   </div>
-                  
+
                   <p className="text-gray-600 text-sm mb-4 line-clamp-3">
                     {org.description}
                   </p>
-                  
+
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -627,7 +663,7 @@ export default function OrganizationsPage() {
                       <span>{org.rating}/5.0</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <span className="text-sm font-medium text-gray-900">
                       {org.category}
@@ -643,24 +679,29 @@ export default function OrganizationsPage() {
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {filteredOrganizations.map((org) => (
-              <div key={org.id} className="border-b border-gray-100 last:border-b-0 p-6 hover:bg-gray-50 transition-colors duration-200">
+              <div
+                key={org.id}
+                className="border-b border-gray-100 last:border-b-0 p-6 hover:bg-gray-50 transition-colors duration-200"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center flex-1">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mr-4 overflow-hidden">
                       {org.logo ? (
-                        <img 
-                          src={org.logo} 
+                        <img
+                          src={org.logo}
                           alt={`${org.name} logo`}
                           className="w-full h-full object-contain"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                            e.currentTarget.style.display = "none";
+                            ("flex");
                           }}
                         />
                       ) : null}
-                      <Building2 className={`h-6 w-6 text-blue-600 ${org.logo ? 'hidden' : ''}`} />
+                      <Building2
+                        className={`h-6 w-6 text-blue-600 ${org.logo ? "hidden" : ""}`}
+                      />
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900 truncate">
@@ -669,11 +710,13 @@ export default function OrganizationsPage() {
                         {org.verified && (
                           <div className="flex items-center text-green-600">
                             <Award className="h-4 w-4 mr-1" />
-                            <span className="text-xs font-medium">Xác thực</span>
+                            <span className="text-xs font-medium">
+                              Xác thực
+                            </span>
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                         <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-medium">
                           {org.type}
@@ -682,11 +725,11 @@ export default function OrganizationsPage() {
                           {org.category}
                         </span>
                       </div>
-                      
+
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                         {org.description}
                       </p>
-                      
+
                       <div className="flex items-center gap-6 text-sm text-gray-600">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-1" />
@@ -703,7 +746,7 @@ export default function OrganizationsPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 ml-6">
                     <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                       Xem chi tiết →
@@ -714,7 +757,7 @@ export default function OrganizationsPage() {
             ))}
           </div>
         )}
-        
+
         {filteredOrganizations.length === 0 && (
           <div className="text-center py-12">
             <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
