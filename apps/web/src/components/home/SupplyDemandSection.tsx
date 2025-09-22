@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, Clock, MapPin, TrendingUp, Users, Eye } from 'lucide-react';
-import { Technology } from '@/types';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import apiClient from '@/lib/api';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Clock,
+  MapPin,
+  TrendingUp,
+  Users,
+  Eye,
+} from "lucide-react";
+import { Technology } from "@/types";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { getTechnologies } from "@/api/technologies";
 
 export default function SupplyDemandSection() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
@@ -14,12 +21,19 @@ export default function SupplyDemandSection() {
   useEffect(() => {
     const fetchTechnologies = async () => {
       try {
-        const response = await apiClient.getTechnologies({ limit: 6, status: 'ACTIVE' });
-        if (response.success && response.data && Array.isArray(response.data)) {
+        const response = await getTechnologies(
+          {
+            status: "active",
+          },
+          {
+            limit: 6,
+          }
+        );
+        if (response.data && Array.isArray(response.data)) {
           setTechnologies(response.data);
         }
       } catch (error) {
-        console.error('Error fetching technologies:', error);
+        console.error("Error fetching technologies:", error);
       } finally {
         setLoading(false);
       }
@@ -32,34 +46,37 @@ export default function SupplyDemandSection() {
   const demands = [
     {
       id: 1,
-      title: 'Tìm kiếm công nghệ AI cho chẩn đoán y tế',
-      description: 'Doanh nghiệp y tế cần công nghệ AI để phân tích hình ảnh X-quang và MRI...',
-      location: 'Hà Nội',
-      budget: '500M - 1B VNĐ',
-      deadline: '30 ngày',
-      category: 'Y tế',
-      views: 156
+      title: "Tìm kiếm công nghệ AI cho chẩn đoán y tế",
+      description:
+        "Doanh nghiệp y tế cần công nghệ AI để phân tích hình ảnh X-quang và MRI...",
+      location: "Hà Nội",
+      budget: "500M - 1B VNĐ",
+      deadline: "30 ngày",
+      category: "Y tế",
+      views: 156,
     },
     {
       id: 2,
-      title: 'Công nghệ xử lý nước thải công nghiệp',
-      description: 'Nhà máy sản xuất cần giải pháp xử lý nước thải hiệu quả, tiết kiệm năng lượng...',
-      location: 'Bắc Ninh',
-      budget: '200M - 500M VNĐ',
-      deadline: '45 ngày',
-      category: 'Môi trường',
-      views: 89
+      title: "Công nghệ xử lý nước thải công nghiệp",
+      description:
+        "Nhà máy sản xuất cần giải pháp xử lý nước thải hiệu quả, tiết kiệm năng lượng...",
+      location: "Bắc Ninh",
+      budget: "200M - 500M VNĐ",
+      deadline: "45 ngày",
+      category: "Môi trường",
+      views: 89,
     },
     {
       id: 3,
-      title: 'Hệ thống IoT cho nông nghiệp thông minh',
-      description: 'Nông trại cần hệ thống giám sát và điều khiển tự động cho canh tác...',
-      location: 'Hưng Yên',
-      budget: '100M - 300M VNĐ',
-      deadline: '60 ngày',
-      category: 'Nông nghiệp',
-      views: 234
-    }
+      title: "Hệ thống IoT cho nông nghiệp thông minh",
+      description:
+        "Nông trại cần hệ thống giám sát và điều khiển tự động cho canh tác...",
+      location: "Hưng Yên",
+      budget: "100M - 300M VNĐ",
+      deadline: "60 ngày",
+      category: "Nông nghiệp",
+      views: 234,
+    },
   ];
 
   if (loading) {
@@ -83,7 +100,8 @@ export default function SupplyDemandSection() {
             Kết nối cung - cầu
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Khám phá công nghệ mới và nhu cầu thị trường để tạo ra những kết nối có giá trị
+            Khám phá công nghệ mới và nhu cầu thị trường để tạo ra những kết nối
+            có giá trị
           </p>
         </div>
 
@@ -116,7 +134,7 @@ export default function SupplyDemandSection() {
                           {tech.title}
                         </h4>
                         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                          {tech.public_summary}
+                          {tech.description}
                         </p>
                       </div>
                       <div className="ml-4 flex-shrink-0">
@@ -150,9 +168,7 @@ export default function SupplyDemandSection() {
           {/* Demand Side - New Demands */}
           <div>
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold text-gray-900">
-                Nhu cầu mới
-              </h3>
+              <h3 className="text-2xl font-bold text-gray-900">Nhu cầu mới</h3>
               <Link
                 href="/demands"
                 className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
@@ -218,7 +234,8 @@ export default function SupplyDemandSection() {
               Bạn có công nghệ hoặc nhu cầu?
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Tham gia ngay để kết nối với cộng đồng khoa học công nghệ và tìm kiếm cơ hội hợp tác
+              Tham gia ngay để kết nối với cộng đồng khoa học công nghệ và tìm
+              kiếm cơ hội hợp tác
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import webSocketManager from '@/lib/websocket';
+import { useEffect, useRef, useState } from "react";
+import webSocketManager from "@/lib/websocket";
 
 export function useWebSocket() {
-  const { data: session } = useSession();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const socketRef = useRef<any>(null);
 
   useEffect(() => {
-    if (session?.apiToken) {
-      const socket = webSocketManager.connect(session.apiToken);
+    if (localStorage.getItem("token")) {
+      const socket = webSocketManager.connect(
+        localStorage.getItem("token") || ""
+      );
       socketRef.current = socket;
 
       const handleConnect = () => {
@@ -23,21 +23,21 @@ export function useWebSocket() {
       };
 
       const handleError = (error: any) => {
-        setConnectionError(error.message || 'Connection error');
+        setConnectionError(error.message || "Connection error");
         setIsConnected(false);
       };
 
-      socket.on('connect', handleConnect);
-      socket.on('disconnect', handleDisconnect);
-      socket.on('connect_error', handleError);
+      socket.on("connect", handleConnect);
+      socket.on("disconnect", handleDisconnect);
+      socket.on("connect_error", handleError);
 
       return () => {
-        socket.off('connect', handleConnect);
-        socket.off('disconnect', handleDisconnect);
-        socket.off('connect_error', handleError);
+        socket.off("connect", handleConnect);
+        socket.off("disconnect", handleDisconnect);
+        socket.off("connect_error", handleError);
       };
     }
-  }, [session?.apiToken]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -51,7 +51,8 @@ export function useWebSocket() {
     socket: socketRef.current,
     isConnected,
     connectionError,
-    connect: () => webSocketManager.connect(session?.apiToken),
+    connect: () =>
+      webSocketManager.connect(localStorage.getItem("token") || ""),
     disconnect: () => webSocketManager.disconnect(),
   };
 }
@@ -61,7 +62,7 @@ export function useAuctionWebSocket(auctionId?: string) {
   const { socket, isConnected } = useWebSocket();
   const [bids, setBids] = useState<any[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
-  const [auctionStatus, setAuctionStatus] = useState<string>('');
+  const [auctionStatus, setAuctionStatus] = useState<string>("");
 
   useEffect(() => {
     if (socket && auctionId) {
@@ -70,7 +71,7 @@ export function useAuctionWebSocket(auctionId?: string) {
 
       // Set up event listeners
       const handleBidUpdate = (data: any) => {
-        setBids(prev => [data, ...prev]);
+        setBids((prev) => [data, ...prev]);
         setCurrentPrice(data.bidAmount);
       };
 
@@ -83,8 +84,11 @@ export function useAuctionWebSocket(auctionId?: string) {
 
       return () => {
         webSocketManager.leaveAuction(auctionId);
-        webSocketManager.off('bid_update', handleBidUpdate);
-        webSocketManager.off('auction_status_change', handleAuctionStatusChange);
+        webSocketManager.off("bid_update", handleBidUpdate);
+        webSocketManager.off(
+          "auction_status_change",
+          handleAuctionStatusChange
+        );
       };
     }
   }, [socket, auctionId]);
@@ -112,23 +116,21 @@ export function useNotifications() {
   useEffect(() => {
     if (socket) {
       const handleNotification = (data: any) => {
-        setNotifications(prev => [data, ...prev]);
+        setNotifications((prev) => [data, ...prev]);
       };
 
       webSocketManager.onNotification(handleNotification);
 
       return () => {
-        webSocketManager.off('notification', handleNotification);
+        webSocketManager.off("notification", handleNotification);
       };
     }
   }, [socket]);
 
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === notificationId 
-          ? { ...notif, isRead: true }
-          : notif
+    setNotifications((prev) =>
+      prev.map((notif) =>
+        notif.id === notificationId ? { ...notif, isRead: true } : notif
       )
     );
   };
@@ -141,6 +143,6 @@ export function useNotifications() {
     notifications,
     markAsRead,
     clearNotifications,
-    unreadCount: notifications.filter(n => !n.isRead).length,
+    unreadCount: notifications.filter((n) => !n.isRead).length,
   };
 }

@@ -96,6 +96,9 @@ export default function LiveAuction({
 
     try {
       placeBid(bidAmount);
+      if (!auction.id) {
+        throw new Error("Auction ID is required");
+      }
 
       // Simulate bid placement
       const newBid: Bid = {

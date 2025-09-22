@@ -2,7 +2,8 @@
 
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Eye } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   TechnologyOwnersSection,
   LegalTerritorySection,
@@ -35,16 +36,11 @@ export default function RegisterTechnologyPage() {
   const pricingRef = useRef<PricingDesiredSectionRef>(null);
   const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
-  const { masterData, loading: masterDataLoading } = useMasterData();
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(null);
 
     (async () => {
       try {
@@ -56,21 +52,15 @@ export default function RegisterTechnologyPage() {
         const pricingDesired = pricingRef.current?.getData();
         const visibility = visibilityRef.current?.getData();
 
-        console.log("Basic info:", basic);
-        console.log("Owners data:", owners);
-        console.log("IP details:", ipDetails);
-        console.log("Legal details:", legalDetails);
-        console.log("Investment & Transfer:", investmentTransfer);
-        console.log("Pricing Desired:", pricingDesired);
-        console.log("Visibility:", visibility);
-
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
         const techMedia = basic?.documents?.length
           ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
           : [];
         const legalMedia = legalDetails?.files?.length
-          ? await mediaApi.uploadMulti(legalDetails!.files, { type: "document" })
+          ? await mediaApi.uploadMulti(legalDetails!.files, {
+              type: "document",
+            })
           : [];
 
         // 3. Aggregate payload aligned with Technology type
@@ -94,47 +84,26 @@ export default function RegisterTechnologyPage() {
           transfer_type: investmentTransfer?.transfer_type,
           pricing: pricingDesired,
           // Server route will create related IP docs if provided
-          intellectual_property: ipDetails && ipDetails.length ? ipDetails : undefined,
+          intellectual_property:
+            ipDetails && ipDetails.length ? ipDetails : undefined,
           status: "draft" as const,
           visibility_mode: visibility?.visibility_mode,
         };
 
         const created = await createTechnology(payload as any);
         console.log("Created technology:", created);
-        setSubmitSuccess("Tạo công nghệ thành công");
-        // Optionally navigate or reset form here
+
+        // Show success toast and navigate to technologies page
+        toast.success("Đăng ký công nghệ thành công!");
+        router.push("/technologies");
       } catch (err: any) {
         console.error("Submit error:", err);
-        setSubmitError(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
+        toast.error(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
       } finally {
         setSubmitting(false);
       }
     })();
   };
-
-  // Show loading while auth is being checked
-  // if (authLoading || !hasCheckedAuth) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <Spinner size="lg" color="primary" className="mb-4" />
-  //         <p className="text-gray-600">Đang kiểm tra xác thực...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // // Redirect if not authenticated
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <Spinner size="lg" color="primary" className="mb-4" />
-  //         <p className="text-gray-600">Đang chuyển hướng về trang chủ...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -165,38 +134,9 @@ export default function RegisterTechnologyPage() {
 
         {/* Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Error Messages */}
-          {/* {(submitError || masterDataError || ocrError) && (
-            <Card className="bg-red-50 border-red-200">
-              <CardBody className="flex flex-row items-center text-red-600">
-                <AlertCircle className="h-5 w-5 mr-2" />
-                {submitError || masterDataError || ocrError}
-              </CardBody>
-            </Card>
-          )} */}
-
-          {/* Loading Messages */}
-          {/* {masterDataLoading && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardBody className="flex flex-row items-center text-blue-600">
-                <Spinner size="sm" color="primary" className="mr-2" />
-                Đang tải dữ liệu...
-              </CardBody>
-            </Card>
-          )} */}
-
-          {/* Success Messages */}
-          {/* {submitSuccess && (
-            <Card className="bg-green-50 border-green-200">
-              <CardBody className="text-green-600">{submitSuccess}</CardBody>
-            </Card>
-          )} */}
-
           {/* 1. Basic Information */}
           <BasicInfoSection
             ref={basicRef}
-            masterData={masterData}
-            masterDataLoading={masterDataLoading}
             onChange={(data) => console.log("Changed:", data)} // optional
           />
 
@@ -223,8 +163,6 @@ export default function RegisterTechnologyPage() {
           {/* 6. Investment & Transfer (Optional) */}
           <InvestmentTransferSection
             ref={investmentTransferRef}
-            masterData={masterData}
-            masterDataLoading={masterDataLoading}
             onChange={(data) => console.log("Changed:", data)} // optional
           />
 

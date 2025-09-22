@@ -26,12 +26,14 @@ export const API_ENDPOINTS = {
   CATEGORIES: "/categories",
   COMPANIES: "/companies",
   RESEARCH_INSTITUTIONS: "/research-institutions",
+  DEMANDS: "/demand",
   AUCTIONS: "/auctions",
   BIDS: "/bids",
   TRANSACTIONS: "/transactions",
   NOTIFICATIONS: "/notifications",
   MEDIA: "/media",
   INTELLECTUAL_PROPERTIES: "/intellectual-properties",
+  INVESTMENT_FUND: "/investment-fund",
 } as const;
 
 // HTTP Methods

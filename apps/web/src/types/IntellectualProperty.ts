@@ -12,6 +12,7 @@ export type IPType =
 export type IPStatus = "pending" | "granted" | "expired" | "rejected";
 
 export interface IntellectualProperty {
+  id?: ID;
   technology: ID | Technology;
   code: string;
   type: IPType;

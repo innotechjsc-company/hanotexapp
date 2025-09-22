@@ -34,121 +34,119 @@ import {
   Avatar,
 } from "@heroui/react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import apiClient from "@/lib/api";
-
-interface Demand {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  budget: string;
-  deadline: string;
-  category: string;
-  views: number;
-  status: "ACTIVE" | "FULFILLED" | "EXPIRED";
-  created_at: string;
-  company_name: string;
-}
+import { getDemands } from "@/api/demands";
+import { Demand } from "@/types/demand";
 
 export default function DemandsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [demands, setDemands] = useState<Demand[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("created_at");
+  const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState({
     category: "",
     budget_range: "",
-    status: "ACTIVE",
+    status: "",
+  });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+    totalPages: 1,
+    totalDocs: 0,
   });
 
-  // Mock data for demands
-  const mockDemands: Demand[] = [
-    {
-      id: 1,
-      title: "Tìm kiếm công nghệ AI cho chẩn đoán y tế",
-      description:
-        "Doanh nghiệp y tế cần công nghệ AI để phân tích hình ảnh X-quang và MRI, hỗ trợ chẩn đoán bệnh lý một cách chính xác và nhanh chóng.",
-      location: "Hà Nội",
-      budget: "500M - 1B VNĐ",
-      deadline: "30 ngày",
-      category: "Y tế",
-      views: 156,
-      status: "ACTIVE",
-      created_at: "2025-01-15",
-      company_name: "Bệnh viện Đa khoa Hà Nội",
-    },
-    {
-      id: 2,
-      title: "Công nghệ xử lý nước thải công nghiệp",
-      description:
-        "Nhà máy sản xuất cần giải pháp xử lý nước thải hiệu quả, tiết kiệm năng lượng và thân thiện với môi trường.",
-      location: "Bắc Ninh",
-      budget: "200M - 500M VNĐ",
-      deadline: "45 ngày",
-      category: "Môi trường",
-      views: 89,
-      status: "ACTIVE",
-      created_at: "2025-01-14",
-      company_name: "Công ty TNHH Sản xuất ABC",
-    },
-    {
-      id: 3,
-      title: "Hệ thống IoT cho nông nghiệp thông minh",
-      description:
-        "Nông trại cần hệ thống giám sát và điều khiển tự động cho canh tác, bao gồm cảm biến độ ẩm, nhiệt độ và hệ thống tưới tiêu.",
-      location: "Hưng Yên",
-      budget: "100M - 300M VNĐ",
-      deadline: "60 ngày",
-      category: "Nông nghiệp",
-      views: 234,
-      status: "ACTIVE",
-      created_at: "2025-01-13",
-      company_name: "Nông trại Thông minh XYZ",
-    },
-    {
-      id: 4,
-      title: "Công nghệ blockchain cho chuỗi cung ứng",
-      description:
-        "Doanh nghiệp logistics cần ứng dụng blockchain để theo dõi và minh bạch hóa chuỗi cung ứng sản phẩm.",
-      location: "TP. Hồ Chí Minh",
-      budget: "300M - 800M VNĐ",
-      deadline: "90 ngày",
-      category: "Công nghệ thông tin",
-      views: 178,
-      status: "ACTIVE",
-      created_at: "2025-01-12",
-      company_name: "Công ty Logistics DEF",
-    },
-  ];
+  // Fetch demands from API
+  const fetchDemands = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Build filters object
+      const apiFilters: any = {};
+      if (searchQuery) {
+        apiFilters.search = searchQuery;
+      }
+      if (filters.category) {
+        apiFilters.category = filters.category;
+      }
+      if (filters.status) {
+        apiFilters.status = filters.status;
+      }
+
+      // Build pagination object
+      const paginationParams = {
+        page: pagination.page,
+        limit: pagination.limit,
+      };
+
+      console.log(
+        "Fetching demands with filters:",
+        apiFilters,
+        "pagination:",
+        paginationParams
+      );
+
+      const response = await getDemands(apiFilters, paginationParams);
+      console.log("Demands API response:", response);
+
+      if (response.docs && response.docs.length > 0) {
+        // response.docs is Demand[][], so we need to flatten it
+        const flattenedDemands = response.docs.flat();
+        console.log("Flattened demands:", flattenedDemands);
+        setDemands(flattenedDemands);
+      } else if (response.data) {
+        // Fallback if data is returned instead of docs
+        console.log("Response data:", response.data);
+        setDemands(
+          Array.isArray(response.data) ? response.data : [response.data]
+        );
+      } else {
+        setDemands([]);
+      }
+
+      // Update pagination info
+      setPagination((prev) => ({
+        ...prev,
+        totalPages: response.totalPages || 1,
+        totalDocs: response.totalDocs || 0,
+      }));
+    } catch (err: any) {
+      console.error("Error fetching demands:", err);
+      setError(err.message || "Có lỗi xảy ra khi tải danh sách nhu cầu");
+      setDemands([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate API call
-    const fetchDemands = async () => {
-      setLoading(true);
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setDemands(mockDemands);
-      setLoading(false);
-    };
-
     fetchDemands();
-  }, []);
+  }, [pagination.page, pagination.limit]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Filter demands based on search query
-    const filtered = mockDemands.filter(
-      (demand) =>
-        demand.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        demand.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        demand.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setDemands(filtered);
+    // Reset to first page and fetch with search query
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    fetchDemands();
   };
+
+  // Handle filter changes
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    // Fetch will be triggered by useEffect when filters change
+  };
+
+  // Add useEffect to refetch when filters change
+  useEffect(() => {
+    if (pagination.page === 1) {
+      fetchDemands();
+    }
+  }, [filters, searchQuery]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -178,7 +176,39 @@ export default function DemandsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Spinner size="lg" color="primary" />
+            <p className="text-default-600 mt-4">
+              Đang tải danh sách nhu cầu...
+            </p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="text-center py-12">
+            <CardBody>
+              <div className="w-16 h-16 bg-danger-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-danger-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Có lỗi xảy ra
+              </h3>
+              <p className="text-default-600 mb-4">{error}</p>
+              <Button
+                color="primary"
+                onPress={() => {
+                  setError("");
+                  fetchDemands();
+                }}
+              >
+                Thử lại
+              </Button>
+            </CardBody>
+          </Card>
         </div>
       </div>
     );
@@ -202,12 +232,24 @@ export default function DemandsPage() {
             size="lg"
             startContent={<Plus className="h-5 w-5" />}
             className="font-medium"
+            onPress={() => {
+              if (isAuthenticated) {
+                router.push("/demands/register");
+              } else {
+                router.push("/auth/login?redirect=/demands/register");
+              }
+            }}
             style={{
               backgroundColor: "#006FEE",
               color: "#ffffff",
               minHeight: "44px",
               fontWeight: "500",
             }}
+            title={
+              isAuthenticated
+                ? "Đăng nhu cầu công nghệ mới"
+                : "Đăng nhập để đăng nhu cầu"
+            }
           >
             Đăng nhu cầu
           </Button>
@@ -257,7 +299,10 @@ export default function DemandsPage() {
                   selectedKeys={filters.category ? [filters.category] : []}
                   onSelectionChange={(keys) => {
                     const selectedKey = Array.from(keys)[0] as string;
-                    setFilters({ ...filters, category: selectedKey || "" });
+                    handleFilterChange({
+                      ...filters,
+                      category: selectedKey || "",
+                    });
                   }}
                   variant="bordered"
                   classNames={{
@@ -280,7 +325,10 @@ export default function DemandsPage() {
                   }
                   onSelectionChange={(keys) => {
                     const selectedKey = Array.from(keys)[0] as string;
-                    setFilters({ ...filters, budget_range: selectedKey || "" });
+                    handleFilterChange({
+                      ...filters,
+                      budget_range: selectedKey || "",
+                    });
                   }}
                   variant="bordered"
                   classNames={{
@@ -295,10 +343,14 @@ export default function DemandsPage() {
 
                 <Select
                   label="Trạng thái"
-                  selectedKeys={[filters.status]}
+                  placeholder="Tất cả trạng thái"
+                  selectedKeys={filters.status ? [filters.status] : []}
                   onSelectionChange={(keys) => {
                     const selectedKey = Array.from(keys)[0] as string;
-                    setFilters({ ...filters, status: selectedKey });
+                    handleFilterChange({
+                      ...filters,
+                      status: selectedKey || "",
+                    });
                   }}
                   variant="bordered"
                   classNames={{
@@ -422,9 +474,9 @@ export default function DemandsPage() {
                 : "space-y-4"
             }
           >
-            {demands.map((demand) => (
+            {demands.map((demand, index) => (
               <Card
-                key={demand.id}
+                key={demand.id || index}
                 className={`shadow-sm hover:shadow-md transition-shadow ${
                   viewMode === "grid" ? "h-full flex flex-col" : ""
                 }`}
@@ -441,21 +493,20 @@ export default function DemandsPage() {
                           variant="flat"
                           className="text-xs"
                         >
-                          {demand.category}
+                          {typeof demand.category === "object" &&
+                          demand.category?.name
+                            ? demand.category.name
+                            : typeof demand.category === "string"
+                              ? demand.category
+                              : "Chưa phân loại"}
                         </Chip>
                         <Chip
                           size="sm"
-                          color={
-                            demand.status === "ACTIVE"
-                              ? "success"
-                              : demand.status === "FULFILLED"
-                                ? "primary"
-                                : "danger"
-                          }
+                          color="success"
                           variant="flat"
                           className="text-xs"
                         >
-                          {getStatusText(demand.status)}
+                          TRL {demand.trl_level}
                         </Chip>
                       </div>
 
@@ -469,27 +520,38 @@ export default function DemandsPage() {
 
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-sm text-default-500">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          <span>{demand.location}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-default-500">
                           <DollarSign className="h-4 w-4 mr-2" />
-                          <span>{demand.budget}</span>
+                          <span>
+                            {demand.from_price && demand.to_price
+                              ? `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`
+                              : "Thỏa thuận"}
+                          </span>
                         </div>
                         <div className="flex items-center text-sm text-default-500">
-                          <Clock className="h-4 w-4 mr-2" />
-                          <span>Còn {demand.deadline}</span>
+                          <Users className="h-4 w-4 mr-2" />
+                          <span>
+                            {typeof demand.user === "object" &&
+                            demand.user?.full_name
+                              ? demand.user.full_name
+                              : "Người dùng"}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm text-default-500">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          <span>Mới đăng</span>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between text-sm text-default-500 mb-4">
                         <div className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          <span>{demand.company_name}</span>
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            {demand.cooperation || "Hợp tác"}
+                          </span>
                         </div>
                         <div className="flex items-center">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span>{demand.views} lượt xem</span>
+                          <span className="text-xs text-default-400">
+                            {demand.documents?.length || 0} tài liệu
+                          </span>
                         </div>
                       </div>
 
@@ -497,7 +559,9 @@ export default function DemandsPage() {
                         <Button
                           color="primary"
                           className="w-full"
-                          onPress={() => router.push(`/demands/${demand.id}`)}
+                          onPress={() =>
+                            router.push(`/demands/${demand.id || index}`)
+                          }
                           endContent={<ArrowRight className="h-4 w-4" />}
                           style={{
                             backgroundColor: "#006FEE",
@@ -515,7 +579,9 @@ export default function DemandsPage() {
                             variant="bordered"
                             className="w-full"
                             onPress={() =>
-                              router.push(`/demands/${demand.id}/propose`)
+                              router.push(
+                                `/demands/${demand.id || index}/propose`
+                              )
                             }
                             endContent={<Send className="h-4 w-4" />}
                             style={{
@@ -546,21 +612,20 @@ export default function DemandsPage() {
                               variant="flat"
                               className="text-xs"
                             >
-                              {demand.category}
+                              {typeof demand.category === "object" &&
+                              demand.category?.name
+                                ? demand.category.name
+                                : typeof demand.category === "string"
+                                  ? demand.category
+                                  : "Chưa phân loại"}
                             </Chip>
                             <Chip
                               size="sm"
-                              color={
-                                demand.status === "ACTIVE"
-                                  ? "success"
-                                  : demand.status === "FULFILLED"
-                                    ? "primary"
-                                    : "danger"
-                              }
+                              color="success"
                               variant="flat"
                               className="text-xs"
                             >
-                              {getStatusText(demand.status)}
+                              TRL {demand.trl_level}
                             </Chip>
                           </div>
                         </div>
@@ -568,25 +633,6 @@ export default function DemandsPage() {
                         <p className="text-default-600 text-sm mb-3 line-clamp-2">
                           {demand.description}
                         </p>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm text-default-500 mb-3">
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2" />
-                            <span>{demand.location}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <DollarSign className="h-4 w-4 mr-2" />
-                            <span>{demand.budget}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-2" />
-                            <span>Còn {demand.deadline}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Eye className="h-4 w-4 mr-2" />
-                            <span>{demand.views} lượt xem</span>
-                          </div>
-                        </div>
                       </div>
 
                       <div className="flex flex-col space-y-2">
@@ -647,6 +693,35 @@ export default function DemandsPage() {
             </CardBody>
           </Card>
         )}
+      </div>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          color="primary"
+          size="lg"
+          isIconOnly
+          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+          onPress={() => {
+            if (isAuthenticated) {
+              router.push("/demands/register");
+            } else {
+              router.push("/auth/login?redirect=/demands/register");
+            }
+          }}
+          style={{
+            backgroundColor: "#006FEE",
+            color: "#ffffff",
+            border: "none",
+          }}
+          title={
+            isAuthenticated
+              ? "Đăng nhu cầu công nghệ mới"
+              : "Đăng nhập để đăng nhu cầu"
+          }
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
       </div>
     </div>
   );
