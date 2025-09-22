@@ -180,10 +180,7 @@ function ProposeSolutionPage() {
       // Create propose data according to Propose interface
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
 
-      console.log("Creating propose with data:", proposeData);
-
       const createdPropose = await createPropose(proposeData);
-      console.log("Propose created successfully:", createdPropose);
 
       // Success - redirect to success page
       router.push(`/demands/${params.id}/propose/success`);
