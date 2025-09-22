@@ -163,7 +163,9 @@ function DemandSolutionsPage() {
           <p className="text-default-600 mb-6">{error}</p>
           <Button
             color="primary"
-            onPress={() => window.location.reload()}
+            onPress={() =>
+              typeof window !== "undefined" && window.location.reload()
+            }
             className="w-full"
           >
             Thử lại

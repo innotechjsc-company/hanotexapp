@@ -1,15 +1,25 @@
-import { Metadata } from "next";
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { useIsAuthenticated, useUser } from "@/store/auth";
+import NoSSR from "@/components/ui/NoSSR";
 
-export const metadata: Metadata = {
-  title: "Dashboard - Admin Panel",
-  description: "HANOTEX Admin Dashboard",
-};
+export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+function AdminPageContent() {
+  const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
   const user = useUser();
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !["ADMIN", "SUPER_ADMIN"].includes(user?.role || "")
+    ) {
+      router.push("/auth/login");
+    }
+  }, [isAuthenticated, user, router]);
 
   if (
     !isAuthenticated ||
@@ -19,4 +29,12 @@ export default async function AdminPage() {
   }
 
   return <AdminDashboard />;
+}
+
+export default function AdminPage() {
+  return (
+    <NoSSR fallback={<div>Loading...</div>}>
+      <AdminPageContent />
+    </NoSSR>
+  );
 }
