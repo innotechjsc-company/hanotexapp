@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15
-    container_name: hanotex-postgres
+    container_name: hanotex-postgres-huy
     environment:
       POSTGRES_DB: hanotex-dev
       POSTGRES_USER: postgres
