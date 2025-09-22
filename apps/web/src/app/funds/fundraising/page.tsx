@@ -1,13 +1,6 @@
 import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Dự án đang gọi vốn - HANOTEX",
-  description:
-    "Khám phá các dự án công nghệ đang tìm kiếm nguồn vốn đầu tư để phát triển và mở rộng.",
-};
 
 // Helper function to get status label
 const getStatusLabel = (status: string) => {
