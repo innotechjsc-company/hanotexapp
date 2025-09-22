@@ -17,8 +17,11 @@ RUN bun install
 COPY . .
 
 # Set environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV development
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+ENV NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENV NEXT_PUBLIC_WS_URL=http://localhost:3001
+ENV NEXT_PUBLIC_PAYLOAD_API_URL=http://localhost:4000/api
 
 # Expose port
 EXPOSE 3000
@@ -26,4 +29,4 @@ EXPOSE 3000
 ENV PORT 3000
 
 # Start development server
-CMD ["bun", "run", "dev"]
+CMD ["bun", "start"]

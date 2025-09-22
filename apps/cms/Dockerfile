@@ -25,6 +25,7 @@ EXPOSE 4000
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=4000
+ENV PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
 
 # Start the application
 CMD ["bun", "start"]
