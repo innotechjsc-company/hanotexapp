@@ -4,7 +4,13 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import SearchModal from "@/components/ui/SearchModal";
-import { Navbar, NavbarBrand, NavbarContent, NavbarMenu, NavbarMenuToggle } from "@heroui/react";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarMenu,
+  NavbarMenuToggle,
+} from "@heroui/react";
 
 import Logo from "./components/Logo";
 import DesktopNav from "./components/DesktopNav";
@@ -33,8 +39,11 @@ export default function Header() {
         onMenuOpenChange={setIsMenuOpen}
         className="bg-white/90 backdrop-blur-md"
       >
-        <NavbarContent justify="start">
-          <NavbarMenuToggle aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"} className="lg:hidden" />
+        <NavbarContent justify="center">
+          <NavbarMenuToggle
+            aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"}
+            className="lg:hidden"
+          />
           <NavbarBrand>
             <Logo />
           </NavbarBrand>
@@ -42,20 +51,31 @@ export default function Header() {
 
         <DesktopNav items={mainMenuItems} isActive={isActive} />
 
-        <NavbarContent justify="end">
+        <NavbarContent justify="center">
           {isAuthenticated ? (
-            <UserMenu user={user} onLogout={logout} onOpenSearch={() => setIsSearchModalOpen(true)} />
+            <UserMenu
+              user={user}
+              onLogout={logout}
+              onOpenSearch={() => setIsSearchModalOpen(true)}
+            />
           ) : (
             <AuthButtons />
           )}
         </NavbarContent>
 
         <NavbarMenu>
-          <MobileMenu items={mainMenuItems} isActive={isActive} onItemClick={() => setIsMenuOpen(false)} />
+          <MobileMenu
+            items={mainMenuItems}
+            isActive={isActive}
+            onItemClick={() => setIsMenuOpen(false)}
+          />
         </NavbarMenu>
       </Navbar>
 
-      <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+      />
     </header>
   );
 }
