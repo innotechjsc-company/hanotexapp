@@ -25,7 +25,7 @@ import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
 import MediaApi from "@/api/media";
 import { createTechnology } from "@/api/technologies";
 
-export default function RegisterTechnologyPage() {
+export default function RegisterTechnologyPage({ props }: { props?: any }) {
   const router = useRouter();
   const [confirmUpload, setConfirmUpload] = useState(false);
   const ownersRef = useRef<TechnologyOwnersSectionRef>(null);

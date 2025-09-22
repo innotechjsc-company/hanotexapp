@@ -194,15 +194,15 @@ export default function MyTechnologiesPage() {
   const selectedCount = useMemo(() => selectedKeys.size, [selectedKeys]);
 
   // Check authentication on component mount
-  useEffect(() => {
-    if (!user) {
-      toast.error("Vui lòng đăng nhập để xem công nghệ của bạn", {
-        duration: 3000,
-      });
-      router.push("/auth/login");
-      return;
-    }
-  }, [user, router]);
+  //   useEffect(() => {
+  //     if (!user) {
+  //       toast.error("Vui lòng đăng nhập để xem công nghệ của bạn", {
+  //         duration: 3000,
+  //       });
+  //       router.push("/auth/login");
+  //       return;
+  //     }
+  //   }, [user, router]);
 
   const fetchList = async () => {
     if (!user) return;
@@ -250,62 +250,14 @@ export default function MyTechnologiesPage() {
   }, [page, limit, search, statusFilter, user]);
 
   const handleCreate = async () => {
-    if (
-      !current?.title ||
-      !current?.description ||
-      !current?.category ||
-      !current?.trl_level
-    )
-      return;
-    if (!checkUserAuth(user, router)) return;
-
-    setActionLoading(true);
-    try {
-      await createTechnology({
-        title: current.title,
-        description: current.description,
-        category: current.category,
-        trl_level: current.trl_level,
-        status: current.status || "draft",
-        visibility_mode: current.visibility_mode || "public",
-        submitter: user!,
-      });
-      toast.success("Tạo công nghệ thành công");
-      setCurrent(null);
-      addDisclosure.onClose();
-      await fetchList();
-    } catch (e) {
-      toast.error("Tạo công nghệ thất bại");
-    } finally {
-      setActionLoading(false);
-    }
+    addDisclosure.onClose();
+    await fetchList();
   };
 
   const handleUpdate = async () => {
-    if (!current?.title || !current?.description || !(current as any).id)
-      return;
-    if (!checkUserAuth(user, router)) return;
-
-    const id = (current as any).id as string;
-    setActionLoading(true);
-    try {
-      await updateTechnology(id, {
-        title: current.title,
-        description: current.description,
-        category: current.category,
-        trl_level: current.trl_level,
-        status: current.status,
-        visibility_mode: current.visibility_mode,
-      });
-      toast.success("Cập nhật công nghệ thành công");
-      setCurrent(null);
-      editDisclosure.onClose();
-      await fetchList();
-    } catch (e) {
-      toast.error("Cập nhật công nghệ thất bại");
-    } finally {
-      setActionLoading(false);
-    }
+    setCurrent(null);
+    editDisclosure.onClose();
+    await fetchList();
   };
 
   const handleDelete = async () => {
