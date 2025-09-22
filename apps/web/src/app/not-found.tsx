@@ -1,5 +1,6 @@
-import Link from 'next/link';
-import { Home, ArrowLeft, Search } from 'lucide-react';
+"use client";
+import Link from "next/link";
+import { Home, ArrowLeft, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -29,7 +30,8 @@ export default function NotFound() {
             Trang không tìm thấy
           </h2>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
-            Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.
+            Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã được di
+            chuyển.
           </p>
 
           {/* Action Buttons */}
@@ -41,7 +43,7 @@ export default function NotFound() {
               <Home className="h-5 w-5 mr-2" />
               Về trang chủ
             </Link>
-            
+
             <button
               onClick={() => window.history.back()}
               className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
