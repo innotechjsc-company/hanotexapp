@@ -32,12 +32,32 @@ export async function getProposes(
   filters: ProposeFilters = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  const params = {
-    ...filters,
+  const params: Record<string, any> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
   };
+
+  // equals filters
+  if (filters.demand) params["where[demand][equals]"] = filters.demand;
+  if (filters.user) params["where[user][equals]"] = filters.user;
+  if (filters.technology)
+    params["where[technology][equals]"] = filters.technology;
+  if (filters.status) params["where[status][equals]"] = filters.status;
+
+  // numeric / range filters
+  if (typeof filters.estimated_cost_min === "number")
+    params["where[estimated_cost][gte]"] = filters.estimated_cost_min;
+  if (typeof filters.estimated_cost_max === "number")
+    params["where[estimated_cost][lte]"] = filters.estimated_cost_max;
+
+  if (filters.execution_time_min)
+    params["where[execution_time][gte]"] = filters.execution_time_min;
+  if (filters.execution_time_max)
+    params["where[execution_time][lte]"] = filters.execution_time_max;
+
+  // optional text search (backend must support)
+  if (filters.search) params["search"] = filters.search;
 
   return payloadApiClient.get<Propose[]>("/propose", params);
 }
@@ -135,7 +155,13 @@ export async function getProposesByDemand(
   demandId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  return getProposes({ demand: demandId }, pagination);
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    "where[demand][equals]": demandId,
+  };
+  return payloadApiClient.get<Propose[]>("/propose", params);
 }
 
 /**
