@@ -74,6 +74,7 @@ function AddFundModal({
             <ModalBody>
               <Input
                 label="Tên"
+                variant="bordered"
                 value={current?.name || ""}
                 onChange={(e) =>
                   setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
@@ -81,6 +82,7 @@ function AddFundModal({
               />
               <Textarea
                 label="Mô tả"
+                variant="bordered"
                 value={current?.description || ""}
                 onChange={(e) =>
                   setCurrent((p) => ({
@@ -142,6 +144,7 @@ function EditFundModal({
                 onChange={(e) =>
                   setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
                 }
+                variant="bordered"
               />
               <Textarea
                 label="Mô tả"
@@ -153,6 +156,7 @@ function EditFundModal({
                   }))
                 }
                 minRows={4}
+                variant="bordered"
               />
             </ModalBody>
             <ModalFooter>
@@ -211,6 +215,7 @@ function ViewFundModal({
               <Button
                 color="primary"
                 onPress={() => disclosure.onClose && disclosure.onClose()}
+                variant="bordered"
               >
                 Đóng
               </Button>

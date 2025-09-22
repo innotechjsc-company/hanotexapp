@@ -85,6 +85,7 @@ export interface Config {
     'investment-fund': InvestmentFund;
     project: Project;
     propose: Propose;
+    'technology-propose': TechnologyPropose;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -109,6 +110,7 @@ export interface Config {
     'investment-fund': InvestmentFundSelect<false> | InvestmentFundSelect<true>;
     project: ProjectSelect<false> | ProjectSelect<true>;
     propose: ProposeSelect<false> | ProposeSelect<true>;
+    'technology-propose': TechnologyProposeSelect<false> | TechnologyProposeSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -788,6 +790,29 @@ export interface Propose {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technology-propose".
+ */
+export interface TechnologyPropose {
+  id: string;
+  /**
+   * Công nghệ
+   */
+  technology: string | Technology;
+  user: string | User;
+  description: string;
+  /**
+   * Tài liệu
+   */
+  document?: (string | null) | Media;
+  /**
+   * Trạng thái
+   */
+  status: 'pending' | 'accepted' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -864,6 +889,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'propose';
         value: string | Propose;
+      } | null)
+    | ({
+        relationTo: 'technology-propose';
+        value: string | TechnologyPropose;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1293,6 +1322,19 @@ export interface ProposeSelect<T extends boolean = true> {
   execution_time?: T;
   estimated_cost?: T;
   cooperation_conditions?: T;
+  document?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "technology-propose_select".
+ */
+export interface TechnologyProposeSelect<T extends boolean = true> {
+  technology?: T;
+  user?: T;
+  description?: T;
   document?: T;
   status?: T;
   updatedAt?: T;

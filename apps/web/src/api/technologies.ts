@@ -157,3 +157,20 @@ export async function getTechnologiesByStatus(
 ): Promise<ApiResponse<Technology[]>> {
   return getTechnologies({ status }, pagination);
 }
+
+/**
+ * Get technologies by user (submitter)
+ */
+export async function getTechnologiesByUser(
+  userId: string,
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<Technology[]>> {
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    "where[submitter][equals]": userId,
+  };
+
+  return payloadApiClient.get<Technology[]>(API_ENDPOINTS.TECHNOLOGIES, params);
+}
