@@ -154,6 +154,7 @@ function AddProjectModal({
                 onChange={(e) =>
                   setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
                 }
+                variant="bordered"
                 isRequired
               />
               <Textarea
@@ -167,6 +168,7 @@ function AddProjectModal({
                   }))
                 }
                 minRows={4}
+                variant="bordered"
                 isRequired
               />
               <Select
@@ -182,6 +184,7 @@ function AddProjectModal({
                   setCurrent((p) => ({ ...(p || {}), technology: key }));
                 }}
                 isRequired
+                variant="bordered"
               >
                 {technologies.map((tech) => (
                   <SelectItem
@@ -204,6 +207,7 @@ function AddProjectModal({
                   setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
                 }}
                 isRequired
+                variant="bordered"
               >
                 {investmentFunds.map((fund) => (
                   <SelectItem
@@ -224,6 +228,7 @@ function AddProjectModal({
                     goal_money: parseInt(e.target.value) || 0,
                   }))
                 }
+                variant="bordered"
               />
               <Input
                 label="Ngày kết thúc"
@@ -235,6 +240,7 @@ function AddProjectModal({
                     end_date: e.target.value,
                   }))
                 }
+                variant="bordered"
               />
             </ModalBody>
             <ModalFooter>
@@ -301,6 +307,7 @@ function EditProjectModal({
                   setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
                 }
                 isRequired
+                variant="bordered"
               />
               <Textarea
                 label="Mô tả dự án"
@@ -314,6 +321,7 @@ function EditProjectModal({
                 }
                 minRows={4}
                 isRequired
+                variant="bordered"
               />
               <Select
                 label="Công nghệ"
@@ -328,6 +336,7 @@ function EditProjectModal({
                   setCurrent((p) => ({ ...(p || {}), technology: key }));
                 }}
                 isRequired
+                variant="bordered"
               >
                 {technologies.map((tech) => (
                   <SelectItem
@@ -350,6 +359,7 @@ function EditProjectModal({
                   setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
                 }}
                 isRequired
+                variant="bordered"
               >
                 {investmentFunds.map((fund) => (
                   <SelectItem
@@ -369,6 +379,7 @@ function EditProjectModal({
                   const key = Array.from(keys as Set<string>)[0];
                   setCurrent((p) => ({ ...(p || {}), status: key }));
                 }}
+                variant="bordered"
               >
                 <SelectItem key="pending">Chờ duyệt</SelectItem>
                 <SelectItem key="in_progress">Đang thực hiện</SelectItem>
@@ -386,6 +397,7 @@ function EditProjectModal({
                     goal_money: parseInt(e.target.value) || 0,
                   }))
                 }
+                variant="bordered"
               />
               <Input
                 label="Ngày kết thúc"
@@ -397,6 +409,7 @@ function EditProjectModal({
                     end_date: e.target.value,
                   }))
                 }
+                variant="bordered"
               />
             </ModalBody>
             <ModalFooter>
@@ -620,7 +633,9 @@ export default function MyProjectsPage() {
   // Check authentication on component mount
   useEffect(() => {
     if (!user) {
-      toast.error("Vui lòng đăng nhập để xem dự án của bạn");
+      toast.error("Vui lòng đăng nhập để xem dự án của bạn", {
+        duration: 3000,
+      });
       router.push("/auth/login");
       return;
     }
@@ -644,7 +659,9 @@ export default function MyProjectsPage() {
       setTotalPages(tPages);
     } catch (e) {
       console.error(e);
-      toast.error("Không thể tải danh sách dự án");
+      toast.error("Không thể tải danh sách dự án", {
+        duration: 3000,
+      });
     } finally {
       setIsLoading(false);
     }
