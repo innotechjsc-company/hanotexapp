@@ -20,8 +20,7 @@ export default function AuthButtons() {
       <Button
         as={Link}
         href="/auth/register"
-        color="primary"
-        className="font-semibold"
+        className="font-semibold bg-primary-600 text-white hover:bg-primary-600"
         startContent={<UserPlus className="h-5 w-5" />}
       >
         <span className="hidden sm:inline">Đăng ký</span>
@@ -29,4 +28,3 @@ export default function AuthButtons() {
     </div>
   );
 }
-

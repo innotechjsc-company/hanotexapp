@@ -44,3 +44,8 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# PM2
+logs/
+*.log
+.pm2/
