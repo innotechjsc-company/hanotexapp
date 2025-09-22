@@ -3,7 +3,6 @@ import { CollectionConfig } from 'payload'
 export const TechnologyPropose: CollectionConfig = {
   slug: 'technology-propose',
   admin: {
-    useAsTitle: 'name',
     group: 'Đề xuất đầu tư công nghệ',
   },
   access: {
