@@ -1,5 +1,6 @@
 export { SubmitterInfoSection } from './SubmitterInfoSection';
 export { BasicInfoSection } from './BasicInfoSection';
+export type { BasicInfoSectionRef } from './BasicInfoSection';
 export { TechnologyOwnersSection } from './TechnologyOwnersSection';
 export { IPSection } from './IPSection';
 export { LegalTerritorySection } from './LegalTerritorySection';

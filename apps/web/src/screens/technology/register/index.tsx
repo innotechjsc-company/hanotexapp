@@ -14,50 +14,102 @@ import {
   InvestmentTransferSectionRef,
   PricingDesiredSectionRef,
   VisibilityNDASectionRef,
+  BasicInfoSection,
 } from "./components";
 import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
 import { IPSectionRef } from "./components/IPSection";
 import { useMasterData } from "@/hooks/useMasterData";
-import { Technology } from "@/types/technologies";
+import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
+import MediaApi from "@/api/media";
+import { createTechnology } from "@/api/technologies";
 
 export default function RegisterTechnologyPage() {
   const router = useRouter();
   const [confirmUpload, setConfirmUpload] = useState(false);
   const ownersRef = useRef<TechnologyOwnersSectionRef>(null);
   const ipRef = useRef<IPSectionRef>(null);
+  const basicRef = useRef<BasicInfoSectionRef>(null);
   const legalTerritoryRef = useRef<LegalTerritorySectionRef>(null);
   const investmentTransferRef = useRef<InvestmentTransferSectionRef>(null);
   const pricingRef = useRef<PricingDesiredSectionRef>(null);
   const visibilityRef = useRef<VisibilityNDASectionRef>(null);
 
   const { masterData, loading: masterDataLoading } = useMasterData();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault(); // Ngăn chặn hành vi submit form mặc định
-    const owners = ownersRef.current?.getOwners();
-    console.log("Owners data:", owners);
-    const ipDetails = ipRef.current?.getIPDetails();
-    console.log("IP details:", ipDetails);
-    const legalDetails = legalTerritoryRef.current?.getData();
-    console.log("Legal details:", legalDetails);
-    const investmentTransfer = investmentTransferRef.current?.getData();
-    console.log("Investment & Transfer:", investmentTransfer);
-    const pricingDesired = pricingRef.current?.getData();
-    console.log("Pricing Desired:", pricingDesired);
-    const visibility = visibilityRef.current?.getData();
-    console.log("Visibility:", visibility);
+    event.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(null);
 
-    const data = {
-      owners,
-      legal_certification: legalDetails,
-      investment_desire: investmentTransfer?.investment_desire,
-      transfer_type: investmentTransfer?.transfer_type,
-      pricing: pricingDesired,
-      status: "draft",
-      visibility_mode: visibility?.visibility_mode,
-    };
-    console.log("Data:", data);
+    (async () => {
+      try {
+        const basic = basicRef.current?.getData();
+        const owners = ownersRef.current?.getOwners();
+        const ipDetails = ipRef.current?.getIPDetails();
+        const legalDetails = legalTerritoryRef.current?.getData();
+        const investmentTransfer = investmentTransferRef.current?.getData();
+        const pricingDesired = pricingRef.current?.getData();
+        const visibility = visibilityRef.current?.getData();
+
+        console.log("Basic info:", basic);
+        console.log("Owners data:", owners);
+        console.log("IP details:", ipDetails);
+        console.log("Legal details:", legalDetails);
+        console.log("Investment & Transfer:", investmentTransfer);
+        console.log("Pricing Desired:", pricingDesired);
+        console.log("Visibility:", visibility);
+
+        // 2. Upload files using MediaApi
+        const mediaApi = new MediaApi();
+        const techMedia = basic?.documents?.length
+          ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
+          : [];
+        const legalMedia = legalDetails?.files?.length
+          ? await mediaApi.uploadMulti(legalDetails!.files, { type: "document" })
+          : [];
+
+        // 3. Aggregate payload aligned with Technology type
+        const payload = {
+          title: basic?.title || "",
+          category: basic?.category, // ID string
+          trl_level: basic?.trl_level || "",
+          description: basic?.description,
+          confidential_detail: basic?.confidential_detail,
+          // Relationship fields in Payload expect IDs
+          documents: techMedia.map((m) => m.id),
+          owners,
+          legal_certification: legalDetails
+            ? {
+                protection_scope: legalDetails.protection_scope,
+                standard_certifications: legalDetails.standard_certifications,
+                files: legalMedia.map((m) => m.id),
+              }
+            : undefined,
+          investment_desire: investmentTransfer?.investment_desire,
+          transfer_type: investmentTransfer?.transfer_type,
+          pricing: pricingDesired,
+          // Server route will create related IP docs if provided
+          intellectual_property: ipDetails && ipDetails.length ? ipDetails : undefined,
+          status: "draft" as const,
+          visibility_mode: visibility?.visibility_mode,
+        };
+
+        const created = await createTechnology(payload as any);
+        console.log("Created technology:", created);
+        setSubmitSuccess("Tạo công nghệ thành công");
+        // Optionally navigate or reset form here
+      } catch (err: any) {
+        console.error("Submit error:", err);
+        setSubmitError(err?.message || "Có lỗi xảy ra khi tạo công nghệ");
+      } finally {
+        setSubmitting(false);
+      }
+    })();
   };
 
   // Show loading while auth is being checked
@@ -141,18 +193,12 @@ export default function RegisterTechnologyPage() {
           )} */}
 
           {/* 1. Basic Information */}
-          {/* <BasicInfoSection
-            formData={formData}
-            masterData={masterData as any}
+          <BasicInfoSection
+            ref={basicRef}
+            masterData={masterData}
             masterDataLoading={masterDataLoading}
-            showOptionalFields={showOptionalFields}
-            setShowOptionalFields={actions.setShowOptionalFields}
-            ocrLoading={ocrLoading}
-            ocrResult={ocrResult}
-            onChange={actions.handleFieldChange}
-            onFileUpload={handleFileUploadWithOCR}
-            onRemoveDocument={actions.removeDocument}
-          /> */}
+            onChange={(data) => console.log("Changed:", data)} // optional
+          />
 
           {/* 2. Technology Owners */}
           <TechnologyOwnersSection
@@ -216,9 +262,9 @@ export default function RegisterTechnologyPage() {
                 type="submit"
                 color="primary"
                 className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
-                isLoading={false}
+                isLoading={submitting}
                 startContent={<Save className="h-4 w-4" />}
-                isDisabled={confirmUpload === false}
+                isDisabled={confirmUpload === false || submitting}
               >
                 {"Đăng ký công nghệ"}
               </Button>

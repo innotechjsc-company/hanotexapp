@@ -1,536 +1,334 @@
-import React, { useMemo } from "react";
-import { Upload, Eye, FileText, Trash2, AlertCircle } from "lucide-react";
-import {
-  TechnologyFormData,
-  FileUpload,
-  MasterData,
-  OCRResult,
-} from "../types";
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+  forwardRef,
+} from "react";
+import { Upload, FileText, Trash2, AlertCircle } from "lucide-react";
 import { getTRLSuggestions } from "../utils";
 import { useCategories } from "@/hooks/useCategories";
-import { Category } from "@/types/categories";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Input,
-  Select,
-  SelectItem,
-  Textarea,
-  Button,
-  Chip,
-  Spinner,
-  Divider,
-} from "@heroui/react";
+import { Card, CardHeader, CardBody, Input, Select, SelectItem, Textarea, Button, Spinner } from "@heroui/react";
+import type { Technology } from "@/types/technologies";
+import type { MasterData } from "@/hooks/useMasterData";
 
 interface BasicInfoSectionProps {
-  formData: TechnologyFormData;
   masterData: MasterData | null;
   masterDataLoading: boolean;
-  showOptionalFields: boolean;
-  setShowOptionalFields: (show: boolean) => void;
-  ocrLoading: boolean;
-  ocrResult: OCRResult | null;
-  onChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  onFileUpload: (files: FileList | null) => void;
-  onRemoveDocument: (index: number) => void;
+  initialData?: Partial<Technology>;
+  onChange?: (data: ReturnType<BasicInfoSectionRef["getData"]>) => void;
 }
 
-export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
-  formData,
-  masterData,
-  masterDataLoading,
-  showOptionalFields,
-  setShowOptionalFields,
-  ocrLoading,
-  ocrResult,
-  onChange,
-  onFileUpload,
-  onRemoveDocument,
-}) => {
-  // Fetch categories from API
-  const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useCategories();
-  
-  // Helper functions for parent-child category filtering
-  const parentCategories = useMemo(() => {
-    return categories.filter(category => !category.parent);
-  }, [categories]);
-  
-  const getChildCategories = useMemo(() => {
-    return (parentId: string) => {
-      return categories.filter(category => {
-        if (typeof category.parent === 'string') {
-          return category.parent === parentId;
-        } else if (category.parent && typeof category.parent === 'object') {
-          // Handle both string and number ID comparison
-          return String(category.parent.id) === String(parentId);
-        }
-        return false;
-      });
-    };
-  }, [categories]);
-  
-  const childCategories = useMemo(() => {
-    if (formData.classification.parentCategory) {
-      return getChildCategories(formData.classification.parentCategory);
-    }
-    return [];
-  }, [formData.classification.parentCategory, getChildCategories]);
-  
-  // Debug logging
-  console.log("Categories state:", { 
-    categories, 
-    categoriesLoading, 
-    categoriesError, 
-    parentCategories,
-    childCategories,
-    selectedParent: formData.classification.parentCategory 
-  });
-  return (
-    <Card>
-      <CardHeader className="px-6 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">
-          1. Thông tin cơ bản *
-        </h2>
-      </CardHeader>
-      <CardBody className="p-6 space-y-4">
-        <Input
-          label="Tên sản phẩm Khoa học/ Công nghệ *"
-          placeholder="Nhập tên sản phẩm khoa học/công nghệ"
-          name="title"
-          value={formData.title}
-          onChange={onChange}
-          isRequired
-          variant="bordered"
-          classNames={{
-            label: "text-sm font-medium text-gray-700 mb-1",
-            input: "text-sm",
-          }}
-        />
+export interface BasicInfoSectionRef {
+  getData: () => {
+    title: string;
+    category?: string; // ID of selected category (child if selected, else parent)
+    trl_level: string; // ID of TRL
+    description?: string;
+    confidential_detail?: string;
+    documents: File[]; // raw files to be uploaded separately
+  };
+  reset: () => void;
+}
 
-        {/* Upload tài liệu */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tài liệu minh chứng (PDF, Ảnh, Video)
-          </label>
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
-            onClick={() => document.getElementById("file-upload")?.click()}
-          >
-            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-2">
-              Kéo thả tài liệu vào đây hoặc{" "}
-              <span className="text-blue-600">click để chọn file</span>
-            </p>
-            <p className="text-xs text-gray-500">
-              Hỗ trợ: PDF, JPG, PNG, MP4 (Tối đa 10MB mỗi file)
-            </p>
-            <input
-              id="file-upload"
-              type="file"
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png,.mp4"
-              className="hidden"
-              onChange={(e) => onFileUpload(e.target.files)}
-            />
+export const BasicInfoSection = forwardRef<BasicInfoSectionRef, BasicInfoSectionProps>(
+  ({ masterData, masterDataLoading, initialData, onChange }, ref) => {
+    // Local state aligned to Technology type
+    const [title, setTitle] = useState<string>(initialData?.title || "");
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [parentCategoryId, setParentCategoryId] = useState<string>("");
+    const [childCategoryId, setChildCategoryId] = useState<string>("");
+    const [trlLevel, setTrlLevel] = useState<string>(
+      (typeof initialData?.trl_level === "string"
+        ? (initialData?.trl_level as string)
+        : "") || ""
+    );
+    const [description, setDescription] = useState<string>(
+      initialData?.description || ""
+    );
+    const [confidentialDetail, setConfidentialDetail] = useState<string>(
+      initialData?.confidential_detail || ""
+    );
+
+    // Categories from API
+    const {
+      categories,
+      loading: categoriesLoading,
+      error: categoriesError,
+    } = useCategories();
+
+    // Initialize category selection from initialData when categories are loaded
+    useEffect(() => {
+      if (!categories.length) return;
+      const initialCategoryId =
+        typeof initialData?.category === "string"
+          ? (initialData?.category as string)
+          : (initialData?.category as any)?.id;
+      if (!initialCategoryId) return;
+      const cat = categories.find((c) => String(c.id) === String(initialCategoryId));
+      if (!cat) return;
+      const parentId = typeof cat.parent === "object" ? String(cat.parent?.id) : String(cat.parent || "");
+      if (parentId) {
+        setParentCategoryId(parentId);
+        setChildCategoryId(String(cat.id));
+      } else {
+        setParentCategoryId(String(cat.id));
+        setChildCategoryId("");
+      }
+    }, [categories, initialData?.category]);
+
+    // Parent categories (no parent)
+    const parentCategories = useMemo(() => {
+      return categories.filter((category) => !category.parent);
+    }, [categories]);
+
+    // Helper to get children by parent id
+    const getChildCategories = useMemo(() => {
+      return (parentId: string) =>
+        categories.filter((category) => {
+          if (typeof category.parent === "string") {
+            return String(category.parent) === String(parentId);
+          }
+          if (category.parent && typeof category.parent === "object") {
+            return String(category.parent.id) === String(parentId);
+          }
+          return false;
+        });
+    }, [categories]);
+
+    const childCategories = useMemo(() => {
+      if (!parentCategoryId) return [];
+      return getChildCategories(parentCategoryId);
+    }, [parentCategoryId, getChildCategories]);
+
+    // Expose data for parent submit
+    useImperativeHandle(ref, () => ({
+      getData: () => ({
+        title: title.trim(),
+        category: childCategoryId || parentCategoryId || undefined,
+        trl_level: trlLevel,
+        description: description.trim() || undefined,
+        confidential_detail: confidentialDetail.trim() || undefined,
+        documents: uploadedFiles,
+      }),
+      reset: () => {
+        setTitle("");
+        setUploadedFiles([]);
+        setParentCategoryId("");
+        setChildCategoryId("");
+        setTrlLevel("");
+        setDescription("");
+        setConfidentialDetail("");
+      },
+    }));
+
+    // Notify optional onChange consumer
+    useEffect(() => {
+      if (!onChange) return;
+      onChange({
+        title: title.trim(),
+        category: childCategoryId || parentCategoryId || undefined,
+        trl_level: trlLevel,
+        description: description.trim() || undefined,
+        confidential_detail: confidentialDetail.trim() || undefined,
+        documents: uploadedFiles,
+      });
+    }, [onChange, title, parentCategoryId, childCategoryId, trlLevel, description, confidentialDetail, uploadedFiles]);
+
+    const handleFileUpload = (files: FileList | null) => {
+      if (!files) return;
+      const newFiles = Array.from(files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    };
+
+    const handleRemoveDocument = (index: number) => {
+      setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    return (
+      <Card>
+        <CardHeader className="px-6 py-4">
+          <h2 className="text-lg font-semibold text-gray-900">1. Thông tin cơ bản *</h2>
+        </CardHeader>
+        <CardBody className="p-6 space-y-4">
+          <Input
+            label="Tên sản phẩm Khoa học/ Công nghệ *"
+            placeholder="Nhập tên sản phẩm khoa học/công nghệ"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            isRequired
+            variant="bordered"
+            classNames={{ label: "text-sm font-medium text-gray-700 mb-1", input: "text-sm" }}
+          />
+
+          {/* Upload tài liệu */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tài liệu minh chứng (PDF, Ảnh, Video)
+            </label>
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+              onClick={() => document.getElementById("file-upload")?.click()}
+            >
+              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600 mb-2">
+                Kéo thả tài liệu vào đây hoặc <span className="text-blue-600">click để chọn file</span>
+              </p>
+              <p className="text-xs text-gray-500">Hỗ trợ: PDF, JPG, PNG, MP4 (Tối đa 10MB mỗi file)</p>
+              <input
+                id="file-upload"
+                type="file"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png,.mp4"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
+            </div>
+
+            {uploadedFiles.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {uploadedFiles.map((file, index) => (
+                  <Card key={`${file.name}-${index}`} className="bg-gray-50">
+                    <CardBody className="p-2 flex flex-row items-center justify-between">
+                      <div className="flex items-center">
+                        <FileText className="h-4 w-4 text-gray-500 mr-2" />
+                        <span className="text-sm text-gray-700">{file.name}</span>
+                      </div>
+                      <Button isIconOnly size="sm" color="danger" variant="light" onClick={() => handleRemoveDocument(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* OCR Loading State */}
-          {ocrLoading && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardBody className="flex flex-row items-center">
-                <Spinner size="sm" color="primary" className="mr-3" />
-                <div>
-                  <p className="text-sm font-medium text-blue-800">
-                    Đang xử lý OCR...
-                  </p>
-                  <p className="text-xs text-blue-600">
-                    Vui lòng chờ trong giây lát
-                  </p>
-                </div>
-              </CardBody>
-            </Card>
-          )}
-
-          {/* OCR Result */}
-          {ocrResult && (
-            <Card className="bg-green-50 border-green-200">
-              <CardBody>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg
-                      className="h-5 w-5 text-green-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <h4 className="text-sm font-medium text-green-800">
-                      OCR xử lý thành công!
-                    </h4>
-                    <div className="mt-2 text-sm text-green-700">
-                      <p>
-                        <strong>File:</strong> {ocrResult.fileInfo?.name}
-                      </p>
-                      <p>
-                        <strong>Thời gian xử lý:</strong>{" "}
-                        {ocrResult.processingTime}
-                      </p>
-                      {ocrResult.extractedData && (
-                        <div className="mt-2">
-                          <p>
-                            <strong>Thông tin đã trích xuất:</strong>
-                          </p>
-                          <ul className="list-disc list-inside mt-1 space-y-1">
-                            {ocrResult.extractedData.title && (
-                              <li>Tên: {ocrResult.extractedData.title}</li>
-                            )}
-                            {ocrResult.extractedData.field && (
-                              <li>Lĩnh vực: {ocrResult.extractedData.field}</li>
-                            )}
-                            {ocrResult.extractedData.trlSuggestion && (
-                              <li>
-                                TRL gợi ý:{" "}
-                                {ocrResult.extractedData.trlSuggestion}
-                              </li>
-                            )}
-                            {ocrResult.extractedData.confidence && (
-                              <li>
-                                Độ tin cậy:{" "}
-                                {Math.round(
-                                  ocrResult.extractedData.confidence * 100
-                                )}
-                                %
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          )}
-
-          {formData.documents.length > 0 && (
-            <div className="mt-3 space-y-2">
-              {formData.documents.map((doc, index) => (
-                <Card key={index} className="bg-gray-50">
-                  <CardBody className="p-2 flex flex-row items-center justify-between">
-                    <div className="flex items-center">
-                      <FileText className="h-4 w-4 text-gray-500 mr-2" />
-                      <span className="text-sm text-gray-700">{doc.name}</span>
-                    </div>
-                    <Button
-                      isIconOnly
-                      size="sm"
-                      color="danger"
-                      variant="light"
-                      onClick={() => onRemoveDocument(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardBody>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Thông tin phân loại - Lĩnh vực cha con từ Categories API */}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <div className="space-y-4">
-            {/* Parent Category Selection */}
-            <Select
-              label="Lĩnh vực chính *"
-              placeholder="Chọn lĩnh vực chính"
-              name="classification.parentCategory"
-              selectedKeys={
-                formData.classification.parentCategory
-                  ? [formData.classification.parentCategory]
-                  : []
-              }
-              onChange={(e) => {
-                // Handle parent category change and clear child category
-                const parentValue = e.target.value;
-                onChange({
-                  target: {
-                    name: "classification.parentCategory",
-                    value: parentValue,
-                  }
-                } as React.ChangeEvent<HTMLSelectElement>);
-                
-                // Clear child category when parent changes
-                if (formData.classification.childCategory) {
-                  onChange({
-                    target: {
-                      name: "classification.childCategory",
-                      value: "",
-                    }
-                  } as React.ChangeEvent<HTMLSelectElement>);
-                }
-              }}
-              isRequired
-              isDisabled={categoriesLoading}
-              variant="bordered"
-              classNames={{
-                label: "text-sm font-medium text-gray-700 mb-1",
-              }}
-            >
-              {parentCategories && parentCategories.length > 0 ? (
-                parentCategories.map((category) => {
-                  // Validate category structure
-                  if (!category.id || !category.name) {
-                    console.warn("Invalid parent category structure:", category);
-                    return null;
-                  }
-                  return (
-                    <SelectItem key={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  );
-                })
-              ) : (
-                <SelectItem key="no-data" isDisabled>
-                  {categoriesLoading ? "Đang tải..." : "Không có dữ liệu"}
-                </SelectItem>
-              )}
-            </Select>
-
-            {/* Child Category Selection - Only show if parent is selected */}
-            {formData.classification.parentCategory && (
+          {/* Phân loại - Lĩnh vực */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div className="space-y-4">
+              {/* Parent Category Selection */}
               <Select
-                label="Lĩnh vực con"
-                placeholder="Chọn lĩnh vực con (tùy chọn)"
-                name="classification.childCategory"
-                selectedKeys={
-                  formData.classification.childCategory
-                    ? [formData.classification.childCategory]
-                    : []
-                }
-                onChange={onChange}
-                variant="bordered"
-                classNames={{
-                  label: "text-sm font-medium text-gray-700 mb-1",
+                label="Lĩnh vực chính *"
+                placeholder="Chọn lĩnh vực chính"
+                selectedKeys={parentCategoryId ? [parentCategoryId] : []}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setParentCategoryId(value);
+                  // Clear child when parent changes
+                  setChildCategoryId("");
                 }}
+                isRequired
+                isDisabled={categoriesLoading}
+                variant="bordered"
+                classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
               >
-                {childCategories && childCategories.length > 0 ? (
-                  childCategories.map((category) => {
-                    // Validate category structure
-                    if (!category.id || !category.name) {
-                      console.warn("Invalid child category structure:", category);
-                      return null;
-                    }
-                    return (
-                      <SelectItem key={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    );
-                  })
+                {parentCategories && parentCategories.length > 0 ? (
+                  parentCategories.map((category) =>
+                    category.id && category.name ? (
+                      <SelectItem key={String(category.id)}>{category.name}</SelectItem>
+                    ) : null
+                  )
                 ) : (
-                  <SelectItem key="no-children" isDisabled>
-                    Không có lĩnh vực con
+                  <SelectItem key="no-data" isDisabled>
+                    {categoriesLoading ? "Đang tải..." : "Không có dữ liệu"}
                   </SelectItem>
                 )}
               </Select>
-            )}
 
-            {/* Categories loading and info state */}
-            {categoriesLoading && (
-              <div className="flex items-center text-sm text-blue-600">
-                <Spinner size="sm" className="mr-2" />
-                Đang tải danh sách lĩnh vực...
-              </div>
-            )}
-            
-            {!categoriesLoading && !categoriesError && categories.length > 0 && (
-              <div className="text-xs text-gray-500">
-                Đã tải {categories.length} lĩnh vực (Cha: {parentCategories.length}, Con được chọn: {childCategories.length})
-              </div>
-            )}
+              {/* Child Category Selection - Only show if parent is selected */}
+              {parentCategoryId && (
+                <Select
+                  label="Lĩnh vực con"
+                  placeholder="Chọn lĩnh vực con (tùy chọn)"
+                  selectedKeys={childCategoryId ? [childCategoryId] : []}
+                  onChange={(e) => setChildCategoryId(e.target.value)}
+                  variant="bordered"
+                  classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
+                >
+                  {childCategories && childCategories.length > 0 ? (
+                    childCategories.map((category) =>
+                      category.id && category.name ? (
+                        <SelectItem key={String(category.id)}>{category.name}</SelectItem>
+                      ) : null
+                    )
+                  ) : (
+                    <SelectItem key="no-children" isDisabled>
+                      Không có lĩnh vực con
+                    </SelectItem>
+                  )}
+                </Select>
+              )}
 
-            {/* Categories error state */}
-            {categoriesError && (
-              <Card className="bg-red-50 border-red-200">
-                <CardBody className="flex flex-row items-center p-2">
-                  <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
-                  <p className="text-xs text-red-600">{categoriesError}</p>
-                </CardBody>
-              </Card>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <div>
-            <Select
-              label="Mức độ phát triển (TRL) *"
-              placeholder="Chọn mức độ TRL"
-              name="trlLevel"
-              selectedKeys={formData.trlLevel ? [formData.trlLevel] : []}
-              onChange={onChange}
-              isRequired
-              isDisabled={masterDataLoading}
-              variant="bordered"
-              classNames={{
-                label: "text-sm font-medium text-gray-700 mb-1",
-              }}
-            >
-              {(masterData?.trlLevels || []).map((trl) => (
-                <SelectItem key={trl.value}>{trl.label}</SelectItem>
-              ))}
-            </Select>
-
-            {/* Gợi ý TRL */}
-            {formData.trlLevel && getTRLSuggestions(formData.trlLevel) && (
-              <Card className="mt-2 bg-blue-50 border-blue-200">
-                <CardBody className="p-2">
-                  <p className="text-xs text-blue-700">
-                    <strong>Gợi ý:</strong>{" "}
-                    {getTRLSuggestions(formData.trlLevel)?.fields.join(", ")}
-                  </p>
-                </CardBody>
-              </Card>
-            )}
-          </div>
-        </div>
-
-        <Textarea
-          label="Tóm tắt công khai *"
-          placeholder="Mô tả ngắn gọn về công nghệ (sẽ hiển thị công khai)"
-          name="publicSummary"
-          value={formData.publicSummary}
-          onChange={onChange}
-          isRequired
-          minRows={4}
-          variant="bordered"
-          classNames={{
-            label: "text-sm font-medium text-gray-700 mb-1",
-            input: "text-sm",
-          }}
-        />
-
-        <Textarea
-          label="Chi tiết bảo mật"
-          placeholder="Mô tả chi tiết về công nghệ (chỉ hiển thị cho người có quyền truy cập)"
-          name="confidentialDetail"
-          value={formData.confidentialDetail}
-          onChange={onChange}
-          minRows={6}
-          variant="bordered"
-          classNames={{
-            label: "text-sm font-medium text-gray-700 mb-1",
-            input: "text-sm",
-          }}
-        />
-
-        <Select
-          label="Chế độ hiển thị"
-          name="visibilityMode"
-          selectedKeys={[formData.visibilityMode]}
-          onChange={onChange}
-          variant="bordered"
-          classNames={{
-            label: "text-sm font-medium text-gray-700 mb-1",
-          }}
-        >
-          <SelectItem key="PUBLIC_SUMMARY">Chỉ hiển thị tóm tắt</SelectItem>
-          <SelectItem key="PUBLIC_FULL">Hiển thị đầy đủ</SelectItem>
-          <SelectItem key="PRIVATE">Riêng tư</SelectItem>
-        </Select>
-
-        {/* Thông tin bổ sung (Optional) */}
-        <Divider className="my-4" />
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-md font-medium text-gray-900">
-              Thông tin bổ sung
-            </h3>
-            <Button
-              variant="flat"
-              color="primary"
-              size="sm"
-              startContent={<Eye className="h-4 w-4" />}
-              onClick={() => setShowOptionalFields(!showOptionalFields)}
-            >
-              {showOptionalFields
-                ? "Ẩn thông tin bổ sung"
-                : "Hiển thị thông tin bổ sung"}
-            </Button>
-          </div>
-          {showOptionalFields && (
-            <div className="space-y-4">
-              <Textarea
-                label="Đội ngũ / Nhân lực/ Cơ sở hạ tầng"
-                placeholder="Mô tả về đội ngũ phát triển, nhân lực chuyên môn..."
-                name="optionalInfo.team"
-                value={formData.optionalInfo.team}
-                onChange={onChange}
-                minRows={3}
-                variant="bordered"
-                classNames={{
-                  label: "text-sm font-medium text-gray-700 mb-1",
-                  input: "text-sm",
-                }}
-              />
-              <Textarea
-                label="Kết quả thử nghiệm / Triển khai"
-                placeholder="Mô tả kết quả thử nghiệm, triển khai thực tế..."
-                name="optionalInfo.testResults"
-                value={formData.optionalInfo.testResults}
-                onChange={onChange}
-                minRows={3}
-                variant="bordered"
-                classNames={{
-                  label: "text-sm font-medium text-gray-700 mb-1",
-                  input: "text-sm",
-                }}
-              />
-              <Textarea
-                label="Hiệu quả kinh tế - xã hội"
-                placeholder="Mô tả tác động kinh tế, xã hội, môi trường..."
-                name="optionalInfo.economicSocialImpact"
-                value={formData.optionalInfo.economicSocialImpact}
-                onChange={onChange}
-                minRows={3}
-                variant="bordered"
-                classNames={{
-                  label: "text-sm font-medium text-gray-700 mb-1",
-                  input: "text-sm",
-                }}
-              />
-              <Textarea
-                label="Thông tin quỹ tài chính hỗ trợ"
-                placeholder="Thông tin về quỹ hỗ trợ, tài trợ, chương trình khuyến khích..."
-                name="optionalInfo.financialSupport"
-                value={formData.optionalInfo.financialSupport}
-                onChange={onChange}
-                minRows={3}
-                variant="bordered"
-                classNames={{
-                  label: "text-sm font-medium text-gray-700 mb-1",
-                  input: "text-sm",
-                }}
-              />
+              {/* Categories loading and error state */}
+              {categoriesLoading && (
+                <div className="flex items-center text-sm text-blue-600">
+                  <Spinner size="sm" className="mr-2" /> Đang tải danh sách lĩnh vực...
+                </div>
+              )}
+              {categoriesError && (
+                <Card className="bg-red-50 border-red-200">
+                  <CardBody className="flex flex-row items-center p-2">
+                    <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
+                    <p className="text-xs text-red-600">{categoriesError}</p>
+                  </CardBody>
+                </Card>
+              )}
             </div>
-          )}
-        </div>
-      </CardBody>
-    </Card>
-  );
-};
+          </div>
+
+          {/* TRL */}
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div>
+              <Select
+                label="Mức độ phát triển (TRL) *"
+                placeholder="Chọn mức độ TRL"
+                selectedKeys={trlLevel ? [trlLevel] : []}
+                onChange={(e) => setTrlLevel(e.target.value)}
+                isRequired
+                isDisabled={masterDataLoading}
+                variant="bordered"
+                classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
+              >
+                {(masterData?.trlLevels || []).map((trl) => (
+                  <SelectItem key={trl.value}>{trl.label}</SelectItem>
+                ))}
+              </Select>
+
+              {trlLevel && getTRLSuggestions(trlLevel) && (
+                <Card className="mt-2 bg-blue-50 border-blue-200">
+                  <CardBody className="p-2">
+                    <p className="text-xs text-blue-700">
+                      <strong>Gợi ý:</strong> {getTRLSuggestions(trlLevel)?.fields.join(", ")}
+                    </p>
+                  </CardBody>
+                </Card>
+              )}
+            </div>
+          </div>
+
+          <Textarea
+            label="Tóm tắt công khai *"
+            placeholder="Mô tả ngắn gọn về công nghệ (sẽ hiển thị công khai)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            isRequired
+            minRows={4}
+            variant="bordered"
+            classNames={{ label: "text-sm font-medium text-gray-700 mb-1", input: "text-sm" }}
+          />
+
+          <Textarea
+            label="Chi tiết bảo mật"
+            placeholder="Mô tả chi tiết về công nghệ (chỉ hiển thị cho người có quyền truy cập)"
+            value={confidentialDetail}
+            onChange={(e) => setConfidentialDetail(e.target.value)}
+            minRows={6}
+            variant="bordered"
+            classNames={{ label: "text-sm font-medium text-gray-700 mb-1", input: "text-sm" }}
+          />
+        </CardBody>
+      </Card>
+    );
+  }
+);
