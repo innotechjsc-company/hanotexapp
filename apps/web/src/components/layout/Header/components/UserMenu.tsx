@@ -14,6 +14,7 @@ import {
 import { Bell, Search as SearchIcon } from "lucide-react";
 import { getUserIconByType, userMenuItemsBase } from "./constants";
 import { UserType } from "@/types";
+import { useUser } from "@/store/auth";
 
 type Props = {
   user?: {
@@ -35,8 +36,10 @@ function getUserType(type: UserType) {
       return "Viện nghiên cứu";
   }
 }
-export default function UserMenu({ user, onLogout, onOpenSearch }: Props) {
+export default function UserMenu({ onLogout, onOpenSearch }: Props) {
   const router = useRouter();
+
+  const user = useUser();
   const DisplayIcon = getUserIconByType(user?.user_type);
 
   const menuItems: Array<
