@@ -1,6 +1,7 @@
 "use client";
 
 import { ContactFormState } from "../hooks/useTechnologyDetail";
+import { Upload, X } from "lucide-react";
 
 interface ContactModalProps {
   open: boolean;
@@ -24,77 +25,67 @@ export default function ContactModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Liên hệ về công nghệ</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Liên hệ về công nghệ
+          </h3>
         </div>
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Họ và tên *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              value={value.name}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              value={value.email}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Số điện thoại
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={value.phone}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-              Công ty/Tổ chức
-            </label>
-            <input
-              type="text"
-              id="company"
-              name="company"
-              value={value.company}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-              Tin nhắn *
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Lời nhắn *
             </label>
             <textarea
-              id="message"
-              name="message"
+              id="description"
+              name="description"
               required
               rows={4}
-              value={value.message}
+              value={value.description}
               onChange={onChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Nhập tin nhắn của bạn..."
+              placeholder="Nhập mô tả hoặc lời nhắn của bạn..."
             />
+          </div>
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tài liệu đính kèm (tùy chọn)
+            </label>
+            <input
+              id="document"
+              name="document"
+              type="file"
+              onChange={onChange}
+              className="hidden"
+            />
+            <div className="flex items-center space-x-2">
+              <label
+                htmlFor="document"
+                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Chọn tệp
+              </label>
+              {value.document && (
+                <span className="text-sm text-gray-700">
+                  {value.document.name}
+                </span>
+              )}
+              {value.document && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange({
+                      target: { name: "document", value: null, files: [] },
+                    } as any)
+                  }
+                  className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
           <div className="flex justify-end space-x-3">
             <button
@@ -108,7 +99,7 @@ export default function ContactModal({
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Gửi tin nhắn
+              Gửi đề xuất
             </button>
           </div>
         </form>
@@ -116,4 +107,3 @@ export default function ContactModal({
     </div>
   );
 }
-

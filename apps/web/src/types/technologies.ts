@@ -3,6 +3,14 @@ import { ID, DateTimeString } from "./common";
 import { User } from "./users";
 import { Media } from "./media1";
 
+export const getPricingTypeLabel = (type: PricingType) => {
+  return {
+    grant_seed: "Grant/Seed (TRL 1–3)",
+    vc_joint_venture: "VC/Joint Venture (TRL 4–6)",
+    growth_strategic: "Growth/Strategic (TRL 7–9)",
+  }[type];
+};
+
 // Trạng thái công nghệ
 export type TechnologyStatus =
   | "draft"

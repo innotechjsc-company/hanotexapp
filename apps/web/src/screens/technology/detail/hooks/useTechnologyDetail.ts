@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/store/auth";
 import { getTechnologyById } from "@/api/technologies";
+import { technologyProposeApi } from "@/api/technology-propose";
+import { uploadFile } from "@/api/media";
 import type { Technology, TechnologyStatus } from "@/types";
 
 export interface ContactFormState {
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
+  description: string;
+  document: File | null;
 }
 
 export function useTechnologyDetail(id?: string) {
@@ -22,11 +21,8 @@ export function useTechnologyDetail(id?: string) {
   const [error, setError] = useState<string>("");
   const [showContactForm, setShowContactForm] = useState<boolean>(false);
   const [contactForm, setContactForm] = useState<ContactFormState>({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    message: "",
+    description: "",
+    document: null,
   });
 
   useEffect(() => {
@@ -98,22 +94,44 @@ export function useTechnologyDetail(id?: string) {
   const onContactChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name } = e.target as HTMLInputElement;
+    if (name === "document") {
+      const input = e.target as HTMLInputElement;
+      const file =
+        input.files && input.files.length > 0 ? input.files[0] : null;
+      setContactForm((prev) => ({ ...prev, document: file }));
+      return;
+    }
+    const value = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
     setContactForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const onSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Hook up to backend endpoint when available
-    console.log("Contact form submitted:", contactForm);
-    setShowContactForm(false);
-    setContactForm({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      message: "",
-    });
+    try {
+      if (!id) throw new Error("Thiếu ID công nghệ");
+
+      let documentId: number | string | undefined;
+      if (contactForm.document) {
+        const uploaded = await uploadFile(contactForm.document);
+        documentId = (uploaded as any)?.id ?? (uploaded as any)?._id;
+      }
+
+      await technologyProposeApi.create({
+        technology: id as any,
+        user: (user as any)?.id,
+        description: contactForm.description,
+        document: documentId as any,
+      } as any);
+
+      setShowContactForm(false);
+      setContactForm({
+        description: "",
+        document: null,
+      });
+    } catch (err) {
+      console.error("Gửi liên hệ thất bại:", err);
+    }
   };
 
   const categoryName = useMemo(() => {
