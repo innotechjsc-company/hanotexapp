@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Filter,
   Calendar,
   Clock,
   User,
@@ -15,13 +15,16 @@ import {
   Heart,
   Share2,
   BookOpen,
-  TrendingUp
-} from 'lucide-react';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import Link from 'next/link';
+  TrendingUp,
+} from "lucide-react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Link from "next/link";
+import { getNews, NewsFilters, PaginationParams } from "@/api/news";
+import { News } from "@/types/news";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
 
 interface NewsArticle {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -37,148 +40,184 @@ interface NewsArticle {
   is_featured: boolean;
 }
 
+// Helper function to get full image URL
+function getFullImageUrl(imageUrl: string | null | undefined): string {
+  if (!imageUrl) {
+    return "/images/news/default.svg";
+  }
+
+  // If it's already a full URL, return as is
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+
+  // If it's a relative path, combine with PayloadCMS base URL
+  const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", "");
+  return `${baseUrl}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+}
+
+// Transform PayloadCMS News data to NewsArticle interface
+function transformNewsToArticle(news: News): NewsArticle {
+  let imageUrl = "/images/news/default.svg";
+
+  if (typeof news.image === "object" && news.image?.url) {
+    imageUrl = getFullImageUrl(news.image.url);
+  } else if (typeof news.image === "string") {
+    imageUrl = getFullImageUrl(news.image);
+  }
+
+  const tags = news.hashtags
+    ? news.hashtags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    id: news.id || "",
+    title: news.title,
+    excerpt:
+      news.content.length > 200
+        ? news.content.substring(0, 200) + "..."
+        : news.content,
+    content: news.content,
+    author: "Ban biên tập HANOTEX", // Default author since not in News model
+    published_at: news.createdAt,
+    category: "Tin tức", // Default category since not in News model
+    read_time: Math.ceil(news.content.length / 200) + " phút", // Estimate reading time
+    featured_image: imageUrl,
+    gallery_images: [imageUrl], // Use main image as gallery
+    tags: tags,
+    views: Math.floor(Math.random() * 2000) + 100, // Mock views for now
+    likes: Math.floor(Math.random() * 100) + 10, // Mock likes for now
+    is_featured: Math.random() > 0.7, // Random featured status
+  };
+}
+
 export default function NewsPage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortBy, setSortBy] = useState('published_at');
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortBy, setSortBy] = useState("published_at");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Mock data for news articles
-  const mockArticles: NewsArticle[] = [
-    {
-      id: 1,
-      title: 'HANOTEX chính thức ra mắt sàn giao dịch công nghệ',
-      excerpt: 'Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ.',
-      content: 'Nội dung đầy đủ của bài viết...',
-      author: 'Ban biên tập HANOTEX',
-      published_at: '2025-01-15',
-      category: 'Tin tức',
-      read_time: '3 phút',
-      featured_image: '/images/news/hanotex-launch.jpg',
-      gallery_images: [
-        '/images/news/hanotex-launch.jpg',
-        '/images/news/tech-trends-2025.jpg',
-        '/images/news/startup-policy.jpg'
-      ],
-      tags: ['HANOTEX', 'Ra mắt', 'Công nghệ'],
-      views: 1250,
-      likes: 45,
-      is_featured: true
-    },
-    {
-      id: 2,
-      title: 'Hội thảo "Xu hướng công nghệ 2025" tại Hà Nội',
-      excerpt: 'Hội thảo quy tụ các chuyên gia hàng đầu trong lĩnh vực AI, IoT và công nghệ sinh học để thảo luận về xu hướng phát triển và cơ hội hợp tác trong năm 2025.',
-      content: 'Nội dung đầy đủ của bài viết...',
-      author: 'Phòng tổ chức sự kiện',
-      published_at: '2025-01-12',
-      category: 'Sự kiện',
-      read_time: '5 phút',
-      featured_image: '/images/news/tech-trends-2025.jpg',
-      gallery_images: [
-        '/images/news/tech-trends-2025.jpg',
-        '/images/news/hanotex-launch.jpg'
-      ],
-      tags: ['Hội thảo', 'AI', 'IoT', '2025'],
-      views: 890,
-      likes: 32,
-      is_featured: false
-    },
-    {
-      id: 3,
-      title: 'Chính sách hỗ trợ doanh nghiệp khởi nghiệp công nghệ',
-      excerpt: 'Thành phố Hà Nội ban hành chính sách mới hỗ trợ doanh nghiệp khởi nghiệp trong lĩnh vực khoa học công nghệ với các gói hỗ trợ tài chính và ưu đãi thuế.',
-      content: 'Nội dung đầy đủ của bài viết...',
-      author: 'Sở KH&CN Hà Nội',
-      published_at: '2025-01-10',
-      category: 'Chính sách',
-      read_time: '4 phút',
-      featured_image: '/images/news/startup-policy.jpg',
-      gallery_images: [
-        '/images/news/startup-policy.jpg',
-        '/images/news/hanotex-launch.jpg'
-      ],
-      tags: ['Chính sách', 'Khởi nghiệp', 'Hỗ trợ'],
-      views: 1560,
-      likes: 67,
-      is_featured: true
-    },
-    {
-      id: 4,
-      title: 'Hướng dẫn đăng ký và sử dụng sàn HANOTEX',
-      excerpt: 'Hướng dẫn chi tiết cách đăng ký tài khoản, đăng tải công nghệ và tìm kiếm đối tác trên sàn giao dịch HANOTEX.',
-      content: 'Nội dung đầy đủ của bài viết...',
-      author: 'Đội ngũ hỗ trợ',
-      published_at: '2025-01-08',
-      category: 'Hướng dẫn',
-      read_time: '6 phút',
-      featured_image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop&crop=center',
-      gallery_images: [
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop&crop=center',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop&crop=center'
-      ],
-      tags: ['Hướng dẫn', 'Đăng ký', 'Sử dụng'],
-      views: 2100,
-      likes: 89,
-      is_featured: false
-    },
-    {
-      id: 5,
-      title: 'Thông báo về lịch đấu giá công nghệ tháng 2/2025',
-      excerpt: 'Thông báo chi tiết về các công nghệ sẽ được đấu giá trong tháng 2/2025, bao gồm thời gian, địa điểm và quy trình tham gia.',
-      content: 'Nội dung đầy đủ của bài viết...',
-      author: 'Ban tổ chức đấu giá',
-      published_at: '2025-01-05',
-      category: 'Thông báo',
-      read_time: '2 phút',
-      featured_image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop&crop=center',
-      gallery_images: [
-        'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop&crop=center'
-      ],
-      tags: ['Đấu giá', 'Tháng 2', '2025'],
-      views: 750,
-      likes: 23,
-      is_featured: false
-    }
+  // Categories for filtering
+  const categories = [
+    "Tất cả",
+    "Tin tức",
+    "Sự kiện",
+    "Chính sách",
+    "Hướng dẫn",
+    "Thông báo",
   ];
 
-  const categories = ['Tất cả', 'Tin tức', 'Sự kiện', 'Chính sách', 'Hướng dẫn', 'Thông báo'];
+  // Fetch news from API
+  const fetchNews = async (isLoadMore = false) => {
+    try {
+      if (!isLoadMore) {
+        setLoading(true);
+        setError(null);
+      } else {
+        setLoadingMore(true);
+      }
 
-  useEffect(() => {
-    // Simulate API call
-    const fetchArticles = async () => {
-      setLoading(true);
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setArticles(mockArticles);
+      const filters: NewsFilters = {};
+      const pagination: PaginationParams = {
+        page: isLoadMore ? currentPage + 1 : 1,
+        limit: 10,
+        sort: sortBy === "published_at" ? "-createdAt" : sortBy,
+      };
+
+      // Add search filter
+      if (searchQuery.trim()) {
+        filters.search = searchQuery.trim();
+      }
+
+      // Add category filter (map UI categories to hashtags)
+      if (selectedCategory && selectedCategory !== "Tất cả") {
+        filters.hashtags = selectedCategory;
+      }
+
+      const response = await getNews(filters, pagination);
+
+      if (response.docs && Array.isArray(response.docs)) {
+        const transformedArticles = (response.docs as unknown as News[]).map(
+          transformNewsToArticle
+        );
+
+        if (isLoadMore) {
+          setArticles((prev) => [...prev, ...transformedArticles]);
+          setCurrentPage((prev) => prev + 1);
+        } else {
+          setArticles(transformedArticles);
+          setCurrentPage(1);
+        }
+        setTotalDocs(response.totalDocs || 0);
+      } else if (response.data && Array.isArray(response.data)) {
+        const transformedArticles = (response.data as unknown as News[]).map(
+          transformNewsToArticle
+        );
+
+        if (isLoadMore) {
+          setArticles((prev) => [...prev, ...transformedArticles]);
+        } else {
+          setArticles(transformedArticles);
+        }
+        setTotalDocs(response.data.length);
+      } else {
+        if (!isLoadMore) {
+          setArticles([]);
+          setTotalDocs(0);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching news:", err);
+      setError("Không thể tải tin tức. Vui lòng thử lại sau.");
+      if (!isLoadMore) {
+        setArticles([]);
+        setTotalDocs(0);
+      }
+    } finally {
       setLoading(false);
-    };
+      setLoadingMore(false);
+    }
+  };
 
-    fetchArticles();
-  }, []);
+  // Load initial data
+  useEffect(() => {
+    fetchNews();
+  }, [sortBy]);
+
+  // Handle search and category changes
+  useEffect(() => {
+    if (searchQuery || selectedCategory) {
+      fetchNews();
+    }
+  }, [searchQuery, selectedCategory]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Filter articles based on search query
-    const filtered = mockArticles.filter(article =>
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-    setArticles(filtered);
+    fetchNews(); // Trigger API call with current search query
   };
 
-  const filteredArticles = selectedCategory === '' || selectedCategory === 'Tất cả'
-    ? articles
-    : articles.filter(article => article.category === selectedCategory);
+  const handleLoadMore = () => {
+    fetchNews(true);
+  };
+
+  const handleRetry = () => {
+    fetchNews();
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -200,11 +239,14 @@ export default function NewsPage() {
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-16 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
@@ -215,7 +257,8 @@ export default function NewsPage() {
               Tin tức & Thông báo
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Cập nhật những thông tin mới nhất về khoa học công nghệ và các sự kiện quan trọng
+              Cập nhật những thông tin mới nhất về khoa học công nghệ và các sự
+              kiện quan trọng
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
@@ -232,12 +275,13 @@ export default function NewsPage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
           <div className="flex items-center mb-4">
             <Search className="h-5 w-5 text-blue-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Tìm kiếm & Lọc</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Tìm kiếm & Lọc
+            </h2>
           </div>
           <form onSubmit={handleSearch} className="space-y-4">
             {/* Search Bar */}
@@ -269,8 +313,8 @@ export default function NewsPage() {
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                     selectedCategory === category
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
                   }`}
                 >
                   {category}
@@ -286,19 +330,20 @@ export default function NewsPage() {
             <div className="flex items-center bg-blue-50 text-blue-600 rounded-full px-4 py-2">
               <BookOpen className="h-4 w-4 mr-2" />
               <span className="text-sm font-medium">
-                Tìm thấy <span className="font-bold">{filteredArticles.length}</span> bài viết
+                <span className="font-bold">{articles.length}</span> bài viết
               </span>
             </div>
-            {filteredArticles.filter(article => article.is_featured).length > 0 && (
+            {articles.filter((article) => article.is_featured).length > 0 && (
               <div className="flex items-center bg-orange-50 text-orange-600 rounded-full px-4 py-2">
                 <TrendingUp className="h-4 w-4 mr-2" />
                 <span className="text-sm font-medium">
-                  {filteredArticles.filter(article => article.is_featured).length} tin nổi bật
+                  {articles.filter((article) => article.is_featured).length} tin
+                  nổi bật
                 </span>
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="flex items-center text-sm text-gray-500">
               <Filter className="h-4 w-4 mr-2" />
@@ -317,89 +362,93 @@ export default function NewsPage() {
         </div>
 
         {/* Featured Articles */}
-        {filteredArticles.filter(article => article.is_featured).length > 0 && (
+        {articles.filter((article) => article.is_featured).length > 0 && (
           <div className="mb-8">
             <div className="flex items-center mb-6">
               <TrendingUp className="h-6 w-6 text-orange-500 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Tin tức nổi bật</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Tin tức nổi bật
+              </h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredArticles.filter(article => article.is_featured).map((article) => (
-                <article
-                  key={article.id}
-                  className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={article.featured_image}
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-500 text-white">
-                        Nổi bật
-                      </span>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
-                        <Heart className="h-4 w-4 text-white" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {article.category}
-                      </span>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>{formatDate(article.published_at)}</span>
+              {articles
+                .filter((article) => article.is_featured)
+                .map((article) => (
+                  <article
+                    key={article.id}
+                    className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={article.featured_image}
+                        alt={article.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-500 text-white">
+                          Nổi bật
+                        </span>
+                      </div>
+                      <div className="absolute top-4 right-4">
+                        <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
+                          <Heart className="h-4 w-4 text-white" />
+                        </button>
                       </div>
                     </div>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {article.title}
-                    </h2>
-
-                    <p className="text-gray-600 mb-4 line-clamp-2">
-                      {article.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 mr-1" />
-                          <span>{article.author}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span>{article.views}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Heart className="h-4 w-4 mr-1" />
-                          <span>{article.likes}</span>
+                    <div className="p-6">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {article.category}
+                        </span>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>{formatDate(article.published_at)}</span>
                         </div>
                       </div>
-                      <Link 
-                        href={`/news/${article.id}`}
-                        className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
-                      >
-                        Đọc thêm
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </Link>
+
+                      <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {article.title}
+                      </h2>
+
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {article.excerpt}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 mr-1" />
+                            <span>{article.author}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span>{article.views}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Heart className="h-4 w-4 mr-1" />
+                            <span>{article.likes}</span>
+                          </div>
+                        </div>
+                        <Link
+                          href={`/news/${article.id}`}
+                          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+                        >
+                          Đọc thêm
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                ))}
             </div>
           </div>
         )}
 
         {/* Regular Articles List */}
-        {filteredArticles.length > 0 ? (
+        {articles.length > 0 ? (
           <div className="space-y-6">
-            {filteredArticles.map((article) => (
+            {articles.map((article) => (
               <article
                 key={article.id}
                 className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
@@ -511,13 +560,73 @@ export default function NewsPage() {
         )}
 
         {/* Load More Button */}
-        {filteredArticles.length > 0 && (
+        {articles.length > 0 && articles.length < totalDocs && (
           <div className="text-center mt-12">
-            <button className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl">
-              <BookOpen className="mr-2 h-5 w-5" />
-              Xem thêm bài viết
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <button
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingMore ? (
+                <>
+                  <LoadingSpinner size="sm" className="mr-2" />
+                  Đang tải...
+                </>
+              ) : (
+                <>
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  Xem thêm bài viết
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
             </button>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-red-600 mb-4">
+                <ExternalLink className="h-12 w-12 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold">Có lỗi xảy ra</h3>
+                <p className="text-sm mt-2">{error}</p>
+              </div>
+              <button
+                onClick={handleRetry}
+                className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Thử lại
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && articles.length === 0 && (
+          <div className="text-center py-12">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-gray-500 mb-4">
+                <BookOpen className="h-12 w-12 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold">Không có bài viết nào</h3>
+                <p className="text-sm mt-2">
+                  {searchQuery || selectedCategory !== "Tất cả"
+                    ? "Không tìm thấy bài viết phù hợp với tiêu chí tìm kiếm."
+                    : "Chưa có bài viết nào được đăng tải."}
+                </p>
+              </div>
+              {(searchQuery || selectedCategory !== "Tất cả") && (
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("Tất cả");
+                  }}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Xem tất cả tin tức
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

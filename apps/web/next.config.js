@@ -9,8 +9,21 @@ const nextConfig = {
     missingSuspenseWithCSRBailout: false,
   },
   images: {
-    domains: ["localhost", "hanotex.com"],
+    domains: ["localhost", "hanotex.com", "127.0.0.1"],
     formats: ["image/webp", "image/avif"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "4000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.hanotex.com",
+        pathname: "/**",
+      },
+    ],
   },
   transpilePackages: ["@heroui/react", "@heroui/theme", "@heroui/system"],
   env: {

@@ -3,9 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const EventUser: CollectionConfig = {
   slug: 'event-user',
   admin: {
-    useAsTitle: 'title',
-    group: 'Quản lý sự kiện',
-    defaultColumns: ['title', 'start_date', 'end_date', 'location', 'status', 'url'],
+    group: 'Người tham gia sự kiện',
   },
   access: {
     read: () => true,

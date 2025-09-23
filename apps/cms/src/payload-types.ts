@@ -89,6 +89,8 @@ export interface Config {
     news: News;
     events: Event;
     'service-ticket-log': ServiceTicketLog;
+    'event-user': EventUser;
+    'event-comment': EventComment;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -117,6 +119,8 @@ export interface Config {
     news: NewsSelect<false> | NewsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'service-ticket-log': ServiceTicketLogSelect<false> | ServiceTicketLogSelect<true>;
+    'event-user': EventUserSelect<false> | EventUserSelect<true>;
+    'event-comment': EventCommentSelect<false> | EventCommentSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -827,6 +831,7 @@ export interface TechnologyPropose {
 export interface News {
   id: string;
   title: string;
+  image: string | Media;
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
@@ -840,6 +845,7 @@ export interface News {
 export interface Event {
   id: string;
   title: string;
+  image: string | Media;
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
@@ -863,6 +869,29 @@ export interface ServiceTicketLog {
   document?: (string | Media)[] | null;
   status?: ('approved' | 'rejected') | null;
   reason?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-user".
+ */
+export interface EventUser {
+  id: string;
+  user: string | User;
+  event: string | Event;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-comment".
+ */
+export interface EventComment {
+  id: string;
+  user: string | User;
+  event: string | Event;
+  comment: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -960,6 +989,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'service-ticket-log';
         value: string | ServiceTicketLog;
+      } | null)
+    | ({
+        relationTo: 'event-user';
+        value: string | EventUser;
+      } | null)
+    | ({
+        relationTo: 'event-comment';
+        value: string | EventComment;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1419,6 +1456,7 @@ export interface TechnologyProposeSelect<T extends boolean = true> {
  */
 export interface NewsSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   content?: T;
   hashtags?: T;
   document?: T;
@@ -1431,6 +1469,7 @@ export interface NewsSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   content?: T;
   hashtags?: T;
   document?: T;
@@ -1453,6 +1492,27 @@ export interface ServiceTicketLogSelect<T extends boolean = true> {
   document?: T;
   status?: T;
   reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-user_select".
+ */
+export interface EventUserSelect<T extends boolean = true> {
+  user?: T;
+  event?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-comment_select".
+ */
+export interface EventCommentSelect<T extends boolean = true> {
+  user?: T;
+  event?: T;
+  comment?: T;
   updatedAt?: T;
   createdAt?: T;
 }

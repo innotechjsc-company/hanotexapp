@@ -3,9 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const EventComment: CollectionConfig = {
   slug: 'event-comment',
   admin: {
-    useAsTitle: 'title',
-    group: 'Quản lý sự kiện',
-    defaultColumns: ['title', 'start_date', 'end_date', 'location', 'status', 'url'],
+    group: 'Bình luận sự kiện',
   },
   access: {
     read: () => true,
