@@ -78,4 +78,5 @@ export const ServiceTicket: CollectionConfig = {
       label: 'Tài liệu',
     },
   ],
+  timestamps: true,
 }

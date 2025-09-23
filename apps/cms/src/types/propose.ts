@@ -3,7 +3,12 @@ import { Demand } from './demand'
 import { Technology } from './technologies'
 import { User } from './users'
 
-export type ProposeStatus = 'pending' | 'accepted' | 'rejected'
+export type ProposeStatus =
+  | 'pending'
+  | 'negotiating'
+  | 'contract_signed'
+  | 'completed'
+  | 'cancelled'
 
 export interface Propose {
   title: string
