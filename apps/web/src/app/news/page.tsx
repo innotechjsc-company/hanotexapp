@@ -10,12 +10,12 @@ import {
   Tag,
   ArrowRight,
   ExternalLink,
-  Image as ImageIcon,
   Eye,
   Heart,
   Share2,
   BookOpen,
   TrendingUp,
+  X,
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Link from "next/link";
@@ -99,24 +99,14 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // Query được sử dụng để gọi API
   const [sortBy, setSortBy] = useState("published_at");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Categories for filtering
-  const categories = [
-    "Tất cả",
-    "Tin tức",
-    "Sự kiện",
-    "Chính sách",
-    "Hướng dẫn",
-    "Thông báo",
-  ];
-
   // Fetch news from API
-  const fetchNews = async (isLoadMore = false) => {
+  const fetchNews = async (isLoadMore = false, customSearchQuery?: string) => {
     try {
       if (!isLoadMore) {
         setLoading(true);
@@ -133,13 +123,10 @@ export default function NewsPage() {
       };
 
       // Add search filter
-      if (searchQuery.trim()) {
-        filters.search = searchQuery.trim();
-      }
-
-      // Add category filter (map UI categories to hashtags)
-      if (selectedCategory && selectedCategory !== "Tất cả") {
-        filters.hashtags = selectedCategory;
+      const searchQueryToUse =
+        customSearchQuery !== undefined ? customSearchQuery : activeSearchQuery;
+      if (searchQueryToUse.trim()) {
+        filters.search = searchQueryToUse.trim();
       }
 
       const response = await getNews(filters, pagination);
@@ -192,16 +179,25 @@ export default function NewsPage() {
     fetchNews();
   }, [sortBy]);
 
-  // Handle search and category changes
-  useEffect(() => {
-    if (searchQuery || selectedCategory) {
-      fetchNews();
-    }
-  }, [searchQuery, selectedCategory]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchNews(); // Trigger API call with current search query
+
+    // Nếu đã có activeSearchQuery, thực hiện xóa tìm kiếm
+    if (activeSearchQuery) {
+      setSearchQuery("");
+      setActiveSearchQuery("");
+      setCurrentPage(1);
+      fetchNews(false, "");
+      return;
+    }
+
+    // Nếu chưa có activeSearchQuery, thực hiện tìm kiếm
+    const newSearchQuery = searchQuery.trim();
+    if (newSearchQuery) {
+      setActiveSearchQuery(newSearchQuery);
+      setCurrentPage(1);
+      fetchNews(false, newSearchQuery);
+    }
   };
 
   const handleLoadMore = () => {
@@ -298,28 +294,19 @@ export default function NewsPage() {
               </div>
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center"
+                className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center ${
+                  activeSearchQuery
+                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                    : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
+                }`}
               >
-                <Search className="h-4 w-4 mr-2" />
-                Tìm kiếm
+                {activeSearchQuery ? (
+                  <X className="h-4 w-4 mr-2" />
+                ) : (
+                  <Search className="h-4 w-4 mr-2" />
+                )}
+                {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
               </button>
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                    selectedCategory === category
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
             </div>
           </form>
         </div>
@@ -331,6 +318,11 @@ export default function NewsPage() {
               <BookOpen className="h-4 w-4 mr-2" />
               <span className="text-sm font-medium">
                 <span className="font-bold">{articles.length}</span> bài viết
+                {activeSearchQuery && (
+                  <span className="ml-1 text-gray-500">
+                    cho "{activeSearchQuery}"
+                  </span>
+                )}
               </span>
             </div>
             {articles.filter((article) => article.is_featured).length > 0 && (
@@ -554,7 +546,9 @@ export default function NewsPage() {
               Không tìm thấy bài viết nào
             </h3>
             <p className="text-gray-600">
-              Hãy thử thay đổi từ khóa tìm kiếm hoặc danh mục
+              {activeSearchQuery
+                ? `Không tìm thấy bài viết nào với từ khóa "${activeSearchQuery}". Hãy thử từ khóa khác.`
+                : "Hãy thử thay đổi từ khóa tìm kiếm hoặc danh mục"}
             </p>
           </div>
         )}
@@ -610,16 +604,18 @@ export default function NewsPage() {
                 <BookOpen className="h-12 w-12 mx-auto mb-2" />
                 <h3 className="text-lg font-semibold">Không có bài viết nào</h3>
                 <p className="text-sm mt-2">
-                  {searchQuery || selectedCategory !== "Tất cả"
+                  {searchQuery.trim()
                     ? "Không tìm thấy bài viết phù hợp với tiêu chí tìm kiếm."
                     : "Chưa có bài viết nào được đăng tải."}
                 </p>
               </div>
-              {(searchQuery || selectedCategory !== "Tất cả") && (
+              {searchQuery.trim() && (
                 <button
                   onClick={() => {
                     setSearchQuery("");
-                    setSelectedCategory("Tất cả");
+                    setActiveSearchQuery("");
+                    setCurrentPage(1);
+                    fetchNews(false, "");
                   }}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
