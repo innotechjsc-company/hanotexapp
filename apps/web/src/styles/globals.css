@@ -4,6 +4,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* Ant Design CSS Variables Override */
+:root {
+  /* Override Ant Design's default font family to match our Inter font */
+  --ant-font-family: 'Inter', system-ui, sans-serif;
+
+  /* Ensure Ant Design components respect our color scheme */
+  --ant-primary-color: #3b82f6;
+  --ant-success-color: #22c55e;
+  --ant-warning-color: #eab308;
+  --ant-error-color: #ef4444;
+  --ant-info-color: #3b82f6;
+}
+
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
@@ -188,25 +201,60 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .animation-delay-200 {
     animation-delay: 200ms;
   }
-  
+
   .animation-delay-400 {
     animation-delay: 400ms;
   }
-  
+
   .animation-delay-600 {
     animation-delay: 600ms;
+  }
+
+  /* Ant Design Integration Utilities */
+  .antd-reset {
+    /* Reset any conflicting styles for Ant Design components */
+    box-sizing: border-box;
+  }
+
+  .antd-container {
+    /* Container for Ant Design components to ensure proper styling */
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Ensure Ant Design components work well with Tailwind */
+  .ant-btn {
+    font-family: inherit;
+  }
+
+  .ant-input {
+    font-family: inherit;
+  }
+
+  .ant-select {
+    font-family: inherit;
+  }
+
+  .ant-table {
+    font-family: inherit;
+  }
+
+  /* Prevent Tailwind from overriding Ant Design's focus styles */
+  .ant-btn:focus,
+  .ant-input:focus,
+  .ant-select:focus {
+    outline: none;
   }
 }
 
