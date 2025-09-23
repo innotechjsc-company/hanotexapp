@@ -26,6 +26,9 @@ import { InvestmentFund } from './collections/InvestmentFund'
 import { Project } from './collections/Project'
 import { Propose } from './collections/Propose'
 import { TechnologyPropose } from './collections/TechnologyPropose'
+import { News } from './collections/News'
+import { Events } from './collections/Events'
+import { ServiceTicketLog } from './collections/ServiceTicketLog'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -65,6 +68,9 @@ export default buildConfig({
     Project,
     Propose,
     TechnologyPropose,
+    News,
+    Events,
+    ServiceTicketLog,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

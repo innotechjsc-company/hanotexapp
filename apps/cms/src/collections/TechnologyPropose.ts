@@ -69,6 +69,12 @@ export const TechnologyPropose: CollectionConfig = {
       label: 'Mô tả',
     },
     {
+      name: 'budget',
+      type: 'number',
+      required: true,
+      label: 'Ngân sách',
+    },
+    {
       name: 'document',
       type: 'upload',
       relationTo: 'media',
@@ -82,7 +88,7 @@ export const TechnologyPropose: CollectionConfig = {
       type: 'select',
       required: true,
       label: 'Trạng thái',
-      options: ['pending', 'accepted', 'rejected'],
+      options: ['pending', 'negotiating', 'contract_signed', 'completed', 'cancelled'],
       defaultValue: 'pending',
       admin: {
         description: 'Trạng thái',

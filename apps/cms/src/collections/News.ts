@@ -1,0 +1,42 @@
+import type { CollectionConfig } from 'payload'
+
+export const News: CollectionConfig = {
+  slug: 'news',
+  admin: {
+    useAsTitle: 'title',
+    group: 'Quản lý tin tức',
+    defaultColumns: ['title', 'hashtags', 'document'],
+  },
+  access: {
+    read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      label: 'Tiêu đề',
+    },
+    {
+      name: 'content',
+      type: 'textarea',
+      required: true,
+      label: 'Nội dung',
+    },
+    {
+      name: 'hashtags',
+      type: 'text',
+      label: 'Hashtags',
+    },
+    {
+      name: 'document',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Tài liệu',
+    },
+  ],
+  timestamps: true,
+}
