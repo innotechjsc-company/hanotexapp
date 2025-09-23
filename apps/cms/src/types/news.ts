@@ -7,6 +7,9 @@ export interface News {
   content: string
   hashtags: string
   document: Media
+  views: number
+  likes: number
+  isLiked: boolean
   createdAt?: string
   updatedAt?: string
 }

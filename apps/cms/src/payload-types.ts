@@ -835,6 +835,9 @@ export interface News {
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
+  views?: number | null;
+  likes?: number | null;
+  isLiked?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1460,6 +1463,9 @@ export interface NewsSelect<T extends boolean = true> {
   content?: T;
   hashtags?: T;
   document?: T;
+  views?: T;
+  likes?: T;
+  isLiked?: T;
   updatedAt?: T;
   createdAt?: T;
 }

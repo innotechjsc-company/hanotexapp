@@ -7,6 +7,9 @@ export interface News {
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
+  views: number;
+  likes: number;
+  isLiked: boolean;
   updatedAt: string;
   createdAt: string;
 }

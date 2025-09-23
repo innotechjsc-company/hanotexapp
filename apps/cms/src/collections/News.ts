@@ -44,6 +44,21 @@ export const News: CollectionConfig = {
       relationTo: 'media',
       label: 'Tài liệu',
     },
+    {
+      name: 'views',
+      type: 'number',
+      label: 'Lượt xem',
+    },
+    {
+      name: 'likes',
+      type: 'number',
+      label: 'Lượt thích',
+    },
+    {
+      name: 'isLiked',
+      type: 'checkbox',
+      label: 'Đã thích',
+    },
   ],
   timestamps: true,
 }
