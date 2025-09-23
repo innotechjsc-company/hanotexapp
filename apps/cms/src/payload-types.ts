@@ -861,6 +861,8 @@ export interface ServiceTicketLog {
   user: string | User;
   content: string;
   document?: (string | Media)[] | null;
+  status?: ('approved' | 'rejected') | null;
+  reason?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1449,6 +1451,8 @@ export interface ServiceTicketLogSelect<T extends boolean = true> {
   user?: T;
   content?: T;
   document?: T;
+  status?: T;
+  reason?: T;
   updatedAt?: T;
   createdAt?: T;
 }
