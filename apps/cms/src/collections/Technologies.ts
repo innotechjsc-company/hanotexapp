@@ -21,6 +21,20 @@ export const Technologies: CollectionConfig = {
         // Only apply to create operations
         if (operation !== 'create') return data
 
+        // Skip authentication check for seed operations (when submitter is already provided)
+        if ((data as any)?.submitter) {
+          // Store IP data in req context for later use
+          const ipInput =
+            (data as any)?.intellectual_property ?? (data as any)?.intellectualProperty
+          if (ipInput) {
+            ;(req as any).ipData = ipInput
+            // Remove from main data to avoid validation issues
+            const { intellectual_property, intellectualProperty, ...cleanData } = data as any
+            data = cleanData
+          }
+          return data
+        }
+
         // Get authenticated user from PayloadCMS context
         let user: any
         try {
@@ -107,6 +121,7 @@ export const Technologies: CollectionConfig = {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
+      required: true,
       label: 'Lĩnh vực',
     },
     {
@@ -121,11 +136,16 @@ export const Technologies: CollectionConfig = {
       name: 'description',
       type: 'textarea',
       label: 'Tóm tắt công khai',
+      required: true,
+      admin: {
+        description: 'Tóm tắt công khai về công nghệ',
+      },
     },
     {
       name: 'confidential_detail',
       type: 'textarea',
       label: 'Chi tiết Bảo mật',
+      required: true,
       admin: {
         description: 'Thông tin chi tiết chỉ dành cho người dùng được ủy quyền',
       },
@@ -135,6 +155,7 @@ export const Technologies: CollectionConfig = {
       name: 'owners',
       type: 'array',
       label: 'Chủ sở hữu Công nghệ',
+      required: true,
       fields: [
         {
           name: 'owner_type',
@@ -171,6 +192,7 @@ export const Technologies: CollectionConfig = {
       name: 'legal_certification',
       type: 'group',
       label: 'Pháp lý & Lãnh thổ',
+      required: true,
       fields: [
         {
           name: 'protection_scope',
@@ -210,6 +232,7 @@ export const Technologies: CollectionConfig = {
       name: 'investment_desire',
       type: 'array',
       label: 'Mong muốn đầu tư & Hình thức chuyển giao',
+      required: true,
       fields: [
         {
           name: 'investment_option',
@@ -223,6 +246,7 @@ export const Technologies: CollectionConfig = {
       name: 'transfer_type',
       type: 'array',
       label: 'Hình thức chuyển giao',
+      required: true,
       fields: [
         {
           name: 'transfer_option',
@@ -236,6 +260,7 @@ export const Technologies: CollectionConfig = {
       name: 'pricing',
       type: 'group',
       label: 'Thông tin Định giá',
+      required: true,
       fields: [
         {
           name: 'pricing_type',
@@ -306,7 +331,7 @@ export const Technologies: CollectionConfig = {
       name: 'status',
       type: 'select',
       required: true,
-      defaultValue: 'draft',
+      defaultValue: 'pending',
       options: [
         { label: 'Bản nháp', value: 'draft' },
         { label: 'Đang chờ duyệt', value: 'pending' },
@@ -319,6 +344,7 @@ export const Technologies: CollectionConfig = {
     {
       name: 'visibility_mode',
       type: 'select',
+      required: true,
       defaultValue: 'public',
       options: [
         { label: 'Công khai', value: 'public' },

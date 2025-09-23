@@ -38,12 +38,14 @@ export default function CategoriesSection() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await getCategories();
-        if (response.data && Array.isArray(response.data)) {
-          // Get top-level categories (no parent)
-          const topCategories = response.data.slice(0, 6);
-          setCategories(topCategories);
-        }
+        // Prefer server sort by custom order, limit to 6 for homepage
+        const response = await getCategories({}, { limit: 6, sort: "sort_order" });
+        const list = (Array.isArray((response as any).data)
+          ? (response as any).data
+          : Array.isArray((response as any).docs)
+          ? (response as any).docs
+          : []) as Category[];
+        setCategories(list.slice(0, 6));
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {

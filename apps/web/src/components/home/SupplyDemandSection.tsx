@@ -13,71 +13,49 @@ import {
 import { Technology } from "@/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getTechnologies } from "@/api/technologies";
+import { getDemands } from "@/api/demands";
+import type { Demand } from "@/types/demand";
 
 export default function SupplyDemandSection() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
   const [loading, setLoading] = useState(true);
+  const [demands, setDemands] = useState<Demand[]>([]);
 
   useEffect(() => {
-    const fetchTechnologies = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getTechnologies(
-          {
-            status: "active",
-          },
-          {
-            limit: 6,
-          }
-        );
-        if (response.data && Array.isArray(response.data)) {
-          setTechnologies(response.data);
-        }
+        const [techRes, demandRes] = await Promise.all([
+          getTechnologies(
+            { status: "active", visibility_mode: "public" },
+            { limit: 6, sort: "-createdAt" }
+          ),
+          getDemands({}, { limit: 3, sort: "-createdAt" }),
+        ]);
+
+        const techList = (Array.isArray((techRes as any).data)
+          ? (techRes as any).data
+          : Array.isArray((techRes as any).docs)
+          ? (techRes as any).docs
+          : []) as Technology[];
+        setTechnologies(techList);
+
+        const demandList = (Array.isArray((demandRes as any).data)
+          ? (demandRes as any).data
+          : Array.isArray((demandRes as any).docs)
+          ? (demandRes as any).docs
+          : []) as Demand[];
+        setDemands(demandList.slice(0, 3));
       } catch (error) {
-        console.error("Error fetching technologies:", error);
+        console.error("Error fetching supply/demand data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTechnologies();
+    fetchData();
   }, []);
 
-  // Mock demand data
-  const demands = [
-    {
-      id: 1,
-      title: "Tìm kiếm công nghệ AI cho chẩn đoán y tế",
-      description:
-        "Doanh nghiệp y tế cần công nghệ AI để phân tích hình ảnh X-quang và MRI...",
-      location: "Hà Nội",
-      budget: "500M - 1B VNĐ",
-      deadline: "30 ngày",
-      category: "Y tế",
-      views: 156,
-    },
-    {
-      id: 2,
-      title: "Công nghệ xử lý nước thải công nghiệp",
-      description:
-        "Nhà máy sản xuất cần giải pháp xử lý nước thải hiệu quả, tiết kiệm năng lượng...",
-      location: "Bắc Ninh",
-      budget: "200M - 500M VNĐ",
-      deadline: "45 ngày",
-      category: "Môi trường",
-      views: 89,
-    },
-    {
-      id: 3,
-      title: "Hệ thống IoT cho nông nghiệp thông minh",
-      description:
-        "Nông trại cần hệ thống giám sát và điều khiển tự động cho canh tác...",
-      location: "Hưng Yên",
-      budget: "100M - 300M VNĐ",
-      deadline: "60 ngày",
-      category: "Nông nghiệp",
-      views: 234,
-    },
-  ];
+  // demands are now loaded from API
 
   if (loading) {
     return (
@@ -181,7 +159,7 @@ export default function SupplyDemandSection() {
             <div className="space-y-6">
               {demands.map((demand) => (
                 <div
-                  key={demand.id}
+                  key={(demand as any).id ?? demand.title}
                   className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -195,30 +173,47 @@ export default function SupplyDemandSection() {
                     </div>
                     <div className="ml-4 flex-shrink-0">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {demand.category}
+                        {typeof demand.category === "object"
+                          ? (demand.category as any).name
+                          : demand.category}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                     <div className="flex items-center text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span>{demand.location}</span>
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      <span>
+                        {new Intl.NumberFormat("vi-VN").format(
+                          demand.from_price || 0
+                        )}
+                        {" - "}
+                        {new Intl.NumberFormat("vi-VN").format(
+                          demand.to_price || 0
+                        )}
+                        {" VNĐ"}
+                      </span>
                     </div>
                     <div className="flex items-center text-gray-500">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      <span>{demand.budget}</span>
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{demand.cooperation || "Hình thức hợp tác"}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      <span>Còn {demand.deadline}</span>
+                      <span>
+                        {demand.createdAt
+                          ? new Date(demand.createdAt).toLocaleDateString(
+                              "vi-VN"
+                            )
+                          : "Mới tạo"}
+                      </span>
                     </div>
                     <div className="flex items-center">
                       <Eye className="h-4 w-4 mr-1" />
-                      <span>{demand.views} lượt xem</span>
+                      <span>— lượt xem</span>
                     </div>
                   </div>
                 </div>

@@ -1,0 +1,2821 @@
+[
+  {
+    "title": "AI Computer Vision Platform #01",
+    "description": "Computer vision models for defect detection and quality control.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #02",
+    "description": "Edge AI for real-time video analytics in manufacturing.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #03",
+    "description": "Vision-based object tracking and anomaly detection toolkit.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #04",
+    "description": "OCR and document understanding for logistics automation.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #05",
+    "description": "Visual inspection system for electronics assembly lines.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #06",
+    "description": "3D pose estimation for robotics and automation.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #07",
+    "description": "Retail shelf analytics and shrinkage prevention solution.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #08",
+    "description": "Autonomous drone navigation using vision-based SLAM.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #09",
+    "description": "Production-grade defect detection service for automotive.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "AI Computer Vision Platform #10",
+    "description": "Vision-enabled safety compliance monitoring.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+
+  {
+    "title": "IoT Environmental Sensor Platform #01",
+    "description": "Low-power air quality sensors with LoRaWAN connectivity.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #02",
+    "description": "Smart water metering and leak detection solution.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #03",
+    "description": "Edge gateway for industrial telemetry and analytics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #04",
+    "description": "Smart building energy monitoring with AI forecasting.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #05",
+    "description": "Cold-chain asset tracking with BLE beacons.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #06",
+    "description": "Predictive maintenance for pumps and motors.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #07",
+    "description": "Smart grid monitoring with substation sensors.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #08",
+    "description": "City-scale environmental telemetry and analytics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #09",
+    "description": "Industrial IoT platform for OEE optimization.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "IoT Environmental Sensor Platform #10",
+    "description": "Pipeline monitoring with fiber optic sensing.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d178b332f95be78613b63f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+
+  {
+    "title": "Renewable Energy Storage Module #01",
+    "description": "Sodium-ion battery module with fast charge capability.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #02",
+    "description": "Hybrid supercapacitor pack for grid stabilization.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #03",
+    "description": "LFP battery BMS with AI-driven lifetime prediction.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #04",
+    "description": "Second-life EV battery repurposing solution.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #05",
+    "description": "Containerized energy storage for solar farms.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #06",
+    "description": "Microgrid controller with VPP integration.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #07",
+    "description": "Utility-scale battery system with EMS software.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #08",
+    "description": "Residential energy storage with time-of-use savings.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #09",
+    "description": "Flow battery chemistry for long-duration storage.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "Renewable Energy Storage Module #10",
+    "description": "AI optimizer for battery cycling and degradation.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d178c032f95be78613b657",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+
+  {
+    "title": "Advanced Materials Graphene Composite #01",
+    "description": "Graphene-reinforced polymer for lightweight structures.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #02",
+    "description": "Thermally conductive composite for EV battery packs.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #03",
+    "description": "EMI shielding material for 5G devices.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #04",
+    "description": "High-strength fiber-reinforced composite for aerospace.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #05",
+    "description": "Conductive inks for printed electronics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #06",
+    "description": "Wear-resistant coating for industrial blades.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #07",
+    "description": "Self-healing protective coating for pipelines.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #08",
+    "description": "Biodegradable composite for packaging applications.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #09",
+    "description": "Thermoelectric materials for waste heat recovery.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "Advanced Materials Graphene Composite #10",
+    "description": "Flexible conductive substrate for wearables.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1788a32f95be78613b5e3",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+
+  {
+    "title": "MedTech Wearable Health Monitor #01",
+    "description": "Continuous glucose monitoring with predictive alerts.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #02",
+    "description": "ECG wearable with arrhythmia detection and triage.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #03",
+    "description": "Sleep apnea screening with edge AI sensors.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #04",
+    "description": "Remote patient monitoring with clinician dashboard.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #05",
+    "description": "FDA-cleared wearable for cardiac rehab programs.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #06",
+    "description": "Wearable hydration and electrolyte monitoring.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #07",
+    "description": "Contactless temperature and respiratory rate sensor.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #08",
+    "description": "Digital therapeutics platform for chronic disease.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #09",
+    "description": "Smart inhaler with adherence tracking.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "MedTech Wearable Health Monitor #10",
+    "description": "Wearable EEG for cognitive assessment.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d178d032f95be78613b66f",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 13485 (Thiết bị y tế)" },
+        { "certification": "FDA Approval (US)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+
+  {
+    "title": "AgriTech Precision Irrigation System #01",
+    "description": "Soil moisture sensing with variable rate irrigation control.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #02",
+    "description": "AI-driven irrigation scheduling from satellite imagery.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #03",
+    "description": "Autonomous irrigation valves with NB-IoT.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #04",
+    "description": "Farm management platform with yield forecasting.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #05",
+    "description": "Low-cost drip irrigation controller for smallholders.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #06",
+    "description": "Plant stress detection via hyperspectral imaging.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #07",
+    "description": "Fertigation automation with nutrient dosing control.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #08",
+    "description": "Greenhouse climate optimization using RL agents.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #09",
+    "description": "Aquaculture water quality monitoring and dosing.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "AgriTech Precision Irrigation System #10",
+    "description": "Autonomous irrigation robots for orchards.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1eed66cf67c6c45504b14",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+
+  {
+    "title": "Robotics Mobile Manipulator #01",
+    "description": "Mobile base with 6-DOF arm for warehouse automation.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #02",
+    "description": "Collaborative robot with force control and safety sensors.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #03",
+    "description": "Autonomous material handling with dynamic routing.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #04",
+    "description": "Vision-guided bin picking and kitting.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #05",
+    "description": "SLAM and fleet management middleware.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #06",
+    "description": "Safety-certified navigation stack for AMRs.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #07",
+    "description": "Autonomous palletization with vision calibration.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #08",
+    "description": "Robotic picking with tactile sensors.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #09",
+    "description": "Human-robot collaboration toolkit for assembly.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "Robotics Mobile Manipulator #10",
+    "description": "Dynamic obstacle avoidance with multi-sensor fusion.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1786c32f95be78613b5b2",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+
+  {
+    "title": "FinTech Risk Scoring Engine #01",
+    "description": "Alt-data credit scoring for underbanked populations.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #02",
+    "description": "AML transaction monitoring with graph analytics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #03",
+    "description": "Explainable AI model governance for lending.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #04",
+    "description": "Real-time fraud detection with streaming features.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #05",
+    "description": "Buy-now-pay-later risk orchestration service.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #06",
+    "description": "API-first KYC with identity verification and liveness.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #07",
+    "description": "Open banking aggregation and risk modeling.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #08",
+    "description": "SME underwriting with behavioral analytics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #09",
+    "description": "Real-time portfolio risk simulation engine.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "FinTech Risk Scoring Engine #10",
+    "description": "Tokenized asset risk modeling platform.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d177e932f95be78613b4eb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #01",
+    "description": "Automated IOC enrichment and attack surface mapping.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #02",
+    "description": "Breach detection using network flow analysis.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #03",
+    "description": "Deception-based intrusion detection system.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #04",
+    "description": "Endpoint EDR with kernel-level telemetry.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #05",
+    "description": "Identity threat detection and response (ITDR).",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #06",
+    "description": "Cloud-native SIEM with UEBA features.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #07",
+    "description": "Runtime protection for containers and serverless.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #08",
+    "description": "Automated red teaming with LLM-guided playbooks.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #09",
+    "description": "Zero-trust network access orchestration.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "Cybersecurity Threat Intelligence Platform #10",
+    "description": "Threat intel fusion for MSSPs.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1787d32f95be78613b5cb",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO/IEC 27001 (ISMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+
+  {
+    "title": "EdTech Adaptive Learning Engine #01",
+    "description": "Personalized learning paths using knowledge graphs.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #02",
+    "description": "AI-generated assessments and feedback analytics.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 2,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 15000, "price_to": 45000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #03",
+    "description": "STEM simulation lab with real-time grading.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 3,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 30000, "price_to": 60000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #04",
+    "description": "Language learning with speech recognition and scoring.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 4,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 60000, "price_to": 120000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #05",
+    "description": "Gamified coding platform with auto-evaluation.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 5,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 80000, "price_to": 200000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #06",
+    "description": "K-12 analytics for early dropout detection.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 6,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "vc_joint_venture", "price_from": 150000, "price_to": 300000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #07",
+    "description": "VR/AR immersive training for vocational skills.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 7,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 300000, "price_to": 600000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #08",
+    "description": "University LMS analytics with LTI integrations.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 8,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 500000, "price_to": 1000000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #09",
+    "description": "Corporate skills matrix and upskilling platform.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 9,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "growth_strategic", "price_from": 750000, "price_to": 2000000, "currency": "usd" }
+  },
+  {
+    "title": "EdTech Adaptive Learning Engine #10",
+    "description": "Adaptive test prep for standardized exams.",
+    "confidential_detail": "Chi tiết nội bộ về công nghệ, tài liệu kỹ thuật và số liệu thử nghiệm.",
+    "trl_level": 1,
+    "category": "68d1eed76cf67c6c45504b3e",
+    "owners": [
+      { "owner_type": "company", "owner_name": "Hanotex R&D", "ownership_percentage": 100 }
+    ],
+    "legal_certification": {
+      "protection_scope": [
+        { "scope": "VN (Cục SHTT)" },
+        { "scope": "PCT (đơn quốc tế)" }
+      ],
+      "standard_certifications": [
+        { "certification": "ISO 9001 (QMS)" }
+      ]
+    },
+    "investment_desire": [
+      { "investment_option": "B2B" },
+      { "investment_option": "Licensing" }
+    ],
+    "transfer_type": [
+      { "transfer_option": "License không độc quyền" },
+      { "transfer_option": "Chuyển nhượng toàn bộ" }
+    ],
+    "pricing": { "pricing_type": "grant_seed", "price_from": 10000, "price_to": 30000, "currency": "usd" }
+  }
+]
