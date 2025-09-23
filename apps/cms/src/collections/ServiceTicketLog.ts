@@ -36,5 +36,17 @@ export const ServiceTicketLog: CollectionConfig = {
       hasMany: true,
       label: 'Tài liệu',
     },
+    {
+      name: 'status',
+      type: 'select',
+      options: ['approved', 'rejected'],
+      label: 'Trạng thái',
+    },
+    {
+      name: 'reason',
+      type: 'text',
+      label: 'Lý do',
+    },
   ],
+  timestamps: true,
 }

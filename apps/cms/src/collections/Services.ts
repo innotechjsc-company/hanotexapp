@@ -22,4 +22,5 @@ export const Services: CollectionConfig = {
       label: 'Mô tả dịch vụ',
     },
   ],
+  timestamps: true,
 }
