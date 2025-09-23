@@ -1,18 +1,4 @@
 services:
-  postgres:
-    image: postgres:15
-    container_name: hanotex-postgres
-    environment:
-      POSTGRES_DB: hanotex-dev
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database:/docker-entrypoint-initdb.d
-    restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     container_name: hanotex-redis
@@ -20,18 +6,6 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    restart: unless-stopped
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: hanotex-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@hanotex.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
     restart: unless-stopped
 
   web:
@@ -57,13 +31,11 @@ services:
     container_name: hanotex-cms
     environment:
       - NODE_ENV=production
-      - DATABASE_URI=postgres://postgres:123456@hanotex-postgres:5432/hanotex-dev
+      - DATABASE_URI=mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test
       - PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
       - PORT=4000
     ports:
       - "4000:4000"
-    depends_on:
-      - postgres
     restart: unless-stopped
 
 volumes:

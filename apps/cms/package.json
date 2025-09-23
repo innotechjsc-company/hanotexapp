@@ -23,7 +23,9 @@
     "pm2:delete": "pm2 delete ecosystem.config.cjs",
     "pm2:logs": "pm2 logs cms-dev",
     "pm2:status": "pm2 status",
-    "pm2:monit": "pm2 monit"
+    "pm2:monit": "pm2 monit",
+    "seed:tech:dry": "node seed-technologies.cjs --dry-run",
+    "seed:tech": "node seed-technologies.cjs"
   },
   "dependencies": {
     "@payloadcms/next": "3.55.1",
@@ -38,7 +40,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sharp": "0.34.2",
-    "@payloadcms/db-postgres": "3.55.1"
+    "@payloadcms/db-postgres": "3.55.1",
+    "@payloadcms/db-mongodb": "3.55.1"
   },
   "devDependencies": {
     "@playwright/test": "1.54.1",

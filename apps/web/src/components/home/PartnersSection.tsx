@@ -1,79 +1,72 @@
-'use client';
+"use client";
 
+import { useEffect, useState } from 'react';
 import { Building2, TrendingUp, Users, Globe, Award, ArrowRight } from 'lucide-react';
+import { getCompanies } from '@/api/company';
+import { getResearchInstitutions } from '@/api/research-institution';
+import { getInvestmentFunds } from '@/api/investment-fund';
+
+type PartnerItem = { name: string; type: string; description?: string };
+type FundItem = { name: string; description?: string };
 
 export default function PartnersSection() {
-  // Mock data for partners
-  const partners = [
-    {
-      name: 'Sở KH&CN Hà Nội',
-      type: 'Cơ quan nhà nước',
-      logo: '/images/partners/hanoi-science-tech.png',
-      description: 'Cơ quan chủ quản của sàn giao dịch HANOTEX'
-    },
-    {
-      name: 'Trường Đại học Bách Khoa Hà Nội',
-      type: 'Trường đại học',
-      logo: '/images/partners/hust.png',
-      description: 'Đối tác nghiên cứu và phát triển công nghệ'
-    },
-    {
-      name: 'Viện Hàn lâm Khoa học Việt Nam',
-      type: 'Viện nghiên cứu',
-      logo: '/images/partners/vast.png',
-      description: 'Đối tác nghiên cứu khoa học cơ bản'
-    },
-    {
-      name: 'FPT Corporation',
-      type: 'Doanh nghiệp',
-      logo: '/images/partners/fpt.png',
-      description: 'Đối tác công nghệ thông tin'
-    },
-    {
-      name: 'Viettel Group',
-      type: 'Doanh nghiệp',
-      logo: '/images/partners/viettel.png',
-      description: 'Đối tác viễn thông và công nghệ'
-    },
-    {
-      name: 'VinGroup',
-      type: 'Tập đoàn',
-      logo: '/images/partners/vingroup.png',
-      description: 'Đối tác đa ngành'
-    }
-  ];
+  const [partners, setPartners] = useState<PartnerItem[]>([]);
+  const [funds, setFunds] = useState<FundItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for investment funds
-  const funds = [
-    {
-      name: 'Quỹ Đầu tư Khởi nghiệp Sáng tạo Hà Nội',
-      type: 'Quỹ đầu tư',
-      focus: 'Khởi nghiệp công nghệ',
-      size: '500 tỷ VNĐ',
-      description: 'Hỗ trợ các dự án khởi nghiệp trong lĩnh vực khoa học công nghệ'
-    },
-    {
-      name: 'Vietnam Silicon Valley',
-      type: 'Quỹ đầu tư',
-      focus: 'Công nghệ cao',
-      size: '200 triệu USD',
-      description: 'Đầu tư vào các công ty công nghệ có tiềm năng phát triển'
-    },
-    {
-      name: 'IDG Ventures Vietnam',
-      type: 'Quỹ đầu tư',
-      focus: 'Công nghệ thông tin',
-      size: '100 triệu USD',
-      description: 'Chuyên đầu tư vào các startup công nghệ thông tin'
-    },
-    {
-      name: 'CyberAgent Capital',
-      type: 'Quỹ đầu tư',
-      focus: 'Internet & Mobile',
-      size: '50 triệu USD',
-      description: 'Đầu tư vào các công ty internet và mobile'
-    }
-  ];
+  useEffect(() => {
+    const fetchPartnersAndFunds = async () => {
+      try {
+        const [companiesRes, institutionsRes, fundsRes] = await Promise.all([
+          getCompanies({ is_active: true }, { limit: 3 }),
+          getResearchInstitutions({ is_active: true }, { limit: 3 }),
+          getInvestmentFunds({}, { limit: 4 }),
+        ]);
+
+        const companies = (Array.isArray((companiesRes as any).data)
+          ? (companiesRes as any).data
+          : Array.isArray((companiesRes as any).docs)
+          ? (companiesRes as any).docs
+          : []) as any[];
+        const institutions = (Array.isArray((institutionsRes as any).data)
+          ? (institutionsRes as any).data
+          : Array.isArray((institutionsRes as any).docs)
+          ? (institutionsRes as any).docs
+          : []) as any[];
+        const fundsList = (Array.isArray((fundsRes as any).data)
+          ? (fundsRes as any).data
+          : Array.isArray((fundsRes as any).docs)
+          ? (fundsRes as any).docs
+          : []) as any[];
+
+        const partnerItems: PartnerItem[] = [
+          ...companies.map((c: any) => ({
+            name: c.company_name,
+            type: 'Doanh nghiệp',
+            description: c.website || c.legal_representative || '',
+          })),
+          ...institutions.map((i: any) => ({
+            name: i.institution_name,
+            type: mapInstitutionType(i.institution_type),
+            description: i.contact_info?.website || i.governing_body || '',
+          })),
+        ].slice(0, 6);
+        setPartners(partnerItems);
+
+        const fundItems: FundItem[] = fundsList.map((f: any) => ({
+          name: f.name,
+          description: f.description,
+        }));
+        setFunds(fundItems);
+      } catch (e) {
+        console.error('Error fetching partners/funds:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartnersAndFunds();
+  }, []);
 
   return (
     <section className="py-20 bg-gray-50">
@@ -119,7 +112,7 @@ export default function PartnersSection() {
                 </span>
 
                 <p className="text-gray-600 text-sm">
-                  {partner.description}
+                  {partner.description || ""}
                 </p>
               </div>
             ))}
@@ -152,25 +145,12 @@ export default function PartnersSection() {
                       {fund.name}
                     </h4>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {fund.type}
+                      Quỹ đầu tư
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Lĩnh vực:</span>
-                    <p className="font-medium text-gray-900">{fund.focus}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Quy mô:</span>
-                    <p className="font-medium text-gray-900">{fund.size}</p>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 text-sm mb-4">
-                  {fund.description}
-                </p>
+                <p className="text-gray-600 text-sm mb-4">{fund.description || ""}</p>
 
                 <div className="flex items-center justify-between">
                   <button className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
@@ -210,4 +190,21 @@ export default function PartnersSection() {
       </div>
     </section>
   );
+}
+
+function mapInstitutionType(type?: string): string {
+  switch (type) {
+    case 'UNIVERSITY':
+      return 'Trường đại học';
+    case 'RESEARCH_INSTITUTE':
+      return 'Viện nghiên cứu';
+    case 'GOVERNMENT_LAB':
+      return 'Phòng thí nghiệm nhà nước';
+    case 'PRIVATE_RND':
+      return 'R&D tư nhân';
+    case 'INTERNATIONAL_ORG':
+      return 'Tổ chức quốc tế';
+    default:
+      return 'Đối tác';
+  }
 }

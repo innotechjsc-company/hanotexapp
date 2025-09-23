@@ -1,7 +1,21 @@
-'use client';
+"use client";
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, ArrowRight, Clock, ExternalLink } from 'lucide-react';
+import { getAuctions } from '@/api/auctions';
+
+type EventItem = {
+  id: string | number;
+  title: string;
+  description?: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  attendees?: string;
+  type?: string;
+  status?: string;
+};
 
 export default function NewsEventsSection() {
   // Mock data for news and events
@@ -35,41 +49,39 @@ export default function NewsEventsSection() {
     }
   ];
 
-  const events = [
-    {
-      id: 1,
-      title: 'Techmart Hà Nội 2025',
-      description: 'Triển lãm công nghệ và sản phẩm khoa học công nghệ lớn nhất Hà Nội',
-      date: '25/02/2025',
-      time: '08:00 - 17:00',
-      location: 'Trung tâm Hội nghị Quốc gia',
-      attendees: '500+',
-      type: 'Triển lãm',
-      status: 'Sắp diễn ra'
-    },
-    {
-      id: 2,
-      title: 'Đấu giá công nghệ AI & Machine Learning',
-      description: 'Sự kiện đấu giá các công nghệ AI và Machine Learning từ các viện nghiên cứu',
-      date: '15/03/2025',
-      time: '14:00 - 16:00',
-      location: 'Sở KH&CN Hà Nội',
-      attendees: '200+',
-      type: 'Đấu giá',
-      status: 'Sắp diễn ra'
-    },
-    {
-      id: 3,
-      title: 'Hội thảo chuyển giao công nghệ',
-      description: 'Hội thảo chuyên đề về quy trình chuyển giao công nghệ hiệu quả',
-      date: '20/03/2025',
-      time: '09:00 - 12:00',
-      location: 'Trường Đại học Bách Khoa Hà Nội',
-      attendees: '150+',
-      type: 'Hội thảo',
-      status: 'Sắp diễn ra'
-    }
-  ];
+  const [events, setEvents] = useState<EventItem[]>([]);
+
+  useEffect(() => {
+    const fetchAuctionsAsEvents = async () => {
+      try {
+        const res = await getAuctions({ status: 'SCHEDULED' }, { limit: 3, sort: 'start_time' });
+        const list = (Array.isArray((res as any).data)
+          ? (res as any).data
+          : Array.isArray((res as any).docs)
+          ? (res as any).docs
+          : []) as any[];
+        const mapped: EventItem[] = list.map((a: any) => {
+          const start = a.start_time ? new Date(a.start_time) : undefined;
+          const end = a.end_time ? new Date(a.end_time) : undefined;
+          return {
+            id: a.id || a._id || Math.random(),
+            title: `Phiên đấu giá: ${typeof a.technology === 'object' ? a.technology?.title || 'Công nghệ' : 'Công nghệ'}`,
+            description: `Phiên đấu giá kiểu ${a.auction_type || ''}`.trim(),
+            date: start ? start.toLocaleDateString('vi-VN') : undefined,
+            time: start && end ? `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : undefined,
+            location: 'Trực tuyến',
+            attendees: undefined,
+            type: 'Đấu giá',
+            status: 'Sắp diễn ra',
+          };
+        });
+        setEvents(mapped);
+      } catch (e) {
+        console.error('Error fetching events:', e);
+      }
+    };
+    fetchAuctionsAsEvents();
+  }, []);
 
   return (
     <section className="py-20 bg-white">
@@ -168,39 +180,53 @@ export default function NewsEventsSection() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center mb-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
-                          {event.type}
-                        </span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          {event.status}
-                        </span>
+                        {event.type && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                            {event.type}
+                          </span>
+                        )}
+                        {event.status && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                            {event.status}
+                          </span>
+                        )}
                       </div>
                       <h4 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                         {event.title}
                       </h4>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {event.description}
-                      </p>
+                      {event.description && (
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
-                    <div className="flex items-center text-gray-500">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Clock className="h-4 w-4 mr-2" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span className="line-clamp-1">{event.location}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Users className="h-4 w-4 mr-2" />
-                      <span>{event.attendees} người tham gia</span>
-                    </div>
+                    {event.date && (
+                      <div className="flex items-center text-gray-500">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>{event.date}</span>
+                      </div>
+                    )}
+                    {event.time && (
+                      <div className="flex items-center text-gray-500">
+                        <Clock className="h-4 w-4 mr-2" />
+                        <span>{event.time}</span>
+                      </div>
+                    )}
+                    {event.location && (
+                      <div className="flex items-center text-gray-500">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                    )}
+                    {event.attendees && (
+                      <div className="flex items-center text-gray-500">
+                        <Users className="h-4 w-4 mr-2" />
+                        <span>{event.attendees} người tham gia</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">

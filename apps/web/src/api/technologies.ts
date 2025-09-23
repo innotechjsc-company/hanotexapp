@@ -77,10 +77,17 @@ export async function getTechnologies(
  * Get technology by ID
  */
 export async function getTechnologyById(id: string): Promise<Technology> {
-  const response = await payloadApiClient.get<Technology>(
-    `${API_ENDPOINTS.TECHNOLOGIES}/${id}`
+  // Use depth=2 to populate referenced fields (e.g., category, submitter)
+  const res = await payloadApiClient.get<Technology>(
+    `${API_ENDPOINTS.TECHNOLOGIES}/${id}?depth=2`
   );
-  return response.data!;
+  const anyRes = res as any;
+  const item =
+    anyRes?.data ??
+    anyRes?.doc ??
+    (Array.isArray(anyRes?.docs) ? anyRes.docs[0] : undefined) ??
+    anyRes;
+  return item as Technology;
 }
 
 /**

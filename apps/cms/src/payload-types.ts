@@ -407,25 +407,26 @@ export interface Technology {
   id: string;
   title: string;
   documents?: (string | Media)[] | null;
-  category?: (string | null) | Category;
+  category: string | Category;
   trl_level: number;
-  description?: string | null;
+  /**
+   * Tóm tắt công khai về công nghệ
+   */
+  description: string;
   /**
    * Thông tin chi tiết chỉ dành cho người dùng được ủy quyền
    */
-  confidential_detail?: string | null;
-  owners?:
-    | {
-        owner_type: 'individual' | 'company' | 'research_institution';
-        owner_name: string;
-        /**
-         * Tỷ lệ sở hữu (0-100)
-         */
-        ownership_percentage: number;
-        id?: string | null;
-      }[]
-    | null;
-  legal_certification?: {
+  confidential_detail: string;
+  owners: {
+    owner_type: 'individual' | 'company' | 'research_institution';
+    owner_name: string;
+    /**
+     * Tỷ lệ sở hữu (0-100)
+     */
+    ownership_percentage: number;
+    id?: string | null;
+  }[];
+  legal_certification: {
     protection_scope?:
       | {
           scope?: string | null;
@@ -440,18 +441,14 @@ export interface Technology {
       | null;
     files?: (string | Media)[] | null;
   };
-  investment_desire?:
-    | {
-        investment_option?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  transfer_type?:
-    | {
-        transfer_option?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  investment_desire: {
+    investment_option?: string | null;
+    id?: string | null;
+  }[];
+  transfer_type: {
+    transfer_option?: string | null;
+    id?: string | null;
+  }[];
   pricing: {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
@@ -507,7 +504,7 @@ export interface Technology {
   };
   submitter: string | User;
   status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
-  visibility_mode?: ('public' | 'private' | 'restricted') | null;
+  visibility_mode: 'public' | 'private' | 'restricted';
   updatedAt: string;
   createdAt: string;
 }

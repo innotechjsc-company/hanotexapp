@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'cms-dev',
       script: 'bun',
-      args: 'run dev',
+      args: 'start',
       watch: true,
       watch_delay: 1000,
       ignore_watch: ['node_modules', '.next', 'uploads', '.git', '*.log', '.env*'],

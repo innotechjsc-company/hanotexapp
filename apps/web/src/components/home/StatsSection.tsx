@@ -1,57 +1,10 @@
-'use client';
+"use client";
 
+import { useEffect, useMemo, useState } from 'react';
 import { TrendingUp, Users, Award, Zap, Building, Globe, Crosshair, CheckCircle } from 'lucide-react';
-
-const stats = [
-  {
-    icon: TrendingUp,
-    label: 'Công nghệ đã đăng tải',
-    value: '500+',
-    description: 'Các công nghệ đa dạng từ nhiều lĩnh vực',
-    color: 'text-primary-600',
-    bgColor: 'bg-primary-100',
-  },
-  {
-    icon: Users,
-    label: 'Người dùng đăng ký',
-    value: '2,500+',
-    description: 'Cá nhân, doanh nghiệp và viện nghiên cứu',
-    color: 'text-secondary-600',
-    bgColor: 'bg-secondary-100',
-  },
-  {
-    icon: Award,
-    label: 'Giao dịch thành công',
-    value: '150+',
-    description: 'Các thương vụ chuyển giao công nghệ',
-    color: 'text-accent-600',
-    bgColor: 'bg-accent-100',
-  },
-  {
-    icon: Building,
-    label: 'Doanh nghiệp tham gia',
-    value: '200+',
-    description: 'Các công ty từ khắp cả nước',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
-  },
-  {
-    icon: Globe,
-    label: 'Quốc gia kết nối',
-    value: '15+',
-    description: 'Mở rộng ra thị trường quốc tế',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-  },
-  {
-    icon: Crosshair,
-    label: 'Tỷ lệ thành công',
-    value: '85%',
-    description: 'Các dự án chuyển giao thành công',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-  },
-];
+import { getTechnologies } from '@/api/technologies';
+import { getCompanies } from '@/api/company';
+import { getAuctions } from '@/api/auctions';
 
 const achievements = [
   {
@@ -75,6 +28,91 @@ const achievements = [
 ];
 
 export default function StatsSection() {
+  const [counts, setCounts] = useState({
+    technologies: 0,
+    users: 0, // Chưa có endpoint thống kê user -> để 0 hoặc tính sau
+    transactions: 0, // Placeholder
+    companies: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [techRes, compRes, auctionRes] = await Promise.all([
+          getTechnologies({}, { limit: 1 }),
+          getCompanies({}, { limit: 1 }),
+          getAuctions({}, { limit: 1 }),
+        ]);
+
+        const getTotal = (res: any) =>
+          (res?.totalDocs as number) ?? (res?.total as number) ??
+          (Array.isArray(res?.data) ? res.data.length : Array.isArray(res?.docs) ? res.docs.length : 0);
+
+        setCounts({
+          technologies: getTotal(techRes),
+          users: 0, // TODO: hook to users when backend ready
+          transactions: getTotal(auctionRes), // tạm dùng số phiên đấu giá
+          companies: getTotal(compRes),
+        });
+      } catch (e) {
+        // silent fail, keep defaults
+        console.error('Error fetching stats:', e);
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const stats = useMemo(() => ([
+    {
+      icon: TrendingUp,
+      label: 'Công nghệ đã đăng tải',
+      value: counts.technologies > 0 ? counts.technologies.toLocaleString('vi-VN') : '—',
+      description: 'Các công nghệ đa dạng từ nhiều lĩnh vực',
+      color: 'text-primary-600',
+      bgColor: 'bg-primary-100',
+    },
+    {
+      icon: Users,
+      label: 'Người dùng đăng ký',
+      value: counts.users > 0 ? counts.users.toLocaleString('vi-VN') : '—',
+      description: 'Cá nhân, doanh nghiệp và viện nghiên cứu',
+      color: 'text-secondary-600',
+      bgColor: 'bg-secondary-100',
+    },
+    {
+      icon: Award,
+      label: 'Giao dịch/phiên đấu giá',
+      value: counts.transactions > 0 ? counts.transactions.toLocaleString('vi-VN') : '—',
+      description: 'Các thương vụ/phiên giao dịch công nghệ',
+      color: 'text-accent-600',
+      bgColor: 'bg-accent-100',
+    },
+    {
+      icon: Building,
+      label: 'Doanh nghiệp tham gia',
+      value: counts.companies > 0 ? counts.companies.toLocaleString('vi-VN') : '—',
+      description: 'Các công ty từ khắp cả nước',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+    },
+    {
+      icon: Globe,
+      label: 'Quốc gia kết nối',
+      value: '15+',
+      description: 'Mở rộng ra thị trường quốc tế',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+    },
+    {
+      icon: Crosshair,
+      label: 'Tỷ lệ thành công',
+      value: '85%',
+      description: 'Các dự án chuyển giao thành công',
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
+    },
+  ]), [counts]);
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

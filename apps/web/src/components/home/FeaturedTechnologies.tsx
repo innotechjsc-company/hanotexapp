@@ -7,7 +7,6 @@ import { Technology } from "@/types";
 import {
   formatCurrency,
   formatDate,
-  getTRLLabel,
   getTRLColor,
   getStatusText,
   getStatusColor,
@@ -25,15 +24,22 @@ export default function FeaturedTechnologies() {
         const response = await getTechnologies(
           {
             status: "active",
+            visibility_mode: "public",
           },
           {
             limit: 6,
+            sort: "-createdAt",
           }
         );
 
-        if (response.data && Array.isArray(response.data)) {
-          setTechnologies(response.data);
-        }
+        const list = (
+          Array.isArray((response as any).data)
+            ? (response as any).data
+            : Array.isArray((response as any).docs)
+              ? (response as any).docs
+              : []
+        ) as Technology[];
+        setTechnologies(list);
       } catch (error) {
         console.error("Error fetching featured technologies:", error);
       } finally {
