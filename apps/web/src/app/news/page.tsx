@@ -340,97 +340,14 @@ export default function NewsPage() {
           </div>
         </div>
 
-        {/* Featured Articles */}
-        {articles.filter((article) => article.is_featured).length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center mb-6">
-              <TrendingUp className="h-6 w-6 text-orange-500 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">
-                Tin tức nổi bật
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {articles
-                .filter((article) => article.is_featured)
-                .map((article) => (
-                  <article
-                    key={article.id}
-                    className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-                  >
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={article.featured_image}
-                        alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                      <div className="absolute top-4 left-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-500 text-white">
-                          Nổi bật
-                        </span>
-                      </div>
-                      <div className="absolute top-4 right-4">
-                        <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
-                          <Heart className="h-4 w-4 text-white" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {article.category}
-                        </span>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>{formatDate(article.published_at)}</span>
-                        </div>
-                      </div>
-
-                      <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                        {article.title}
-                      </h2>
-
-                      <p className="text-gray-600 mb-4 line-clamp-2">
-                        {article.excerpt}
-                      </p>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <User className="h-4 w-4 mr-1" />
-                            <span>{article.author}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" />
-                            <span>{article.views}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Heart className="h-4 w-4 mr-1" />
-                            <span>{article.likes}</span>
-                          </div>
-                        </div>
-                        <Link
-                          href={`/news/${article.id}`}
-                          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
-                        >
-                          Đọc thêm
-                          <ArrowRight className="ml-1 h-4 w-4" />
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-            </div>
-          </div>
-        )}
-
         {/* Regular Articles List */}
         {articles.length > 0 ? (
           <div className="space-y-6">
             {articles.map((article) => (
               <article
                 key={article.id}
-                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                onClick={() => {}}
+                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
               >
                 <div className="flex flex-col md:flex-row">
                   {/* Featured Image */}
@@ -464,17 +381,7 @@ export default function NewsPage() {
                           <Calendar className="h-4 w-4 mr-1" />
                           <span>{formatDate(article.published_at)}</span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock className="h-4 w-4 mr-1" />
-                          <span>{article.read_time}</span>
-                        </div>
                       </div>
-                      {article.is_featured && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                          Nổi bật
-                        </span>
-                      )}
                     </div>
 
                     <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
