@@ -91,6 +91,7 @@ export interface Config {
     'service-ticket-log': ServiceTicketLog;
     'event-user': EventUser;
     'event-comment': EventComment;
+    'new-like': NewLike;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -121,6 +122,7 @@ export interface Config {
     'service-ticket-log': ServiceTicketLogSelect<false> | ServiceTicketLogSelect<true>;
     'event-user': EventUserSelect<false> | EventUserSelect<true>;
     'event-comment': EventCommentSelect<false> | EventCommentSelect<true>;
+    'new-like': NewLikeSelect<false> | NewLikeSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -837,7 +839,6 @@ export interface News {
   document?: (string | null) | Media;
   views?: number | null;
   likes?: number | null;
-  isLiked?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -895,6 +896,17 @@ export interface EventComment {
   user: string | User;
   event: string | Event;
   comment: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "new-like".
+ */
+export interface NewLike {
+  id: string;
+  news: string | News;
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1000,6 +1012,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'event-comment';
         value: string | EventComment;
+      } | null)
+    | ({
+        relationTo: 'new-like';
+        value: string | NewLike;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1465,7 +1481,6 @@ export interface NewsSelect<T extends boolean = true> {
   document?: T;
   views?: T;
   likes?: T;
-  isLiked?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1519,6 +1534,16 @@ export interface EventCommentSelect<T extends boolean = true> {
   user?: T;
   event?: T;
   comment?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "new-like_select".
+ */
+export interface NewLikeSelect<T extends boolean = true> {
+  news?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }

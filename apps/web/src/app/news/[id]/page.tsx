@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
+import { useState, useEffect } from "react";
+import {
   Calendar,
   Clock,
   User,
@@ -14,9 +14,9 @@ import {
   TrendingUp,
   Image as ImageIcon,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import Link from 'next/link';
+  ChevronRight,
+} from "lucide-react";
+import Link from "next/link";
 
 interface NewsArticle {
   id: number;
@@ -39,13 +39,13 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
   const [article, setArticle] = useState<NewsArticle | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
 
   // Mock data - in real app, fetch from API
   const mockArticle: NewsArticle = {
     id: parseInt(params.id),
-    title: 'HANOTEX chính thức ra mắt sàn giao dịch công nghệ',
-    excerpt: 'Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ.',
+    title: "HANOTEX chính thức ra mắt sàn giao dịch công nghệ",
+    excerpt:
+      "Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ.",
     content: `
       <p>Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, đánh dấu một bước ngoặt quan trọng trong việc kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội. Với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ, HANOTEX hứa hẹn sẽ trở thành cầu nối quan trọng giữa các nhà nghiên cứu, doanh nghiệp và nhà đầu tư.</p>
       
@@ -70,28 +70,28 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       <h2>Kế hoạch phát triển</h2>
       <p>Trong thời gian tới, HANOTEX sẽ tiếp tục mở rộng và phát triển các tính năng mới, bao gồm tích hợp AI để tối ưu hóa quá trình kết nối và đưa ra gợi ý phù hợp cho người dùng.</p>
     `,
-    author: 'Ban biên tập HANOTEX',
-    published_at: '2025-01-15',
-    category: 'Tin tức',
-    read_time: '3 phút',
-    featured_image: '/images/news/hanotex-launch.jpg',
+    author: "Ban biên tập HANOTEX",
+    published_at: "2025-01-15",
+    category: "Tin tức",
+    read_time: "3 phút",
+    featured_image: "/images/news/hanotex-launch.jpg",
     gallery_images: [
-      '/images/news/hanotex-launch.jpg',
-      '/images/news/tech-trends-2025.jpg',
-      '/images/news/startup-policy.jpg',
-      '/images/news/hanotex-launch.jpg'
+      "/images/news/hanotex-launch.jpg",
+      "/images/news/tech-trends-2025.jpg",
+      "/images/news/startup-policy.jpg",
+      "/images/news/hanotex-launch.jpg",
     ],
-    tags: ['HANOTEX', 'Ra mắt', 'Công nghệ', 'Đổi mới sáng tạo'],
+    tags: ["HANOTEX", "Ra mắt", "Công nghệ", "Đổi mới sáng tạo"],
     views: 1250,
     likes: 45,
-    is_featured: true
+    is_featured: true,
   };
 
   useEffect(() => {
     // Simulate API call
     const fetchArticle = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setArticle(mockArticle);
       setLoading(false);
     };
@@ -101,26 +101,16 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
-  };
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    if (article) {
-      setArticle({
-        ...article,
-        likes: isLiked ? article.likes - 1 : article.likes + 1
-      });
-    }
   };
 
   const nextImage = () => {
     if (article?.gallery_images) {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === article.gallery_images!.length - 1 ? 0 : prev + 1
       );
     }
@@ -128,7 +118,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
 
   const prevImage = () => {
     if (article?.gallery_images) {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? article.gallery_images!.length - 1 : prev - 1
       );
     }
@@ -156,7 +146,9 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Không tìm thấy bài viết</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Không tìm thấy bài viết
+          </h1>
           <Link href="/news" className="text-blue-600 hover:text-blue-700">
             Quay lại danh sách tin tức
           </Link>
@@ -171,14 +163,17 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-16 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-6">
-            <Link 
+            <Link
               href="/news"
               className="inline-flex items-center text-white/80 hover:text-white transition-colors"
             >
@@ -186,7 +181,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
               Quay lại tin tức
             </Link>
           </div>
-          
+
           <div className="flex items-center space-x-3 mb-4">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white">
               {article.category}
@@ -198,11 +193,11 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
               </span>
             )}
           </div>
-          
+
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             {article.title}
           </h1>
-          
+
           <div className="flex items-center space-x-6 text-blue-100">
             <div className="flex items-center">
               <User className="h-4 w-4 mr-2" />
@@ -247,9 +242,11 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <div className="flex items-center mb-6">
               <ImageIcon className="h-6 w-6 text-blue-600 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Hình ảnh liên quan</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Hình ảnh liên quan
+              </h2>
             </div>
-            
+
             <div className="relative">
               <div className="relative h-96 rounded-lg overflow-hidden">
                 <img
@@ -257,7 +254,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
                   alt={`Gallery image ${currentImageIndex + 1}`}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Navigation buttons */}
                 <button
                   onClick={prevImage}
@@ -272,7 +269,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
                   <ChevronRight className="h-6 w-6 text-white" />
                 </button>
               </div>
-              
+
               {/* Thumbnail navigation */}
               <div className="flex space-x-2 mt-4 overflow-x-auto">
                 {article.gallery_images.map((image, index) => (
@@ -280,7 +277,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden ${
-                      index === currentImageIndex ? 'ring-2 ring-blue-500' : ''
+                      index === currentImageIndex ? "ring-2 ring-blue-500" : ""
                     }`}
                   >
                     <img
@@ -300,23 +297,19 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
-                onClick={handleLike}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                  isLiked 
-                    ? 'bg-red-50 text-red-600 border border-red-200' 
-                    : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
-                }`}
+                onClick={() => {}}
+                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${"bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
               >
-                <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
+                <Heart className={`h-4 w-4 mr-2fill-current`} />
                 <span>{article.likes}</span>
               </button>
-              
+
               <button className="flex items-center px-4 py-2 bg-gray-50 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
                 <Share2 className="h-4 w-4 mr-2" />
                 Chia sẻ
               </button>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {article.tags.map((tag) => (
                 <span
@@ -335,9 +328,11 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center mb-6">
             <BookOpen className="h-6 w-6 text-blue-600 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">Bài viết liên quan</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Bài viết liên quan
+            </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex space-x-4">
@@ -358,7 +353,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
             </div>
-            
+
             <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex space-x-4">
                 <img

@@ -31,13 +31,11 @@ interface NewsArticle {
   author: string;
   published_at: string;
   category: string;
-  read_time: string;
   featured_image: string;
   gallery_images?: string[];
   tags: string[];
   views: number;
   likes: number;
-  is_featured: boolean;
 }
 
 // Helper function to get full image URL
@@ -84,13 +82,11 @@ function transformNewsToArticle(news: News): NewsArticle {
     author: "Ban biên tập HANOTEX", // Default author since not in News model
     published_at: news.createdAt,
     category: "Tin tức", // Default category since not in News model
-    read_time: Math.ceil(news.content.length / 200) + " phút", // Estimate reading time
     featured_image: imageUrl,
     gallery_images: [imageUrl], // Use main image as gallery
     tags: tags,
-    views: Math.floor(Math.random() * 2000) + 100, // Mock views for now
-    likes: Math.floor(Math.random() * 100) + 10, // Mock likes for now
-    is_featured: Math.random() > 0.7, // Random featured status
+    views: news.views ?? 0,
+    likes: news.likes ?? 0,
   };
 }
 
@@ -325,15 +321,6 @@ export default function NewsPage() {
                 )}
               </span>
             </div>
-            {articles.filter((article) => article.is_featured).length > 0 && (
-              <div className="flex items-center bg-orange-50 text-orange-600 rounded-full px-4 py-2">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <span className="text-sm font-medium">
-                  {articles.filter((article) => article.is_featured).length} tin
-                  nổi bật
-                </span>
-              </div>
-            )}
           </div>
 
           <div className="flex items-center space-x-4">

@@ -31,7 +31,7 @@ import { Events } from './collections/Events'
 import { ServiceTicketLog } from './collections/ServiceTicketLog'
 import { EventUser } from './collections/EventUser'
 import { EventComment } from './collections/EventComment'
-
+import { NewsLike } from './collections/NewsLike'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -75,6 +75,7 @@ export default buildConfig({
     ServiceTicketLog,
     EventUser,
     EventComment,
+    NewsLike,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

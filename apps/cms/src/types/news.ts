@@ -9,7 +9,6 @@ export interface News {
   document: Media
   views: number
   likes: number
-  isLiked: boolean
   createdAt?: string
   updatedAt?: string
 }

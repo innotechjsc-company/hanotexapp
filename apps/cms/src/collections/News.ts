@@ -54,11 +54,6 @@ export const News: CollectionConfig = {
       type: 'number',
       label: 'Lượt thích',
     },
-    {
-      name: 'isLiked',
-      type: 'checkbox',
-      label: 'Đã thích',
-    },
   ],
   timestamps: true,
 }
