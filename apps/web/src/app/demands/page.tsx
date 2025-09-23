@@ -557,9 +557,16 @@ export default function DemandsPage() {
                         <Button
                           color="primary"
                           className="w-full"
-                          onPress={() =>
-                            router.push(`/demands/${demand.id || index}`)
-                          }
+                          onPress={() => {
+                            const target = `/demands/${demand.id || index}`;
+                            if (isAuthenticated) {
+                              router.push(target);
+                            } else {
+                              router.push(
+                                `/auth/login?redirect=${encodeURIComponent(target)}`
+                              );
+                            }
+                          }}
                           endContent={<ArrowRight className="h-4 w-4" />}
                           style={{
                             backgroundColor: "#006FEE",
@@ -571,28 +578,6 @@ export default function DemandsPage() {
                         >
                           Xem chi tiết
                         </Button>
-                        {isAuthenticated && (
-                          <Button
-                            color="success"
-                            variant="bordered"
-                            className="w-full"
-                            onPress={() =>
-                              router.push(
-                                `/demands/${demand.id || index}/propose`
-                              )
-                            }
-                            endContent={<Send className="h-4 w-4" />}
-                            style={{
-                              backgroundColor: "transparent",
-                              color: "#17C964",
-                              border: "1px solid #17C964",
-                              minHeight: "40px",
-                              fontWeight: "500",
-                            }}
-                          >
-                            Đề xuất giải pháp
-                          </Button>
-                        )}
                       </div>
                     </>
                   ) : (
