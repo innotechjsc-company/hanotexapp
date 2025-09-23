@@ -4,28 +4,38 @@ import { useEffect, useState } from "react";
 import {
   Button,
   Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Chip,
-  Spinner,
+  Tag,
+  Spin,
   Card,
-  CardBody,
-} from "@heroui/react";
-import { FileText, User, Calendar, DollarSign } from "lucide-react";
+  Space,
+  Tooltip,
+  message,
+  Popconfirm,
+  Typography,
+  Divider,
+} from "antd";
+import type { ColumnsType } from "antd/es/table";
+import {
+  FileText,
+  Calendar,
+  DollarSign,
+  Download,
+  Eye,
+  MessageSquare,
+  X,
+  User as UserIcon,
+  ExternalLink,
+} from "lucide-react";
 import { technologyProposeApi } from "@/api/technology-propose";
 import type {
   TechnologyPropose,
   TechnologyProposeStatus,
 } from "@/types/technology-propose";
 import { formatDate, formatCurrency } from "../utils";
+import { User } from "@/types";
+
+const { Text } = Typography;
 
 interface ProposalsModalProps {
   isOpen: boolean;
@@ -43,6 +53,7 @@ export function ProposalsModal({
   const [proposals, setProposals] = useState<TechnologyPropose[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Fetch proposals when modal opens and technologyId is available
   useEffect(() => {
@@ -76,15 +87,15 @@ export function ProposalsModal({
   const getStatusColor = (status: TechnologyProposeStatus) => {
     switch (status) {
       case "pending":
-        return "warning";
+        return "orange"; // Màu cam cho trạng thái chờ xử lý
       case "negotiating":
-        return "primary";
+        return "blue"; // Màu xanh dương cho đang đàm phán
       case "contract_signed":
-        return "success";
+        return "cyan"; // Màu xanh lam cho đã ký hợp đồng
       case "completed":
-        return "success";
+        return "green"; // Màu xanh lá cho hoàn thành
       case "cancelled":
-        return "danger";
+        return "red"; // Màu đỏ cho đã hủy
       default:
         return "default";
     }
@@ -93,7 +104,7 @@ export function ProposalsModal({
   const getStatusLabel = (status: TechnologyProposeStatus) => {
     switch (status) {
       case "pending":
-        return "Chờ xử lý";
+        return "Chờ xác nhận";
       case "negotiating":
         return "Đang đàm phán";
       case "contract_signed":
@@ -107,135 +118,313 @@ export function ProposalsModal({
     }
   };
 
-  const getUserName = (user: any) => {
+  const getUserName = (user: User) => {
     if (typeof user === "string") return user;
-    return user?.name || user?.email || "Không xác định";
+    return user?.full_name || user?.email || "Không xác định";
+  };
+
+  // Handle document viewing/downloading
+  const handleViewDocument = (document: any) => {
+    if (document?.url) {
+      window.open(document.url, "_blank");
+    } else {
+      message.warning("Không có tài liệu để xem");
+    }
+  };
+
+  const handleDownloadDocument = (document: any) => {
+    if (document?.url) {
+      const link = document.createElement("a");
+      link.href = document.url;
+      link.download = document.filename || "document";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      message.warning("Không có tài liệu để tải xuống");
+    }
+  };
+
+  // Handle proposal actions
+  const handleNegotiate = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await technologyProposeApi.setStatus(proposalId, "negotiating");
+      message.success("Đã chuyển sang trạng thái đàm phán");
+      fetchProposals(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to update proposal status:", error);
+      message.error("Không thể cập nhật trạng thái đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await technologyProposeApi.setStatus(proposalId, "cancelled");
+      message.success("Đã từ chối đề xuất");
+      fetchProposals(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to update proposal status:", error);
+      message.error("Không thể cập nhật trạng thái đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  // Handle opening negotiation details
+  const handleViewNegotiationDetails = (proposalId: string) => {
+    const url = `/technologies/negotiations/${proposalId}`;
+    window.open(url, "_blank");
+  };
+
+  const columns: ColumnsType<TechnologyPropose> = [
+    {
+      title: "Người đề xuất",
+      dataIndex: "user",
+      key: "user",
+      width: 150,
+      render: (user: any) => (
+        <Space>
+          <UserIcon size={16} className="text-gray-400" />
+          <Text strong>{getUserName(user)}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      width: 200,
+      render: (description: string) => (
+        <Tooltip title={description || "Không có mô tả"}>
+          <Text ellipsis style={{ maxWidth: 180 }}>
+            {description || "Không có mô tả"}
+          </Text>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Ngân sách",
+      dataIndex: "budget",
+      key: "budget",
+      width: 120,
+      render: (budget: number) => (
+        <Space>
+          <DollarSign size={16} className="text-gray-400" />
+          <Text strong>{formatCurrency(budget || 0, "vnd")}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Tài liệu",
+      dataIndex: "document",
+      key: "document",
+      width: 100,
+      render: (document: any) => (
+        <Space>
+          {document ? (
+            <>
+              <Tooltip title="Xem tài liệu">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Eye size={16} />}
+                  onClick={() => handleViewDocument(document)}
+                />
+              </Tooltip>
+              <Tooltip title="Tải xuống">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Download size={16} />}
+                  onClick={() => handleDownloadDocument(document)}
+                />
+              </Tooltip>
+            </>
+          ) : (
+            <Text type="secondary">Không có</Text>
+          )}
+        </Space>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 120,
+      render: (status: TechnologyProposeStatus) => (
+        <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
+      ),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 120,
+      render: (createdAt: string) => (
+        <Space>
+          <Calendar size={16} className="text-gray-400" />
+          <Text className="text-sm">
+            {createdAt ? formatDate(createdAt) : "Không xác định"}
+          </Text>
+        </Space>
+      ),
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 150,
+      fixed: "right",
+      render: (_, record: any) => {
+        const proposalId = record.id || record._id;
+        const isLoading = actionLoading === proposalId;
+        const isPending = record.status === "pending";
+        const canReject = record.status === "pending";
+        const canViewNegotiation =
+          record.status !== "pending" && record.status !== "cancelled";
+
+        return (
+          <Space>
+            {isPending && (
+              <Tooltip title="Đàm phán">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<MessageSquare size={16} />}
+                  loading={isLoading}
+                  onClick={() => handleNegotiate(proposalId)}
+                >
+                  Đàm phán
+                </Button>
+              </Tooltip>
+            )}
+            {canViewNegotiation && (
+              <Tooltip title="Chi tiết đàm phán">
+                <Button
+                  type="default"
+                  size="small"
+                  icon={<ExternalLink size={16} />}
+                  onClick={() => handleViewNegotiationDetails(proposalId)}
+                >
+                  Chi tiết đàm phán
+                </Button>
+              </Tooltip>
+            )}
+            {canReject && (
+              <Popconfirm
+                title="Từ chối đề xuất"
+                description="Bạn có chắc chắn muốn từ chối đề xuất này?"
+                onConfirm={() => handleReject(proposalId)}
+                okText="Từ chối"
+                cancelText="Hủy"
+                okType="danger"
+              >
+                <Tooltip title="Từ chối">
+                  <Button
+                    danger
+                    size="small"
+                    icon={<X size={16} />}
+                    loading={isLoading}
+                  >
+                    Từ chối
+                  </Button>
+                </Tooltip>
+              </Popconfirm>
+            )}
+          </Space>
+        );
+      },
+    },
+  ];
+
+  const handleCancel = () => {
+    onOpenChange(false);
   };
 
   return (
     <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      size="5xl"
-      scrollBehavior="inside"
+      title={
+        <div>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            Danh sách đề xuất
+          </Typography.Title>
+          <Text type="secondary">Công nghệ: {technologyTitle}</Text>
+        </div>
+      }
+      open={isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="close" type="primary" onClick={handleCancel}>
+          Đóng
+        </Button>,
+      ]}
+      width={1400}
+      style={{ top: 20 }}
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1">
-              <h3 className="text-xl font-semibold">Danh sách đề xuất</h3>
-              <p className="text-sm text-gray-600 font-normal">
-                Công nghệ: {technologyTitle}
-              </p>
-            </ModalHeader>
-            <ModalBody>
-              {loading ? (
-                <div className="flex justify-center items-center py-8">
-                  <Spinner size="lg" />
-                  <span className="ml-2">Đang tải...</span>
-                </div>
-              ) : error ? (
-                <Card>
-                  <CardBody className="text-center py-8">
-                    <p className="text-red-600">{error}</p>
-                    <Button
-                      color="primary"
-                      variant="flat"
-                      onPress={fetchProposals}
-                      className="mt-4"
-                    >
-                      Thử lại
-                    </Button>
-                  </CardBody>
-                </Card>
-              ) : proposals.length === 0 ? (
-                <Card>
-                  <CardBody className="text-center py-8">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">
-                      Chưa có đề xuất nào cho công nghệ này
-                    </p>
-                  </CardBody>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-sm text-gray-600">
-                    Tổng cộng: {proposals.length} đề xuất
-                  </div>
-                  <Table removeWrapper aria-label="Danh sách đề xuất">
-                    <TableHeader>
-                      <TableColumn>Người đề xuất</TableColumn>
-                      <TableColumn>Mô tả</TableColumn>
-                      <TableColumn>Ngân sách</TableColumn>
-                      <TableColumn>Trạng thái</TableColumn>
-                      <TableColumn>Ngày tạo</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                      {proposals.map((proposal, index) => (
-                        <TableRow
-                          key={
-                            (proposal as any).id ||
-                            (proposal as any)._id ||
-                            index
-                          }
-                        >
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium">
-                                {getUserName(proposal.user)}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-xs">
-                              <p className="text-sm line-clamp-2">
-                                {proposal.description || "Không có mô tả"}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4 text-gray-400" />
-                              <span className="font-medium">
-                                {formatCurrency(proposal.budget || 0, "vnd")}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              color={getStatusColor(proposal.status)}
-                              size="sm"
-                              variant="flat"
-                            >
-                              {getStatusLabel(proposal.status)}
-                            </Chip>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm">
-                                {proposal.createdAt
-                                  ? formatDate(proposal.createdAt)
-                                  : "Không xác định"}
-                              </span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </ModalBody>
-            <ModalFooter>
-              <Button color="primary" onPress={onClose}>
-                Đóng
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <Spin size="large" />
+          <div style={{ marginTop: 16 }}>
+            <Text>Đang tải...</Text>
+          </div>
+        </div>
+      ) : error ? (
+        <Card>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <Text type="danger">{error}</Text>
+            <div style={{ marginTop: 16 }}>
+              <Button type="primary" onClick={fetchProposals}>
+                Thử lại
               </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+            </div>
+          </div>
+        </Card>
+      ) : proposals.length === 0 ? (
+        <Card>
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <FileText
+              size={48}
+              className="text-gray-400"
+              style={{ margin: "0 auto 16px" }}
+            />
+            <Text type="secondary">Chưa có đề xuất nào cho công nghệ này</Text>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          <div
+            style={{
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text type="secondary">
+              Tổng cộng: <Text strong>{proposals.length}</Text> đề xuất
+            </Text>
+          </div>
+          <Divider style={{ margin: "16px 0" }} />
+          <Table
+            columns={columns}
+            dataSource={proposals}
+            rowKey={(record) => (record as any).id || (record as any)._id}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} của ${total} đề xuất`,
+            }}
+            scroll={{ x: 1200 }}
+            size="middle"
+            bordered
+          />
+        </div>
+      )}
     </Modal>
   );
 }

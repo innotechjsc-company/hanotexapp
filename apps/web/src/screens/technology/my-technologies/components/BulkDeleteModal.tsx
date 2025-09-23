@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "@heroui/react";
+import { Button, Modal } from "antd";
 import { Trash2 } from "lucide-react";
 
 interface BulkDeleteModalProps {
@@ -25,37 +18,40 @@ export function BulkDeleteModal({
   onConfirm,
   loading,
 }: BulkDeleteModalProps) {
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
+
+  const handleOk = () => {
+    onConfirm();
+  };
+
   return (
     <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      size="sm"
+      title="Xác nhận xóa hàng loạt"
+      open={isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="cancel" onClick={handleCancel}>
+          Hủy
+        </Button>,
+        <Button
+          key="confirm"
+          type="primary"
+          danger
+          loading={loading}
+          icon={<Trash2 className="h-4 w-4" />}
+          onClick={handleOk}
+        >
+          Xóa tất cả
+        </Button>,
+      ]}
+      width={400}
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Xác nhận xóa hàng loạt</ModalHeader>
-            <ModalBody>
-              Bạn có chắc muốn xóa {selectedCount} công nghệ đã chọn? Hành
-              động này không thể hoàn tác.
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                color="danger"
-                onPress={onConfirm}
-                variant="bordered"
-                startContent={<Trash2 className="h-4 w-4" />}
-                isLoading={loading}
-              >
-                Xóa tất cả
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+      <p>
+        Bạn có chắc muốn xóa {selectedCount} công nghệ đã chọn? Hành động này
+        không thể hoàn tác.
+      </p>
     </Modal>
   );
 }

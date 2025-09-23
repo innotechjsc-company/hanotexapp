@@ -3,7 +3,7 @@
  * Các function để quản lý propose với PayloadCMS
  */
 
-import { Propose, ProposeStatus } from "@/types/propose";
+import { Propose, ProposeStatus, ProposeStatusEnum } from "@/types/propose";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
@@ -118,14 +118,14 @@ export async function updateProposeStatus(
  * Accept propose
  */
 export async function acceptPropose(id: string): Promise<Propose> {
-  return updateProposeStatus(id, "accepted");
+  return updateProposeStatus(id, ProposeStatusEnum.negotiating);
 }
 
 /**
  * Reject propose
  */
 export async function rejectPropose(id: string): Promise<Propose> {
-  return updateProposeStatus(id, "rejected");
+  return updateProposeStatus(id, ProposeStatusEnum.cancelled);
 }
 
 /**
@@ -209,7 +209,7 @@ export async function getPendingProposes(
 export async function getAcceptedProposes(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  return getProposesByStatus("accepted", pagination);
+  return getProposesByStatus(ProposeStatusEnum.negotiating, pagination);
 }
 
 /**
@@ -218,7 +218,7 @@ export async function getAcceptedProposes(
 export async function getRejectedProposes(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  return getProposesByStatus("rejected", pagination);
+  return getProposesByStatus(ProposeStatusEnum.cancelled, pagination);
 }
 
 /**

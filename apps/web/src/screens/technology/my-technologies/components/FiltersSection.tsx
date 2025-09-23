@@ -1,6 +1,8 @@
 "use client";
 
-import { Input, Select, SelectItem } from "@heroui/react";
+import { Input, Select } from "antd";
+
+const { Option } = Select;
 
 interface FiltersSectionProps {
   statusFilter: string;
@@ -17,10 +19,9 @@ export function FiltersSection({
   setSearch,
   setPage,
 }: FiltersSectionProps) {
-  const handleStatusFilterChange = (keys: any) => {
-    const key = Array.from(keys as Set<string>)[0];
+  const handleStatusFilterChange = (value: string) => {
     setPage(1);
-    setStatusFilter(key || "");
+    setStatusFilter(value || "");
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,25 +33,24 @@ export function FiltersSection({
     <div className="flex items-center gap-3">
       <Select
         placeholder="Lọc theo trạng thái"
-        selectedKeys={
-          statusFilter ? new Set([statusFilter]) : new Set()
-        }
-        onSelectionChange={handleStatusFilterChange}
-        className="max-w-xs"
+        value={statusFilter || undefined}
+        onChange={handleStatusFilterChange}
+        style={{ width: 200 }}
+        allowClear
       >
-        <SelectItem key="">Tất cả trạng thái</SelectItem>
-        <SelectItem key="draft">Bản nháp</SelectItem>
-        <SelectItem key="pending">Chờ duyệt</SelectItem>
-        <SelectItem key="approved">Đã duyệt</SelectItem>
-        <SelectItem key="active">Hoạt động</SelectItem>
-        <SelectItem key="inactive">Không hoạt động</SelectItem>
-        <SelectItem key="rejected">Từ chối</SelectItem>
+        <Option value="">Tất cả trạng thái</Option>
+        <Option value="draft">Bản nháp</Option>
+        <Option value="pending">Chờ duyệt</Option>
+        <Option value="approved">Đã duyệt</Option>
+        <Option value="active">Hoạt động</Option>
+        <Option value="inactive">Không hoạt động</Option>
+        <Option value="rejected">Từ chối</Option>
       </Select>
       <Input
         placeholder="Tìm theo tiêu đề, mô tả..."
         value={search}
         onChange={handleSearchChange}
-        className="max-w-sm"
+        style={{ width: 300 }}
       />
     </div>
   );

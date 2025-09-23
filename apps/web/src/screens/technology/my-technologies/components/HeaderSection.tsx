@@ -1,36 +1,31 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "antd";
 import { Zap, Plus, Trash2 } from "lucide-react";
-import { checkUserAuth } from "../utils";
-import type { EditableTechnology } from "../hooks/useMyTechnologies";
+import { useRouter } from "next/navigation";
 
 interface HeaderSectionProps {
   selectedCount: number;
   user: any;
-  setCurrent: React.Dispatch<React.SetStateAction<EditableTechnology | null>>;
-  onAddTechnology: () => void;
   onBulkDelete: () => void;
 }
 
 export function HeaderSection({
   selectedCount,
   user,
-  setCurrent,
-  onAddTechnology,
   onBulkDelete,
 }: HeaderSectionProps) {
+  const router = useRouter();
+
   const handleAddTechnology = () => {
     if (!user) {
       const toast = require("react-hot-toast").default;
-      const { useRouter } = require("next/navigation");
-      const router = useRouter();
       toast.error("Vui lòng đăng nhập để tiếp tục");
       router.push("/auth/login");
       return;
     }
-    setCurrent({});
-    onAddTechnology();
+    // Navigate to the technology registration page
+    router.push("/technologies/register");
   };
 
   return (
@@ -48,19 +43,19 @@ export function HeaderSection({
           </div>
           {selectedCount > 0 ? (
             <Button
-              color="danger"
-              variant="bordered"
-              startContent={<Trash2 className="h-5 w-5" />}
-              onPress={onBulkDelete}
+              danger
+              variant="outlined"
+              icon={<Trash2 className="h-5 w-5" />}
+              onClick={onBulkDelete}
             >
               Xóa đã chọn ({selectedCount})
             </Button>
           ) : (
             <Button
-              color="primary"
-              variant="bordered"
-              startContent={<Plus className="h-5 w-5" />}
-              onPress={handleAddTechnology}
+              type="primary"
+              variant="outlined"
+              icon={<Plus className="h-5 w-5" />}
+              onClick={handleAddTechnology}
             >
               Thêm công nghệ mới
             </Button>

@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Button,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Tooltip,
-} from "@heroui/react";
+import { Button, Tag, Table, Tooltip, Space } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { Edit, Trash2, Eye, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Technology } from "@/types/technologies";
@@ -51,17 +42,6 @@ export function TechnologiesTable({
 }: TechnologiesTableProps) {
   const router = useRouter();
 
-  const handleSelectionChange = (keys: any) => {
-    if (keys === "all") {
-      const all = new Set(
-        (filteredItems as any[]).map((it) => String(it.id || it._id))
-      );
-      setSelectedKeys(all);
-    } else {
-      setSelectedKeys(new Set(Array.from(keys as Set<any>).map(String)));
-    }
-  };
-
   const handleView = (item: any) => {
     setCurrent(item);
     onView();
@@ -84,99 +64,123 @@ export function TechnologiesTable({
     onViewProposals();
   };
 
+  const columns: ColumnsType<any> = [
+    {
+      title: "Tiêu đề công nghệ",
+      dataIndex: "title",
+      key: "title",
+      render: (title: string, record: any) => (
+        <div>
+          <div className="font-semibold">{title}</div>
+          <div className="text-sm text-gray-500 truncate max-w-xs">
+            {record.description}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Lĩnh vực",
+      dataIndex: "category",
+      key: "category",
+      render: (category: any) => (
+        <span className="text-gray-600">{category?.name || "Chưa chọn"}</span>
+      ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status: any) => (
+        <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
+      ),
+    },
+    {
+      title: "Chế độ hiển thị",
+      dataIndex: "visibility_mode",
+      key: "visibility_mode",
+      render: (visibility_mode: string) => (
+        <span className="text-gray-600">
+          {getVisibilityModeLabel(visibility_mode)}
+        </span>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      align: "right" as const,
+      render: (_, record: any) =>
+        selectedCount > 0 ? null : (
+          <Space>
+            <Tooltip
+              title="Xem chi tiết"
+              color="#1677ff"
+              overlayInnerStyle={{ color: "white" }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<Eye className="h-4 w-4" />}
+                onClick={() => handleView(record)}
+              />
+            </Tooltip>
+            <Tooltip
+              title="Xem đề xuất"
+              color="#1677ff"
+              overlayInnerStyle={{ color: "white" }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<FileText className="h-4 w-4" />}
+                onClick={() => handleViewProposals(record)}
+              />
+            </Tooltip>
+            <Tooltip
+              title="Chỉnh sửa"
+              color="#52c41a"
+              overlayInnerStyle={{ color: "white" }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<Edit className="h-4 w-4" />}
+                onClick={() => handleEdit(record)}
+              />
+            </Tooltip>
+            <Tooltip
+              title={<span style={{ color: "#ff4d4f" }}>Xóa</span>}
+              color="#fff"
+              overlayInnerStyle={{
+                color: "#ff4d4f",
+                border: "1px solid #ff4d4f",
+                backgroundColor: "white",
+              }}
+            >
+              <Button
+                type="text"
+                size="small"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => handleDelete(record)}
+              />
+            </Tooltip>
+          </Space>
+        ),
+    },
+  ];
+
   return (
     <div className="relative overflow-x-auto">
       <Table
-        aria-label="Danh sách công nghệ"
-        removeWrapper
-        selectionMode="multiple"
-        selectedKeys={selectedKeys as unknown as Set<any>}
-        onSelectionChange={handleSelectionChange}
-      >
-        <TableHeader>
-          <TableColumn className="sticky backdrop-blur z-20">
-            Tiêu đề công nghệ
-          </TableColumn>
-          <TableColumn className="sticky backdrop-blur z-20">
-            Lĩnh vực
-          </TableColumn>
-          <TableColumn className="sticky backdrop-blur z-20">
-            Trạng thái
-          </TableColumn>
-          <TableColumn className="sticky backdrop-blur z-20">
-            Chế độ hiển thị
-          </TableColumn>
-          <TableColumn className="sticky backdrop-blur right-0" align="end">
-            Hành động
-          </TableColumn>
-        </TableHeader>
-        <TableBody
-          emptyContent={isLoading ? "Đang tải..." : "Chưa có công nghệ nào"}
-          items={filteredItems as any}
-        >
-          {(item: any) => (
-            <TableRow key={item.id || item._id}>
-              <TableCell className="font-medium">
-                <div>
-                  <div className="font-semibold">{item.title}</div>
-                  <div className="text-sm text-gray-500 truncate max-w-xs">
-                    {item.description}
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="text-gray-600">
-                {item.category?.name || "Chưa chọn"}
-              </TableCell>
-              <TableCell>
-                <Chip color={getStatusColor(item.status)} size="sm">
-                  {getStatusLabel(item.status)}
-                </Chip>
-              </TableCell>
-              <TableCell className="text-gray-600">
-                {getVisibilityModeLabel(item.visibility_mode)}
-              </TableCell>
-              <TableCell className="sticky backdrop-blur z-10 right-0 text-right justify-end">
-                {selectedCount > 0 ? null : (
-                  <div className="flex items-center gap-2 justify-end">
-                    <Tooltip content="Xem chi tiết">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        startContent={<Eye className="h-4 w-4" />}
-                        onPress={() => handleView(item)}
-                      />
-                    </Tooltip>
-                    <Tooltip content="Xem đề xuất">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        startContent={<FileText className="h-4 w-4" />}
-                        onPress={() => handleViewProposals(item)}
-                      />
-                    </Tooltip>
-                    <Tooltip content="Chỉnh sửa">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        startContent={<Edit className="h-4 w-4" />}
-                        onPress={() => handleEdit(item)}
-                      />
-                    </Tooltip>
-                    <Tooltip content="Xóa">
-                      <Button
-                        variant="flat"
-                        size="sm"
-                        startContent={<Trash2 className="h-4 w-4" />}
-                        onPress={() => handleDelete(item)}
-                      />
-                    </Tooltip>
-                  </div>
-                )}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        columns={columns}
+        dataSource={filteredItems}
+        rowKey={(record) => record.id || record._id}
+        loading={isLoading}
+        locale={{
+          emptyText: isLoading ? "Đang tải..." : "Chưa có công nghệ nào",
+        }}
+        pagination={false}
+        scroll={{ x: 800 }}
+      />
     </div>
   );
 }

@@ -89,6 +89,7 @@ export interface Config {
     news: News;
     events: Event;
     'service-ticket-log': ServiceTicketLog;
+    'negotiating-messages': NegotiatingMessage;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -117,6 +118,7 @@ export interface Config {
     news: NewsSelect<false> | NewsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'service-ticket-log': ServiceTicketLogSelect<false> | ServiceTicketLogSelect<true>;
+    'negotiating-messages': NegotiatingMessagesSelect<false> | NegotiatingMessagesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -868,6 +870,35 @@ export interface ServiceTicketLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "negotiating-messages".
+ */
+export interface NegotiatingMessage {
+  id: string;
+  /**
+   * Đề xuất
+   */
+  propose?: (string | null) | Propose;
+  /**
+   * Đề xuất công nghệ
+   */
+  technology_propose?: (string | null) | TechnologyPropose;
+  /**
+   * Người gửi
+   */
+  user: string | User;
+  /**
+   * Nội dung
+   */
+  message: string;
+  /**
+   * Tài liệu đính kèm
+   */
+  document?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -960,6 +991,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'service-ticket-log';
         value: string | ServiceTicketLog;
+      } | null)
+    | ({
+        relationTo: 'negotiating-messages';
+        value: string | NegotiatingMessage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1453,6 +1488,19 @@ export interface ServiceTicketLogSelect<T extends boolean = true> {
   document?: T;
   status?: T;
   reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "negotiating-messages_select".
+ */
+export interface NegotiatingMessagesSelect<T extends boolean = true> {
+  propose?: T;
+  technology_propose?: T;
+  user?: T;
+  message?: T;
+  document?: T;
   updatedAt?: T;
   createdAt?: T;
 }

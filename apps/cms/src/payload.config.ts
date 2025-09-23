@@ -29,6 +29,7 @@ import { TechnologyPropose } from './collections/TechnologyPropose'
 import { News } from './collections/News'
 import { Events } from './collections/Events'
 import { ServiceTicketLog } from './collections/ServiceTicketLog'
+import { NegotiatingMessage } from './collections/NegotiatingMessage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -71,6 +72,7 @@ export default buildConfig({
     News,
     Events,
     ServiceTicketLog,
+    NegotiatingMessage,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
