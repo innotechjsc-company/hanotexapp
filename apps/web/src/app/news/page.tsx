@@ -5,7 +5,6 @@ import {
   Search,
   Filter,
   Calendar,
-  Clock,
   User,
   Tag,
   ArrowRight,
@@ -18,10 +17,15 @@ import {
   X,
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import Link from "next/link";
 import { getNews, NewsFilters, PaginationParams } from "@/api/news";
 import { News } from "@/types/news";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import {
+  toggleNewsLike,
+  hasUserLikedNews,
+  getNewsLikesCount,
+} from "@/api/newsLike";
+import { useAuth } from "@/store/auth";
 
 interface NewsArticle {
   id: string;
@@ -36,6 +40,7 @@ interface NewsArticle {
   tags: string[];
   views: number;
   likes: number;
+  isLiked?: boolean; // Thêm trạng thái like của user hiện tại
 }
 
 // Helper function to get full image URL
@@ -100,6 +105,82 @@ export default function NewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [likingArticles, setLikingArticles] = useState<Set<string>>(new Set()); // Track articles being liked/unliked
+
+  // Get current user from auth store
+  const { user, isAuthenticated } = useAuth();
+
+  // Load like status for articles
+  const loadLikeStatus = async (articleIds: string[]) => {
+    if (!isAuthenticated || !user?.id) return;
+
+    try {
+      const likeStatusPromises = articleIds.map(async (articleId) => {
+        const isLiked = await hasUserLikedNews(user.id!, articleId);
+        const likesCount = await getNewsLikesCount(articleId);
+        return { articleId, isLiked, likesCount };
+      });
+
+      const likeStatuses = await Promise.all(likeStatusPromises);
+
+      setArticles((prevArticles) =>
+        prevArticles.map((article) => {
+          const status = likeStatuses.find((s) => s.articleId === article.id);
+          return status
+            ? { ...article, isLiked: status.isLiked, likes: status.likesCount }
+            : article;
+        })
+      );
+    } catch (error) {
+      console.error("Error loading like status:", error);
+    }
+  };
+
+  // Handle like/unlike action
+  const handleLikeToggle = async (
+    articleId: string,
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isAuthenticated || !user?.id) {
+      // Redirect to login or show login modal
+      alert("Vui lòng đăng nhập để thích bài viết");
+      return;
+    }
+
+    // Prevent multiple clicks
+    if (likingArticles.has(articleId)) return;
+
+    setLikingArticles((prev) => new Set(prev).add(articleId));
+
+    try {
+      const result = await toggleNewsLike(user.id, articleId);
+
+      // Update article state immediately for better UX
+      setArticles((prevArticles) =>
+        prevArticles.map((article) =>
+          article.id === articleId
+            ? {
+                ...article,
+                isLiked: result.liked,
+                likes: result.liked ? article.likes + 1 : article.likes - 1,
+              }
+            : article
+        )
+      );
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      alert("Có lỗi xảy ra khi thích bài viết. Vui lòng thử lại.");
+    } finally {
+      setLikingArticles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(articleId);
+        return newSet;
+      });
+    }
+  };
 
   // Fetch news from API
   const fetchNews = async (isLoadMore = false, customSearchQuery?: string) => {
@@ -135,9 +216,15 @@ export default function NewsPage() {
         if (isLoadMore) {
           setArticles((prev) => [...prev, ...transformedArticles]);
           setCurrentPage((prev) => prev + 1);
+          // Load like status for new articles only
+          const newArticleIds = transformedArticles.map((a) => a.id);
+          loadLikeStatus(newArticleIds);
         } else {
           setArticles(transformedArticles);
           setCurrentPage(1);
+          // Load like status for all articles
+          const articleIds = transformedArticles.map((a) => a.id);
+          loadLikeStatus(articleIds);
         }
         setTotalDocs(response.totalDocs || 0);
       } else if (response.data && Array.isArray(response.data)) {
@@ -147,8 +234,14 @@ export default function NewsPage() {
 
         if (isLoadMore) {
           setArticles((prev) => [...prev, ...transformedArticles]);
+          // Load like status for new articles only
+          const newArticleIds = transformedArticles.map((a) => a.id);
+          loadLikeStatus(newArticleIds);
         } else {
           setArticles(transformedArticles);
+          // Load like status for all articles
+          const articleIds = transformedArticles.map((a) => a.id);
+          loadLikeStatus(articleIds);
         }
         setTotalDocs(response.data.length);
       } else {
@@ -364,8 +457,22 @@ export default function NewsPage() {
                       </span>
                     </div>
                     <div className="absolute top-4 right-4 flex space-x-2">
-                      <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
-                        <Heart className="h-4 w-4 text-white" />
+                      <button
+                        onClick={(e) => handleLikeToggle(article.id, e)}
+                        disabled={likingArticles.has(article.id)}
+                        className={`p-2 backdrop-blur-sm rounded-full transition-all duration-200 ${
+                          article.isLiked
+                            ? "bg-red-500/80 hover:bg-red-600/80"
+                            : "bg-white/20 hover:bg-white/30"
+                        } ${likingArticles.has(article.id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        <Heart
+                          className={`h-4 w-4 transition-colors ${
+                            article.isLiked
+                              ? "text-white fill-white"
+                              : "text-white"
+                          }`}
+                        />
                       </button>
                       <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
                         <Share2 className="h-4 w-4 text-white" />
@@ -402,10 +509,20 @@ export default function NewsPage() {
                           <Eye className="h-4 w-4 mr-1" />
                           <span>{article.views}</span>
                         </div>
-                        <div className="flex items-center">
-                          <Heart className="h-4 w-4 mr-1" />
+                        <button
+                          onClick={(e) => handleLikeToggle(article.id, e)}
+                          disabled={likingArticles.has(article.id)}
+                          className={`flex items-center transition-colors hover:text-red-500 ${
+                            article.isLiked ? "text-red-500" : "text-gray-500"
+                          } ${likingArticles.has(article.id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          <Heart
+                            className={`h-4 w-4 mr-1 transition-colors ${
+                              article.isLiked ? "fill-current" : ""
+                            }`}
+                          />
                           <span>{article.likes}</span>
-                        </div>
+                        </button>
                       </div>
 
                       <div className="flex items-center space-x-2">
