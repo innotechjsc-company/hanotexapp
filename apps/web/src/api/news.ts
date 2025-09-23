@@ -115,6 +115,30 @@ export async function updateNews(
 }
 
 /**
+ * Increment likes count for a news article
+ */
+export async function incrementNewsLikes(id: string): Promise<News> {
+  // First get current news to get current likes count
+  const currentNews = await getNewsById(id);
+  const currentLikes = currentNews.likes || 0;
+
+  // Update with incremented likes
+  return updateNews(id, { likes: currentLikes + 1 });
+}
+
+/**
+ * Decrement likes count for a news article
+ */
+export async function decrementNewsLikes(id: string): Promise<News> {
+  // First get current news to get current likes count
+  const currentNews = await getNewsById(id);
+  const currentLikes = currentNews.likes || 0;
+
+  // Update with decremented likes (minimum 0)
+  return updateNews(id, { likes: Math.max(0, currentLikes - 1) });
+}
+
+/**
  * Delete news
  */
 export async function deleteNews(id: string): Promise<void> {
