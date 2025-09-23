@@ -364,16 +364,6 @@ export default function NewsPage() {
                       </span>
                     </div>
                     <div className="absolute top-4 right-4 flex space-x-2">
-                      <div className="p-1 bg-white/20 backdrop-blur-sm rounded-full">
-                        <LikeButton
-                          newsId={article.id}
-                          initialLikes={article.likes}
-                          variant="icon-only"
-                          size="sm"
-                          showCount={false}
-                          className="text-white"
-                        />
-                      </div>
                       <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
                         <Share2 className="h-4 w-4 text-white" />
                       </button>
