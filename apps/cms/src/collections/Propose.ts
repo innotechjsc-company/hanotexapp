@@ -126,7 +126,7 @@ export const Propose: CollectionConfig = {
       type: 'select',
       required: true,
       label: 'Trạng thái',
-      options: ['pending', 'accepted', 'rejected'],
+      options: ['pending', 'negotiating', 'contract_signed', 'completed', 'cancelled'],
       defaultValue: 'pending',
       admin: {
         description: 'Trạng thái',

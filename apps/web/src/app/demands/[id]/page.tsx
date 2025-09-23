@@ -42,7 +42,7 @@ import { PAYLOAD_API_BASE_URL } from "@/api/config";
 export default function DemandDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [demand, setDemand] = useState<Demand | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -269,6 +269,16 @@ export default function DemandDetailPage() {
       </div>
     );
   }
+
+  // Determine if the current user is the creator of the demand
+  const isOwner = (() => {
+    if (!isAuthenticated || !user || !demand) return false;
+    const demandUserId =
+      typeof demand.user === "object"
+        ? (demand.user?.id as string | undefined)
+        : (demand.user as string | undefined);
+    return Boolean(demandUserId && user.id && demandUserId === user.id);
+  })();
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -593,18 +603,12 @@ export default function DemandDetailPage() {
 
                 {typeof demand.user === "object" && demand.user && (
                   <div className="space-y-2 text-sm">
-                    {demand.user.email && (
-                      <div className="flex items-center text-default-600">
-                        <Mail className="h-4 w-4 mr-2" />
-                        <span>{demand.user.email}</span>
-                      </div>
-                    )}
-                    {demand.user.phone && (
+                    {/* {demand.user.phone && (
                       <div className="flex items-center text-default-600">
                         <Phone className="h-4 w-4 mr-2" />
                         <span>{demand.user.phone}</span>
                       </div>
-                    )}
+                    )} */}
                     {demand.user.company &&
                       typeof demand.user.company === "object" &&
                       demand.user.company.website && (
@@ -627,35 +631,45 @@ export default function DemandDetailPage() {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <Button
-                color="primary"
-                size="lg"
-                className="w-full"
-                onPress={handlePropose}
-                endContent={<Send className="h-5 w-5" />}
-                style={{
-                  backgroundColor: "#006FEE",
-                  color: "#ffffff",
-                  minHeight: "48px",
-                  fontWeight: "600",
-                  fontSize: "16px",
-                }}
-              >
-                {isAuthenticated ? "Đề xuất giải pháp" : "Đăng nhập để đề xuất"}
-              </Button>
-
-              <Button
-                variant="bordered"
-                size="lg"
-                className="w-full"
-                onPress={() => router.push(`/demands/${demandId}/solutions`)}
-                style={{
-                  minHeight: "48px",
-                  fontWeight: "500",
-                }}
-              >
-                Tất cả giải pháp
-              </Button>
+              {!isAuthenticated ? (
+                <Button
+                  color="primary"
+                  size="lg"
+                  className="w-full"
+                  onPress={() =>
+                    router.push(
+                      `/auth/login?redirect=/demands/${demandId}/propose`
+                    )
+                  }
+                  endContent={<Send className="h-5 w-5" />}
+                  style={{
+                    backgroundColor: "#006FEE",
+                    color: "#ffffff",
+                    minHeight: "48px",
+                    fontWeight: "600",
+                    fontSize: "16px",
+                  }}
+                >
+                  Đăng nhập để đề xuất
+                </Button>
+              ) : !isOwner ? (
+                <Button
+                  color="primary"
+                  size="lg"
+                  className="w-full"
+                  onPress={handlePropose}
+                  endContent={<Send className="h-5 w-5" />}
+                  style={{
+                    backgroundColor: "#006FEE",
+                    color: "#ffffff",
+                    minHeight: "48px",
+                    fontWeight: "600",
+                    fontSize: "16px",
+                  }}
+                >
+                  Đề xuất giải pháp
+                </Button>
+              ) : null}
 
               <Button
                 variant="bordered"

@@ -86,6 +86,9 @@ export interface Config {
     project: Project;
     propose: Propose;
     'technology-propose': TechnologyPropose;
+    news: News;
+    events: Event;
+    'service-ticket-log': ServiceTicketLog;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -111,6 +114,9 @@ export interface Config {
     project: ProjectSelect<false> | ProjectSelect<true>;
     propose: ProposeSelect<false> | ProposeSelect<true>;
     'technology-propose': TechnologyProposeSelect<false> | TechnologyProposeSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    'service-ticket-log': ServiceTicketLogSelect<false> | ServiceTicketLogSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -677,8 +683,43 @@ export interface ServiceTicket {
   id: string;
   service: string | Service;
   user: string | User;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
-  implementer: string;
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  responsible_user: string | User;
+  implementers: (string | User)[];
+  technologies?: (string | Technology)[] | null;
+  project?: (string | null) | Project;
+  description: string;
+  document?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project".
+ */
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
+  technology: string | Technology;
+  investment_fund: string | InvestmentFund;
+  status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
+  goal_money?: number | null;
+  end_date?: string | null;
+  documents?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "investment-fund".
+ */
+export interface InvestmentFund {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -711,36 +752,6 @@ export interface Demand {
   from_price?: number | null;
   to_price?: number | null;
   cooperation?: string | null;
-  documents?: (string | Media)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "investment-fund".
- */
-export interface InvestmentFund {
-  id: string;
-  name: string;
-  description: string;
-  user: string | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project".
- */
-export interface Project {
-  id: string;
-  name: string;
-  description: string;
-  user: string | User;
-  technology: string | Technology;
-  investment_fund: string | InvestmentFund;
-  status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
-  goal_money?: number | null;
-  end_date?: string | null;
   documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -781,7 +792,7 @@ export interface Propose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -797,6 +808,7 @@ export interface TechnologyPropose {
   technology: string | Technology;
   user: string | User;
   description: string;
+  budget: number;
   /**
    * Tài liệu
    */
@@ -804,7 +816,51 @@ export interface TechnologyPropose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: string;
+  title: string;
+  content: string;
+  hashtags?: string | null;
+  document?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: string;
+  title: string;
+  content: string;
+  hashtags?: string | null;
+  document?: (string | null) | Media;
+  start_date: string;
+  end_date: string;
+  location?: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  url?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-ticket-log".
+ */
+export interface ServiceTicketLog {
+  id: string;
+  service_ticket: string | ServiceTicket;
+  user: string | User;
+  content: string;
+  document?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -890,6 +946,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'technology-propose';
         value: string | TechnologyPropose;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: string | News;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: string | Event;
+      } | null)
+    | ({
+        relationTo: 'service-ticket-log';
+        value: string | ServiceTicketLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1243,7 +1311,12 @@ export interface ServiceTicketSelect<T extends boolean = true> {
   service?: T;
   user?: T;
   status?: T;
-  implementer?: T;
+  responsible_user?: T;
+  implementers?: T;
+  technologies?: T;
+  project?: T;
+  description?: T;
+  document?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1332,8 +1405,50 @@ export interface TechnologyProposeSelect<T extends boolean = true> {
   technology?: T;
   user?: T;
   description?: T;
+  budget?: T;
   document?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  hashtags?: T;
+  document?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  hashtags?: T;
+  document?: T;
+  start_date?: T;
+  end_date?: T;
+  location?: T;
+  status?: T;
+  url?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-ticket-log_select".
+ */
+export interface ServiceTicketLogSelect<T extends boolean = true> {
+  service_ticket?: T;
+  user?: T;
+  content?: T;
+  document?: T;
   updatedAt?: T;
   createdAt?: T;
 }
