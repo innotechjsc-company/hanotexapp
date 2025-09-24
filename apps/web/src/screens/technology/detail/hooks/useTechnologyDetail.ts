@@ -10,6 +10,7 @@ import type { Technology, TechnologyStatus } from "@/types";
 export interface ContactFormState {
   description: string;
   document: File | null;
+  budget: number | string;
 }
 
 export function useTechnologyDetail(id?: string) {
@@ -23,6 +24,7 @@ export function useTechnologyDetail(id?: string) {
   const [contactForm, setContactForm] = useState<ContactFormState>({
     description: "",
     document: null,
+    budget: "",
   });
 
   useEffect(() => {
@@ -122,12 +124,14 @@ export function useTechnologyDetail(id?: string) {
         user: (user as any)?.id,
         description: contactForm.description,
         document: documentId as any,
+        budget: Number(contactForm.budget) || 0,
       } as any);
 
       setShowContactForm(false);
       setContactForm({
         description: "",
         document: null,
+        budget: "",
       });
     } catch (err) {
       console.error("Gửi liên hệ thất bại:", err);

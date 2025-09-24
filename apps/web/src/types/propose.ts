@@ -3,6 +3,14 @@ import { Media } from "./media1";
 import { Technology } from "./technologies";
 import { User } from "./users";
 
+export enum ProposeStatusEnum {
+  pending = "pending",
+  negotiating = "negotiating",
+  contract_signed = "contract_signed",
+  completed = "completed",
+  cancelled = "cancelled",
+}
+
 export type ProposeStatus =
   | "pending"
   | "negotiating"

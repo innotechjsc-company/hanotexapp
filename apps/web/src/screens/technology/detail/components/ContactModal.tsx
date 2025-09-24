@@ -48,6 +48,26 @@ export default function ContactModal({
               placeholder="Nhập mô tả hoặc lời nhắn của bạn..."
             />
           </div>
+          <div>
+            <label
+              htmlFor="budget"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Ngân sách dự kiến (VNĐ) *
+            </label>
+            <input
+              id="budget"
+              name="budget"
+              type="number"
+              required
+              min="0"
+              step="1000"
+              value={value.budget}
+              onChange={onChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Nhập ngân sách dự kiến..."
+            />
+          </div>
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tài liệu đính kèm (tùy chọn)
