@@ -30,6 +30,7 @@ export const NegotiationDetailsScreen: React.FC<
     // Loading states
     loading,
     sendingMessage,
+    uploadingFiles,
     showConfirmModal,
 
     // Error state
@@ -87,25 +88,31 @@ export const NegotiationDetailsScreen: React.FC<
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Header - Fixed at top */}
-      <NegotiationHeader proposal={proposal} onClose={handleClose} />
-
-      {/* Chat area - Takes remaining space */}
-      <div className="flex-1 min-h-0">
-        <NegotiationChat messages={messages} formatFileSize={formatFileSize} />
+      <div className="flex-shrink-0">
+        <NegotiationHeader proposal={proposal} onClose={handleClose} />
       </div>
 
-      {/* Message Input - Fixed at bottom */}
-      <MessageInput
-        form={form}
-        attachments={attachments}
-        sendingMessage={sendingMessage}
-        onSendMessage={onSendMessage}
-        onFileUpload={handleFileUpload}
-        onRemoveAttachment={removeAttachment}
-        formatFileSize={formatFileSize}
-      />
+      {/* Chat area - Takes remaining space with proper scrolling */}
+      <div className="flex-1 overflow-hidden">
+        <NegotiationChat
+          messages={messages}
+          formatFileSize={formatFileSize}
+          messageInputComponent={
+            <MessageInput
+              form={form}
+              attachments={attachments}
+              sendingMessage={sendingMessage}
+              uploadingFiles={uploadingFiles}
+              onSendMessage={onSendMessage}
+              onFileUpload={handleFileUpload}
+              onRemoveAttachment={removeAttachment}
+              formatFileSize={formatFileSize}
+            />
+          }
+        />
+      </div>
 
       {/* Confirmation Modal */}
       <ConfirmationModal
@@ -113,6 +120,7 @@ export const NegotiationDetailsScreen: React.FC<
         onOk={onConfirmSend}
         onCancel={() => setShowConfirmModal(false)}
         confirmLoading={sendingMessage}
+        uploadingFiles={uploadingFiles}
         pendingMessage={pendingMessage}
         formatFileSize={formatFileSize}
       />

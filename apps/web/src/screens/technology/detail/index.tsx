@@ -16,7 +16,9 @@ interface TechnologyDetailScreenProps {
   id?: string;
 }
 
-export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenProps) {
+export default function TechnologyDetailScreen({
+  id,
+}: TechnologyDetailScreenProps) {
   const {
     technology,
     loading,
@@ -28,6 +30,8 @@ export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenPro
     getTrlLabel,
     showContactForm,
     contactForm,
+    contactSubmitting,
+    hasContacted,
     onOpenContact,
     onCloseContact,
     onContactChange,
@@ -46,7 +50,9 @@ export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenPro
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">{error || "Không tìm thấy công nghệ"}</div>
+          <div className="text-red-600 text-xl mb-4">
+            {error || "Không tìm thấy công nghệ"}
+          </div>
         </div>
       </div>
     );
@@ -67,7 +73,9 @@ export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenPro
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <SummaryCard summary={technology?.public_summary || technology?.description} />
+            <SummaryCard
+              summary={technology?.public_summary || technology?.description}
+            />
             <ConfidentialDetailCard
               confidential_detail={technology?.confidential_detail}
               isAuthenticated={Boolean(isAuthenticated)}
@@ -77,7 +85,11 @@ export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenPro
           </div>
 
           <div className="space-y-6">
-            <SidebarContactCard owner={technology?.owner || technology?.submitter} onContact={onOpenContact} />
+            <SidebarContactCard
+              owner={technology?.owner || technology?.submitter}
+              onContact={onOpenContact}
+              hasContacted={hasContacted}
+            />
             <PricingCard pricing={technology?.pricing} />
             <TechnologyMetaCard
               trl_level={technology?.trl_level}
@@ -98,8 +110,8 @@ export default function TechnologyDetailScreen({ id }: TechnologyDetailScreenPro
         onSubmit={onSubmitContact}
         onChange={onContactChange}
         value={contactForm}
+        loading={contactSubmitting}
       />
     </div>
   );
 }
-

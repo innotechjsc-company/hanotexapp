@@ -5,8 +5,10 @@ import {
   negotiatingMessageApi,
   ApiNegotiatingMessage,
 } from "@/api/negotiating-messages";
+import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
+import { MediaType } from "@/types/media1";
 
 export interface UseNegotiationProps {
   proposalId: string;
@@ -22,6 +24,7 @@ export interface UseNegotiationReturn {
   // Loading states
   loading: boolean;
   sendingMessage: boolean;
+  uploadingFiles: boolean;
   showConfirmModal: boolean;
 
   // Error state
@@ -39,6 +42,76 @@ export interface UseNegotiationReturn {
   getStatusColor: (status: string) => string;
   getStatusLabel: (status: string) => string;
 }
+
+// Helper function to detect file type based on MIME type or file extension
+const detectFileType = (file: File): MediaType => {
+  const mimeType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+
+  // Check MIME type first
+  if (mimeType.startsWith("image/")) {
+    return MediaType.IMAGE;
+  }
+
+  if (mimeType.startsWith("video/")) {
+    return MediaType.VIDEO;
+  }
+
+  // Check by file extension for documents
+  const documentExtensions = [
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".txt",
+    ".rtf",
+    ".odt",
+    ".ods",
+    ".odp",
+    ".csv",
+  ];
+
+  const imageExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".webp",
+    ".svg",
+    ".ico",
+  ];
+
+  const videoExtensions = [
+    ".mp4",
+    ".avi",
+    ".mov",
+    ".wmv",
+    ".flv",
+    ".webm",
+    ".mkv",
+    ".m4v",
+  ];
+
+  // Check file extensions
+  if (documentExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.DOCUMENT;
+  }
+
+  if (imageExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.IMAGE;
+  }
+
+  if (videoExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.VIDEO;
+  }
+
+  // Default to document for unknown types
+  return MediaType.DOCUMENT;
+};
 
 export const useNegotiation = ({
   proposalId,
@@ -60,6 +133,7 @@ export const useNegotiation = ({
   const [error, setError] = useState<string>("");
   const [messages, setMessages] = useState<ApiNegotiatingMessage[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<{
@@ -135,35 +209,76 @@ export const useNegotiation = ({
       // Use stable user reference with fallback to currentUser
       const userForSending = stableUser || currentUser;
 
-      console.log("confirmSendMessage - Start - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
-        email: userForSending?.email,
-        hasUser: !!userForSending,
-      });
-
-      // TODO: Upload files first if any attachments exist
+      // Upload files first if any attachments exist
       const documentIds: string[] = [];
       if (pendingMessage.attachments.length > 0) {
-        // For now, we'll skip file upload and just use empty array
-        // In a real implementation, you would upload files to media API first
-        console.log("File upload not implemented yet, skipping attachments");
+        try {
+          setUploadingFiles(true);
+          console.log("Uploading files:", pendingMessage.attachments.length);
+
+          // Show progress message
+          message.loading("Đang tải lên file đính kèm...", 0);
+
+          // Upload files individually with proper type detection
+          const uploadPromises = pendingMessage.attachments.map(
+            async (file) => {
+              const fileType = detectFileType(file);
+              const fileName = file.name;
+
+              console.log(`Uploading ${fileName} as ${fileType}`);
+
+              // Generate appropriate alt text based on file type
+              let altText = "";
+              switch (fileType) {
+                case MediaType.IMAGE:
+                  altText = `Hình ảnh đính kèm: ${fileName}`;
+                  break;
+                case MediaType.VIDEO:
+                  altText = `Video đính kèm: ${fileName}`;
+                  break;
+                case MediaType.DOCUMENT:
+                  altText = `Tài liệu đính kèm: ${fileName}`;
+                  break;
+                default:
+                  altText = `File đính kèm: ${fileName}`;
+              }
+
+              return await uploadFile(file, {
+                type: fileType,
+                alt: altText,
+              });
+            }
+          );
+
+          const uploadedMedia = await Promise.all(uploadPromises);
+
+          // Extract IDs from uploaded media
+          documentIds.push(
+            ...uploadedMedia.map((media) => media.id.toString())
+          );
+
+          console.log("Files uploaded successfully:", {
+            count: uploadedMedia.length,
+            ids: documentIds,
+          });
+
+          // Hide loading message
+          message.destroy();
+          message.success(`Đã tải lên ${uploadedMedia.length} file thành công`);
+        } catch (uploadError) {
+          console.error("Failed to upload files:", uploadError);
+          message.destroy();
+          message.error("Không thể tải lên file đính kèm");
+          return; // Stop execution if file upload fails
+        } finally {
+          setUploadingFiles(false);
+        }
       }
 
       // Check if user is authenticated - use stable user reference with fallback
       if (!userForSending?.id) {
-        console.error(
-          "User not authenticated - userForSending:",
-          userForSending
-        );
         throw new Error("User not authenticated");
       }
-
-      console.log("confirmSendMessage - Before API call - userForSending:", {
-        id: userForSending?.id,
-        email: userForSending?.email,
-      });
 
       // Send negotiation using API
       const sentMessage = await negotiatingMessageApi.sendMessage({
@@ -171,25 +286,11 @@ export const useNegotiation = ({
         technology_propose: proposalId,
         user: userForSending.id,
         message: pendingMessage.message,
-        document: documentIds,
-      });
-
-      console.log("Negotiation sent successfully:", sentMessage);
-
-      console.log("confirmSendMessage - Before refresh - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
+        documents: documentIds,
       });
 
       // Refresh negotiation data to get the latest data from server
       await fetchNegotiationMessages();
-
-      console.log("confirmSendMessage - After refresh - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
-      });
 
       setAttachments([]);
       setShowConfirmModal(false);
@@ -264,6 +365,7 @@ export const useNegotiation = ({
     // Loading states
     loading,
     sendingMessage,
+    uploadingFiles,
     showConfirmModal,
 
     // Error state
