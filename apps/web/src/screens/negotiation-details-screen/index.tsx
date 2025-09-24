@@ -87,12 +87,16 @@ export const NegotiationDetailsScreen: React.FC<
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-white shadow-xl">
-      {/* Loading State */}
+    <div className="h-screen flex flex-col bg-white">
+      {/* Header - Fixed at top */}
       <NegotiationHeader proposal={proposal} onClose={handleClose} />
 
-      <NegotiationChat messages={messages} formatFileSize={formatFileSize} />
+      {/* Chat area - Takes remaining space */}
+      <div className="flex-1 min-h-0">
+        <NegotiationChat messages={messages} formatFileSize={formatFileSize} />
+      </div>
 
+      {/* Message Input - Fixed at bottom */}
       <MessageInput
         form={form}
         attachments={attachments}

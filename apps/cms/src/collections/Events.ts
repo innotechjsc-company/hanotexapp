@@ -21,6 +21,13 @@ export const Events: CollectionConfig = {
       label: 'Tiêu đề',
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'content',
       type: 'textarea',
       required: true,

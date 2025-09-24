@@ -37,7 +37,6 @@ export const Project: CollectionConfig = {
       name: 'technology',
       type: 'relationship',
       relationTo: 'technologies',
-      required: true,
       label: 'Công nghệ',
     },
     {

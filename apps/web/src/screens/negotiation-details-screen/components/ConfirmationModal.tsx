@@ -24,7 +24,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 }) => {
   return (
     <Modal
-      title="Xác nhận gửi tin nhắn"
+      title="Xác nhận gửi đàm phán"
       open={open}
       onOk={onOk}
       onCancel={onCancel}
@@ -33,11 +33,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       confirmLoading={confirmLoading}
     >
       <div>
-        <Typography.Text strong>Tin nhắn:</Typography.Text>
+        <Typography.Text strong>Nội dung đàm phán:</Typography.Text>
         <div className="p-2 bg-gray-100 rounded-md m-2">
           {pendingMessage.message || (
             <Typography.Text type="secondary">
-              Không có tin nhắn
+              Không có nội dung đàm phán
             </Typography.Text>
           )}
         </div>

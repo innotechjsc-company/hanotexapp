@@ -24,171 +24,208 @@ import {
   Spinner,
   Divider,
 } from "@heroui/react";
-
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
-  attendees: string;
-  type: string;
-  status: "upcoming" | "ongoing" | "completed";
-  registration_required: boolean;
-  registration_deadline?: string;
-  image_url?: string;
-  organizer: string;
-  contact_email: string;
-  contact_phone: string;
-}
+import { Event } from "@/types/event";
+import {
+  getEvents,
+  getUpcomingEvents,
+  getOngoingEvents,
+  getPastEvents,
+  searchEvents,
+} from "@/api/events";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import { useRouter } from "next/navigation";
 
 export default function EventsPage() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("upcoming");
-  const [sortBy, setSortBy] = useState("date");
+  const [selectedStatus, setSelectedStatus] = useState<
+    "pending" | "in_progress" | "completed" | "cancelled" | "all"
+  >("all");
+  const [sortBy, setSortBy] = useState("start_date");
+  const [totalDocs, setTotalDocs] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Mock data for events
-  const mockEvents: Event[] = [
+  // Comments state
+  const [comments, setComments] = useState([
     {
       id: 1,
-      title: "Techmart Hà Nội 2025",
-      description:
-        "Triển lãm công nghệ và sản phẩm khoa học công nghệ lớn nhất Hà Nội với sự tham gia của hơn 200 doanh nghiệp và viện nghiên cứu.",
-      date: "2025-02-25",
-      time: "08:00 - 17:00",
-      location: "Trung tâm Hội nghị Quốc gia",
-      attendees: "500+",
-      type: "Triển lãm",
-      status: "upcoming",
-      registration_required: true,
-      registration_deadline: "2025-02-20",
-      organizer: "Sở KH&CN Hà Nội",
-      contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3825 1234",
-      image_url: "/images/events/techmart-2025.jpg",
+      author: "Phạm Minh D",
+      avatar: "P",
+      avatarColor: "purple",
+      time: "09:44 24 thg 9",
+      content:
+        "Sự kiện này có hấp dẫn quá! Mình đã đăng ký rồi, mong chờ được tham gia.",
     },
     {
       id: 2,
-      title: "Đấu giá công nghệ AI & Machine Learning",
-      description:
-        "Sự kiện đấu giá các công nghệ AI và Machine Learning từ các viện nghiên cứu và doanh nghiệp công nghệ hàng đầu.",
-      date: "2025-03-15",
-      time: "14:00 - 16:00",
-      location: "Sở KH&CN Hà Nội",
-      attendees: "200+",
-      type: "Đấu giá",
-      status: "upcoming",
-      registration_required: true,
-      registration_deadline: "2025-03-10",
-      organizer: "HANOTEX",
-      contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3825 1234",
-      image_url: "/images/events/ai-auction.jpg",
+      author: "Hoàng Thị E",
+      avatar: "H",
+      avatarColor: "blue",
+      time: "08:44 24 thg 9",
+      content:
+        "Có workshop thực hành không ạ? Mình muốn tìm hiểu thêm về phần này.",
     },
-    {
-      id: 3,
-      title: "Hội thảo chuyển giao công nghệ",
-      description:
-        "Hội thảo chuyên đề về quy trình chuyển giao công nghệ hiệu quả, chia sẻ kinh nghiệm và best practices.",
-      date: "2025-03-20",
-      time: "09:00 - 12:00",
-      location: "Trường Đại học Bách Khoa Hà Nội",
-      attendees: "150+",
-      type: "Hội thảo",
-      status: "upcoming",
-      registration_required: true,
-      registration_deadline: "2025-03-15",
-      organizer: "Đại học Bách Khoa Hà Nội",
-      contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3869 1234",
-      image_url: "/images/events/tech-transfer-workshop.jpg",
-    },
-    {
-      id: 4,
-      title: 'Workshop "Định giá công nghệ và sở hữu trí tuệ"',
-      description:
-        "Workshop hướng dẫn các phương pháp định giá công nghệ và bảo vệ quyền sở hữu trí tuệ cho doanh nghiệp.",
-      date: "2025-03-25",
-      time: "13:30 - 17:00",
-      location: "Viện Hàn lâm Khoa học Việt Nam",
-      attendees: "100+",
-      type: "Workshop",
-      status: "upcoming",
-      registration_required: true,
-      registration_deadline: "2025-03-20",
-      organizer: "Viện Hàn lâm KH&CN VN",
-      contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3791 1234",
-    },
-    {
-      id: 5,
-      title: 'Hội nghị "Xu hướng công nghệ 2025"',
-      description:
-        "Hội nghị tổng kết các xu hướng công nghệ nổi bật trong năm 2025 và định hướng phát triển cho các doanh nghiệp.",
-      date: "2025-01-20",
-      time: "08:30 - 16:30",
-      location: "Khách sạn Daewoo Hà Nội",
-      attendees: "300+",
-      type: "Hội nghị",
-      status: "completed",
-      registration_required: false,
-      organizer: "Hiệp hội Doanh nghiệp CNTT",
-      contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3775 1234",
-    },
-  ];
+  ]);
+  const [newComment, setNewComment] = useState("");
 
   const eventTypes = [
     "Tất cả",
-    "Triển lãm",
-    "Đấu giá",
     "Hội thảo",
     "Workshop",
+    "Triển lãm",
     "Hội nghị",
   ];
   const eventStatuses = [
-    { value: "upcoming", label: "Sắp diễn ra" },
-    { value: "ongoing", label: "Đang diễn ra" },
+    { value: "all", label: "Tất cả" },
+    { value: "pending", label: "Chờ duyệt" },
+    { value: "in_progress", label: "Đang diễn ra" },
     { value: "completed", label: "Đã kết thúc" },
+    { value: "cancelled", label: "Đã hủy" },
   ];
 
-  useEffect(() => {
-    // Simulate API call
-    const fetchEvents = async () => {
-      setLoading(true);
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setEvents(mockEvents);
+  // Fetch events from API
+  const fetchEvents = async (isLoadMore = false) => {
+    try {
+      if (!isLoadMore) {
+        setLoading(true);
+        setError(null);
+      }
+
+      let response;
+
+      // Fetch based on selected status
+      if (selectedStatus === "all") {
+        // Fetch all events without status filter
+        response = await getEvents(
+          {}, // No filters
+          {
+            page: isLoadMore ? currentPage + 1 : 1,
+            limit: 10,
+            sort: sortBy === "start_date" ? "start_date" : "-createdAt",
+          }
+        );
+      } else if (selectedStatus === "in_progress") {
+        response = await getOngoingEvents({
+          page: isLoadMore ? currentPage + 1 : 1,
+          limit: 10,
+          sort: sortBy === "start_date" ? "start_date" : "-createdAt",
+        });
+      } else if (selectedStatus === "completed") {
+        response = await getPastEvents({
+          page: isLoadMore ? currentPage + 1 : 1,
+          limit: 10,
+          sort: sortBy === "start_date" ? "-end_date" : "-createdAt",
+        });
+      } else {
+        response = await getEvents(
+          { status: selectedStatus as any },
+          {
+            page: isLoadMore ? currentPage + 1 : 1,
+            limit: 10,
+            sort: sortBy === "start_date" ? "start_date" : "-createdAt",
+          }
+        );
+      }
+
+      const newEvents = Array.isArray(response.docs) ? response.docs : [];
+
+      if (isLoadMore) {
+        setEvents((prev) => [...prev, ...newEvents] as any);
+        setCurrentPage((prev) => prev + 1);
+      } else {
+        setEvents(newEvents as any);
+        setCurrentPage(1);
+      }
+
+      setTotalDocs(response.totalDocs || 0);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError("Không thể tải danh sách sự kiện. Vui lòng thử lại sau.");
+    } finally {
       setLoading(false);
-    };
-
-    fetchEvents();
-  }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Filter events based on search query
-    const filtered = mockEvents.filter(
-      (event) =>
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.type.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setEvents(filtered);
+    }
   };
 
-  const filteredEvents = events.filter((event) => {
-    const typeMatch =
-      selectedType === "" ||
-      selectedType === "Tất cả" ||
-      event.type === selectedType;
-    const statusMatch = event.status === selectedStatus;
-    return typeMatch && statusMatch;
-  });
+  useEffect(() => {
+    fetchEvents();
+  }, [selectedStatus, sortBy]);
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      fetchEvents();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await searchEvents(
+        searchQuery,
+        { status: selectedStatus },
+        {
+          page: 1,
+          limit: 10,
+          sort: sortBy === "start_date" ? "start_date" : "-createdAt",
+        }
+      );
+
+      const searchResults = Array.isArray(response.docs) ? response.docs : [];
+      setEvents(searchResults as any);
+      setTotalDocs(response.totalDocs || 0);
+      setCurrentPage(1);
+    } catch (err) {
+      console.error("Error searching events:", err);
+      setError("Không thể tìm kiếm sự kiện. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper function to get image URL
+  const getImageUrl = (image: any): string => {
+    // Multiple fallback images for variety
+    const fallbackImages = [
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop", // Conference
+      "https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=400&fit=crop", // Business meeting
+      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=400&fit=crop", // Tech event
+      "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=400&fit=crop", // Workshop
+    ];
+
+    // Use a random fallback image based on image id or title
+    const fallbackIndex = image?.id
+      ? parseInt(image.id.slice(-1), 16) % fallbackImages.length
+      : Math.floor(Math.random() * fallbackImages.length);
+    const fallbackImage = fallbackImages[fallbackIndex];
+
+    if (!image) return fallbackImage;
+
+    // Check if it's a string URL
+    if (typeof image === "string") {
+      if (image.startsWith("http")) return image;
+      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image}`;
+    }
+
+    // Check if it's an image object from PayloadCMS
+    if (image && typeof image === "object") {
+      // Only use the image if it's actually an image file
+      if (image.mimeType && image.mimeType.startsWith("image/")) {
+        if (image.url) {
+          if (image.url.startsWith("http")) return image.url;
+          return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image.url}`;
+        }
+      }
+      // If it's not an image file (like PDF), use fallback
+      return fallbackImage;
+    }
+
+    return fallbackImage;
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -201,12 +238,14 @@ export default function EventsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "upcoming":
-        return "success";
-      case "ongoing":
+      case "pending":
+        return "warning";
+      case "in_progress":
         return "primary";
       case "completed":
-        return "default";
+        return "success";
+      case "cancelled":
+        return "danger";
       default:
         return "default";
     }
@@ -214,14 +253,50 @@ export default function EventsPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "upcoming":
-        return "Sắp diễn ra";
-      case "ongoing":
+      case "pending":
+        return "Chờ duyệt";
+      case "in_progress":
         return "Đang diễn ra";
       case "completed":
         return "Đã kết thúc";
+      case "cancelled":
+        return "Đã hủy";
       default:
         return status;
+    }
+  };
+
+  // Comment handlers
+  const handleAddComment = () => {
+    if (newComment.trim()) {
+      const comment = {
+        id: comments.length + 1,
+        author: "Bạn",
+        avatar: "B",
+        avatarColor: "green",
+        time: new Date().toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+        }),
+        content: newComment.trim(),
+      };
+      setComments([comment, ...comments]);
+      setNewComment("");
+    }
+  };
+
+  const getAvatarColorClass = (color: string) => {
+    switch (color) {
+      case "purple":
+        return "bg-purple-100 text-purple-600";
+      case "blue":
+        return "bg-blue-100 text-blue-600";
+      case "green":
+        return "bg-green-100 text-green-600";
+      default:
+        return "bg-gray-100 text-gray-600";
     }
   };
 
@@ -255,6 +330,7 @@ export default function EventsPage() {
             startContent={<Plus className="h-5 w-5" />}
             className="font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-md visible opacity-100 z-10 relative"
             size="md"
+            onPress={() => router.push("/events/register")}
           >
             Đăng sự kiện
           </Button>
@@ -288,27 +364,16 @@ export default function EventsPage() {
               {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
-                  label="Loại sự kiện"
-                  variant="bordered"
-                  selectedKeys={selectedType ? [selectedType] : []}
-                  onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0] as string;
-                    setSelectedType(selected === "Tất cả" ? "" : selected);
-                  }}
-                >
-                  {eventTypes.map((type) => (
-                    <SelectItem key={type === "Tất cả" ? "" : type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </Select>
-
-                <Select
                   label="Trạng thái"
                   variant="bordered"
                   selectedKeys={[selectedStatus]}
                   onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0] as string;
+                    const selected = Array.from(keys)[0] as
+                      | "pending"
+                      | "in_progress"
+                      | "completed"
+                      | "cancelled"
+                      | "all";
                     setSelectedStatus(selected);
                   }}
                 >
@@ -325,8 +390,7 @@ export default function EventsPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <p className="text-gray-600">
-              Tìm thấy{" "}
-              <span className="font-semibold">{filteredEvents.length}</span> sự
+              Tìm thấy <span className="font-semibold">{totalDocs}</span> sự
               kiện
             </p>
           </div>
@@ -350,20 +414,18 @@ export default function EventsPage() {
         </div>
 
         {/* Events List */}
-        {filteredEvents.length > 0 ? (
+        {events.length > 0 ? (
           <div className="space-y-6 w-full">
-            {filteredEvents.map((event) => (
+            {events.map((event: Event) => (
               <Card
                 key={event.id}
-                className="hover:shadow-md transition-shadow w-full"
+                className="hover:shadow-md transition-shadow w-full cursor-pointer"
                 isPressable
+                onPress={() => router.push(`/events/${event.id}`)}
               >
                 <CardBody className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Chip color="primary" size="sm" variant="flat">
-                        {event.type}
-                      </Chip>
                       <Chip
                         color={getStatusColor(event.status) as any}
                         size="sm"
@@ -371,11 +433,6 @@ export default function EventsPage() {
                       >
                         {getStatusText(event.status)}
                       </Chip>
-                      {event.registration_required && (
-                        <Chip color="warning" size="sm" variant="flat">
-                          Cần đăng ký
-                        </Chip>
-                      )}
                     </div>
                   </div>
 
@@ -384,68 +441,67 @@ export default function EventsPage() {
                   </h2>
 
                   <p className="text-gray-600 mb-4 line-clamp-3">
-                    {event.description}
+                    {event.content.length > 200
+                      ? event.content.substring(0, 200) + "..."
+                      : event.content}
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
                     <div className="flex items-center text-gray-500">
                       <Calendar className="h-4 w-4 mr-2" />
-                      <span>{formatDate(event.date)}</span>
+                      <span>{formatDate(event.start_date)}</span>
                     </div>
                     <div className="flex items-center text-gray-500">
                       <Clock className="h-4 w-4 mr-2" />
-                      <span>{event.time}</span>
+                      <span>{formatDate(event.end_date)}</span>
                     </div>
-                    <div className="flex items-center text-gray-500">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span className="line-clamp-1">{event.location}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Users className="h-4 w-4 mr-2" />
-                      <span>{event.attendees} người tham gia</span>
-                    </div>
+                    {event.location && (
+                      <div className="flex items-center text-gray-500">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                    )}
                   </div>
 
                   <Divider className="my-4" />
 
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">
-                      <span>Tổ chức bởi: </span>
-                      <span className="font-medium">{event.organizer}</span>
+                      <span>Ngày tạo: </span>
+                      <span className="font-medium">
+                        {event.createdAt ? formatDate(event.createdAt) : "N/A"}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap min-h-[40px]">
-                      {event.status === "upcoming" &&
-                        event.registration_required && (
+                      {event.url && (
+                        <div onClick={(e) => e.stopPropagation()}>
                           <Button
+                            variant="light"
                             color="primary"
                             size="sm"
-                            className="bg-blue-600 text-white hover:bg-blue-700 shadow-sm font-medium visible opacity-100 z-10 relative flex-shrink-0"
+                            endContent={<ExternalLink className="h-3 w-3" />}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
+                            onPress={() => window.open(event.url, "_blank")}
                           >
-                            Đăng ký tham gia
+                            Xem chi tiết
                           </Button>
-                        )}
-                      <Button
-                        variant="light"
-                        color="primary"
-                        size="sm"
-                        endContent={<ExternalLink className="h-3 w-3" />}
-                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
-                      >
-                        Chi tiết sự kiện
-                      </Button>
+                        </div>
+                      )}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="light"
+                          color="primary"
+                          size="sm"
+                          endContent={<ExternalLink className="h-3 w-3" />}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
+                          onPress={() => router.push(`/events/${event.id}`)}
+                        >
+                          Chi tiết sự kiện
+                        </Button>
+                      </div>
                     </div>
                   </div>
-
-                  {event.registration_deadline &&
-                    event.status === "upcoming" && (
-                      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-sm text-yellow-800">
-                          <strong>Hạn đăng ký:</strong>{" "}
-                          {formatDate(event.registration_deadline)}
-                        </p>
-                      </div>
-                    )}
                 </CardBody>
               </Card>
             ))}
@@ -465,15 +521,37 @@ export default function EventsPage() {
         )}
 
         {/* Load More Button */}
-        {filteredEvents.length > 0 && (
+        {events.length > 0 && events.length < totalDocs && (
           <div className="text-center mt-8">
             <Button
               variant="bordered"
               endContent={<ArrowRight className="h-4 w-4" />}
               className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm font-medium visible opacity-100 z-10 relative"
               size="md"
+              onPress={() => fetchEvents(true)}
+              isLoading={loading}
             >
               Xem thêm sự kiện
+            </Button>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ExternalLink className="h-8 w-8 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Có lỗi xảy ra
+            </h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button
+              color="primary"
+              onPress={() => fetchEvents()}
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Thử lại
             </Button>
           </div>
         )}

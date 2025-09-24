@@ -19,4 +19,5 @@ export {
 } from "./Charts";
 export { default as Map } from "./Map";
 export { default as MapComponent } from "./MapComponent";
+export { default as CountdownTimer } from "./CountdownTimer";
 export { default as Card, CardHeader, CardContent, CardFooter } from "./Card";

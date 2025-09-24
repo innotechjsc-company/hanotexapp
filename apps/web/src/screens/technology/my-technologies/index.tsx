@@ -42,8 +42,6 @@ export default function MyTechnologiesScreen() {
     totalPages,
 
     // Selection state
-    selectedKeys,
-    setSelectedKeys,
     selectedCount,
 
     // Computed data
@@ -100,8 +98,6 @@ export default function MyTechnologiesScreen() {
               <TechnologiesTable
                 filteredItems={filteredItems}
                 isLoading={isLoading}
-                selectedKeys={selectedKeys}
-                setSelectedKeys={setSelectedKeys}
                 selectedCount={selectedCount}
                 setCurrent={setCurrent}
                 onView={viewDisclosure.onOpen}
