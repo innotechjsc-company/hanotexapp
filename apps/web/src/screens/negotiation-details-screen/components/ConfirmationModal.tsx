@@ -7,6 +7,7 @@ interface ConfirmationModalProps {
   onOk: () => Promise<void>;
   onCancel: () => void;
   confirmLoading: boolean;
+  uploadingFiles?: boolean;
   pendingMessage: {
     message: string;
     attachments: File[];
@@ -19,6 +20,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onOk,
   onCancel,
   confirmLoading,
+  uploadingFiles = false,
   pendingMessage,
   formatFileSize,
 }) => {
@@ -28,9 +30,16 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       open={open}
       onOk={onOk}
       onCancel={onCancel}
-      okText="Gửi"
+      okText={
+        uploadingFiles
+          ? "Đang tải lên..."
+          : confirmLoading
+            ? "Đang gửi..."
+            : "Gửi"
+      }
       cancelText="Hủy"
-      confirmLoading={confirmLoading}
+      confirmLoading={confirmLoading || uploadingFiles}
+      cancelButtonProps={{ disabled: confirmLoading || uploadingFiles }}
     >
       <div>
         <Typography.Text strong>Nội dung đàm phán:</Typography.Text>

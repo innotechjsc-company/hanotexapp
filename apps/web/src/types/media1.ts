@@ -1,3 +1,10 @@
+export enum MediaType {
+  IMAGE = "image",
+  VIDEO = "video",
+  DOCUMENT = "document",
+  OTHER = "other",
+}
+
 export interface Media {
   id: number;
   /**
@@ -11,7 +18,7 @@ export interface Media {
   /**
    * Loại file media
    */
-  type?: ("image" | "video" | "document" | "other") | null;
+  type?: MediaType | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;

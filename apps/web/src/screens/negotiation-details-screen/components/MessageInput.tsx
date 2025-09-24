@@ -9,6 +9,7 @@ interface MessageInputProps {
   form: any;
   attachments: File[];
   sendingMessage: boolean;
+  uploadingFiles?: boolean;
   onSendMessage: (values: { message: string }) => Promise<void>;
   onFileUpload: (file: File) => boolean;
   onRemoveAttachment: (index: number) => void;
@@ -19,13 +20,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   form,
   attachments,
   sendingMessage,
+  uploadingFiles = false,
   onSendMessage,
   onFileUpload,
   onRemoveAttachment,
   formatFileSize,
 }) => {
   return (
-    <div className="sticky bottom-0 bg-white border-t border-gray-200 backdrop-blur-sm bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+    <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
       <div className="max-w-7xl mx-auto">
         {/* File Attachments Preview */}
         {attachments.length > 0 && (
@@ -102,9 +104,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               type="primary"
               htmlType="submit"
               icon={<Send size={16} />}
-              loading={sendingMessage}
-              disabled={sendingMessage}
+              loading={sendingMessage || uploadingFiles}
+              disabled={sendingMessage || uploadingFiles}
               className="rounded-full w-10 h-10 flex items-center justify-center border-none bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-200"
+              title={
+                uploadingFiles
+                  ? "Đang tải lên file..."
+                  : sendingMessage
+                    ? "Đang gửi tin nhắn..."
+                    : "Gửi tin nhắn"
+              }
             />
           </div>
         </Form>

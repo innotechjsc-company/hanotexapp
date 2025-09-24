@@ -943,7 +943,7 @@ export interface NegotiatingMessage {
   /**
    * Tài liệu đính kèm
    */
-  document?: (string | Media)[] | null;
+  documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1643,7 +1643,7 @@ export interface NegotiatingMessagesSelect<T extends boolean = true> {
   technology_propose?: T;
   user?: T;
   message?: T;
-  document?: T;
+  documents?: T;
   updatedAt?: T;
   createdAt?: T;
 }
