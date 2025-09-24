@@ -1,23 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Select,
-  SelectItem,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Textarea,
-  Spinner,
-} from "@heroui/react";
+import { Button, Card, Input, Select, Modal, Spin } from "antd";
 import { Upload, FileText, Trash2, Plus, Save } from "lucide-react";
+
+const { TextArea } = Input;
 import type {
   Technology,
   TechnologyStatus,
@@ -158,31 +145,41 @@ export function AddTechnologyModal({
     })();
   };
 
+  const handleCancel = () => {
+    disclosure.onOpenChange(false);
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="5xl"
-      scrollBehavior="inside"
+      title="Thêm công nghệ mới"
+      open={disclosure.isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="cancel" onClick={handleCancel}>
+          Hủy
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          loading={submitting}
+          icon={<Save className="h-4 w-4" />}
+          disabled={confirmUpload === false || submitting}
+          onClick={(e) => handleSubmit(e as any, handleCancel)}
+        >
+          Đăng ký công nghệ
+        </Button>,
+      ]}
+      width={1200}
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="text-xl font-bold">
-              Thêm công nghệ mới
-            </ModalHeader>
-            <ModalBody className="space-y-6">
-              <form
-                className="space-y-6"
-                onSubmit={(e) => handleSubmit(e, onClose)}
-              >
-                {/* 1. Basic Information */}
-                <BasicInfoSection
-                  ref={basicRef}
-                  onChange={(data) => console.log("Changed:", data)} // optional
-                />
+      <div className="space-y-6">
+        <form className="space-y-6" onSubmit={(e) => handleSubmit(e, onClose)}>
+          {/* 1. Basic Information */}
+          <BasicInfoSection
+            ref={basicRef}
+            onChange={(data) => console.log("Changed:", data)} // optional
+          />
 
-                {/* <Card>
+          {/* <Card>
                   <CardHeader className="px-6 py-4">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Trạng thái *
@@ -215,78 +212,57 @@ export function AddTechnologyModal({
                   </CardBody>
                 </Card> */}
 
-                {/* 2. Technology Owners */}
-                <TechnologyOwnersSection
-                  ref={ownersRef}
-                  initialOwners={[]} // Dữ liệu khởi tạo (tùy chọn)
-                  onChange={(owners) => console.log("Changed:", owners)} // Callback khi có thay đổi (tùy chọn)
+          {/* 2. Technology Owners */}
+          <TechnologyOwnersSection
+            ref={ownersRef}
+            initialOwners={[]} // Dữ liệu khởi tạo (tùy chọn)
+            onChange={(owners) => console.log("Changed:", owners)} // Callback khi có thay đổi (tùy chọn)
+          />
+
+          {/* 3. IP Details */}
+          <IPSection
+            ref={ipRef}
+            onChange={(ipDetails) => console.log("Changed:", ipDetails)} // Callback khi có thay đổi (tùy chọn)
+          />
+
+          {/* 4. Legal Territory */}
+          <LegalTerritorySection
+            ref={legalTerritoryRef}
+            initialData={{}} // optional
+            onChange={(legalDetails) => console.log("Changed:", legalDetails)} // optional
+          />
+
+          {/* 6. Investment & Transfer (Optional) */}
+          <InvestmentTransferSection
+            ref={investmentTransferRef}
+            onChange={(data) => console.log("Changed:", data)} // optional
+          />
+
+          {/* 7. Pricing & Desired Price (Optional) */}
+          <PricingDesiredSection ref={pricingRef} />
+
+          {/* 8. Visibility */}
+          <VisibilityNDASection ref={visibilityRef} />
+
+          {/* Confirmation checkbox */}
+          <Card>
+            <div className="p-4">
+              <label className="flex items-start gap-3 cursor-pointer p-2 rounded-md transition-colors">
+                <input
+                  type="checkbox"
+                  checked={confirmUpload}
+                  onChange={(e) => setConfirmUpload(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-
-                {/* 3. IP Details */}
-                <IPSection
-                  ref={ipRef}
-                  onChange={(ipDetails) => console.log("Changed:", ipDetails)} // Callback khi có thay đổi (tùy chọn)
-                />
-
-                {/* 4. Legal Territory */}
-                <LegalTerritorySection
-                  ref={legalTerritoryRef}
-                  initialData={{}} // optional
-                  onChange={(legalDetails) =>
-                    console.log("Changed:", legalDetails)
-                  } // optional
-                />
-
-                {/* 6. Investment & Transfer (Optional) */}
-                <InvestmentTransferSection
-                  ref={investmentTransferRef}
-                  onChange={(data) => console.log("Changed:", data)} // optional
-                />
-
-                {/* 7. Pricing & Desired Price (Optional) */}
-                <PricingDesiredSection ref={pricingRef} />
-
-                {/* 8. Visibility */}
-                <VisibilityNDASection ref={visibilityRef} />
-
-                {/* Confirmation checkbox */}
-                <Card>
-                  <CardBody className="p-4">
-                    <label className="flex items-start gap-3 cursor-pointer p-2 rounded-md transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={confirmUpload}
-                        onChange={(e) => setConfirmUpload(e.target.checked)}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <span className="text-sm text-gray-700">
-                        Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm
-                        công nghệ theo đúng quy định.
-                      </span>
-                    </label>
-                  </CardBody>
-                </Card>
-              </form>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                type="submit"
-                color="primary"
-                className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
-                isLoading={submitting}
-                startContent={<Save className="h-4 w-4" />}
-                isDisabled={confirmUpload === false || submitting}
-                onPress={() => handleSubmit(event as any, onClose)}
-              >
-                {"Đăng ký công nghệ"}
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+                <span className="text-sm text-gray-700">
+                  Tôi xác nhận sẽ tải lên và cung cấp thông tin sản phẩm công
+                  nghệ theo đúng quy định.
+                </span>
+              </label>
+            </div>
+          </Card>
+        </form>
+      </div>
     </Modal>
   );
 }
@@ -396,30 +372,37 @@ export function EditTechnologyModal({
     })();
   };
 
+  const handleCancel = () => {
+    disclosure.onOpenChange(false);
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="5xl"
-      scrollBehavior="inside"
+      title="Chỉnh sửa công nghệ"
+      open={disclosure.isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="cancel" onClick={handleCancel}>
+          Hủy
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          loading={submitting}
+          icon={<Save className="h-4 w-4" />}
+          disabled={submitting}
+          onClick={(e) => handleSubmit(e as any, handleCancel)}
+        >
+          Cập nhật
+        </Button>,
+      ]}
+      width={1200}
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="text-xl font-bold">
-              Chỉnh sửa công nghệ
-            </ModalHeader>
-            <ModalBody className="space-y-6">
-              <form
-                className="space-y-6"
-                onSubmit={(e) => handleSubmit(e, onClose)}
-              >
-                <BasicInfoSection
-                  initialData={current || undefined}
-                  ref={basicRef}
-                />
+      <div className="space-y-6">
+        <form className="space-y-6" onSubmit={(e) => handleSubmit(e, onClose)}>
+          <BasicInfoSection initialData={current || undefined} ref={basicRef} />
 
-                {/* <Card>
+          {/* <Card>
                   <CardHeader className="px-6 py-4">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Trạng thái *
@@ -454,61 +437,42 @@ export function EditTechnologyModal({
                   </CardBody>
                 </Card> */}
 
-                <TechnologyOwnersSection
-                  ref={ownersRef}
-                  initialOwners={current?.owners || []}
-                  onChange={() => {}}
-                />
+          <TechnologyOwnersSection
+            ref={ownersRef}
+            initialOwners={current?.owners || []}
+            onChange={() => {}}
+          />
 
-                <IPSection ref={ipRef} onChange={() => {}} />
+          <IPSection ref={ipRef} onChange={() => {}} />
 
-                <LegalTerritorySection
-                  ref={legalTerritoryRef}
-                  initialData={current?.legal_certification as any}
-                  onChange={() => {}}
-                />
+          <LegalTerritorySection
+            ref={legalTerritoryRef}
+            initialData={current?.legal_certification as any}
+            onChange={() => {}}
+          />
 
-                <InvestmentTransferSection
-                  ref={investmentTransferRef}
-                  onChange={() => {}}
-                  initialData={
-                    {
-                      investment_desire: current?.investment_desire,
-                      transfer_type: current?.transfer_type,
-                    } as any
-                  }
-                />
+          <InvestmentTransferSection
+            ref={investmentTransferRef}
+            onChange={() => {}}
+            initialData={
+              {
+                investment_desire: current?.investment_desire,
+                transfer_type: current?.transfer_type,
+              } as any
+            }
+          />
 
-                <PricingDesiredSection
-                  ref={pricingRef}
-                  initialData={current?.pricing as any}
-                />
+          <PricingDesiredSection
+            ref={pricingRef}
+            initialData={current?.pricing as any}
+          />
 
-                <VisibilityNDASection
-                  ref={visibilityRef}
-                  initialMode={current?.visibility_mode as any}
-                />
-              </form>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                type="submit"
-                color="primary"
-                className="bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500"
-                isLoading={submitting}
-                startContent={<Save className="h-4 w-4" />}
-                isDisabled={submitting}
-                onPress={() => handleSubmit(event as any, onClose)}
-              >
-                {"Cập nhật"}
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+          <VisibilityNDASection
+            ref={visibilityRef}
+            initialMode={current?.visibility_mode as any}
+          />
+        </form>
+      </div>
     </Modal>
   );
 }
@@ -605,101 +569,89 @@ export function ViewTechnologyModal({
     return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
+  const handleCancel = () => {
+    disclosure.onOpenChange(false);
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="lg"
-      scrollBehavior="inside"
+      title="Thông tin công nghệ"
+      open={disclosure.isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="close" type="primary" onClick={handleCancel}>
+          Đóng
+        </Button>,
+      ]}
+      width={800}
     >
-      <ModalContent>
-        {() => (
-          <>
-            <ModalHeader>Thông tin công nghệ</ModalHeader>
-            <ModalBody>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-500">Tiêu đề</div>
-                  <div className="font-medium text-lg">{current?.title}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Mô tả</div>
-                  <div className="text-gray-700 whitespace-pre-wrap">
-                    {current?.description}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Lĩnh vực</div>
-                    <div className="font-medium">
-                      {current?.category
-                        ? getCategoryName(current.category)
-                        : "Chưa chọn"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Mức TRL</div>
-                    <div className="font-medium">
-                      {current?.trl_level || "Chưa xác định"}
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Trạng thái</div>
-                    <div className="font-medium">
-                      {getStatusLabel(current?.status || "draft")}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Chế độ hiển thị</div>
-                    <div className="font-medium">
-                      {current?.visibility_mode === "public" && "Công khai"}
-                      {current?.visibility_mode === "private" && "Riêng tư"}
-                      {current?.visibility_mode === "restricted" && "Hạn chế"}
-                    </div>
-                  </div>
-                </div>
-                {current?.pricing && (
-                  <div>
-                    <div className="text-sm text-gray-500">
-                      Thông tin định giá
-                    </div>
-                    <div className="font-medium">
-                      {getPricingTypeLabel(current.pricing.pricing_type)}:{" "}
-                      {formatCurrency(
-                        current.pricing.price_from,
-                        current.pricing.currency
-                      )}{" "}
-                      -{" "}
-                      {formatCurrency(
-                        current.pricing.price_to,
-                        current.pricing.currency
-                      )}
-                    </div>
-                  </div>
-                )}
-                {current?.createdAt && (
-                  <div>
-                    <div className="text-sm text-gray-500">Ngày tạo</div>
-                    <div className="font-medium">
-                      {formatDate(current.createdAt)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="primary"
-                onPress={() => disclosure.onClose && disclosure.onClose()}
-              >
-                Đóng
-              </Button>
-            </ModalFooter>
-          </>
+      <div className="space-y-4">
+        <div>
+          <div className="text-sm text-gray-500">Tiêu đề</div>
+          <div className="font-medium text-lg">{current?.title}</div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-500">Mô tả</div>
+          <div className="text-gray-700 whitespace-pre-wrap">
+            {current?.description}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-gray-500">Lĩnh vực</div>
+            <div className="font-medium">
+              {current?.category
+                ? getCategoryName(current.category)
+                : "Chưa chọn"}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Mức TRL</div>
+            <div className="font-medium">
+              {current?.trl_level || "Chưa xác định"}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-gray-500">Trạng thái</div>
+            <div className="font-medium">
+              {getStatusLabel(current?.status || "draft")}
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Chế độ hiển thị</div>
+            <div className="font-medium">
+              {current?.visibility_mode === "public" && "Công khai"}
+              {current?.visibility_mode === "private" && "Riêng tư"}
+              {current?.visibility_mode === "restricted" && "Hạn chế"}
+            </div>
+          </div>
+        </div>
+        {current?.pricing && (
+          <div>
+            <div className="text-sm text-gray-500">Thông tin định giá</div>
+            <div className="font-medium">
+              {getPricingTypeLabel(current.pricing.pricing_type)}:{" "}
+              {formatCurrency(
+                current.pricing.price_from,
+                current.pricing.currency
+              )}{" "}
+              -{" "}
+              {formatCurrency(
+                current.pricing.price_to,
+                current.pricing.currency
+              )}
+            </div>
+          </div>
         )}
-      </ModalContent>
+        {current?.createdAt && (
+          <div>
+            <div className="text-sm text-gray-500">Ngày tạo</div>
+            <div className="font-medium">{formatDate(current.createdAt)}</div>
+          </div>
+        )}
+      </div>
     </Modal>
   );
 }
@@ -715,37 +667,36 @@ export function DeleteTechnologyModal({
   onDelete: () => Promise<void> | void;
   loading?: boolean;
 }) {
+  const handleCancel = () => {
+    disclosure.onOpenChange(false);
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="sm"
+      title="Xác nhận xóa"
+      open={disclosure.isOpen}
+      onCancel={handleCancel}
+      footer={[
+        <Button key="cancel" onClick={handleCancel}>
+          Hủy
+        </Button>,
+        <Button
+          key="delete"
+          type="primary"
+          danger
+          loading={!!loading}
+          icon={<Trash2 className="h-4 w-4" />}
+          onClick={onDelete}
+        >
+          Xóa
+        </Button>,
+      ]}
+      width={400}
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Xác nhận xóa</ModalHeader>
-            <ModalBody>
-              Bạn có chắc chắn muốn xóa công nghệ "{current?.title}"? Hành động
-              này không thể hoàn tác.
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                color="danger"
-                onPress={onDelete}
-                variant="bordered"
-                startContent={<Trash2 className="h-4 w-4" />}
-                isLoading={!!loading}
-              >
-                Xóa
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+      <p>
+        Bạn có chắc chắn muốn xóa công nghệ "{current?.title}"? Hành động này
+        không thể hoàn tác.
+      </p>
     </Modal>
   );
 }

@@ -50,7 +50,8 @@ export class TechnologyProposeApi {
     const res = await payloadApiClient.get<TechnologyPropose>(
       `${API_ENDPOINTS.TECHNOLOGY_PROPOSE}/${id}?depth=2`
     );
-    return (res as any).data as TechnologyPropose;
+
+    return res as TechnologyPropose;
   }
 
   async create(data: Partial<TechnologyPropose>): Promise<TechnologyPropose> {

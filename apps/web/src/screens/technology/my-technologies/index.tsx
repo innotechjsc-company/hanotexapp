@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Divider } from "@heroui/react";
+import { Card, Divider } from "antd";
 import { Toaster } from "react-hot-toast";
 import { useMyTechnologies } from "./hooks/useMyTechnologies";
 import {
@@ -77,15 +77,13 @@ export default function MyTechnologiesScreen() {
       <HeaderSection
         selectedCount={selectedCount}
         user={user}
-        setCurrent={setCurrent}
-        onAddTechnology={addDisclosure.onOpen}
         onBulkDelete={bulkDeleteDisclosure.onOpen}
       />
 
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col gap-6">
           <Card>
-            <CardHeader className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 p-6">
               <div className="flex items-center justify-between w-full">
                 <StatsCard totalDocs={totalDocs} items={items} />
                 <FiltersSection
@@ -96,9 +94,9 @@ export default function MyTechnologiesScreen() {
                   setPage={setPage}
                 />
               </div>
-            </CardHeader>
+            </div>
             <Divider />
-            <CardBody>
+            <div className="p-6">
               <TechnologiesTable
                 filteredItems={filteredItems}
                 isLoading={isLoading}
@@ -112,7 +110,7 @@ export default function MyTechnologiesScreen() {
                 onViewProposals={proposalsDisclosure.onOpen}
                 user={user}
               />
-            </CardBody>
+            </div>
           </Card>
 
           <PaginationSection
