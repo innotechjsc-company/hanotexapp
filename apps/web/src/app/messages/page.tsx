@@ -1,80 +1,159 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MessageSquare, Send, Search, MoreVertical, Star, Reply } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  MessageSquare,
+  Send,
+  Search,
+  MoreVertical,
+  Star,
+  Reply,
+} from "lucide-react";
+import { useAuthStore } from "@/store/auth";
+import { getRoomChats } from "@/api/roomChat";
+import { getUsersInRoom } from "@/api/roomUser";
+import { getMessagesForRoom, sendMessage } from "@/api/roomMessage";
+import { RoomChat } from "@/api/roomChat";
+import { RoomUser } from "@/types/room_user";
+import { RoomMessage } from "@/api/roomMessage";
 
 export default function MessagesPage() {
-  const [selectedConversation, setSelectedConversation] = useState(0);
-  const [newMessage, setNewMessage] = useState('');
+  const { user } = useAuthStore();
+  const searchParams = useSearchParams();
+  const roomIdFromUrl = searchParams.get("roomId");
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // TODO: Implement send message functionality
-      console.log('Sending message:', newMessage);
-      setNewMessage('');
+  const [selectedConversation, setSelectedConversation] = useState<
+    number | null
+  >(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [conversations, setConversations] = useState<RoomChat[]>([]);
+  const [messages, setMessages] = useState<RoomMessage[]>([]);
+  const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  // Load conversations on component mount
+  useEffect(() => {
+    if (user?.id) {
+      loadConversations();
+    }
+  }, [user?.id]);
+
+  // Auto-select conversation if roomId is provided in URL
+  useEffect(() => {
+    if (roomIdFromUrl && conversations.length > 0) {
+      const roomIndex = conversations.findIndex(
+        (room) => room.id === roomIdFromUrl
+      );
+      if (roomIndex !== -1) {
+        setSelectedConversation(roomIndex);
+      }
+    }
+  }, [roomIdFromUrl, conversations]);
+
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (selectedConversation !== null && conversations[selectedConversation]) {
+      loadMessages(conversations[selectedConversation].id);
+      loadRoomUsers(conversations[selectedConversation].id);
+    }
+  }, [selectedConversation, conversations]);
+
+  const loadConversations = async () => {
+    try {
+      setLoading(true);
+      // For now, get all room chats - in a real app, you'd filter by user
+      const response = await getRoomChats({}, { limit: 50 });
+      setConversations(response.docs || []);
+    } catch (error) {
+      console.error("Error loading conversations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMessages = async (roomId: string) => {
+    try {
+      const response = await getMessagesForRoom(roomId, { limit: 100 });
+      setMessages(response.docs || []);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+
+  const loadRoomUsers = async (roomId: string) => {
+    try {
+      const response = await getUsersInRoom(roomId);
+      setRoomUsers(response.docs || []);
+    } catch (error) {
+      console.error("Error loading room users:", error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !user?.id || selectedConversation === null)
+      return;
+
+    const currentRoom = conversations[selectedConversation];
+    if (!currentRoom) return;
+
+    try {
+      setSendingMessage(true);
+      await sendMessage(currentRoom.id, user.id, newMessage.trim());
+      setNewMessage("");
+      // Reload messages to show the new message
+      await loadMessages(currentRoom.id);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại.");
+    } finally {
+      setSendingMessage(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  const conversations = [
-    {
-      id: 1,
-      name: 'Công ty TNHH ABC',
-      avatar: 'AB',
-      lastMessage: 'Chúng tôi quan tâm đến công nghệ xử lý nước thải của bạn...',
-      time: '10:30',
-      unread: 2,
-      isOnline: true
-    },
-    {
-      id: 2,
-      name: 'Viện Nghiên cứu XYZ',
-      avatar: 'XY',
-      lastMessage: 'Cảm ơn bạn đã quan tâm đến nhu cầu của chúng tôi',
-      time: '09:15',
-      unread: 0,
-      isOnline: false
-    },
-    {
-      id: 3,
-      name: 'Startup Tech Solutions',
-      avatar: 'ST',
-      lastMessage: 'Bạn có thể gửi thêm tài liệu kỹ thuật không?',
-      time: 'Yesterday',
-      unread: 1,
-      isOnline: true
-    }
-  ];
+  // Helper function to get conversation display name
+  const getConversationName = (conversation: RoomChat) => {
+    return conversation.title || `Room ${conversation.id}`;
+  };
 
-  const messages = [
-    {
-      id: 1,
-      sender: 'Công ty TNHH ABC',
-      content: 'Xin chào, tôi quan tâm đến công nghệ xử lý nước thải mà bạn đã đăng. Bạn có thể cung cấp thêm thông tin chi tiết không?',
-      time: '09:30',
-      isOwn: false
-    },
-    {
-      id: 2,
-      sender: 'Bạn',
-      content: 'Chào bạn! Cảm ơn bạn đã quan tâm. Tôi sẽ gửi thêm tài liệu kỹ thuật chi tiết qua email.',
-      time: '09:35',
-      isOwn: true
-    },
-    {
-      id: 3,
-      sender: 'Công ty TNHH ABC',
-      content: 'Tuyệt vời! Chúng tôi cũng muốn biết về giá cả và thời gian triển khai.',
-      time: '10:30',
-      isOwn: false
+  // Helper function to get conversation avatar
+  const getConversationAvatar = (conversation: RoomChat) => {
+    const name = getConversationName(conversation);
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Helper function to format time
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } else if (diffInHours < 48) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("vi-VN");
     }
-  ];
+  };
+
+  // Helper function to check if message is from current user
+  const isOwnMessage = (message: RoomMessage) => {
+    const messageUserId =
+      typeof message.user === "string" ? message.user : message.user?.id;
+    return messageUserId === user?.id;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -107,44 +186,50 @@ export default function MessagesPage() {
             </div>
 
             <div className="overflow-y-auto">
-              {conversations.map((conversation, index) => (
-                <div
-                  key={conversation.id}
-                  onClick={() => setSelectedConversation(index)}
-                  className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                    selectedConversation === index ? 'bg-blue-50 border-blue-200' : ''
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                        {conversation.avatar}
-                      </div>
-                      {conversation.isOnline && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900 truncate">
-                          {conversation.name}
-                        </h3>
-                        <span className="text-xs text-gray-500">
-                          {conversation.time}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 truncate mt-1">
-                        {conversation.lastMessage}
-                      </p>
-                    </div>
-                    {conversation.unread > 0 && (
-                      <div className="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {conversation.unread}
-                      </div>
-                    )}
-                  </div>
+              {loading ? (
+                <div className="p-4 text-center text-gray-500">
+                  Đang tải cuộc trò chuyện...
                 </div>
-              ))}
+              ) : conversations.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  Chưa có cuộc trò chuyện nào
+                </div>
+              ) : (
+                conversations.map((conversation, index) => (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(index)}
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
+                      selectedConversation === index
+                        ? "bg-blue-50 border-blue-200"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
+                          {getConversationAvatar(conversation)}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-semibold text-gray-900 truncate">
+                            {getConversationName(conversation)}
+                          </h3>
+                          <span className="text-xs text-gray-500">
+                            {formatTime(conversation.updatedAt)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate mt-1">
+                          {messages.length > 0
+                            ? messages[messages.length - 1]?.message
+                            : "Chưa có tin nhắn"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -157,14 +242,18 @@ export default function MessagesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-semibold">
-                        {conversations[selectedConversation]?.avatar}
+                        {getConversationAvatar(
+                          conversations[selectedConversation]
+                        )}
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {conversations[selectedConversation]?.name}
+                          {getConversationName(
+                            conversations[selectedConversation]
+                          )}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          {conversations[selectedConversation]?.isOnline ? 'Đang hoạt động' : 'Không hoạt động'}
+                          {roomUsers.length} thành viên
                         </p>
                       </div>
                     </div>
@@ -176,25 +265,48 @@ export default function MessagesPage() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.isOwn
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}>
-                        <p className="text-sm">{message.content}</p>
-                        <p className={`text-xs mt-1 ${
-                          message.isOwn ? 'text-blue-100' : 'text-gray-500'
-                        }`}>
-                          {message.time}
-                        </p>
-                      </div>
+                  {messages.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
                     </div>
-                  ))}
+                  ) : (
+                    messages.map((message) => {
+                      const isOwn = isOwnMessage(message);
+                      const userName =
+                        typeof message.user === "string"
+                          ? "Unknown User"
+                          : message.user?.full_name || "Unknown User";
+
+                      return (
+                        <div
+                          key={message.id}
+                          className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                              isOwn
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100 text-gray-900"
+                            }`}
+                          >
+                            {!isOwn && (
+                              <p className="text-xs font-medium mb-1 text-gray-600">
+                                {userName}
+                              </p>
+                            )}
+                            <p className="text-sm">{message.message}</p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                isOwn ? "text-blue-100" : "text-gray-500"
+                              }`}
+                            >
+                              {formatTime(message.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
 
                 {/* Message Input */}
@@ -206,11 +318,13 @@ export default function MessagesPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Nhập tin nhắn..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={sendingMessage}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
-                    <button 
+                    <button
                       onClick={handleSendMessage}
-                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+                      disabled={sendingMessage || !newMessage.trim()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Send className="h-5 w-5" />
                     </button>
