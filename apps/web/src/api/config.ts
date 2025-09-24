@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
   INTELLECTUAL_PROPERTIES: "/intellectual-properties",
   INVESTMENT_FUND: "/investment-fund",
   PROJECTS: "/project",
+  PROPOSE: "/propose",
   TECHNOLOGY_PROPOSE: "/technology-propose",
   NEGOTIATING_MESSAGES: "/negotiating-messages",
   EVENTS: "/events",

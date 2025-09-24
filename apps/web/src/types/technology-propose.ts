@@ -10,6 +10,7 @@ export type TechnologyProposeStatus =
   | "cancelled";
 
 export interface TechnologyPropose {
+  id: string;
   technology: Technology;
   user: User;
   description: string;
