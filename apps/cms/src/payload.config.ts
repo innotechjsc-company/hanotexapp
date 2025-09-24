@@ -29,6 +29,9 @@ import { TechnologyPropose } from './collections/TechnologyPropose'
 import { News } from './collections/News'
 import { Events } from './collections/Events'
 import { ServiceTicketLog } from './collections/ServiceTicketLog'
+import { EventUser } from './collections/EventUser'
+import { EventComment } from './collections/EventComment'
+import { NewsLike } from './collections/NewsLike'
 import { NegotiatingMessage } from './collections/NegotiatingMessage'
 
 const filename = fileURLToPath(import.meta.url)
@@ -72,6 +75,9 @@ export default buildConfig({
     News,
     Events,
     ServiceTicketLog,
+    EventUser,
+    EventComment,
+    NewsLike,
     NegotiatingMessage,
   ],
   editor: lexicalEditor(),

@@ -21,6 +21,13 @@ export const News: CollectionConfig = {
       label: 'Tiêu đề',
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'content',
       type: 'textarea',
       required: true,
@@ -36,6 +43,16 @@ export const News: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       label: 'Tài liệu',
+    },
+    {
+      name: 'views',
+      type: 'number',
+      label: 'Lượt xem',
+    },
+    {
+      name: 'likes',
+      type: 'number',
+      label: 'Lượt thích',
     },
   ],
   timestamps: true,
