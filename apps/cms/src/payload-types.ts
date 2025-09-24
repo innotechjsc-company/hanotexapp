@@ -89,6 +89,13 @@ export interface Config {
     news: News;
     events: Event;
     'service-ticket-log': ServiceTicketLog;
+    'event-user': EventUser;
+    'event-comment': EventComment;
+    'news-like': NewsLike;
+    'negotiating-messages': NegotiatingMessage;
+    'room-chat': RoomChat;
+    'room-message': RoomMessage;
+    'room-user': RoomUser;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -117,6 +124,13 @@ export interface Config {
     news: NewsSelect<false> | NewsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'service-ticket-log': ServiceTicketLogSelect<false> | ServiceTicketLogSelect<true>;
+    'event-user': EventUserSelect<false> | EventUserSelect<true>;
+    'event-comment': EventCommentSelect<false> | EventCommentSelect<true>;
+    'news-like': NewsLikeSelect<false> | NewsLikeSelect<true>;
+    'negotiating-messages': NegotiatingMessagesSelect<false> | NegotiatingMessagesSelect<true>;
+    'room-chat': RoomChatSelect<false> | RoomChatSelect<true>;
+    'room-message': RoomMessageSelect<false> | RoomMessageSelect<true>;
+    'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -702,8 +716,8 @@ export interface Project {
   name: string;
   description: string;
   user: string | User;
-  technology: string | Technology;
-  investment_fund: string | InvestmentFund;
+  technology?: (string | null) | Technology;
+  investment_fund?: (string | null) | InvestmentFund;
   status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
   goal_money?: number | null;
   end_date?: string | null;
@@ -827,9 +841,12 @@ export interface TechnologyPropose {
 export interface News {
   id: string;
   title: string;
+  image: string | Media;
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
+  views?: number | null;
+  likes?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -840,6 +857,7 @@ export interface News {
 export interface Event {
   id: string;
   title: string;
+  image: string | Media;
   content: string;
   hashtags?: string | null;
   document?: (string | null) | Media;
@@ -861,6 +879,105 @@ export interface ServiceTicketLog {
   user: string | User;
   content: string;
   document?: (string | Media)[] | null;
+  status?: ('approved' | 'rejected') | null;
+  reason?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-user".
+ */
+export interface EventUser {
+  id: string;
+  user: string | User;
+  event: string | Event;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-comment".
+ */
+export interface EventComment {
+  id: string;
+  user: string | User;
+  event: string | Event;
+  comment: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-like".
+ */
+export interface NewsLike {
+  id: string;
+  news: string | News;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "negotiating-messages".
+ */
+export interface NegotiatingMessage {
+  id: string;
+  /**
+   * Đề xuất
+   */
+  propose?: (string | null) | Propose;
+  /**
+   * Đề xuất công nghệ
+   */
+  technology_propose?: (string | null) | TechnologyPropose;
+  /**
+   * Người gửi
+   */
+  user: string | User;
+  /**
+   * Nội dung
+   */
+  message: string;
+  /**
+   * Tài liệu đính kèm
+   */
+  document?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-chat".
+ */
+export interface RoomChat {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-message".
+ */
+export interface RoomMessage {
+  id: string;
+  room: string | RoomChat;
+  message?: string | null;
+  document?: (string | null) | Media;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-user".
+ */
+export interface RoomUser {
+  id: string;
+  room: string | RoomChat;
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -958,6 +1075,34 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'service-ticket-log';
         value: string | ServiceTicketLog;
+      } | null)
+    | ({
+        relationTo: 'event-user';
+        value: string | EventUser;
+      } | null)
+    | ({
+        relationTo: 'event-comment';
+        value: string | EventComment;
+      } | null)
+    | ({
+        relationTo: 'news-like';
+        value: string | NewsLike;
+      } | null)
+    | ({
+        relationTo: 'negotiating-messages';
+        value: string | NegotiatingMessage;
+      } | null)
+    | ({
+        relationTo: 'room-chat';
+        value: string | RoomChat;
+      } | null)
+    | ({
+        relationTo: 'room-message';
+        value: string | RoomMessage;
+      } | null)
+    | ({
+        relationTo: 'room-user';
+        value: string | RoomUser;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1417,9 +1562,12 @@ export interface TechnologyProposeSelect<T extends boolean = true> {
  */
 export interface NewsSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   content?: T;
   hashtags?: T;
   document?: T;
+  views?: T;
+  likes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1429,6 +1577,7 @@ export interface NewsSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   content?: T;
   hashtags?: T;
   document?: T;
@@ -1449,6 +1598,83 @@ export interface ServiceTicketLogSelect<T extends boolean = true> {
   user?: T;
   content?: T;
   document?: T;
+  status?: T;
+  reason?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-user_select".
+ */
+export interface EventUserSelect<T extends boolean = true> {
+  user?: T;
+  event?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-comment_select".
+ */
+export interface EventCommentSelect<T extends boolean = true> {
+  user?: T;
+  event?: T;
+  comment?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-like_select".
+ */
+export interface NewsLikeSelect<T extends boolean = true> {
+  news?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "negotiating-messages_select".
+ */
+export interface NegotiatingMessagesSelect<T extends boolean = true> {
+  propose?: T;
+  technology_propose?: T;
+  user?: T;
+  message?: T;
+  document?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-chat_select".
+ */
+export interface RoomChatSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-message_select".
+ */
+export interface RoomMessageSelect<T extends boolean = true> {
+  room?: T;
+  message?: T;
+  document?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-user_select".
+ */
+export interface RoomUserSelect<T extends boolean = true> {
+  room?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }

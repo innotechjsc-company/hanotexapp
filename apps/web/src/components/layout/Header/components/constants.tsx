@@ -90,6 +90,7 @@ export const userMenuItemsBase: UserMenuItem[] = [
   { name: "Hồ sơ cá nhân", href: "/profile" },
   { name: "Công nghệ của tôi", href: "/my-technologies" },
   { name: "Nhu cầu của tôi", href: "/my-demands" },
+  { name: "Đề xuất của tôi", href: "/my-proposals" },
   { name: "Dự án của tôi", href: "/my-projects" },
   { name: "Quỹ & Đầu tư của tôi", href: "/my-investments" },
   { name: "Tin nhắn", href: "/messages" },
@@ -108,4 +109,3 @@ export function getUserIconByType(type?: string) {
       return User;
   }
 }
-

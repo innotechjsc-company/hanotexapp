@@ -29,6 +29,13 @@ import { TechnologyPropose } from './collections/TechnologyPropose'
 import { News } from './collections/News'
 import { Events } from './collections/Events'
 import { ServiceTicketLog } from './collections/ServiceTicketLog'
+import { EventUser } from './collections/EventUser'
+import { EventComment } from './collections/EventComment'
+import { NewsLike } from './collections/NewsLike'
+import { NegotiatingMessage } from './collections/NegotiatingMessage'
+import { RoomChat } from './collections/RoomChat'
+import { RoomMessage } from './collections/RoomMessage'
+import { RoomUser } from './collections/RoomUser'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -71,6 +78,13 @@ export default buildConfig({
     News,
     Events,
     ServiceTicketLog,
+    EventUser,
+    EventComment,
+    NewsLike,
+    NegotiatingMessage,
+    RoomChat,
+    RoomMessage,
+    RoomUser,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

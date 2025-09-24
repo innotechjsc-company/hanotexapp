@@ -3,7 +3,7 @@
  * Các function để quản lý propose với PayloadCMS
  */
 
-import { Propose, ProposeStatus } from "@/types/propose";
+import { Propose, ProposeStatus, ProposeStatusEnum } from "@/types/propose";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
@@ -59,7 +59,7 @@ export async function getProposes(
   // optional text search (backend must support)
   if (filters.search) params["search"] = filters.search;
 
-  return payloadApiClient.get<Propose[]>("/propose", params);
+  return payloadApiClient.get<Propose[]>(API_ENDPOINTS.PROPOSE, params);
 }
 
 /**
@@ -67,7 +67,7 @@ export async function getProposes(
  */
 export async function getProposeById(id: string): Promise<Propose> {
   const response = await payloadApiClient.get<Propose>(
-    `/propose/${id}?depth=2`
+    `${API_ENDPOINTS.PROPOSE}/${id}?depth=2`
   );
   return response.data as any as Propose;
 }
@@ -76,7 +76,10 @@ export async function getProposeById(id: string): Promise<Propose> {
  * Create new propose
  */
 export async function createPropose(data: Partial<Propose>): Promise<Propose> {
-  const response = await payloadApiClient.post<Propose>("/propose", data);
+  const response = await payloadApiClient.post<Propose>(
+    API_ENDPOINTS.PROPOSE,
+    data
+  );
   return response.data!;
 }
 
@@ -88,7 +91,7 @@ export async function updatePropose(
   data: Partial<Propose>
 ): Promise<Propose> {
   const response = await payloadApiClient.patch<Propose>(
-    `/propose/${id}`,
+    `${API_ENDPOINTS.PROPOSE}/${id}`,
     data
   );
   return response.data!;
@@ -98,7 +101,7 @@ export async function updatePropose(
  * Delete propose
  */
 export async function deletePropose(id: string): Promise<void> {
-  await payloadApiClient.delete(`/propose/${id}`);
+  await payloadApiClient.delete(`${API_ENDPOINTS.PROPOSE}/${id}`);
 }
 
 /**
@@ -108,9 +111,12 @@ export async function updateProposeStatus(
   id: string,
   status: ProposeStatus
 ): Promise<Propose> {
-  const response = await payloadApiClient.patch<Propose>(`/propose/${id}`, {
-    status,
-  });
+  const response = await payloadApiClient.patch<Propose>(
+    `${API_ENDPOINTS.PROPOSE}/${id}`,
+    {
+      status,
+    }
+  );
   return response.data!;
 }
 
@@ -118,14 +124,14 @@ export async function updateProposeStatus(
  * Accept propose
  */
 export async function acceptPropose(id: string): Promise<Propose> {
-  return updateProposeStatus(id, "accepted");
+  return updateProposeStatus(id, ProposeStatusEnum.negotiating);
 }
 
 /**
  * Reject propose
  */
 export async function rejectPropose(id: string): Promise<Propose> {
-  return updateProposeStatus(id, "rejected");
+  return updateProposeStatus(id, ProposeStatusEnum.cancelled);
 }
 
 /**
@@ -161,7 +167,7 @@ export async function getProposesByDemand(
     sort: pagination.sort || "-createdAt",
     "where[demand][equals]": demandId,
   };
-  return payloadApiClient.get<Propose[]>("/propose", params);
+  return payloadApiClient.get<Propose[]>(API_ENDPOINTS.PROPOSE, params);
 }
 
 /**
@@ -209,7 +215,7 @@ export async function getPendingProposes(
 export async function getAcceptedProposes(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  return getProposesByStatus("accepted", pagination);
+  return getProposesByStatus(ProposeStatusEnum.negotiating, pagination);
 }
 
 /**
@@ -218,7 +224,7 @@ export async function getAcceptedProposes(
 export async function getRejectedProposes(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Propose[]>> {
-  return getProposesByStatus("rejected", pagination);
+  return getProposesByStatus(ProposeStatusEnum.cancelled, pagination);
 }
 
 /**

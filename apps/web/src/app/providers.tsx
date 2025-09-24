@@ -5,7 +5,10 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { useState, useEffect } from "react";
 import { HeroUIProvider } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { ConfigProvider } from "antd";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { initializeAuth } from "@/store/auth";
+import { antdTheme } from "@/lib/antd-theme";
 
 // Separate component for HeroUIProvider that can use hooks
 function HeroUIWrapper({ children }: { children: React.ReactNode }) {
@@ -48,7 +51,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HeroUIWrapper>{children}</HeroUIWrapper>
+      <AntdRegistry>
+        <ConfigProvider theme={antdTheme}>
+          <HeroUIWrapper>{children}</HeroUIWrapper>
+        </ConfigProvider>
+      </AntdRegistry>
       {process.env.NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
