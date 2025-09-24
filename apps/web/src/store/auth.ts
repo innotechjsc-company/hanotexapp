@@ -2,6 +2,7 @@ import { create } from "zustand";
 import * as authApi from "@/api/auth";
 import { RegisterData, User, UserType } from "@/api/auth";
 import { localStorageService } from "@/services/localstorage";
+import { payloadApiClient } from "@/api/client";
 
 // Định nghĩa types cho User
 
@@ -63,6 +64,9 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
         throw new Error("Token xác thực không hợp lệ");
       }
 
+      // Set token for payloadApiClient
+      payloadApiClient.setToken(response.token);
+
       set({
         user: response.user,
         token: response.token,
@@ -109,6 +113,10 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
     } finally {
       // Clear state
       console.log("[Auth Store] Clearing auth state...");
+
+      // Clear token from payloadApiClient
+      payloadApiClient.clearToken();
+
       set({
         user: null,
         token: null,
@@ -131,6 +139,9 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 
     try {
       const response = await authApi.refreshToken();
+
+      // Set token for payloadApiClient
+      payloadApiClient.setToken(response.token);
 
       set({
         user: response.user,
@@ -231,6 +242,10 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
 
     if (authData?.user && authData?.token) {
       console.log("[Auth Store] Setting authenticated state from storage");
+
+      // Set token for payloadApiClient
+      payloadApiClient.setToken(authData.token);
+
       set({
         user: authData.user,
         token: authData.token,

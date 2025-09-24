@@ -28,6 +28,11 @@ import {
   unregisterFromEvent,
   checkUserRegistration,
 } from "@/api/events";
+import {
+  getEventCommentsForDisplay,
+  createEventComment,
+  CommentDisplay,
+} from "@/api/eventComments";
 import { Event as ApiEvent } from "@/types/event";
 import { useAuth } from "@/store/auth";
 
@@ -58,16 +63,7 @@ interface EventDisplay extends ApiEvent {
   }>;
 }
 
-interface Comment {
-  id: number;
-  user: {
-    name: string;
-    avatar?: string;
-    initial: string;
-  };
-  content: string;
-  timestamp: string;
-}
+// Use CommentDisplay from API instead of local interface
 
 export default function EventDetailPage({
   params,
@@ -77,10 +73,11 @@ export default function EventDetailPage({
   const [event, setEvent] = useState<EventDisplay | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<CommentDisplay[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
   const [attendeesCount, setAttendeesCount] = useState<number>(0);
   const [loadingAttendees, setLoadingAttendees] = useState(false);
   const [registering, setRegistering] = useState(false);
@@ -147,29 +144,22 @@ export default function EventDetailPage({
     };
   };
 
-  // Mock comments data
-  const mockComments: Comment[] = [
-    {
-      id: 1,
-      user: {
-        name: "Phạm Minh D",
-        initial: "P",
-      },
-      content:
-        "Sự kiện này có hấp dẫn quá! Mình đã đăng ký rồi, mong chờ được tham gia.",
-      timestamp: "09:44 24 thg 9",
-    },
-    {
-      id: 2,
-      user: {
-        name: "Hoàng Thị E",
-        initial: "H",
-      },
-      content:
-        "Có workshop thực hành không ạ? Mình muốn tìm hiểu thêm về phần này.",
-      timestamp: "08:44 24 thg 9",
-    },
-  ];
+  // Function to fetch comments for the event
+  const fetchEventComments = async (eventId: string) => {
+    try {
+      setLoadingComments(true);
+      const response = await getEventCommentsForDisplay(eventId, {
+        limit: 50, // Get more comments initially
+        sort: "-createdAt", // Newest first
+      });
+      setComments(response.comments);
+    } catch (err) {
+      console.error("Error fetching comments:", err);
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
 
   // Function to fetch attendees count
   const fetchAttendeesCount = async (eventId: string) => {
@@ -246,7 +236,9 @@ export default function EventDetailPage({
         const displayEvent = transformEventForDisplay(apiEvent);
 
         setEvent(displayEvent);
-        setComments(mockComments);
+
+        // Fetch comments for the event
+        await fetchEventComments(params.id);
 
         // Fetch attendees count after getting event details
         await fetchAttendeesCount(params.id);
@@ -265,19 +257,6 @@ export default function EventDetailPage({
 
     fetchEvent();
   }, [params.id, user?.id]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "upcoming":
-        return "bg-primary-100 text-primary-800";
-      case "ongoing":
-        return "bg-green-100 text-green-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -302,40 +281,32 @@ export default function EventDetailPage({
     });
   };
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim()) {
-      const comment: Comment = {
-        id: comments.length + 1,
-        user: {
-          name: "Bạn",
-          initial: "B",
-        },
-        content: newComment.trim(),
-        timestamp: new Date().toLocaleString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          day: "numeric",
-          month: "short",
-        }),
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim() || !user?.id || !event?.id) return;
+
+    try {
+      setSubmittingComment(true);
+
+      // Create comment via API
+      const newCommentData = {
+        user: user.id,
+        event: event.id,
+        comment: newComment.trim(),
       };
-      setComments([comment, ...comments]);
+
+      await createEventComment(newCommentData);
+
+      // Clear the input first
       setNewComment("");
-    }
-  };
 
-  const nextImage = () => {
-    if (event?.gallery_images) {
-      setCurrentImageIndex((prev) =>
-        prev === event.gallery_images!.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (event?.gallery_images) {
-      setCurrentImageIndex((prev) =>
-        prev === 0 ? event.gallery_images!.length - 1 : prev - 1
-      );
+      // Refresh all comments from API to get the latest data
+      await fetchEventComments(event.id);
+    } catch (err) {
+      console.error("Error creating comment:", err);
+      // Show user-friendly error message
+      alert("Có lỗi xảy ra khi đăng bình luận. Vui lòng thử lại.");
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -386,10 +357,6 @@ export default function EventDetailPage({
       </div>
     );
   }
-
-  const allImages = event.gallery_images
-    ? [event.image_url, ...event.gallery_images].filter(Boolean)
-    : [event.image_url].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -504,58 +471,94 @@ export default function EventDetailPage({
               </div>
 
               {/* Comment Input */}
-              <div className="mb-6">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Chia sẻ suy nghĩ của bạn về sự kiện..."
-                  className="w-full p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  rows={3}
-                />
-                <div className="flex justify-end mt-3">
-                  <button
-                    onClick={handleCommentSubmit}
-                    disabled={!newComment.trim()}
-                    className="px-6 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    Đăng bình luận
-                  </button>
+              {isAuthenticated ? (
+                <div className="mb-6">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Chia sẻ suy nghĩ của bạn về sự kiện..."
+                    className="w-full p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    rows={3}
+                    disabled={submittingComment}
+                  />
+                  <div className="flex justify-end mt-3">
+                    <button
+                      onClick={handleCommentSubmit}
+                      disabled={!newComment.trim() || submittingComment}
+                      className="px-6 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                    >
+                      {submittingComment ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Đang đăng...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" />
+                          Đăng bình luận
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center">
+                  <p className="text-gray-600 mb-3">
+                    Bạn cần đăng nhập để bình luận
+                  </p>
+                  <Link
+                    href="/auth/login"
+                    className="inline-block bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200"
+                  >
+                    Đăng nhập
+                  </Link>
+                </div>
+              )}
 
               {/* Comments List */}
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-primary-600 font-medium text-sm">
-                          {comment.user.initial}
-                        </span>
+              {loadingComments ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Đang tải bình luận...</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className="flex items-start space-x-3"
+                    >
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                          <span className="text-primary-600 font-medium text-sm">
+                            {comment.user.initial}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-gray-900">
+                            {comment.user.name}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {comment.timestamp}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">
+                          {comment.content}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-gray-900">
-                          {comment.user.name}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {comment.timestamp}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed">
-                        {comment.content}
+                  ))}
+
+                  {comments.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p>
+                        Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ!
                       </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {comments.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ!</p>
+                  )}
                 </div>
               )}
             </div>
