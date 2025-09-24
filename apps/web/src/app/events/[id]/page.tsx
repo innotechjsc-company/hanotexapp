@@ -80,6 +80,10 @@ export default function EventDetailPage({
   const [submittingComment, setSubmittingComment] = useState(false);
   const [attendeesCount, setAttendeesCount] = useState<number>(0);
   const [loadingAttendees, setLoadingAttendees] = useState(false);
+
+  // Modal states
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showUnregisterModal, setShowUnregisterModal] = useState(false);
   const [registering, setRegistering] = useState(false);
 
   // Auth state
@@ -187,14 +191,25 @@ export default function EventDetailPage({
     }
   };
 
-  // Function to handle registration
-  const handleRegister = async () => {
+  // Function to show register modal
+  const handleRegister = () => {
+    setShowRegisterModal(true);
+  };
+
+  // Function to show unregister modal
+  const handleUnregister = () => {
+    setShowUnregisterModal(true);
+  };
+
+  // Function to confirm registration
+  const confirmRegister = async () => {
     if (!user?.id || !event?.id) return;
 
     try {
       setRegistering(true);
       await registerForEvent(event.id, user.id);
       setIsRegistered(true);
+      setShowRegisterModal(false);
 
       // Refresh attendees count
       await fetchAttendeesCount(event.id);
@@ -206,14 +221,15 @@ export default function EventDetailPage({
     }
   };
 
-  // Function to handle unregistration
-  const handleUnregister = async () => {
+  // Function to confirm unregistration
+  const confirmUnregister = async () => {
     if (!user?.id || !event?.id) return;
 
     try {
       setRegistering(true);
       await unregisterFromEvent(event.id, user.id);
       setIsRegistered(false);
+      setShowUnregisterModal(false);
 
       // Refresh attendees count
       await fetchAttendeesCount(event.id);
@@ -407,6 +423,33 @@ export default function EventDetailPage({
               />
             )}
 
+            {/* Địa điểm với bản đồ */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <MapPin className="h-5 w-5 mr-2 text-primary-600" />
+                Địa điểm
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">
+                    {event.location || "Địa điểm"}
+                  </h3>
+
+                  {event.location_details?.googleMapsUrl && (
+                    <a
+                      href={event.location_details.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Xem trên Google Maps
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Thông tin sự kiện card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -431,33 +474,6 @@ export default function EventDetailPage({
                   <p className="text-gray-700 leading-relaxed">
                     {event.description || event.content}
                   </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Địa điểm với bản đồ */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-primary-600" />
-                Địa điểm
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    {event.location || "Địa điểm"}
-                  </h3>
-
-                  {event.location_details?.googleMapsUrl && (
-                    <a
-                      href={event.location_details.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Xem trên Google Maps
-                    </a>
-                  )}
                 </div>
               </div>
             </div>
@@ -647,6 +663,90 @@ export default function EventDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Register Confirmation Modal */}
+      {showRegisterModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-primary-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Xác nhận tham gia
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn tham gia sự kiện này không?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRegisterModal(false)}
+                  disabled={registering}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                >
+                  Thoát
+                </button>
+                <button
+                  onClick={confirmRegister}
+                  disabled={registering}
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-primary-400 transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  {registering ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    "Đồng ý"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unregister Confirmation Modal */}
+      {showUnregisterModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Xác nhận hủy tham gia
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn hủy tham gia sự kiện này không?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowUnregisterModal(false)}
+                  disabled={registering}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                >
+                  Thoát
+                </button>
+                <button
+                  onClick={confirmUnregister}
+                  disabled={registering}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:bg-red-400 transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  {registering ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    "Đồng ý"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

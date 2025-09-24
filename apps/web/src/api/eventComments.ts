@@ -12,7 +12,7 @@ export interface EventComment {
   user:
     | {
         id: string;
-        name: string;
+        full_name?: string;
         email: string;
       }
     | string;
@@ -120,19 +120,23 @@ export async function getEventCommentById(
 export function transformCommentForDisplay(
   comment: EventComment
 ): CommentDisplay {
-  const user =
-    typeof comment.user === "object"
-      ? comment.user
-      : { name: "Unknown User", email: "" };
+  // Handle user object - could be populated or just ID
+  let userName = "Unknown User";
 
-  // Get user initial from name
+  if (typeof comment.user === "object" && comment.user) {
+    // User is populated object
+    userName = comment.user.full_name || comment.user.email || "Unknown User";
+  } else if (typeof comment.user === "string") {
+    // User is just ID string
+    userName = "User";
+  }
+
+  // Get user initial from name (first letter of first name)
   const getInitial = (name: string): string => {
     if (!name) return "U";
     const words = name.trim().split(" ");
-    if (words.length === 1) {
-      return words[0].charAt(0).toUpperCase();
-    }
-    return words[words.length - 1].charAt(0).toUpperCase();
+    // Always return the first letter of the first word
+    return words[0].charAt(0).toUpperCase();
   };
 
   // Format timestamp
@@ -149,8 +153,8 @@ export function transformCommentForDisplay(
   return {
     id: comment.id,
     user: {
-      name: user.name,
-      initial: getInitial(user.name),
+      name: userName,
+      initial: getInitial(userName),
     },
     content: comment.comment,
     timestamp: formatTimestamp(comment.createdAt),
