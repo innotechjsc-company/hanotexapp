@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { getInvestmentFunds } from "@/api/investment-fund";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { getProjects } from "@/api/projects";
@@ -56,6 +56,7 @@ function formatVNDShort(value: number) {
 
 export default function InvestmentFundsPage() {
   const params = useSearchParams();
+  const router = useRouter();
   const size = params.get("size") || "all";
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -249,7 +250,8 @@ export default function InvestmentFundsPage() {
               {filteredFunds.map((fund, idx) => (
                 <div
                   key={`${fund.name}-${idx}`}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/funds/investment-funds/${(fund as any).id}`)}
                 >
                   <div className="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
                     <svg
@@ -283,12 +285,15 @@ export default function InvestmentFundsPage() {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">Việt Nam</span>
-                      <a
-                        href="/contact"
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push("/contact");
+                        }}
                         className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
                       >
                         Liên hệ
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>

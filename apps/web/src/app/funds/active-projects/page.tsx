@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
@@ -37,6 +38,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function ActiveProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -140,7 +142,8 @@ export default function ActiveProjectsPage() {
             projects.map((proj: any) => (
               <div
                 key={proj.id || proj.name}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => router.push(`/funds/active-projects/${proj.id}`)}
               >
                 <div className="h-40 bg-gradient-to-r from-blue-500 to-purple-600" />
                 <div className="p-6">

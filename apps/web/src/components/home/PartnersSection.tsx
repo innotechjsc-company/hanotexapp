@@ -5,15 +5,17 @@ import { Building2, TrendingUp, Users, Globe, Award, ArrowRight } from 'lucide-r
 import { getCompanies } from '@/api/company';
 import { getResearchInstitutions } from '@/api/research-institution';
 import { getInvestmentFunds } from '@/api/investment-fund';
+import { useRouter } from 'next/navigation';
+import { log } from 'console';
 
-type PartnerItem = { name: string; type: string; description?: string };
+type PartnerItem = { name: string; type: string; description?: string; url?: string };
 type FundItem = { name: string; description?: string };
 
 export default function PartnersSection() {
   const [partners, setPartners] = useState<PartnerItem[]>([]);
   const [funds, setFunds] = useState<FundItem[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
   useEffect(() => {
     const fetchPartnersAndFunds = async () => {
       try {
@@ -43,14 +45,17 @@ export default function PartnersSection() {
           ...companies.map((c: any) => ({
             name: c.company_name,
             type: 'Doanh nghiệp',
-            description: c.website || c.legal_representative || '',
+            description: c.website || c.legal_representative || '', 
+            url: c.website,
           })),
           ...institutions.map((i: any) => ({
             name: i.institution_name,
             type: mapInstitutionType(i.institution_type),
             description: i.contact_info?.website || i.governing_body || '',
+            url: i.contact_info?.website,
           })),
         ].slice(0, 6);
+
         setPartners(partnerItems);
 
         const fundItems: FundItem[] = fundsList.map((f: any) => ({
@@ -97,6 +102,12 @@ export default function PartnersSection() {
               <div
                 key={index}
                 className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 text-center"
+                onClick={() => {
+                  console.log(partner.url);
+                  if (partner.url) {
+                    window.open(partner.url, '_blank');
+                  }
+                }}
               >
                 {/* Logo Placeholder */}
                 <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -176,14 +187,14 @@ export default function PartnersSection() {
               Tham gia mạng lưới đối tác để cùng phát triển hệ sinh thái khoa học công nghệ Hà Nội
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+              <button onClick={() => router.push('/auth/register')} className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
                 <Users className="mr-2 h-5 w-5" />
                 Trở thành đối tác
               </button>
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500">
+              {/* <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500">
                 <Globe className="mr-2 h-5 w-5" />
                 Tìm hiểu thêm
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
