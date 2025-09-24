@@ -139,6 +139,18 @@ export async function decrementNewsLikes(id: string): Promise<News> {
 }
 
 /**
+ * Increment views count for a news article
+ */
+export async function incrementNewsViews(id: string): Promise<News> {
+  // First get current news to get current views count
+  const currentNews = await getNewsById(id);
+  const currentViews = currentNews.views || 0;
+
+  // Update with incremented views
+  return updateNews(id, { views: currentViews + 1 });
+}
+
+/**
  * Delete news
  */
 export async function deleteNews(id: string): Promise<void> {

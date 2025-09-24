@@ -18,9 +18,16 @@ import {
 } from "lucide-react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import LikeButton from "@/components/ui/LikeButton";
+import ShareModal from "@/components/ui/ShareModal";
 import Link from "next/link";
-import { getNews, NewsFilters, PaginationParams } from "@/api/news";
+import {
+  getNews,
+  NewsFilters,
+  PaginationParams,
+  incrementNewsViews,
+} from "@/api/news";
 import { News } from "@/types/news";
+import { useRouter } from "next/navigation";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
 
 interface NewsArticle {
@@ -91,6 +98,7 @@ function transformNewsToArticle(news: News): NewsArticle {
 }
 
 export default function NewsPage() {
+  const router = useRouter();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +108,10 @@ export default function NewsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalDocs, setTotalDocs] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean;
+    article: NewsArticle | null;
+  }>({ isOpen: false, article: null });
 
   // Fetch news from API
   const fetchNews = async (isLoadMore = false, customSearchQuery?: string) => {
@@ -202,6 +214,52 @@ export default function NewsPage() {
 
   const handleRetry = () => {
     fetchNews();
+  };
+
+  // Handle share button click
+  const handleShareClick = (e: React.MouseEvent, article: NewsArticle) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShareModal({ isOpen: true, article });
+  };
+
+  // Close share modal
+  const closeShareModal = () => {
+    setShareModal({ isOpen: false, article: null });
+  };
+
+  // Handle article click - increment views and navigate
+  const handleArticleClick = async (articleId: string) => {
+    try {
+      // Optimistic update: increment views in UI immediately
+      setArticles((prevArticles) =>
+        prevArticles.map((article) =>
+          article.id === articleId
+            ? { ...article, views: article.views + 1 }
+            : article
+        )
+      );
+
+      // Increment views count in backend
+      await incrementNewsViews(articleId);
+
+      // Navigate to detail page
+      router.push(`/news/${articleId}`);
+    } catch (err) {
+      console.error("Error incrementing views:", err);
+
+      // Rollback optimistic update on error
+      setArticles((prevArticles) =>
+        prevArticles.map((article) =>
+          article.id === articleId
+            ? { ...article, views: Math.max(0, article.views - 1) }
+            : article
+        )
+      );
+
+      // Still navigate even if view increment fails
+      router.push(`/news/${articleId}`);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -346,8 +404,8 @@ export default function NewsPage() {
             {articles.map((article) => (
               <article
                 key={article.id}
-                onClick={() => {}}
-                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                onClick={() => handleArticleClick(article.id)}
+                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
               >
                 <div className="flex flex-col md:flex-row">
                   {/* Featured Image */}
@@ -364,7 +422,11 @@ export default function NewsPage() {
                       </span>
                     </div>
                     <div className="absolute top-4 right-4 flex space-x-2">
-                      <button className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
+                      <button
+                        onClick={(e) => handleShareClick(e, article)}
+                        className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                        title="Chia sẻ bài viết"
+                      >
                         <Share2 className="h-4 w-4 text-white" />
                       </button>
                     </div>
@@ -519,6 +581,17 @@ export default function NewsPage() {
           </div>
         )}
       </div>
+
+      {/* Share Modal */}
+      {shareModal.article && (
+        <ShareModal
+          isOpen={shareModal.isOpen}
+          onClose={closeShareModal}
+          title={shareModal.article.title}
+          url={`/news/${shareModal.article.id}`}
+          description={shareModal.article.excerpt}
+        />
+      )}
     </div>
   );
 }
