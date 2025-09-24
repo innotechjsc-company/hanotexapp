@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth";
 import { getTechnologyById } from "@/api/technologies";
 import { technologyProposeApi } from "@/api/technology-propose";
 import { uploadFile } from "@/api/media";
+import toastService from "@/services/toastService";
 import type { Technology, TechnologyStatus } from "@/types";
 
 export interface ContactFormState {
@@ -26,6 +27,8 @@ export function useTechnologyDetail(id?: string) {
     document: null,
     budget: "",
   });
+  const [contactSubmitting, setContactSubmitting] = useState<boolean>(false);
+  const [hasContacted, setHasContacted] = useState<boolean>(false);
 
   useEffect(() => {
     const run = async () => {
@@ -40,6 +43,25 @@ export function useTechnologyDetail(id?: string) {
         setError("");
         const data = await getTechnologyById(String(id));
         setTechnology(data as any);
+
+        // Check if user has already contacted about this technology
+        if (user?.id) {
+          try {
+            const existingContacts = await technologyProposeApi.list({
+              technology: id,
+              user: user.id,
+            });
+            if (existingContacts.data?.length) {
+              setHasContacted(true);
+            } else {
+              setHasContacted(false);
+            }
+          } catch (contactError) {
+            console.error("Failed to check existing contacts:", contactError);
+            // Don't show error for this, just assume no contact exists
+            setHasContacted(false);
+          }
+        }
       } catch (e) {
         console.error("Failed to load technology detail", e);
         setError("Có lỗi xảy ra khi tải thông tin công nghệ");
@@ -49,7 +71,7 @@ export function useTechnologyDetail(id?: string) {
       }
     };
     run();
-  }, [id]);
+  }, [id, user?.id]);
 
   const getTrlLabel = (level?: number) => {
     const trlLabels: Record<number, string> = {
@@ -110,6 +132,7 @@ export function useTechnologyDetail(id?: string) {
 
   const onSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
+    setContactSubmitting(true);
     try {
       if (!id) throw new Error("Thiếu ID công nghệ");
 
@@ -127,6 +150,13 @@ export function useTechnologyDetail(id?: string) {
         budget: Number(contactForm.budget) || 0,
       } as any);
 
+      // Show success toast
+      toastService.success(
+        "Gửi liên hệ thành công!",
+        "Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất."
+      );
+
+      setHasContacted(true);
       setShowContactForm(false);
       setContactForm({
         description: "",
@@ -135,6 +165,13 @@ export function useTechnologyDetail(id?: string) {
       });
     } catch (err) {
       console.error("Gửi liên hệ thất bại:", err);
+      // Show error toast
+      toastService.error(
+        "Gửi liên hệ thất bại!",
+        "Có lỗi xảy ra. Vui lòng thử lại sau."
+      );
+    } finally {
+      setContactSubmitting(false);
     }
   };
 
@@ -168,6 +205,8 @@ export function useTechnologyDetail(id?: string) {
     // contact modal
     showContactForm,
     contactForm,
+    contactSubmitting,
+    hasContacted,
     onOpenContact,
     onCloseContact,
     onContactChange,

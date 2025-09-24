@@ -6,11 +6,13 @@ import { useAuthStore } from "@/store/auth";
 interface SidebarContactCardProps {
   owner?: any;
   onContact: () => void;
+  hasContacted?: boolean;
 }
 
 export default function SidebarContactCard({
   owner,
   onContact,
+  hasContacted = false,
 }: SidebarContactCardProps) {
   const { user } = useAuthStore();
   const ownerName = owner?.full_name || "Chưa cập nhật";
@@ -51,13 +53,23 @@ export default function SidebarContactCard({
       </div>
 
       {!isOwnTechnology && isAuthenticated ? (
-        <button
-          onClick={onContact}
-          className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-        >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Liên hệ
-        </button>
+        hasContacted ? (
+          <button
+            disabled
+            className="w-full mt-4 px-4 py-2 bg-green-600 text-white rounded-lg cursor-not-allowed flex items-center justify-center"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Đã gửi đề xuất
+          </button>
+        ) : (
+          <button
+            onClick={onContact}
+            className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Liên hệ
+          </button>
+        )
       ) : null}
     </div>
   );
