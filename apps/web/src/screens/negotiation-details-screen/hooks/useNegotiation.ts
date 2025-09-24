@@ -36,6 +36,8 @@ export interface UseNegotiationReturn {
   handleFileUpload: (file: File) => boolean;
   removeAttachment: (index: number) => void;
   setShowConfirmModal: (show: boolean) => void;
+  handleSignContract: () => Promise<void>;
+  handleDownloadContract: () => Promise<void>;
 
   // Utilities
   formatFileSize: (bytes: number) => string;
@@ -313,6 +315,46 @@ export const useNegotiation = ({
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleSignContract = async () => {
+    try {
+      if (!proposal) return;
+
+      // Update proposal status to contract_signed
+      const updatedProposal = await technologyProposeApi.setStatus(
+        proposalId,
+        "contract_signed"
+      );
+
+      setProposal(updatedProposal);
+      message.success("Hợp đồng đã được ký thành công!");
+    } catch (err) {
+      console.error("Failed to sign contract:", err);
+      message.error("Không thể ký hợp đồng. Vui lòng thử lại.");
+    }
+  };
+
+  const handleDownloadContract = async () => {
+    try {
+      if (!proposal?.document?.url) {
+        message.warning("Không tìm thấy tài liệu hợp đồng để tải xuống.");
+        return;
+      }
+
+      // Create a temporary link to download the file
+      const link = document.createElement("a");
+      link.href = proposal.document.url;
+      link.download = proposal.document.filename || "contract.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      message.success("Đã bắt đầu tải xuống hợp đồng.");
+    } catch (err) {
+      console.error("Failed to download contract:", err);
+      message.error("Không thể tải xuống hợp đồng. Vui lòng thử lại.");
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -377,6 +419,8 @@ export const useNegotiation = ({
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
+    handleSignContract,
+    handleDownloadContract,
 
     // Utilities
     formatFileSize,

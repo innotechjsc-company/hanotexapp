@@ -714,26 +714,24 @@ export interface ServiceTicket {
 export interface Project {
   id: string;
   name: string;
-  description: string;
+  description?: string | null;
+  business_model?: string | null;
+  market_data?: string | null;
   user: string | User;
-  technology?: (string | null) | Technology;
-  investment_fund?: (string | null) | InvestmentFund;
-  status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
+  technologies?: (string | Technology)[] | null;
+  revenue?: number | null;
+  profit?: number | null;
+  assets?: number | null;
+  documents_finance?: (string | Media)[] | null;
+  team_profile?: string | null;
   goal_money?: number | null;
+  share_percentage?: number | null;
+  goal_money_purpose?: string | null;
+  /**
+   * Trạng thái
+   */
+  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
   end_date?: string | null;
-  documents?: (string | Media)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "investment-fund".
- */
-export interface InvestmentFund {
-  id: string;
-  name: string;
-  description: string;
-  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -767,6 +765,18 @@ export interface Demand {
   to_price?: number | null;
   cooperation?: string | null;
   documents?: (string | Media)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "investment-fund".
+ */
+export interface InvestmentFund {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1514,13 +1524,20 @@ export interface InvestmentFundSelect<T extends boolean = true> {
 export interface ProjectSelect<T extends boolean = true> {
   name?: T;
   description?: T;
+  business_model?: T;
+  market_data?: T;
   user?: T;
-  technology?: T;
-  investment_fund?: T;
-  status?: T;
+  technologies?: T;
+  revenue?: T;
+  profit?: T;
+  assets?: T;
+  documents_finance?: T;
+  team_profile?: T;
   goal_money?: T;
+  share_percentage?: T;
+  goal_money_purpose?: T;
+  status?: T;
   end_date?: T;
-  documents?: T;
   updatedAt?: T;
   createdAt?: T;
 }

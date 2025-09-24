@@ -14,6 +14,7 @@ export const Project: CollectionConfig = {
     delete: () => true,
   },
   fields: [
+    // Thông tin dự án
     {
       name: 'name',
       type: 'text',
@@ -23,9 +24,20 @@ export const Project: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
-      required: true,
       label: 'Mô tả',
     },
+    {
+      name: 'business_model',
+      type: 'textarea',
+      label: 'Mô hình kinh doanh',
+    },
+    {
+      name: 'market_data',
+      type: 'textarea',
+      label: 'Số liệu và thị trường',
+    },
+
+    //Thông tin pháp lý và pháp nhân
     {
       name: 'user',
       type: 'relationship',
@@ -34,41 +46,73 @@ export const Project: CollectionConfig = {
       label: 'Người tạo',
     },
     {
-      name: 'technology',
+      name: 'technologies',
       type: 'relationship',
       relationTo: 'technologies',
       hasMany: true,
       label: 'Công nghệ',
     },
+
+    // Thông tin tài chính
     {
-      name: 'investment_fund',
+      name: 'revenue',
+      type: 'number',
+      label: 'Doanh thu',
+    },
+    {
+      name: 'profit',
+      type: 'number',
+      label: 'Lợi nhuận',
+    },
+    {
+      name: 'assets',
+      type: 'number',
+      label: 'Tài sản',
+    },
+    {
+      name: 'documents_finance',
       type: 'relationship',
-      relationTo: 'investment-fund',
-      label: 'Quỹ đầu tư',
+      relationTo: 'media',
+      hasMany: true,
+      label: 'Tài liệu tài chính',
+    },
+    // Profile đội ngũ
+    {
+      name: 'team_profile',
+      type: 'textarea',
+      label: 'Profile đội ngũ',
+    },
+    //Thông tin kêu gọi
+    {
+      name: 'goal_money',
+      type: 'number',
+      label: 'Số vốn kêu gọi',
+    },
+    {
+      name: 'share_percentage',
+      type: 'number',
+      label: 'Tỉ lệ cổ phần',
+    },
+    {
+      name: 'goal_money_purpose',
+      type: 'textarea',
+      label: 'Mục đích kêu gọi và tỉ lệ phân bổ chi tiết',
     },
     {
       name: 'status',
       type: 'select',
-      options: ['pending', 'in_progress', 'completed', 'cancelled'],
-      defaultValue: 'pending',
+      required: true,
       label: 'Trạng thái',
-    },
-    {
-      name: 'goal_money',
-      type: 'number',
-      label: 'Số tiền đầu tư kêu gọi',
+      options: ['pending', 'negotiating', 'contract_signed', 'completed', 'cancelled'],
+      defaultValue: 'pending',
+      admin: {
+        description: 'Trạng thái',
+      },
     },
     {
       name: 'end_date',
       type: 'date',
       label: 'Ngày kết thúc',
-    },
-    {
-      name: 'documents',
-      type: 'relationship',
-      relationTo: 'media',
-      hasMany: true,
-      label: 'Tài liệu đính kèm',
     },
   ],
   timestamps: true,

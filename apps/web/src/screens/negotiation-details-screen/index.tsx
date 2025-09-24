@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import { Spin, Alert, Button, Form } from "antd";
+import { Spin, Alert, Button, Form, Steps } from "antd";
+import { MessageOutlined, FileTextOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { useNegotiation } from "./hooks/useNegotiation";
 import { NegotiationHeader } from "./components/NegotiationHeader";
 import { NegotiationChat } from "./components/NegotiationChat";
 import { MessageInput } from "./components/MessageInput";
 import { ConfirmationModal } from "./components/ConfirmationModal";
+import { ContractSigningStep } from "./components/ContractSigningStep";
 
 const { Text } = Typography;
 
@@ -42,6 +44,8 @@ export const NegotiationDetailsScreen: React.FC<
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
+    handleSignContract,
+    handleDownloadContract,
 
     // Utilities
     formatFileSize,
@@ -87,6 +91,33 @@ export const NegotiationDetailsScreen: React.FC<
     );
   }
 
+  // Determine current step based on status
+  const getCurrentStep = () => {
+    switch (proposal.status) {
+      case "negotiating":
+        return 0; // Negotiation step
+      case "contract_signed":
+        return 1; // Contract signing step
+      default:
+        return 0; // Default to negotiation
+    }
+  };
+
+  const currentStep = getCurrentStep();
+
+  const steps = [
+    {
+      title: "Đàm phán",
+      description: "Thảo luận và thương lượng điều kiện",
+      icon: <MessageOutlined />,
+    },
+    {
+      title: "Ký hợp đồng",
+      description: "Xem xét và ký kết hợp đồng",
+      icon: <FileTextOutlined />,
+    },
+  ];
+
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Header - Fixed at top */}
@@ -94,36 +125,69 @@ export const NegotiationDetailsScreen: React.FC<
         <NegotiationHeader proposal={proposal} onClose={handleClose} />
       </div>
 
-      {/* Chat area - Takes remaining space with proper scrolling */}
-      <div className="flex-1 overflow-hidden">
-        <NegotiationChat
-          messages={messages}
-          formatFileSize={formatFileSize}
-          messageInputComponent={
-            <MessageInput
-              form={form}
-              attachments={attachments}
-              sendingMessage={sendingMessage}
-              uploadingFiles={uploadingFiles}
-              onSendMessage={onSendMessage}
-              onFileUpload={handleFileUpload}
-              onRemoveAttachment={removeAttachment}
-              formatFileSize={formatFileSize}
-            />
-          }
-        />
+      {/* Steps Indicator */}
+      <div className="flex-shrink-0 bg-gray-50 border-b">
+        <div className="max-w-4xl mx-auto w-full px-6 py-3">
+          <Steps
+            current={currentStep}
+            size="small"
+            labelPlacement="vertical"
+            progressDot
+            items={steps.map((s) => ({
+              title: s.title,
+              description: (
+                <span className="text-xs text-gray-500">{s.description}</span>
+              ),
+              icon: s.icon,
+            }))}
+          />
+        </div>
       </div>
 
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        open={showConfirmModal}
-        onOk={onConfirmSend}
-        onCancel={() => setShowConfirmModal(false)}
-        confirmLoading={sendingMessage}
-        uploadingFiles={uploadingFiles}
-        pendingMessage={pendingMessage}
-        formatFileSize={formatFileSize}
-      />
+      {/* Content area - Takes remaining space with proper scrolling */}
+      <div className="flex-1 overflow-hidden">
+        {currentStep === 0 ? (
+          /* Negotiation Step - Chat Interface */
+          <NegotiationChat
+            messages={messages}
+            formatFileSize={formatFileSize}
+            messageInputComponent={
+              <MessageInput
+                form={form}
+                attachments={attachments}
+                sendingMessage={sendingMessage}
+                uploadingFiles={uploadingFiles}
+                onSendMessage={onSendMessage}
+                onFileUpload={handleFileUpload}
+                onRemoveAttachment={removeAttachment}
+                formatFileSize={formatFileSize}
+              />
+            }
+          />
+        ) : (
+          /* Contract Signing Step */
+          <div className="h-full overflow-auto">
+            <ContractSigningStep
+              proposal={proposal}
+              onSignContract={handleSignContract}
+              onDownloadContract={handleDownloadContract}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Confirmation Modal - Only show in negotiation step */}
+      {currentStep === 0 && (
+        <ConfirmationModal
+          open={showConfirmModal}
+          onOk={onConfirmSend}
+          onCancel={() => setShowConfirmModal(false)}
+          confirmLoading={sendingMessage}
+          uploadingFiles={uploadingFiles}
+          pendingMessage={pendingMessage}
+          formatFileSize={formatFileSize}
+        />
+      )}
     </div>
   );
 };
