@@ -9,6 +9,7 @@ import { getInvestmentFundById } from "@/api/investment-fund";
 import type { Project } from "@/types/project";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { Chip } from "@heroui/react";
+import { Tag } from "antd";
 
 function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", {
@@ -45,15 +46,15 @@ const getStatusLabel = (status: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
-      return "warning";
+      return "magenta";
     case "in_progress":
-      return "primary";
+      return "blue";
     case "completed":
-      return "success";
+      return "green";
     case "cancelled":
-      return "danger";
+      return "red";
     default:
-      return "default";
+      return "gray";
   }
 };
 
@@ -184,9 +185,7 @@ export default function FundraisingProjectDetailPage() {
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
                 {(typeof project.technology === "object" && project.technology && (project.technology as any).name) || "Dự án công nghệ"}
               </span>
-              <Chip color={getStatusColor(project.status || "")} size="lg">
-                {getStatusLabel(project.status || "")}
-              </Chip>
+              <Tag color={getStatusColor(project.status || "")}>{getStatusLabel(project.status || "")}</Tag>
             </div>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">{project.name || "Chưa có tên dự án"}</h2>
@@ -213,15 +212,13 @@ export default function FundraisingProjectDetailPage() {
               <div className="bg-purple-50 rounded-lg p-4 text-center">
                 <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                 <div className="text-lg font-bold text-gray-900">
-                  {(typeof project.user === "object" && project.user && (project.user as any).name) || "Chưa xác định"}
+                  {(typeof project.user === "object" && project.user && (project.user as any).full_name) || "Chưa xác định"}
                 </div>
                 <div className="text-sm text-gray-600">Người phụ trách</div>
               </div>
               <div className="bg-orange-50 rounded-lg p-4 text-center">
                 <Target className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-lg font-bold text-gray-900">
-                  {getStatusLabel(project.status || "")}
-                </div>
+               <div className="text-lg font-bold text-gray-900">{getStatusLabel(project.status || "")}</div>
                 <div className="text-sm text-gray-600">Trạng thái</div>
               </div>
             </div>
@@ -284,9 +281,7 @@ export default function FundraisingProjectDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Trạng thái:</span>
-                  <Chip color={getStatusColor(project.status || "")} size="sm">
-                    {getStatusLabel(project.status || "")}
-                  </Chip>
+                  <Tag color={getStatusColor(project.status || "")}>{getStatusLabel(project.status || "")}</Tag>
                 </div>
               </div>
             </div>
@@ -320,7 +315,7 @@ export default function FundraisingProjectDetailPage() {
             
             <div className="border border-gray-200 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                {(project.technology as any).name}
+                {(project.technology as any).title}
               </h4>
               {(project.technology as any).description && (
                 <p className="text-gray-600">

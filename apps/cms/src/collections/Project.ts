@@ -44,7 +44,6 @@ export const Project: CollectionConfig = {
       name: 'investment_fund',
       type: 'relationship',
       relationTo: 'investment-fund',
-      required: true,
       label: 'Quỹ đầu tư',
     },
     {

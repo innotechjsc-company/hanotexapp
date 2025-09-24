@@ -705,7 +705,7 @@ export interface Project {
   description: string;
   user: string | User;
   technology: string | Technology;
-  investment_fund: string | InvestmentFund;
+  investment_fund?: (string | null) | InvestmentFund;
   status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
   goal_money?: number | null;
   end_date?: string | null;

@@ -49,7 +49,9 @@ export default function FundraisingPage() {
       try {
         const response = await getActiveProjectsAll({ limit: 12 });
         const list = (response.data as any) || (response.docs as any) || [];
-        if (isMounted) setProjects(list);
+        // chỉ lấy những dự án không có investment_fund
+        const projects = list.filter((p: any) => !p.investment_fund);
+        if (isMounted) setProjects(projects);
       } catch (e: any) {
         if (isMounted) setError(e?.message || "Đã xảy ra lỗi");
       } finally {
