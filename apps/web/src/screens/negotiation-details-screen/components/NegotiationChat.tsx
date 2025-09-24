@@ -1,13 +1,13 @@
 import React from "react";
 import { Typography } from "antd";
 import { FileText } from "lucide-react";
-import type { NegotiationMessage } from "../hooks/useNegotiation";
+import type { ApiNegotiatingMessage } from "@/api/negotiating-messages";
 import { MessageItem } from "./MessageItem";
 
 const { Text } = Typography;
 
 interface NegotiationChatProps {
-  messages: NegotiationMessage[];
+  messages: ApiNegotiatingMessage[];
   formatFileSize: (bytes: number) => string;
 }
 
@@ -44,7 +44,6 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({
             message={msg}
             formatFileSize={formatFileSize}
             formatMessageTime={formatMessageTime}
-            side={msg.sender === "owner" ? "right" : "left"}
           />
         ))}
 

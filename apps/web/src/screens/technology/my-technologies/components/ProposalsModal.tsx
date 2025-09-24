@@ -242,11 +242,7 @@ export function ProposalsModal({
         <Space>
           {document ? (
             <>
-              <Tooltip
-                title="Xem tài liệu"
-                color="#1677ff"
-                overlayInnerStyle={{ color: "white" }}
-              >
+              <Tooltip title="Xem tài liệu" color="#1677ff">
                 <Button
                   type="text"
                   size="small"
@@ -254,11 +250,7 @@ export function ProposalsModal({
                   onClick={() => handleViewDocument(document)}
                 />
               </Tooltip>
-              <Tooltip
-                title="Tải xuống"
-                color="#1677ff"
-                overlayInnerStyle={{ color: "white" }}
-              >
+              <Tooltip title="Tải xuống" color="#1677ff">
                 <Button
                   type="text"
                   size="small"
@@ -299,7 +291,7 @@ export function ProposalsModal({
     {
       title: "Thao tác",
       key: "actions",
-      width: 150,
+      width: 120,
       fixed: "right",
       render: (_, record: any) => {
         const proposalId = record.id || record._id;
@@ -321,53 +313,38 @@ export function ProposalsModal({
               cancelText="Hủy"
               disabled={!canConfirm}
             >
-              <Tooltip
-                title="Xác nhận"
-                color="#1677ff"
-                overlayInnerStyle={{ color: "white" }}
-              >
+              <Tooltip title="Xác nhận" color="#1677ff">
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
                   icon={<CheckCircle size={16} />}
                   loading={isLoading}
                   disabled={!canConfirm}
-                >
-                  Xác nhận
-                </Button>
+                  className="hover:bg-green-50 hover:text-green-600"
+                />
               </Tooltip>
             </Popconfirm>
             {isPending && (
-              <Tooltip
-                title="Đàm phán"
-                color="#1677ff"
-                overlayInnerStyle={{ color: "white" }}
-              >
+              <Tooltip title="Đàm phán" color="#1677ff">
                 <Button
-                  type="primary"
+                  type="text"
                   size="small"
                   icon={<MessageSquare size={16} />}
                   loading={isLoading}
                   onClick={() => handleNegotiate(proposalId)}
-                >
-                  Đàm phán
-                </Button>
+                  className="hover:bg-blue-50 hover:text-blue-600"
+                />
               </Tooltip>
             )}
             {canViewNegotiation && (
-              <Tooltip
-                title="Chi tiết đàm phán"
-                color="#1677ff"
-                overlayInnerStyle={{ color: "white" }}
-              >
+              <Tooltip title="Chi tiết đàm phán" color="#1677ff">
                 <Button
-                  type="default"
+                  type="text"
                   size="small"
                   icon={<ExternalLink size={16} />}
                   onClick={() => handleViewNegotiationDetails(proposalId)}
-                >
-                  Chi tiết đàm phán
-                </Button>
+                  className="hover:bg-gray-50 hover:text-gray-600"
+                />
               </Tooltip>
             )}
             {canReject && (
@@ -379,19 +356,14 @@ export function ProposalsModal({
                 cancelText="Hủy"
                 okType="danger"
               >
-                <Tooltip
-                  title="Từ chối"
-                  color="#1677ff"
-                  overlayInnerStyle={{ color: "white" }}
-                >
+                <Tooltip title="Từ chối" color="#ff4d4f">
                   <Button
-                    danger
+                    type="text"
                     size="small"
-                    icon={<X size={16} />}
+                    icon={<X size={16} color="red" />}
                     loading={isLoading}
-                  >
-                    Từ chối
-                  </Button>
+                    className="hover:bg-red-50 hover:text-red-600"
+                  />
                 </Tooltip>
               </Popconfirm>
             )}

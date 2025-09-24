@@ -8,25 +8,6 @@ import {
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
 
-// UI-specific types for the negotiation screen
-export interface MessageAttachment {
-  id: string;
-  name: string;
-  url: string;
-  size: number;
-  type: string;
-}
-
-export interface NegotiationMessage {
-  id: string;
-  sender: "owner" | "proposer";
-  message: string;
-  timestamp: string;
-  senderName: string;
-  senderAvatar?: string;
-  attachments?: MessageAttachment[];
-}
-
 export interface UseNegotiationProps {
   proposalId: string;
 }
@@ -34,7 +15,7 @@ export interface UseNegotiationProps {
 export interface UseNegotiationReturn {
   // Data
   proposal: TechnologyPropose | null;
-  messages: NegotiationMessage[];
+  messages: ApiNegotiatingMessage[];
   attachments: File[];
   pendingMessage: { message: string; attachments: File[] };
 
@@ -77,7 +58,7 @@ export const useNegotiation = ({
   const [proposal, setProposal] = useState<TechnologyPropose | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [messages, setMessages] = useState<NegotiationMessage[]>([]);
+  const [messages, setMessages] = useState<ApiNegotiatingMessage[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -113,26 +94,6 @@ export const useNegotiation = ({
 
   const fetchNegotiationMessages = async () => {
     try {
-      // Use stable user reference to avoid race conditions, fallback to currentUser if needed
-      const userAtCallTime = stableUser || currentUser;
-
-      console.log("fetchNegotiationMessages - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userAtCallTime?.id,
-        email: userAtCallTime?.email,
-        hasUser: !!userAtCallTime,
-      });
-
-      // If we still don't have a user, skip message transformation
-      if (!userAtCallTime?.id) {
-        console.warn(
-          "No user available for message transformation, skipping..."
-        );
-        setMessages([]);
-        return;
-      }
-
       // Fetch negotiation data using the API
       const response = await negotiatingMessageApi.getMessages({
         technology_propose: proposalId,
@@ -140,69 +101,12 @@ export const useNegotiation = ({
         page: 1,
       });
 
-      // Transform API messages to UI format
-      const transformedMessages: NegotiationMessage[] =
-        (response.docs as unknown as ApiNegotiatingMessage[])?.map(
-          (apiMessage: ApiNegotiatingMessage) => {
-            // Determine sender based on user relationship to current user
-            const messageUserId = apiMessage.user?.id;
-            const isCurrentUser = messageUserId === userAtCallTime?.id;
-            const sender = isCurrentUser ? "owner" : "proposer";
+      // Use the messages directly from API without transformation
+      const messages =
+        (response.docs as unknown as ApiNegotiatingMessage[]) || [];
 
-            console.log("Message transform:", {
-              messageId: apiMessage.id,
-              messageUserId,
-              selectedUserId: userAtCallTime?.id,
-              isCurrentUser,
-              sender,
-            });
-
-            // Get user info
-            const user = apiMessage.user;
-            const senderName = user?.full_name || user?.email || "Unknown User";
-            const senderAvatar = user?.full_name?.substring(0, 2).toUpperCase();
-
-            // Transform documents to attachments
-            const attachments: MessageAttachment[] =
-              apiMessage.document?.map((doc, index) => ({
-                id:
-                  typeof doc === "string"
-                    ? doc
-                    : doc.id?.toString() || `doc-${index}`,
-                name:
-                  typeof doc === "string"
-                    ? `document-${index}`
-                    : doc.filename || `document-${index}`,
-                url: typeof doc === "string" ? "#" : doc.url || "#",
-                size: typeof doc === "string" ? 0 : doc.filesize || 0,
-                type:
-                  typeof doc === "string"
-                    ? "application/octet-stream"
-                    : doc.mimeType || "application/octet-stream",
-              })) || [];
-
-            return {
-              id: apiMessage.id || `msg-${Date.now()}-${Math.random()}`,
-              sender: sender as "owner" | "proposer",
-              message: apiMessage.message,
-              timestamp: apiMessage.createdAt || new Date().toISOString(),
-              senderName,
-              senderAvatar,
-              attachments: attachments.length > 0 ? attachments : undefined,
-            };
-          }
-        ) || [];
-
-      console.log(
-        "Transformed messages:",
-        transformedMessages.map((m) => ({
-          id: m.id,
-          sender: m.sender,
-          senderName: m.senderName,
-        }))
-      );
-
-      setMessages(transformedMessages);
+      console.log("Fetched messages:", messages);
+      setMessages(messages);
     } catch (err) {
       console.error("Failed to fetch negotiation data:", err);
       // Fallback to empty array on error

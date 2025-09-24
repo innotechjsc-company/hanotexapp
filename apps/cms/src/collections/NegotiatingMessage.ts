@@ -50,7 +50,7 @@ export const NegotiatingMessage: CollectionConfig = {
       },
     },
     {
-      name: 'document',
+      name: 'documents',
       type: 'upload',
       relationTo: 'media',
       hasMany: true,
