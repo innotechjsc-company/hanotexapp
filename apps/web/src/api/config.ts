@@ -39,6 +39,8 @@ export const API_ENDPOINTS = {
   TECHNOLOGY_PROPOSE: "/technology-propose",
   NEGOTIATING_MESSAGES: "/negotiating-messages",
   EVENTS: "/events",
+  EVENT_USER: "/event-user",
+  EVENT_COMMENT: "/event-comment",
   NEWS: "/news",
   NEWS_LIKE: "/news-like",
 } as const;
