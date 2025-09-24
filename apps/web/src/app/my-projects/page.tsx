@@ -47,7 +47,7 @@ import {
   updateProject,
   deleteProject,
 } from "@/api/projects";
-import { getTechnologies } from "@/api/technologies";
+import { getTechnologies, getTechnologiesByUser } from "@/api/technologies";
 import { getInvestmentFunds } from "@/api/investment-fund";
 import type { Project } from "@/types/project";
 import type { Technology } from "@/types/technologies";
@@ -232,7 +232,7 @@ function AddProjectModal({
                   </SelectItem>
                 ))}
               </Select>
-              <Select
+              {/* <Select
                 label="Quỹ đầu tư"
                 placeholder="Chọn quỹ đầu tư"
                 selectedKeys={
@@ -246,7 +246,6 @@ function AddProjectModal({
                   const key = Array.from(keys as Set<string>)[0];
                   setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
                 }}
-                isRequired
                 variant="bordered"
               >
                 {investmentFunds.map((fund) => (
@@ -256,7 +255,7 @@ function AddProjectModal({
                     {fund.name}
                   </SelectItem>
                 ))}
-              </Select>
+              </Select> */}
               <Input
                 label="Số tiền đầu tư kêu gọi (VND)"
                 type="number"
@@ -391,7 +390,7 @@ function EditProjectModal({
                   </SelectItem>
                 ))}
               </Select>
-              <Select
+              {/* <Select
                 label="Quỹ đầu tư"
                 placeholder="Chọn quỹ đầu tư"
                 value={investmentFund}
@@ -403,7 +402,6 @@ function EditProjectModal({
                   setInvestmentFund(key);
                   setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
                 }}
-                isRequired
                 variant="bordered"
                 items={investmentFunds}
               >
@@ -414,7 +412,7 @@ function EditProjectModal({
                     {item.name}
                   </SelectItem>
                 )}
-              </Select>
+              </Select> */}
               {/* <Select
                 label="Trạng thái"
                 placeholder="Chọn trạng thái"
@@ -715,11 +713,12 @@ export default function MyProjectsPage() {
 
   const fetchTechnologies = async () => {
     try {
-      const res = await getTechnologies({}, { limit: 100 });
-      const list = ((res as any).docs ||
-        (res as any).data ||
+        // get list of technologies by user
+      const userTechnologies = await getTechnologiesByUser(String((user as any).id || (user as any)._id), { limit: 100 });
+      const userList = ((userTechnologies as any).docs ||
+        (userTechnologies as any).data ||
         []) as Technology[];
-      setTechnologies(list);
+      setTechnologies(userList);
     } catch (e) {
       console.error("Failed to fetch technologies:", e);
     }
@@ -1014,7 +1013,7 @@ export default function MyProjectsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-600">
+                        <TableCell className="text-gray-600" key="technology" align="center">
                           {getTechnologyTitleFromValue(
                             (item as any).technology,
                             technologies
