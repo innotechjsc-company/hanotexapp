@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { message } from "antd";
 import { technologyProposeApi } from "@/api/technology-propose";
-import type { TechnologyPropose } from "@/types/technology-propose";
 import {
-  formatDate,
-  formatCurrency,
-} from "@/screens/technology/my-technologies/utils";
+  negotiatingMessageApi,
+  ApiNegotiatingMessage,
+} from "@/api/negotiating-messages";
+import { useUser } from "@/store/auth";
+import type { TechnologyPropose } from "@/types/technology-propose";
 
+// UI-specific types for the negotiation screen
 export interface MessageAttachment {
   id: string;
   name: string;
@@ -23,7 +25,6 @@ export interface NegotiationMessage {
   senderName: string;
   senderAvatar?: string;
   attachments?: MessageAttachment[];
-  isOnline?: boolean;
 }
 
 export interface UseNegotiationProps {
@@ -61,6 +62,18 @@ export interface UseNegotiationReturn {
 export const useNegotiation = ({
   proposalId,
 }: UseNegotiationProps): UseNegotiationReturn => {
+  const currentUser = useUser();
+
+  // Create a stable reference to the current user to avoid race conditions
+  const [stableUser, setStableUser] = useState(currentUser);
+
+  // Update stable user when currentUser changes, but only if it's not null
+  useEffect(() => {
+    if (currentUser) {
+      setStableUser(currentUser);
+    }
+  }, [currentUser]);
+
   const [proposal, setProposal] = useState<TechnologyPropose | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -74,28 +87,23 @@ export const useNegotiation = ({
   }>({ message: "", attachments: [] });
 
   useEffect(() => {
-    if (proposalId) {
+    if (proposalId && stableUser) {
       fetchProposalDetails();
       fetchNegotiationMessages();
     }
-  }, [proposalId]);
+  }, [proposalId, stableUser]);
 
   const fetchProposalDetails = async () => {
     try {
       setLoading(true);
       setError("");
-
-      console.log("Fetching proposal details for ID:", proposalId);
       const data = await technologyProposeApi.getById(proposalId);
-      console.log("Received proposal data:", data);
-
       if (!data) {
         throw new Error("No data received from API");
       }
 
       setProposal(data);
     } catch (err) {
-      console.error("Failed to fetch proposal details:", err);
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(`Không thể tải thông tin đề xuất: ${errorMessage}`);
     } finally {
@@ -105,57 +113,106 @@ export const useNegotiation = ({
 
   const fetchNegotiationMessages = async () => {
     try {
-      // Mock data for now - replace with actual API call
-      const mockMessages: NegotiationMessage[] = [
-        {
-          id: "1",
-          sender: "proposer",
-          message:
-            "Xin chào, tôi quan tâm đến công nghệ xử lý nước thải mà bạn đã đăng. Bạn có thể cung cấp thêm thông tin chi tiết không?",
-          timestamp: "2024-01-15T09:30:00Z",
-          senderName: "Công ty TNHH ABC",
-          senderAvatar: "AB",
-          isOnline: false,
-        },
-        {
-          id: "2",
-          sender: "owner",
-          message:
-            "Chào bạn! Cảm ơn bạn đã quan tâm. Tôi sẽ gửi thêm tài liệu kỹ thuật chi tiết qua email.",
-          timestamp: "2024-01-15T09:35:00Z",
-          senderName: "Bạn",
-          senderAvatar: "B",
-          isOnline: true,
-        },
-        {
-          id: "3",
-          sender: "proposer",
-          message:
-            "Tuyệt vời! Chúng tôi cũng muốn biết về giá cả và thời gian triển khai.",
-          timestamp: "2024-01-15T10:30:00Z",
-          senderName: "Công ty TNHH ABC",
-          senderAvatar: "AB",
-          isOnline: false,
-          attachments: [
-            {
-              id: "att1",
-              name: "company-profile.pdf",
-              url: "#",
-              size: 2048000,
-              type: "application/pdf",
-            },
-          ],
-        },
-      ];
-      setMessages(mockMessages);
+      // Use stable user reference to avoid race conditions, fallback to currentUser if needed
+      const userAtCallTime = stableUser || currentUser;
+
+      console.log("fetchNegotiationMessages - user reference:", {
+        stableUserId: stableUser?.id,
+        currentUserId: currentUser?.id,
+        selectedUserId: userAtCallTime?.id,
+        email: userAtCallTime?.email,
+        hasUser: !!userAtCallTime,
+      });
+
+      // If we still don't have a user, skip message transformation
+      if (!userAtCallTime?.id) {
+        console.warn(
+          "No user available for message transformation, skipping..."
+        );
+        setMessages([]);
+        return;
+      }
+
+      // Fetch negotiation data using the API
+      const response = await negotiatingMessageApi.getMessages({
+        technology_propose: proposalId,
+        limit: 100,
+        page: 1,
+      });
+
+      // Transform API messages to UI format
+      const transformedMessages: NegotiationMessage[] =
+        (response.docs as unknown as ApiNegotiatingMessage[])?.map(
+          (apiMessage: ApiNegotiatingMessage) => {
+            // Determine sender based on user relationship to current user
+            const messageUserId = apiMessage.user?.id;
+            const isCurrentUser = messageUserId === userAtCallTime?.id;
+            const sender = isCurrentUser ? "owner" : "proposer";
+
+            console.log("Message transform:", {
+              messageId: apiMessage.id,
+              messageUserId,
+              selectedUserId: userAtCallTime?.id,
+              isCurrentUser,
+              sender,
+            });
+
+            // Get user info
+            const user = apiMessage.user;
+            const senderName = user?.full_name || user?.email || "Unknown User";
+            const senderAvatar = user?.full_name?.substring(0, 2).toUpperCase();
+
+            // Transform documents to attachments
+            const attachments: MessageAttachment[] =
+              apiMessage.document?.map((doc, index) => ({
+                id:
+                  typeof doc === "string"
+                    ? doc
+                    : doc.id?.toString() || `doc-${index}`,
+                name:
+                  typeof doc === "string"
+                    ? `document-${index}`
+                    : doc.filename || `document-${index}`,
+                url: typeof doc === "string" ? "#" : doc.url || "#",
+                size: typeof doc === "string" ? 0 : doc.filesize || 0,
+                type:
+                  typeof doc === "string"
+                    ? "application/octet-stream"
+                    : doc.mimeType || "application/octet-stream",
+              })) || [];
+
+            return {
+              id: apiMessage.id || `msg-${Date.now()}-${Math.random()}`,
+              sender: sender as "owner" | "proposer",
+              message: apiMessage.message,
+              timestamp: apiMessage.createdAt || new Date().toISOString(),
+              senderName,
+              senderAvatar,
+              attachments: attachments.length > 0 ? attachments : undefined,
+            };
+          }
+        ) || [];
+
+      console.log(
+        "Transformed messages:",
+        transformedMessages.map((m) => ({
+          id: m.id,
+          sender: m.sender,
+          senderName: m.senderName,
+        }))
+      );
+
+      setMessages(transformedMessages);
     } catch (err) {
-      console.error("Failed to fetch messages:", err);
+      console.error("Failed to fetch negotiation data:", err);
+      // Fallback to empty array on error
+      setMessages([]);
     }
   };
 
   const handleSendMessage = async (values: { message: string }) => {
     if (!values.message.trim() && attachments.length === 0) {
-      message.warning("Vui lòng nhập tin nhắn hoặc đính kèm file");
+      message.warning("Vui lòng nhập nội dung đàm phán hoặc đính kèm file");
       return;
     }
 
@@ -171,39 +228,72 @@ export const useNegotiation = ({
     try {
       setSendingMessage(true);
 
-      // Mock file upload - replace with actual API call
-      const uploadedAttachments: MessageAttachment[] = [];
-      for (const file of pendingMessage.attachments) {
-        uploadedAttachments.push({
-          id: Date.now().toString() + Math.random(),
-          name: file.name,
-          url: URL.createObjectURL(file), // Mock URL
-          size: file.size,
-          type: file.type,
-        });
+      // Use stable user reference with fallback to currentUser
+      const userForSending = stableUser || currentUser;
+
+      console.log("confirmSendMessage - Start - user reference:", {
+        stableUserId: stableUser?.id,
+        currentUserId: currentUser?.id,
+        selectedUserId: userForSending?.id,
+        email: userForSending?.email,
+        hasUser: !!userForSending,
+      });
+
+      // TODO: Upload files first if any attachments exist
+      const documentIds: string[] = [];
+      if (pendingMessage.attachments.length > 0) {
+        // For now, we'll skip file upload and just use empty array
+        // In a real implementation, you would upload files to media API first
+        console.log("File upload not implemented yet, skipping attachments");
       }
 
-      // Mock sending message - replace with actual API call
-      const newMessage: NegotiationMessage = {
-        id: Date.now().toString(),
-        sender: "owner",
-        message: pendingMessage.message,
-        timestamp: new Date().toISOString(),
-        senderName: "Bạn",
-        senderAvatar: "B",
-        isOnline: true,
-        attachments:
-          uploadedAttachments.length > 0 ? uploadedAttachments : undefined,
-      };
+      // Check if user is authenticated - use stable user reference with fallback
+      if (!userForSending?.id) {
+        console.error(
+          "User not authenticated - userForSending:",
+          userForSending
+        );
+        throw new Error("User not authenticated");
+      }
 
-      setMessages((prev) => [...prev, newMessage]);
+      console.log("confirmSendMessage - Before API call - userForSending:", {
+        id: userForSending?.id,
+        email: userForSending?.email,
+      });
+
+      // Send negotiation using API
+      const sentMessage = await negotiatingMessageApi.sendMessage({
+        propose: "", // Leave empty for now - this might be optional
+        technology_propose: proposalId,
+        user: userForSending.id,
+        message: pendingMessage.message,
+        document: documentIds,
+      });
+
+      console.log("Negotiation sent successfully:", sentMessage);
+
+      console.log("confirmSendMessage - Before refresh - user reference:", {
+        stableUserId: stableUser?.id,
+        currentUserId: currentUser?.id,
+        selectedUserId: userForSending?.id,
+      });
+
+      // Refresh negotiation data to get the latest data from server
+      await fetchNegotiationMessages();
+
+      console.log("confirmSendMessage - After refresh - user reference:", {
+        stableUserId: stableUser?.id,
+        currentUserId: currentUser?.id,
+        selectedUserId: userForSending?.id,
+      });
+
       setAttachments([]);
       setShowConfirmModal(false);
       setPendingMessage({ message: "", attachments: [] });
-      message.success("Đã gửi tin nhắn");
+      message.success("Đã gửi đàm phán");
     } catch (err) {
-      console.error("Failed to send message:", err);
-      message.error("Không thể gửi tin nhắn");
+      console.error("Failed to send negotiation:", err);
+      message.error("Không thể gửi đàm phán");
     } finally {
       setSendingMessage(false);
     }

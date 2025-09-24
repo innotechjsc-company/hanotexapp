@@ -26,6 +26,7 @@ import {
   X,
   User as UserIcon,
   ExternalLink,
+  CheckCircle,
 } from "lucide-react";
 import { technologyProposeApi } from "@/api/technology-propose";
 import type {
@@ -132,14 +133,14 @@ export function ProposalsModal({
     }
   };
 
-  const handleDownloadDocument = (document: any) => {
-    if (document?.url) {
-      const link = document.createElement("a");
-      link.href = document.url;
-      link.download = document.filename || "document";
-      document.body.appendChild(link);
+  const handleDownloadDocument = (doc: any) => {
+    if (doc?.url) {
+      const link = window.document.createElement("a");
+      link.href = doc.url;
+      link.download = doc.filename || "document";
+      window.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      window.document.body.removeChild(link);
     } else {
       message.warning("Không có tài liệu để tải xuống");
     }
@@ -174,6 +175,20 @@ export function ProposalsModal({
     }
   };
 
+  const handleConfirm = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      await technologyProposeApi.setStatus(proposalId, "contract_signed");
+      message.success("Đã xác nhận đề xuất");
+      fetchProposals();
+    } catch (error) {
+      console.error("Failed to confirm proposal:", error);
+      message.error("Không thể xác nhận đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Handle opening negotiation details
   const handleViewNegotiationDetails = (proposalId: string) => {
     const url = `/technologies/negotiations/${proposalId}`;
@@ -185,25 +200,25 @@ export function ProposalsModal({
       title: "Người đề xuất",
       dataIndex: "user",
       key: "user",
-      width: 150,
+      width: 120,
       render: (user: any) => (
         <Space>
           <UserIcon size={16} className="text-gray-400" />
-          <Text strong>{getUserName(user)}</Text>
+          <Text strong ellipsis className="max-w-[90px]">
+            {getUserName(user)}
+          </Text>
         </Space>
       ),
     },
     {
-      title: "Mô tả",
+      title: "Lời nhắn",
       dataIndex: "description",
       key: "description",
       width: 200,
       render: (description: string) => (
-        <Tooltip title={description || "Không có mô tả"}>
-          <Text ellipsis style={{ maxWidth: 180 }}>
-            {description || "Không có mô tả"}
-          </Text>
-        </Tooltip>
+        <Text className="whitespace-pre-wrap break-words">
+          {description || "Không có lời nhắn"}
+        </Text>
       ),
     },
     {
@@ -222,12 +237,16 @@ export function ProposalsModal({
       title: "Tài liệu",
       dataIndex: "document",
       key: "document",
-      width: 100,
+      width: 80,
       render: (document: any) => (
         <Space>
           {document ? (
             <>
-              <Tooltip title="Xem tài liệu">
+              <Tooltip
+                title="Xem tài liệu"
+                color="#1677ff"
+                overlayInnerStyle={{ color: "white" }}
+              >
                 <Button
                   type="text"
                   size="small"
@@ -235,7 +254,11 @@ export function ProposalsModal({
                   onClick={() => handleViewDocument(document)}
                 />
               </Tooltip>
-              <Tooltip title="Tải xuống">
+              <Tooltip
+                title="Tải xuống"
+                color="#1677ff"
+                overlayInnerStyle={{ color: "white" }}
+              >
                 <Button
                   type="text"
                   size="small"
@@ -260,15 +283,15 @@ export function ProposalsModal({
       ),
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 120,
-      render: (createdAt: string) => (
+      title: "Lần cập nhật gần nhất",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      width: 140,
+      render: (updatedAt: string) => (
         <Space>
           <Calendar size={16} className="text-gray-400" />
           <Text className="text-sm">
-            {createdAt ? formatDate(createdAt) : "Không xác định"}
+            {updatedAt ? formatDate(updatedAt) : "Không xác định"}
           </Text>
         </Space>
       ),
@@ -285,11 +308,41 @@ export function ProposalsModal({
         const canReject = record.status === "pending";
         const canViewNegotiation =
           record.status !== "pending" && record.status !== "cancelled";
+        const canConfirm =
+          record.status === "pending" || record.status === "negotiating";
 
         return (
           <Space>
+            <Popconfirm
+              title="Xác nhận đề xuất"
+              description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
+              onConfirm={() => handleConfirm(proposalId)}
+              okText="Xác nhận"
+              cancelText="Hủy"
+              disabled={!canConfirm}
+            >
+              <Tooltip
+                title="Xác nhận"
+                color="#1677ff"
+                overlayInnerStyle={{ color: "white" }}
+              >
+                <Button
+                  type="default"
+                  size="small"
+                  icon={<CheckCircle size={16} />}
+                  loading={isLoading}
+                  disabled={!canConfirm}
+                >
+                  Xác nhận
+                </Button>
+              </Tooltip>
+            </Popconfirm>
             {isPending && (
-              <Tooltip title="Đàm phán">
+              <Tooltip
+                title="Đàm phán"
+                color="#1677ff"
+                overlayInnerStyle={{ color: "white" }}
+              >
                 <Button
                   type="primary"
                   size="small"
@@ -302,7 +355,11 @@ export function ProposalsModal({
               </Tooltip>
             )}
             {canViewNegotiation && (
-              <Tooltip title="Chi tiết đàm phán">
+              <Tooltip
+                title="Chi tiết đàm phán"
+                color="#1677ff"
+                overlayInnerStyle={{ color: "white" }}
+              >
                 <Button
                   type="default"
                   size="small"
@@ -322,7 +379,11 @@ export function ProposalsModal({
                 cancelText="Hủy"
                 okType="danger"
               >
-                <Tooltip title="Từ chối">
+                <Tooltip
+                  title="Từ chối"
+                  color="#1677ff"
+                  overlayInnerStyle={{ color: "white" }}
+                >
                   <Button
                     danger
                     size="small"
@@ -348,7 +409,7 @@ export function ProposalsModal({
     <Modal
       title={
         <div>
-          <Typography.Title level={4} style={{ margin: 0 }}>
+          <Typography.Title level={4} className="!m-0">
             Danh sách đề xuất
           </Typography.Title>
           <Text type="secondary">Công nghệ: {technologyTitle}</Text>
@@ -361,21 +422,21 @@ export function ProposalsModal({
           Đóng
         </Button>,
       ]}
-      width={1400}
-      style={{ top: 20 }}
+      width={1600}
+      className="!top-5"
     >
       {loading ? (
-        <div style={{ textAlign: "center", padding: "40px 0" }}>
+        <div className="text-center py-10">
           <Spin size="large" />
-          <div style={{ marginTop: 16 }}>
+          <div className="mt-4">
             <Text>Đang tải...</Text>
           </div>
         </div>
       ) : error ? (
         <Card>
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <div className="text-center py-10">
             <Text type="danger">{error}</Text>
-            <div style={{ marginTop: 16 }}>
+            <div className="mt-4">
               <Button type="primary" onClick={fetchProposals}>
                 Thử lại
               </Button>
@@ -384,30 +445,19 @@ export function ProposalsModal({
         </Card>
       ) : proposals.length === 0 ? (
         <Card>
-          <div style={{ textAlign: "center", padding: "40px 0" }}>
-            <FileText
-              size={48}
-              className="text-gray-400"
-              style={{ margin: "0 auto 16px" }}
-            />
+          <div className="text-center py-10">
+            <FileText size={48} className="text-gray-400 mx-auto mb-4" />
             <Text type="secondary">Chưa có đề xuất nào cho công nghệ này</Text>
           </div>
         </Card>
       ) : (
         <div>
-          <div
-            style={{
-              marginBottom: 16,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div className="mb-4 flex justify-between items-center">
             <Text type="secondary">
               Tổng cộng: <Text strong>{proposals.length}</Text> đề xuất
             </Text>
           </div>
-          <Divider style={{ margin: "16px 0" }} />
+          <Divider className="my-4" />
           <Table
             columns={columns}
             dataSource={proposals}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Input, Button, Upload, Typography, Card, Space } from "antd";
+import { Form, Input, Button, Upload, Typography } from "antd";
 import { Send, Paperclip, X } from "lucide-react";
 import { FileText } from "lucide-react";
 
@@ -25,29 +25,26 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   formatFileSize,
 }) => {
   return (
-    <div className="p-5 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-      <div className="max-w-screen-2xl mx-auto px-5">
+    <div className="sticky bottom-0 bg-white border-t border-gray-200 backdrop-blur-sm bg-white/95 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="max-w-7xl mx-auto">
         {/* File Attachments Preview */}
         {attachments.length > 0 && (
-          <Card
-            className="mb-4 rounded-xl border border-gray-200 bg-gray-50"
-            bodyStyle={{ padding: "16px" }}
-          >
-            <Text className="text-sm font-semibold text-gray-800 mb-3 block">
+          <div className="mb-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <Text className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">
               File đính kèm ({attachments.length})
             </Text>
-            <Space direction="vertical" size="small" className="w-full">
+            <div className="space-y-2">
               {attachments.map((file, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200"
+                  className="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
                 >
-                  <div className="p-2 rounded-md bg-blue-50">
-                    <FileText size={16} className="text-blue-500" />
+                  <div className="p-1.5 rounded-md bg-blue-50">
+                    <FileText size={14} className="text-blue-500" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <Text className="text-sm font-medium text-gray-800 block mb-0.5 truncate">
+                    <Text className="text-xs font-medium text-gray-800 block truncate">
                       {file.name}
                     </Text>
                     <Text className="text-xs text-gray-500">
@@ -58,19 +55,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                   <Button
                     type="text"
                     size="small"
-                    icon={<X size={14} />}
+                    icon={<X size={12} />}
                     onClick={() => onRemoveAttachment(index)}
-                    className="text-red-500 bg-red-50 hover:bg-red-100 border-none rounded-md"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 border-none rounded-md w-6 h-6 flex items-center justify-center"
                   />
                 </div>
               ))}
-            </Space>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Message Input Form */}
         <Form form={form} onFinish={onSendMessage}>
-          <div className="flex items-end gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+          <div className="flex gap-3 p-3 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             {/* File upload button */}
             <Upload
               beforeUpload={onFileUpload}
@@ -80,16 +77,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             >
               <Button
                 type="text"
-                icon={<Paperclip size={18} />}
-                className="text-blue-500 bg-blue-50 hover:bg-blue-100 border-none rounded-xl w-11 h-11 flex items-center justify-center"
+                icon={<Paperclip size={16} />}
+                className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 border-none rounded-full w-10 h-10 flex items-center justify-center transition-colors"
               />
             </Upload>
 
             {/* Message input */}
             <Form.Item name="message" className="flex-1 mb-0">
               <Input
-                placeholder="Nhập tin nhắn của bạn..."
-                className="rounded-3xl border border-gray-300 text-sm px-4 py-3 bg-white min-h-[44px]"
+                placeholder="Nhập nội dung đàm phán của bạn..."
+                className="border-none text-sm px-0 py-2 bg-transparent focus:shadow-none"
+                style={{ boxShadow: "none" }}
                 onPressEnter={(e) => {
                   if (!e.shiftKey) {
                     e.preventDefault();
@@ -103,9 +101,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             <Button
               type="primary"
               htmlType="submit"
-              icon={<Send size={18} />}
+              icon={<Send size={16} />}
               loading={sendingMessage}
-              className="rounded-full w-11 h-11 flex items-center justify-center border-none bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30"
+              disabled={sendingMessage}
+              className="rounded-full w-10 h-10 flex items-center justify-center border-none bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-200"
             />
           </div>
         </Form>
