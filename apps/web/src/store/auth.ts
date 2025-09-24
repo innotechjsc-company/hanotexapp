@@ -289,7 +289,7 @@ export const useAuthStore = create<AuthStore>()((set, get) => ({
  * Trả về tất cả state và actions cần thiết
  */
 export const useAuth = () => {
-  return useAuthStore((state) => ({
+  const authState = useAuthStore((state) => ({
     // State
     user: state.user,
     token: state.token,
@@ -312,6 +312,8 @@ export const useAuth = () => {
     initialize: state.initialize,
     loadUserFromStorage: state.loadUserFromStorage,
   }));
+
+  return authState;
 };
 
 /**

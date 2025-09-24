@@ -1,7 +1,9 @@
 import { Media } from '@/payload-types'
 
 export interface Event {
+  id: string
   title: string
+  image: Media
   content: string
   hashtags: string
   document: Media
