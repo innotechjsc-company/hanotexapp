@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
@@ -37,6 +38,7 @@ const getStatusColor = (status: string) => {
 };
 
 export default function FundraisingPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,16 +165,17 @@ export default function FundraisingPage() {
             projects.map((proj: any) => (
               <div
                 key={proj.id || proj.name}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => router.push(`/funds/fundraising/${proj.id}`)}
               >
-                <div className="h-40 bg-gradient-to-r from-blue-500 to-purple-600" />
+                <div className="h-40 bg-gradient-to-r from-green-500 to-teal-600" />
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                       {(typeof proj.technology === "object" &&
                         proj.technology &&
                         proj.technology.name) ||
-                        "Dự án"}
+                        "Dự án gọi vốn"}
                     </span>
                     <Chip color={getStatusColor(proj?.status || "")} size="sm">
                       {getStatusLabel(proj?.status || "")}
@@ -191,6 +194,9 @@ export default function FundraisingPage() {
                       {typeof proj.user === "object" && proj.user
                         ? proj.user.name || proj.user.email
                         : "Người tạo"}
+                    </span>
+                    <span className="text-sm font-semibold text-green-600">
+                      {proj.goal_money ? `${Math.round(proj.goal_money / 1000000)}M VNĐ` : "Liên hệ"}
                     </span>
                   </div>
                 </div>
