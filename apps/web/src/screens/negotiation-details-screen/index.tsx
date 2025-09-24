@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Spin, Alert, Button, Form, Steps } from "antd";
+import { MessageOutlined, FileTextOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { useNegotiation } from "./hooks/useNegotiation";
 import { NegotiationHeader } from "./components/NegotiationHeader";
@@ -11,7 +12,6 @@ import { ConfirmationModal } from "./components/ConfirmationModal";
 import { ContractSigningStep } from "./components/ContractSigningStep";
 
 const { Text } = Typography;
-const { Step } = Steps;
 
 interface NegotiationDetailsScreenProps {
   proposalId: string;
@@ -109,12 +109,12 @@ export const NegotiationDetailsScreen: React.FC<
     {
       title: "Đàm phán",
       description: "Thảo luận và thương lượng điều kiện",
-      icon: "💬",
+      icon: <MessageOutlined />,
     },
     {
       title: "Ký hợp đồng",
       description: "Xem xét và ký kết hợp đồng",
-      icon: "📝",
+      icon: <FileTextOutlined />,
     },
   ];
 
@@ -126,25 +126,22 @@ export const NegotiationDetailsScreen: React.FC<
       </div>
 
       {/* Steps Indicator */}
-      <div className="flex-shrink-0 px-6 py-4 bg-gray-50 border-b">
-        <Steps current={currentStep} size="small">
-          {steps.map((step, index) => (
-            <Step
-              key={index}
-              title={
-                <div className="text-center">
-                  <div className="text-lg mb-1">{step.icon}</div>
-                  <div className="text-sm font-medium">{step.title}</div>
-                </div>
-              }
-              description={
-                <div className="text-xs text-gray-500 text-center">
-                  {step.description}
-                </div>
-              }
-            />
-          ))}
-        </Steps>
+      <div className="flex-shrink-0 bg-gray-50 border-b">
+        <div className="max-w-4xl mx-auto w-full px-6 py-3">
+          <Steps
+            current={currentStep}
+            size="small"
+            labelPlacement="vertical"
+            progressDot
+            items={steps.map((s) => ({
+              title: s.title,
+              description: (
+                <span className="text-xs text-gray-500">{s.description}</span>
+              ),
+              icon: s.icon,
+            }))}
+          />
+        </div>
       </div>
 
       {/* Content area - Takes remaining space with proper scrolling */}
