@@ -16,8 +16,6 @@ import type { EditableTechnology } from "../hooks/useMyTechnologies";
 interface TechnologiesTableProps {
   filteredItems: Technology[];
   isLoading: boolean;
-  selectedKeys: Set<string>;
-  setSelectedKeys: React.Dispatch<React.SetStateAction<Set<string>>>;
   selectedCount: number;
   setCurrent: React.Dispatch<React.SetStateAction<EditableTechnology | null>>;
   onView: () => void;
@@ -30,8 +28,6 @@ interface TechnologiesTableProps {
 export function TechnologiesTable({
   filteredItems,
   isLoading,
-  selectedKeys,
-  setSelectedKeys,
   selectedCount,
   setCurrent,
   onView,

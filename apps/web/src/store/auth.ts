@@ -335,7 +335,19 @@ export const useAuth = () => {
  * Hook chỉ lấy user data
  */
 export const useUser = () => {
-  return useAuthStore((state) => state.user);
+  const user = useAuthStore((state) => state.user);
+
+  // Debug logging for user state changes
+  if (process.env.NODE_ENV === "development") {
+    console.log("useUser - current user:", {
+      id: user?.id,
+      email: user?.email,
+      hasUser: !!user,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return user;
 };
 
 /**
