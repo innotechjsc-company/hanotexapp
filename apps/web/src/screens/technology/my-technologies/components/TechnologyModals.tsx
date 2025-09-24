@@ -172,45 +172,15 @@ export function AddTechnologyModal({
       width={1200}
     >
       <div className="space-y-6">
-        <form className="space-y-6" onSubmit={(e) => handleSubmit(e, onClose)}>
+        <form
+          className="space-y-6"
+          onSubmit={(e) => handleSubmit(e, handleCancel)}
+        >
           {/* 1. Basic Information */}
           <BasicInfoSection
             ref={basicRef}
             onChange={(data) => console.log("Changed:", data)} // optional
           />
-
-          {/* <Card>
-                  <CardHeader className="px-6 py-4">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      Trạng thái *
-                    </h2>
-                  </CardHeader>
-                  <CardBody className="p-6 space-y-4">
-                    <Select
-                      label="Trạng thái"
-                      placeholder="Chọn trạng thái"
-                      selectedKeys={
-                        current?.status ? new Set([current.status]) : new Set()
-                      }
-                      onSelectionChange={(keys) => {
-                        const key = Array.from(keys as Set<string>)[0];
-                        setCurrent((p) => ({
-                          ...(p || {}),
-                          status: key as TechnologyStatus,
-                        }));
-                        setStatus(key as TechnologyStatus);
-                      }}
-                      variant="bordered"
-                    >
-                      <SelectItem key="draft">Bản nháp</SelectItem>
-                      <SelectItem key="pending">Chờ duyệt</SelectItem>
-                      <SelectItem key="approved">Đã duyệt</SelectItem>
-                      <SelectItem key="active">Hoạt động</SelectItem>
-                      <SelectItem key="inactive">Không hoạt động</SelectItem>
-                      <SelectItem key="rejected">Từ chối</SelectItem>
-                    </Select>
-                  </CardBody>
-                </Card> */}
 
           {/* 2. Technology Owners */}
           <TechnologyOwnersSection
@@ -399,43 +369,11 @@ export function EditTechnologyModal({
       width={1200}
     >
       <div className="space-y-6">
-        <form className="space-y-6" onSubmit={(e) => handleSubmit(e, onClose)}>
+        <form
+          className="space-y-6"
+          onSubmit={(e) => handleSubmit(e, handleCancel)}
+        >
           <BasicInfoSection initialData={current || undefined} ref={basicRef} />
-
-          {/* <Card>
-                  <CardHeader className="px-6 py-4">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      Trạng thái *
-                    </h2>
-                  </CardHeader>
-                  <CardBody className="p-6 space-y-4">
-                    <Select
-                      label="Trạng thái"
-                      placeholder="Chọn trạng thái"
-                      selectedKeys={
-                        current?.status || status
-                          ? new Set([String(current?.status || status)])
-                          : new Set()
-                      }
-                      onSelectionChange={(keys) => {
-                        const key = Array.from(keys as Set<string>)[0];
-                        setCurrent((p) => ({
-                          ...(p || {}),
-                          status: key as TechnologyStatus,
-                        }));
-                        setStatus(key as TechnologyStatus);
-                      }}
-                      variant="bordered"
-                    >
-                      <SelectItem key="draft">Bản nháp</SelectItem>
-                      <SelectItem key="pending">Chờ duyệt</SelectItem>
-                      <SelectItem key="approved">Đã duyệt</SelectItem>
-                      <SelectItem key="active">Hoạt động</SelectItem>
-                      <SelectItem key="inactive">Không hoạt động</SelectItem>
-                      <SelectItem key="rejected">Từ chối</SelectItem>
-                    </Select>
-                  </CardBody>
-                </Card> */}
 
           <TechnologyOwnersSection
             ref={ownersRef}
