@@ -93,6 +93,9 @@ export interface Config {
     'event-comment': EventComment;
     'news-like': NewsLike;
     'negotiating-messages': NegotiatingMessage;
+    'room-chat': RoomChat;
+    'room-message': RoomMessage;
+    'room-user': RoomUser;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -125,6 +128,9 @@ export interface Config {
     'event-comment': EventCommentSelect<false> | EventCommentSelect<true>;
     'news-like': NewsLikeSelect<false> | NewsLikeSelect<true>;
     'negotiating-messages': NegotiatingMessagesSelect<false> | NegotiatingMessagesSelect<true>;
+    'room-chat': RoomChatSelect<false> | RoomChatSelect<true>;
+    'room-message': RoomMessageSelect<false> | RoomMessageSelect<true>;
+    'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -943,6 +949,40 @@ export interface NegotiatingMessage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-chat".
+ */
+export interface RoomChat {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-message".
+ */
+export interface RoomMessage {
+  id: string;
+  room: string | RoomChat;
+  message?: string | null;
+  document?: (string | null) | Media;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-user".
+ */
+export interface RoomUser {
+  id: string;
+  room: string | RoomChat;
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1051,6 +1091,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'negotiating-messages';
         value: string | NegotiatingMessage;
+      } | null)
+    | ({
+        relationTo: 'room-chat';
+        value: string | RoomChat;
+      } | null)
+    | ({
+        relationTo: 'room-message';
+        value: string | RoomMessage;
+      } | null)
+    | ({
+        relationTo: 'room-user';
+        value: string | RoomUser;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1592,6 +1644,37 @@ export interface NegotiatingMessagesSelect<T extends boolean = true> {
   user?: T;
   message?: T;
   document?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-chat_select".
+ */
+export interface RoomChatSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-message_select".
+ */
+export interface RoomMessageSelect<T extends boolean = true> {
+  room?: T;
+  message?: T;
+  document?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "room-user_select".
+ */
+export interface RoomUserSelect<T extends boolean = true> {
+  room?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }
