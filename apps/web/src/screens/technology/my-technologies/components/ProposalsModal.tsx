@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Button,
   Modal,
@@ -22,7 +23,6 @@ import {
   DollarSign,
   Download,
   Eye,
-  MessageSquare,
   X,
   User as UserIcon,
   ExternalLink,
@@ -51,6 +51,7 @@ export function ProposalsModal({
   technologyId,
   technologyTitle,
 }: ProposalsModalProps) {
+  const router = useRouter();
   const [proposals, setProposals] = useState<TechnologyPropose[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -147,20 +148,6 @@ export function ProposalsModal({
   };
 
   // Handle proposal actions
-  const handleNegotiate = async (proposalId: string) => {
-    setActionLoading(proposalId);
-    try {
-      await technologyProposeApi.setStatus(proposalId, "negotiating");
-      message.success("Đã chuyển sang trạng thái đàm phán");
-      fetchProposals(); // Refresh the list
-    } catch (error) {
-      console.error("Failed to update proposal status:", error);
-      message.error("Không thể cập nhật trạng thái đề xuất");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const handleReject = async (proposalId: string) => {
     setActionLoading(proposalId);
     try {
@@ -178,8 +165,8 @@ export function ProposalsModal({
   const handleConfirm = async (proposalId: string) => {
     setActionLoading(proposalId);
     try {
-      await technologyProposeApi.setStatus(proposalId, "contract_signed");
-      message.success("Đã xác nhận đề xuất");
+      await technologyProposeApi.setStatus(proposalId, "negotiating");
+      message.success("Đã chuyển sang trạng thái đàm phán");
       fetchProposals();
     } catch (error) {
       console.error("Failed to confirm proposal:", error);
@@ -192,7 +179,7 @@ export function ProposalsModal({
   // Handle opening negotiation details
   const handleViewNegotiationDetails = (proposalId: string) => {
     const url = `/technologies/negotiations/${proposalId}`;
-    window.open(url, "_blank");
+    router.push(url);
   };
 
   const columns: ColumnsType<TechnologyPropose> = [
@@ -297,47 +284,52 @@ export function ProposalsModal({
         const proposalId = record.id || record._id;
         const isLoading = actionLoading === proposalId;
         const isPending = record.status === "pending";
-        const canReject = record.status === "pending";
         const canViewNegotiation =
-          record.status !== "pending" && record.status !== "cancelled";
-        const canConfirm =
-          record.status === "pending" || record.status === "negotiating";
+          record.status === "negotiating" ||
+          record.status === "contract_signed";
 
         return (
           <Space>
-            <Popconfirm
-              title="Xác nhận đề xuất"
-              description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
-              onConfirm={() => handleConfirm(proposalId)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              disabled={!canConfirm}
-            >
-              <Tooltip title="Xác nhận" color="#1677ff">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<CheckCircle size={16} />}
-                  loading={isLoading}
-                  disabled={!canConfirm}
-                  className="hover:bg-green-50 hover:text-green-600"
-                />
-              </Tooltip>
-            </Popconfirm>
             {isPending && (
-              <Tooltip title="Đàm phán" color="#1677ff">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<MessageSquare size={16} />}
-                  loading={isLoading}
-                  onClick={() => handleNegotiate(proposalId)}
-                  className="hover:bg-blue-50 hover:text-blue-600"
-                />
-              </Tooltip>
+              <>
+                <Popconfirm
+                  title="Xác nhận đề xuất"
+                  description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
+                  onConfirm={() => handleConfirm(proposalId)}
+                  okText="Xác nhận"
+                  cancelText="Hủy"
+                >
+                  <Tooltip title="Xác nhận" color="#1677ff">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<CheckCircle size={16} />}
+                      loading={isLoading}
+                      className="hover:bg-green-50 hover:text-green-600"
+                    />
+                  </Tooltip>
+                </Popconfirm>
+                <Popconfirm
+                  title="Từ chối đề xuất"
+                  description="Bạn có chắc chắn muốn từ chối đề xuất này?"
+                  onConfirm={() => handleReject(proposalId)}
+                  okText="Từ chối"
+                  cancelText="Hủy"
+                  okType="danger"
+                >
+                  <Tooltip title="Từ chối" color="#ff4d4f">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<X size={16} color="red" />}
+                      loading={isLoading}
+                    />
+                  </Tooltip>
+                </Popconfirm>
+              </>
             )}
             {canViewNegotiation && (
-              <Tooltip title="Chi tiết đàm phán" color="#1677ff">
+              <Tooltip title="Xem chi tiết" color="#1677ff">
                 <Button
                   type="text"
                   size="small"
@@ -346,26 +338,6 @@ export function ProposalsModal({
                   className="hover:bg-gray-50 hover:text-gray-600"
                 />
               </Tooltip>
-            )}
-            {canReject && (
-              <Popconfirm
-                title="Từ chối đề xuất"
-                description="Bạn có chắc chắn muốn từ chối đề xuất này?"
-                onConfirm={() => handleReject(proposalId)}
-                okText="Từ chối"
-                cancelText="Hủy"
-                okType="danger"
-              >
-                <Tooltip title="Từ chối" color="#ff4d4f">
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<X size={16} color="red" />}
-                    loading={isLoading}
-                    className="hover:bg-red-50 hover:text-red-600"
-                  />
-                </Tooltip>
-              </Popconfirm>
             )}
           </Space>
         );
