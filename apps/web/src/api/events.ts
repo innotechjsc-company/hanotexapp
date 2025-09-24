@@ -323,6 +323,90 @@ export async function getFilteredEvents(
 }
 
 /**
+ * Get event attendees count from event-user collection
+ */
+export async function getEventAttendeesCount(eventId: string): Promise<number> {
+  try {
+    const response = await payloadApiClient.get<any>(
+      `${API_ENDPOINTS.EVENT_USER}?where[event][equals]=${eventId}&limit=0`
+    );
+
+    // Return the total count from the response
+    return response.totalDocs || 0;
+  } catch (error) {
+    console.error("Error fetching event attendees count:", error);
+    return 0;
+  }
+}
+
+/**
+ * Register user for an event (create event-user record)
+ */
+export async function registerForEvent(
+  eventId: string,
+  userId: string
+): Promise<any> {
+  try {
+    const response = await payloadApiClient.post<any>(
+      API_ENDPOINTS.EVENT_USER,
+      {
+        user: userId,
+        event: eventId,
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error registering for event:", error);
+    throw error;
+  }
+}
+
+/**
+ * Check if user is already registered for an event
+ */
+export async function checkUserRegistration(
+  eventId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    const response = await payloadApiClient.get<any>(
+      `${API_ENDPOINTS.EVENT_USER}?where[event][equals]=${eventId}&where[user][equals]=${userId}&limit=1`
+    );
+
+    return (response.totalDocs || 0) > 0;
+  } catch (error) {
+    console.error("Error checking user registration:", error);
+    return false;
+  }
+}
+
+/**
+ * Unregister user from an event (delete event-user record)
+ */
+export async function unregisterFromEvent(
+  eventId: string,
+  userId: string
+): Promise<void> {
+  try {
+    // First find the event-user record
+    const response = await payloadApiClient.get<any>(
+      `${API_ENDPOINTS.EVENT_USER}?where[event][equals]=${eventId}&where[user][equals]=${userId}&limit=1`
+    );
+
+    if (response.docs && response.docs.length > 0) {
+      const eventUserId = response.docs[0].id;
+      await payloadApiClient.delete(
+        `${API_ENDPOINTS.EVENT_USER}/${eventUserId}`
+      );
+    }
+  } catch (error) {
+    console.error("Error unregistering from event:", error);
+    throw error;
+  }
+}
+
+/**
  * Get recent events (created recently)
  */
 export async function getRecentEvents(

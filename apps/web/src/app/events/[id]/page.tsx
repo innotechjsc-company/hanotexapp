@@ -6,7 +6,6 @@ import {
   Clock,
   MapPin,
   Users,
-  User,
   ArrowLeft,
   Share2,
   ExternalLink,
@@ -22,29 +21,35 @@ import {
 import Link from "next/link";
 import Map from "@/components/ui/Map";
 import CountdownTimer from "@/components/ui/CountdownTimer";
+import {
+  getEventById,
+  getEventAttendeesCount,
+  registerForEvent,
+  unregisterFromEvent,
+  checkUserRegistration,
+} from "@/api/events";
+import { Event as ApiEvent } from "@/types/event";
+import { useAuth } from "@/store/auth";
 
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  location: string;
+interface EventDisplay extends ApiEvent {
+  // Additional UI-specific fields
+  description?: string;
+  date?: string;
+  time?: string;
   location_details?: {
     address: string;
     coordinates: [number, number];
     googleMapsUrl?: string;
   };
-  attendees: string;
-  type: string;
-  status: "upcoming" | "ongoing" | "completed";
-  registration_required: boolean;
+  attendees?: string;
+  type?: string;
+  registration_required?: boolean;
   registration_deadline?: string;
   image_url?: string;
   gallery_images?: string[];
-  organizer: string;
-  contact_email: string;
-  contact_phone: string;
+  organizer?: string;
+  contact_email?: string;
+  contact_phone?: string;
   detailed_content?: string;
   agenda?: Array<{
     time: string;
@@ -69,111 +74,77 @@ export default function EventDetailPage({
 }: {
   params: { id: string };
 }) {
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<EventDisplay | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isRegistered, setIsRegistered] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
+  const [attendeesCount, setAttendeesCount] = useState<number>(0);
+  const [loadingAttendees, setLoadingAttendees] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
-  // Mock data - in real app, fetch from API
-  const mockEvent: Event = {
-    id: parseInt(params.id),
-    title: "Techmart Hà Nội 2025",
-    description:
-      "Triển lãm công nghệ và sản phẩm khoa học công nghệ lớn nhất Hà Nội với sự tham gia của hơn 200 doanh nghiệp và viện nghiên cứu.",
-    date: "2025-02-25",
-    time: "08:00 - 17:00",
-    location: "Trung tâm Hội nghị Quốc gia",
-    location_details: {
-      address: "Mỹ Đình, Nam Từ Liêm, Hà Nội",
-      coordinates: [21.0285, 105.8542],
-      googleMapsUrl: "https://maps.google.com/?q=21.0285,105.8542",
-    },
-    attendees: "500+",
-    type: "Triển lãm",
-    status: "upcoming",
-    registration_required: true,
-    registration_deadline: "2025-02-20",
-    organizer: "Sở KH&CN Hà Nội",
-    contact_email: "contact@hanotex.vn",
-    contact_phone: "024 3825 1234",
-    image_url: "/images/events/techmart-2025.jpg",
-    gallery_images: [
-      "/images/events/techmart-2025.jpg",
-      "/images/events/ai-auction.jpg",
-      "/images/events/tech-transfer-workshop.jpg",
-      "/images/events/techmart-2025.jpg",
-    ],
-    detailed_content: `
-      <p>Techmart Hà Nội 2025 là triển lãm công nghệ và sản phẩm khoa học công nghệ lớn nhất Hà Nội, quy tụ hơn 200 doanh nghiệp và viện nghiên cứu hàng đầu. Sự kiện này mang đến cơ hội tuyệt vời để kết nối, học hỏi và khám phá những xu hướng công nghệ mới nhất.</p>
-      
-      <h2>Mục tiêu sự kiện</h2>
-      <p>Techmart Hà Nội 2025 được tổ chức với các mục tiêu chính:</p>
-      <ul>
-        <li>Giới thiệu các sản phẩm và dịch vụ công nghệ mới nhất</li>
-        <li>Tạo cơ hội kết nối giữa doanh nghiệp và nhà nghiên cứu</li>
-        <li>Thúc đẩy chuyển giao công nghệ và thương mại hóa</li>
-        <li>Nâng cao nhận thức về vai trò của khoa học công nghệ</li>
-      </ul>
-      
-      <h2>Nội dung chính</h2>
-      <p>Sự kiện bao gồm nhiều hoạt động đa dạng:</p>
-      <ul>
-        <li>Triển lãm sản phẩm và công nghệ</li>
-        <li>Hội thảo chuyên đề về xu hướng công nghệ</li>
-        <li>Kết nối doanh nghiệp (B2B)</li>
-        <li>Demo và thuyết trình công nghệ</li>
-        <li>Hội chợ việc làm trong lĩnh vực công nghệ</li>
-      </ul>
-      
-      <h2>Đối tượng tham gia</h2>
-      <p>Techmart Hà Nội 2025 dành cho:</p>
-      <ul>
-        <li>Doanh nghiệp công nghệ và khởi nghiệp</li>
-        <li>Viện nghiên cứu và trường đại học</li>
-        <li>Nhà đầu tư và quỹ đầu tư</li>
-        <li>Sinh viên và chuyên gia công nghệ</li>
-        <li>Đại diện các cơ quan chính phủ</li>
-      </ul>
-    `,
-    agenda: [
-      {
-        time: "08:00 - 08:30",
-        title: "Đăng ký và khai mạc",
-        speaker: "Đại diện Sở KH&CN Hà Nội",
-      },
-      {
-        time: "08:30 - 09:30",
-        title: "Phát biểu khai mạc và giới thiệu tổng quan",
-        speaker: "Ông Nguyễn Văn A - Giám đốc Sở KH&CN",
-      },
-      {
-        time: "09:30 - 11:00",
-        title: "Triển lãm sản phẩm công nghệ",
-        speaker: "Các doanh nghiệp tham gia",
-      },
-      {
-        time: "11:00 - 12:00",
-        title: "Hội thảo: Xu hướng AI và Machine Learning 2025",
-        speaker: "GS.TS. Trần Văn B - Viện Công nghệ Thông tin",
-      },
-      {
-        time: "13:30 - 15:00",
-        title: "Demo công nghệ và thuyết trình sản phẩm",
-        speaker: "Các startup công nghệ",
-      },
-      {
-        time: "15:00 - 16:30",
-        title: "Kết nối doanh nghiệp (B2B Networking)",
-        speaker: "Tất cả tham gia",
-      },
-      {
-        time: "16:30 - 17:00",
-        title: "Tổng kết và bế mạc",
-        speaker: "Đại diện Ban tổ chức",
-      },
-    ],
+  // Auth state
+  const { user, isAuthenticated } = useAuth();
+
+  // Helper function to transform API event to display format
+  const transformEventForDisplay = (apiEvent: ApiEvent): EventDisplay => {
+    // Extract date and time from start_date and end_date
+    const startDate = new Date(apiEvent.start_date);
+    const endDate = new Date(apiEvent.end_date);
+
+    // Format date and time
+    const date = startDate.toISOString().split("T")[0];
+    const startTime = startDate.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const endTime = endDate.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const time = `${startTime} - ${endTime}`;
+
+    // Determine status based on dates
+    const now = new Date();
+    let displayStatus: "upcoming" | "ongoing" | "completed";
+    if (now < startDate) {
+      displayStatus = "upcoming";
+    } else if (now >= startDate && now <= endDate) {
+      displayStatus = "ongoing";
+    } else {
+      displayStatus = "completed";
+    }
+
+    return {
+      ...apiEvent,
+      description: apiEvent.content,
+      date,
+      time,
+      status: displayStatus,
+      // Add default location details if location exists
+      location_details: apiEvent.location
+        ? {
+            address: apiEvent.location,
+            coordinates: [21.0285, 105.8542] as [number, number], // Default Hanoi coordinates
+            googleMapsUrl: `https://maps.google.com/?q=${encodeURIComponent(apiEvent.location)}`,
+          }
+        : undefined,
+      // Add some default values for UI
+      attendees: "Đang cập nhật",
+      type: "Sự kiện",
+      registration_required: true,
+      organizer: "Ban tổ chức",
+      contact_email: "contact@hanotex.vn",
+      contact_phone: "024 3825 1234",
+      image_url:
+        typeof apiEvent.image === "object"
+          ? apiEvent.image?.url || undefined
+          : undefined,
+    };
   };
 
   // Mock comments data
@@ -200,23 +171,105 @@ export default function EventDetailPage({
     },
   ];
 
+  // Function to fetch attendees count
+  const fetchAttendeesCount = async (eventId: string) => {
+    try {
+      setLoadingAttendees(true);
+      const count = await getEventAttendeesCount(eventId);
+      setAttendeesCount(count);
+    } catch (err) {
+      console.error("Error fetching attendees count:", err);
+      setAttendeesCount(0);
+    } finally {
+      setLoadingAttendees(false);
+    }
+  };
+
+  // Function to check if user is registered
+  const checkRegistrationStatus = async (eventId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const isRegistered = await checkUserRegistration(eventId, user.id);
+      setIsRegistered(isRegistered);
+    } catch (err) {
+      console.error("Error checking registration status:", err);
+    }
+  };
+
+  // Function to handle registration
+  const handleRegister = async () => {
+    if (!user?.id || !event?.id) return;
+
+    try {
+      setRegistering(true);
+      await registerForEvent(event.id, user.id);
+      setIsRegistered(true);
+
+      // Refresh attendees count
+      await fetchAttendeesCount(event.id);
+    } catch (err) {
+      console.error("Error registering for event:", err);
+      alert("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  // Function to handle unregistration
+  const handleUnregister = async () => {
+    if (!user?.id || !event?.id) return;
+
+    try {
+      setRegistering(true);
+      await unregisterFromEvent(event.id, user.id);
+      setIsRegistered(false);
+
+      // Refresh attendees count
+      await fetchAttendeesCount(event.id);
+    } catch (err) {
+      console.error("Error unregistering from event:", err);
+      alert("Có lỗi xảy ra khi hủy đăng ký. Vui lòng thử lại.");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   useEffect(() => {
-    // Simulate API call
     const fetchEvent = async () => {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setEvent(mockEvent);
-      setComments(mockComments);
-      setLoading(false);
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch event from API
+        const apiEvent = await getEventById(params.id);
+        const displayEvent = transformEventForDisplay(apiEvent);
+
+        setEvent(displayEvent);
+        setComments(mockComments);
+
+        // Fetch attendees count after getting event details
+        await fetchAttendeesCount(params.id);
+
+        // Check if user is registered (if authenticated)
+        if (user?.id) {
+          await checkRegistrationStatus(params.id);
+        }
+      } catch (err) {
+        console.error("Error fetching event:", err);
+        setError("Không thể tải thông tin sự kiện. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchEvent();
-  }, [params.id]);
+  }, [params.id, user?.id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "upcoming":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary-100 text-primary-800";
       case "ongoing":
         return "bg-green-100 text-green-800";
       case "completed":
@@ -247,11 +300,6 @@ export default function EventDetailPage({
       month: "long",
       day: "numeric",
     });
-  };
-
-  const handleRegister = () => {
-    setIsRegistered(true);
-    // In real app, handle registration logic
   };
 
   const handleCommentSubmit = () => {
@@ -295,8 +343,27 @@ export default function EventDetailPage({
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Đang tải thông tin sự kiện...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Lỗi tải sự kiện
+          </h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Link
+            href="/events"
+            className="text-primary-600 hover:text-primary-800"
+          >
+            Quay lại danh sách sự kiện
+          </Link>
         </div>
       </div>
     );
@@ -309,7 +376,10 @@ export default function EventDetailPage({
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Không tìm thấy sự kiện
           </h1>
-          <Link href="/events" className="text-blue-600 hover:text-blue-800">
+          <Link
+            href="/events"
+            className="text-primary-600 hover:text-primary-800"
+          >
             Quay lại danh sách sự kiện
           </Link>
         </div>
@@ -324,7 +394,7 @@ export default function EventDetailPage({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with gradient background */}
-      <div className="relative bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 text-white">
+      <div className="relative bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 text-white">
         {/* Background pattern */}
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         <div
@@ -338,7 +408,7 @@ export default function EventDetailPage({
           <div className="flex items-center justify-between mb-8">
             <Link
               href="/events"
-              className="flex items-center text-white hover:text-purple-200 transition-colors duration-200"
+              className="flex items-center text-white hover:text-primary-200 transition-colors duration-200"
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
               Quay lại danh sách sự kiện
@@ -354,9 +424,6 @@ export default function EventDetailPage({
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               {event.title}
             </h1>
-            <p className="text-xl text-purple-100 leading-relaxed max-w-4xl">
-              {event.description}
-            </p>
           </div>
         </div>
       </div>
@@ -366,7 +433,7 @@ export default function EventDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Countdown Timer */}
-            {event.status === "upcoming" && (
+            {event.status === "upcoming" && event.date && event.time && (
               <CountdownTimer
                 targetDate={`${event.date}T${event.time.split(" - ")[0]}:00`}
                 className="mb-6"
@@ -376,17 +443,18 @@ export default function EventDetailPage({
             {/* Thông tin sự kiện card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <Info className="h-5 w-5 mr-2 text-purple-600" />
+                <Info className="h-5 w-5 mr-2 text-primary-600" />
                 Thông tin sự kiện
               </h2>
               <div className="space-y-4">
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-purple-700 mb-2 flex items-center">
+                <div className="bg-primary-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-primary-700 mb-2 flex items-center">
                     <Clock className="h-4 w-4 mr-1" />
                     Thời gian bắt đầu
                   </h3>
-                  <p className="text-purple-900 font-medium text-lg">
-                    {formatDate(event.date)} • {event.time}
+                  <p className="text-primary-900 font-medium text-lg">
+                    {event.date && formatDate(event.date)}{" "}
+                    {event.time && `• ${event.time}`}
                   </p>
                 </div>
                 <div>
@@ -394,10 +462,7 @@ export default function EventDetailPage({
                     Mô tả sự kiện
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
-                    Tham gia cùng chúng tôi trong hội thảo về những xu hướng mới
-                    nhất trong lĩnh vực Trí tuệ Nhân tạo. Sự kiện sẽ bao gồm các
-                    phiên thuyết trình từ các chuyên gia hàng đầu, workshop thực
-                    hành và cơ hội networking với cộng đồng tech Việt Nam.
+                    {event.description || event.content}
                   </p>
                 </div>
               </div>
@@ -406,23 +471,21 @@ export default function EventDetailPage({
             {/* Địa điểm với bản đồ */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-purple-600" />
+                <MapPin className="h-5 w-5 mr-2 text-primary-600" />
                 Địa điểm
               </h2>
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">
-                    Trung tâm Hội nghị Quốc gia
+                    {event.location || "Địa điểm"}
                   </h3>
-                  <p className="text-gray-900 mb-2">
-                    {event.location_details?.address}
-                  </p>
+
                   {event.location_details?.googleMapsUrl && (
                     <a
                       href={event.location_details.googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-purple-600 hover:text-purple-800 text-sm font-medium"
+                      className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium"
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Xem trên Google Maps
@@ -446,14 +509,14 @@ export default function EventDetailPage({
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Chia sẻ suy nghĩ của bạn về sự kiện..."
-                  className="w-full p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   rows={3}
                 />
                 <div className="flex justify-end mt-3">
                   <button
                     onClick={handleCommentSubmit}
                     disabled={!newComment.trim()}
-                    className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
                   >
                     <Send className="h-4 w-4" />
                     Đăng bình luận
@@ -466,8 +529,8 @@ export default function EventDetailPage({
                 {comments.map((comment) => (
                   <div key={comment.id} className="flex items-start space-x-3">
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-purple-600 font-medium text-sm">
+                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                        <span className="text-primary-600 font-medium text-sm">
                           {comment.user.initial}
                         </span>
                       </div>
@@ -518,61 +581,63 @@ export default function EventDetailPage({
                   </div>
                 )}
 
-                {isRegistered ? (
+                {!isAuthenticated ? (
+                  <div className="text-center">
+                    <p className="text-gray-600 mb-4">
+                      Bạn cần đăng nhập để đăng ký tham gia sự kiện
+                    </p>
+                    <Link
+                      href="/auth/login"
+                      className="inline-block bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200"
+                    >
+                      Đăng nhập
+                    </Link>
+                  </div>
+                ) : isRegistered ? (
                   <div className="text-center">
                     <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
                     <p className="text-green-600 font-medium">
                       Đã đăng ký thành công!
                     </p>
-                    <p className="text-sm text-gray-600 mt-2">
-                      Chúng tôi sẽ gửi thông tin chi tiết đến email của bạn
-                    </p>
+
+                    <button
+                      onClick={handleUnregister}
+                      disabled={registering}
+                      className="bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      {registering ? "Đang xử lý..." : "Hủy đăng ký"}
+                    </button>
                   </div>
                 ) : (
                   <button
                     onClick={handleRegister}
-                    className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors duration-200"
+                    disabled={registering}
+                    className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
                   >
-                    Đăng ký ngay
+                    {registering ? "Đang đăng ký..." : "Đăng ký ngay"}
                   </button>
                 )}
               </div>
             )}
 
-            {/* Organizer Info */}
+            {/* Attendees Info */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2 text-purple-600" />
-                Thông tin tổ chức
+                <Users className="h-5 w-5 mr-2 text-primary-600" />
+                Người tham gia
               </h3>
-              <div className="space-y-3">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">
-                    Đơn vị tổ chức
-                  </h4>
-                  <p className="text-gray-900">{event.organizer}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">
-                    Email liên hệ
-                  </h4>
-                  <a
-                    href={`mailto:${event.contact_email}`}
-                    className="text-purple-600 hover:text-purple-800"
-                  >
-                    {event.contact_email}
-                  </a>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">
-                    Số điện thoại
-                  </h4>
-                  <a
-                    href={`tel:${event.contact_phone}`}
-                    className="text-purple-600 hover:text-purple-800"
-                  >
-                    {event.contact_phone}
-                  </a>
+              <div className="space-y-4">
+                <div className="text-center p-6 bg-primary-50 rounded-lg">
+                  <div className="text-4xl font-bold text-primary-600 mb-2">
+                    {loadingAttendees ? (
+                      <div className="animate-pulse bg-primary-200 h-12 w-16 mx-auto rounded"></div>
+                    ) : (
+                      attendeesCount
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    người đã đăng ký tham gia
+                  </div>
                 </div>
               </div>
             </div>

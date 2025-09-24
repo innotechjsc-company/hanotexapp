@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   PROJECTS: "/project",
   TECHNOLOGY_PROPOSE: "/technology-propose",
   EVENTS: "/events",
+  EVENT_USER: "/event-user",
   NEWS: "/news",
   NEWS_LIKE: "/news-like",
 } as const;
