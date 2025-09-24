@@ -298,3 +298,37 @@ export async function bulkRemoveUsersFromRoom(
   const promises = userIds.map((userId) => removeUserFromRoom(roomId, userId));
   await Promise.all(promises);
 }
+
+/**
+ * Find existing room between two users
+ * Returns the first room that contains both users
+ */
+export async function findRoomBetweenUsers(
+  userId1: string,
+  userId2: string
+): Promise<string | null> {
+  try {
+    // Get all rooms for user1
+    const user1Rooms = await getRoomsForUser(userId1, { limit: 100 });
+
+    if (!user1Rooms.docs || user1Rooms.docs.length === 0) {
+      return null;
+    }
+
+    // Extract room IDs from user1's rooms
+    const roomIds = user1Rooms.docs.map((roomUser) => roomUser.room);
+
+    // Check each room to see if user2 is also in it
+    for (const roomId of roomIds) {
+      const isUser2InRoom = await isUserInRoom(roomId, userId2);
+      if (isUser2InRoom) {
+        return roomId;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error finding room between users:", error);
+    return null;
+  }
+}

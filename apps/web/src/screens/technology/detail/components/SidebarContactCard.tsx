@@ -14,7 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { createSimpleRoomChat } from "@/api/roomChat";
-import { addUserToRoom } from "@/api/roomUser";
+import { addUserToRoom, findRoomBetweenUsers } from "@/api/roomUser";
 import { sendMessage } from "@/api/roomMessage";
 
 interface SidebarContactCardProps {
@@ -60,26 +60,36 @@ export default function SidebarContactCard({
     try {
       setIsCreatingChat(true);
 
-      // 1. Create room chat
+      // 1. Check if room already exists between these two users
+      const existingRoomId = await findRoomBetweenUsers(currentUserId, ownerId);
+
+      if (existingRoomId) {
+        // Room already exists, navigate to existing chat
+        setShowOwnerModal(false);
+        router.push(`/messages?roomId=${existingRoomId}`);
+        return;
+      }
+
+      // 2. No existing room, create new room chat
       const roomTitle = `Chat với ${ownerName}`;
       const roomChat = await createSimpleRoomChat(roomTitle);
 
-      // 2. Add both users to room
+      // 3. Add both users to room
       await addUserToRoom(roomChat.id, currentUserId);
       await addUserToRoom(roomChat.id, ownerId);
 
-      // 3. Send initial message
+      // 4. Send initial message
       await sendMessage(
         roomChat.id,
         currentUserId,
         `Xin chào ${ownerName}, tôi quan tâm đến công nghệ của bạn.`
       );
 
-      // 4. Close modal and navigate to messages page
+      // 5. Close modal and navigate to messages page
       setShowOwnerModal(false);
       router.push(`/messages?roomId=${roomChat.id}`);
     } catch (error) {
-      console.error("Error creating chat:", error);
+      console.error("Error creating/finding chat:", error);
       alert("Có lỗi xảy ra khi tạo cuộc trò chuyện. Vui lòng thử lại.");
     } finally {
       setIsCreatingChat(false);
@@ -208,7 +218,7 @@ export default function SidebarContactCard({
                 className="w-full px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
-                {isCreatingChat ? "Đang tạo cuộc trò chuyện..." : "Chat ngay"}
+                {isCreatingChat ? "Đang kiểm tra..." : "Chat ngay"}
               </button>
             </div>
           </div>
