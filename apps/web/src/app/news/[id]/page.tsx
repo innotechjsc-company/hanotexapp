@@ -17,9 +17,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
+import { getNewsById, getNews } from "@/api/news";
+import { News } from "@/types/news";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import LikeButton from "@/components/ui/LikeButton";
+import ShareModal from "@/components/ui/ShareModal";
+import ImageWithFallback from "@/components/ui/ImageWithFallback";
 
 interface NewsArticle {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -35,68 +42,116 @@ interface NewsArticle {
   is_featured: boolean;
 }
 
-export default function NewsDetailPage({ params }: { params: { id: string } }) {
-  const [article, setArticle] = useState<NewsArticle | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+// Helper function to get proper image URL
+function getImageUrl(imageData: any): string {
+  const fallbackUrl =
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop&crop=center";
 
-  // Mock data - in real app, fetch from API
-  const mockArticle: NewsArticle = {
-    id: parseInt(params.id),
-    title: "HANOTEX chính thức ra mắt sàn giao dịch công nghệ",
+  if (!imageData?.url) {
+    console.log("No image found in news data, using fallback");
+    return fallbackUrl;
+  }
+
+  const originalUrl = imageData.url;
+  console.log("Original image URL from API:", originalUrl);
+  console.log("PAYLOAD_API_BASE_URL:", PAYLOAD_API_BASE_URL);
+
+  // Check if URL is already absolute (starts with http/https)
+  if (originalUrl.startsWith("http")) {
+    console.log("Using absolute URL:", originalUrl);
+    return originalUrl;
+  }
+
+  // For relative URLs, construct proper URL
+  const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", ""); // Remove /api from base URL
+
+  // Handle different URL formats
+  let cleanUrl = originalUrl;
+  if (!cleanUrl.startsWith("/")) {
+    cleanUrl = `/${cleanUrl}`;
+  }
+
+  const constructedUrl = `${baseUrl}${cleanUrl}`;
+  console.log("Constructed relative URL:", constructedUrl);
+
+  return constructedUrl;
+}
+
+// Helper function to convert News to display format
+function convertNewsToArticle(news: News): NewsArticle {
+  const imageUrl = getImageUrl(news.image);
+
+  // Parse hashtags
+  const tags = news.hashtags
+    ? news.hashtags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+    : [];
+
+  return {
+    id: news.id || "",
+    title: news.title,
     excerpt:
-      "Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ.",
-    content: `
-      <p>Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, đánh dấu một bước ngoặt quan trọng trong việc kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội. Với mục tiêu thúc đẩy chuyển giao và thương mại hóa công nghệ, HANOTEX hứa hẹn sẽ trở thành cầu nối quan trọng giữa các nhà nghiên cứu, doanh nghiệp và nhà đầu tư.</p>
-      
-      <h2>Mục tiêu và tầm nhìn</h2>
-      <p>HANOTEX được thiết kế để tạo ra một môi trường minh bạch và hiệu quả cho việc giao dịch công nghệ. Sàn giao dịch này sẽ giúp:</p>
-      <ul>
-        <li>Kết nối các nhà nghiên cứu với doanh nghiệp</li>
-        <li>Tạo cơ hội thương mại hóa kết quả nghiên cứu</li>
-        <li>Hỗ trợ quá trình chuyển giao công nghệ</li>
-        <li>Thúc đẩy đổi mới sáng tạo trong khu vực</li>
-      </ul>
-      
-      <h2>Tính năng nổi bật</h2>
-      <p>Sàn giao dịch HANOTEX được trang bị nhiều tính năng hiện đại:</p>
-      <ul>
-        <li>Hệ thống đăng ký và quản lý tài khoản thông minh</li>
-        <li>Công cụ tìm kiếm và lọc công nghệ tiên tiến</li>
-        <li>Hệ thống đấu giá trực tuyến</li>
-        <li>Dịch vụ tư vấn và hỗ trợ chuyên nghiệp</li>
-      </ul>
-      
-      <h2>Kế hoạch phát triển</h2>
-      <p>Trong thời gian tới, HANOTEX sẽ tiếp tục mở rộng và phát triển các tính năng mới, bao gồm tích hợp AI để tối ưu hóa quá trình kết nối và đưa ra gợi ý phù hợp cho người dùng.</p>
-    `,
+      news.content && news.content.length > 200
+        ? news.content.substring(0, 200) + "..."
+        : news.content,
+    content: news.content,
     author: "Ban biên tập HANOTEX",
-    published_at: "2025-01-15",
+    published_at: news.createdAt,
     category: "Tin tức",
     read_time: "3 phút",
-    featured_image: "/images/news/hanotex-launch.jpg",
-    gallery_images: [
-      "/images/news/hanotex-launch.jpg",
-      "/images/news/tech-trends-2025.jpg",
-      "/images/news/startup-policy.jpg",
-      "/images/news/hanotex-launch.jpg",
-    ],
-    tags: ["HANOTEX", "Ra mắt", "Công nghệ", "Đổi mới sáng tạo"],
-    views: 1250,
-    likes: 45,
+    featured_image: imageUrl,
+    gallery_images: [imageUrl],
+    tags: tags,
+    views: news.views || 0,
+    likes: news.likes || 0,
     is_featured: true,
   };
+}
+
+export default function NewsDetailPage({ params }: { params: { id: string } }) {
+  const [article, setArticle] = useState<NewsArticle | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [shareModal, setShareModal] = useState<{
+    isOpen: boolean;
+    article: NewsArticle | null;
+  }>({ isOpen: false, article: null });
 
   useEffect(() => {
-    // Simulate API call
-    const fetchArticle = async () => {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setArticle(mockArticle);
-      setLoading(false);
+    const fetchArticleAndRelated = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch main article data from API
+        const newsData = await getNewsById(params.id);
+        const articleData = convertNewsToArticle(newsData);
+        setArticle(articleData);
+
+        // Fetch related articles (2 random articles, excluding current one)
+        const relatedResponse = await getNews({}, { limit: 3, page: 1 });
+        const relatedData = relatedResponse.data || [];
+
+        // Convert to NewsArticle format and exclude current article
+        const relatedConverted = relatedData
+          .filter((news) => news.id !== params.id)
+          .slice(0, 2)
+          .map(convertNewsToArticle);
+
+        setRelatedArticles(relatedConverted);
+      } catch (err) {
+        console.error("Error fetching article:", err);
+        setError("Không thể tải bài viết. Vui lòng thử lại sau.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchArticle();
+    fetchArticleAndRelated();
   }, [params.id]);
 
   const formatDate = (dateString: string) => {
@@ -106,6 +161,18 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       month: "long",
       day: "numeric",
     });
+  };
+
+  // Handle share button click
+  const handleShareClick = (e: React.MouseEvent, article: NewsArticle) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShareModal({ isOpen: true, article });
+  };
+
+  // Close share modal
+  const closeShareModal = () => {
+    setShareModal({ isOpen: false, article: null });
   };
 
   const nextImage = () => {
@@ -127,16 +194,24 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-64 bg-gray-200 rounded mb-6"></div>
-            <div className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Có lỗi xảy ra
+          </h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Link href="/news" className="text-blue-600 hover:text-blue-700">
+            Quay lại danh sách tin tức
+          </Link>
         </div>
       </div>
     );
@@ -186,12 +261,6 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white">
               {article.category}
             </span>
-            {article.is_featured && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-500 text-white">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Nổi bật
-              </span>
-            )}
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
@@ -215,6 +284,24 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
               <Eye className="h-4 w-4 mr-2" />
               <span>{article.views} lượt xem</span>
             </div>
+            <div className="flex items-center">
+              <LikeButton
+                newsId={article.id}
+                initialLikes={article.likes}
+                variant="compact"
+                size="sm"
+              />
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={(e) => handleShareClick(e, article)}
+                className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 bg-white/10 text-blue-100 hover:bg-white/20"
+                title="Chia sẻ bài viết"
+              >
+                <Share2 className="h-3 w-3" />
+                <span className="text-xs font-medium">Chia sẻ</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -222,12 +309,23 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Featured Image */}
         <div className="relative mb-8 rounded-xl overflow-hidden shadow-lg">
-          <img
+          <ImageWithFallback
             src={article.featured_image}
             alt={article.title}
             className="w-full h-96 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+          {/* Share Button on Image */}
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={(e) => handleShareClick(e, article)}
+              className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+              title="Chia sẻ bài viết"
+            >
+              <Share2 className="h-4 w-4 text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Article Content */}
@@ -236,146 +334,18 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
             <div dangerouslySetInnerHTML={{ __html: article.content }} />
           </div>
         </div>
-
-        {/* Gallery Images */}
-        {article.gallery_images && article.gallery_images.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <div className="flex items-center mb-6">
-              <ImageIcon className="h-6 w-6 text-blue-600 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">
-                Hình ảnh liên quan
-              </h2>
-            </div>
-
-            <div className="relative">
-              <div className="relative h-96 rounded-lg overflow-hidden">
-                <img
-                  src={article.gallery_images[currentImageIndex]}
-                  alt={`Gallery image ${currentImageIndex + 1}`}
-                  className="w-full h-full object-cover"
-                />
-
-                {/* Navigation buttons */}
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <ChevronLeft className="h-6 w-6 text-white" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-                >
-                  <ChevronRight className="h-6 w-6 text-white" />
-                </button>
-              </div>
-
-              {/* Thumbnail navigation */}
-              <div className="flex space-x-2 mt-4 overflow-x-auto">
-                {article.gallery_images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden ${
-                      index === currentImageIndex ? "ring-2 ring-blue-500" : ""
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Article Actions */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => {}}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${"bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"}`}
-              >
-                <Heart className={`h-4 w-4 mr-2fill-current`} />
-                <span>{article.likes}</span>
-              </button>
-
-              <button className="flex items-center px-4 py-2 bg-gray-50 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
-                <Share2 className="h-4 w-4 mr-2" />
-                Chia sẻ
-              </button>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              {article.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                >
-                  <Tag className="h-3 w-3 mr-1" />
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Related Articles */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex items-center mb-6">
-            <BookOpen className="h-6 w-6 text-blue-600 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">
-              Bài viết liên quan
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex space-x-4">
-                <img
-                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=120&h=80&fit=crop&crop=center"
-                  alt="Related article"
-                  className="w-20 h-20 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    Hội thảo "Xu hướng công nghệ 2025" tại Hà Nội
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">5 phút đọc</p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Eye className="h-3 w-3 mr-1" />
-                    <span>890 lượt xem</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-              <div className="flex space-x-4">
-                <img
-                  src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=120&h=80&fit=crop&crop=center"
-                  alt="Related article"
-                  className="w-20 h-20 object-cover rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    Chính sách hỗ trợ doanh nghiệp khởi nghiệp công nghệ
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">4 phút đọc</p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Eye className="h-3 w-3 mr-1" />
-                    <span>1,560 lượt xem</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Share Modal */}
+      {shareModal.article && (
+        <ShareModal
+          isOpen={shareModal.isOpen}
+          onClose={closeShareModal}
+          title={shareModal.article.title}
+          url={`/news/${shareModal.article.id}`}
+          description={shareModal.article.excerpt}
+        />
+      )}
     </div>
   );
 }

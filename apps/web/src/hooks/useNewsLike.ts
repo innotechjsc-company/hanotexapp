@@ -95,7 +95,7 @@ export function useNewsLike({
         setIsLiked(false);
         setLikesCount((prev) => Math.max(0, prev - 1));
 
-        // Unlike: Remove from new-like and decrement news likes
+        // Unlike: Remove from news-like and decrement news likes
         await unlikeNews(user.id, newsId);
         await decrementNewsLikes(newsId);
       } else {
@@ -103,7 +103,7 @@ export function useNewsLike({
         setIsLiked(true);
         setLikesCount((prev) => prev + 1);
 
-        // Like: Add to new-like and increment news likes
+        // Like: Add to news-like and increment news likes
         await likeNews(user.id, newsId);
         await incrementNewsLikes(newsId);
       }

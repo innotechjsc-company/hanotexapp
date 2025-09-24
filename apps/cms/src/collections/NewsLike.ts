@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 export const NewsLike: CollectionConfig = {
-  slug: 'new-like',
+  slug: 'news-like',
   admin: {
     group: 'lượt thích tin tức',
   },
