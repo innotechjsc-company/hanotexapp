@@ -24,6 +24,7 @@ import { useMasterData } from "@/hooks/useMasterData";
 import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
 import MediaApi from "@/api/media";
 import { createTechnology } from "@/api/technologies";
+import { MediaType } from "@/types/media1";
 
 export default function RegisterTechnologyPage({ props }: { props?: any }) {
   const router = useRouter();
@@ -55,11 +56,11 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
         const techMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
+          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
           : [];
         const legalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
-              type: "document",
+              type: MediaType.DOCUMENT,
             })
           : [];
 

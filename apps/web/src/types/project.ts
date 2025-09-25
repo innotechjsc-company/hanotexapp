@@ -18,7 +18,8 @@ export type Project = {
   business_model?: string;
   market_data?: string;
   user: string | User;
-  technologies?: string[] | Technology[];
+  technologies: string[] | Technology[];
+  investment_fund?: string[] | InvestmentFund[];
   revenue?: number;
   profit?: number;
   assets?: number;
@@ -29,5 +30,4 @@ export type Project = {
   goal_money_purpose?: string;
   status: ProjectStatusEnum;
   end_date?: string;
-  investment_fund?: string | InvestmentFund;
 };

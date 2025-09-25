@@ -52,6 +52,7 @@ import { useRouter } from "next/navigation";
 import MediaApi from "@/api/media";
 import { createTechnology, updateTechnology } from "@/api/technologies";
 import toast from "react-hot-toast";
+import { MediaType } from "@/types/media1";
 
 type EditableTechnology = Partial<Technology> & { id?: string };
 
@@ -108,11 +109,11 @@ export function AddTechnologyModal({
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
         const techMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
+          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
           : [];
         const legalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
-              type: "document",
+              type: MediaType.DOCUMENT,
             })
           : [];
 
@@ -330,14 +331,14 @@ export function EditTechnologyModal({
 
         const mediaApi = new MediaApi();
         const newTechMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: "document" })
+          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
           : [];
         const existingDocIds = (current?.documents || []).map((m: any) => m.id);
         const documents = [...existingDocIds, ...newTechMedia.map((m) => m.id)];
 
         const newLegalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
-              type: "document",
+              type: MediaType.DOCUMENT,
             })
           : [];
         const existingLegalIds = (

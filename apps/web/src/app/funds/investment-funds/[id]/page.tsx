@@ -7,7 +7,7 @@ import Link from "next/link";
 import { getInvestmentFundById } from "@/api/investment-fund";
 import { getProjectsByInvestmentFund } from "@/api/projects";
 import type { InvestmentFund } from "@/types/investment_fund";
-import type { Project } from "@/types/project";
+import { Project, ProjectStatusEnum } from "@/types/project";
 
 function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", {
@@ -204,14 +204,14 @@ export default function InvestmentFundDetailPage() {
                       Mục tiêu: {formatVND(project.goal_money || 0)}
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      project.status === 'active' 
+                      project.status === ProjectStatusEnum.PENDING
                         ? 'bg-green-100 text-green-800'
-                        : project.status === 'completed'
+                        : project.status === ProjectStatusEnum.COMPLETED
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {project.status === 'active' ? 'Đang hoạt động' :
-                       project.status === 'completed' ? 'Hoàn thành' : project.status === 'in_progress' ? 'Đang thực hiện' : project.status === 'cancelled' ? 'Đã hủy' :
+                      {project.status === ProjectStatusEnum.PENDING ? 'Đang hoạt động' :
+                       project.status === ProjectStatusEnum.COMPLETED ? 'Hoàn thành' : project.status === ProjectStatusEnum.CONTRACT_SIGNED ? 'Đang thực hiện' : project.status === ProjectStatusEnum.CANCELLED ? 'Đã hủy' :
                        project.status || 'Chưa xác định'}
                     </span>
                   </div>
