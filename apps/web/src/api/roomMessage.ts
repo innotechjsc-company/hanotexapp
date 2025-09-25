@@ -11,8 +11,24 @@ export interface RoomMessage {
   id: string;
   room: string | RoomChat;
   message: string;
-  document: string;
+  document?: string | Media;
   user: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Interface cho Media (from PayloadCMS)
+export interface Media {
+  id: string;
+  filename: string;
+  mimeType: string;
+  filesize: number;
+  width?: number;
+  height?: number;
+  alt: string;
+  caption?: string;
+  type: "image" | "video" | "document" | "other";
+  url: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -255,7 +271,7 @@ export async function getMessagesInDateRange(
 }
 
 /**
- * Send a simple text message
+ * Send a message with optional file attachment
  */
 export async function sendMessage(
   roomId: string,
@@ -268,6 +284,23 @@ export async function sendMessage(
     user: userId,
     message,
     document,
+  });
+}
+
+/**
+ * Send a message with file attachment
+ */
+export async function sendMessageWithFile(
+  roomId: string,
+  userId: string,
+  message: string,
+  fileId: string
+): Promise<RoomMessage> {
+  return createRoomMessage({
+    room: roomId,
+    user: userId,
+    message,
+    document: fileId,
   });
 }
 

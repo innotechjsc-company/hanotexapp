@@ -9,14 +9,26 @@ import {
   MoreVertical,
   Star,
   Reply,
+  Paperclip,
+  X,
+  File,
+  Image,
+  FileText,
+  Video,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { getRoomChats } from "@/api/roomChat";
 import { getUsersInRoom } from "@/api/roomUser";
-import { getMessagesForRoom, sendMessage } from "@/api/roomMessage";
+import {
+  getMessagesForRoom,
+  sendMessage,
+  sendMessageWithFile,
+  Media,
+} from "@/api/roomMessage";
 import { RoomChat } from "@/api/roomChat";
 import { RoomUser } from "@/types/room_user";
 import { RoomMessage } from "@/api/roomMessage";
+import { uploadFile } from "@/api/media";
 
 export default function MessagesPage() {
   const { user } = useAuthStore();
@@ -32,6 +44,8 @@ export default function MessagesPage() {
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   // Load conversations on component mount
   useEffect(() => {
@@ -92,7 +106,11 @@ export default function MessagesPage() {
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !user?.id || selectedConversation === null)
+    if (
+      (!newMessage.trim() && selectedFiles.length === 0) ||
+      !user?.id ||
+      selectedConversation === null
+    )
       return;
 
     const currentRoom = conversations[selectedConversation];
@@ -100,8 +118,45 @@ export default function MessagesPage() {
 
     try {
       setSendingMessage(true);
-      await sendMessage(currentRoom.id, user.id, newMessage.trim());
+
+      let documentId: string | undefined;
+
+      // Upload files if any are selected
+      if (selectedFiles.length > 0) {
+        setUploadingFiles(true);
+        try {
+          // Upload the first file (for now, support single file)
+          const file = selectedFiles[0];
+          const uploadedMedia = await uploadFile(file, {
+            alt: file.name,
+            caption: `File đính kèm từ ${user.full_name || user.email}`,
+            type: file.type.startsWith("image/")
+              ? "image"
+              : file.type.startsWith("video/")
+                ? "video"
+                : "document",
+          });
+          documentId = uploadedMedia.id.toString();
+        } catch (uploadError) {
+          console.error("Error uploading file:", uploadError);
+          alert("Có lỗi xảy ra khi tải lên file. Vui lòng thử lại.");
+          return;
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
+      // Send message with or without file
+      await sendMessage(
+        currentRoom.id,
+        user.id,
+        newMessage.trim() ||
+          (selectedFiles.length > 0 ? `📎 ${selectedFiles[0].name}` : ""),
+        documentId
+      );
+
       setNewMessage("");
+      setSelectedFiles([]);
       // Reload messages to show the new message
       await loadMessages(currentRoom.id);
     } catch (error) {
@@ -112,11 +167,67 @@ export default function MessagesPage() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles(files.slice(0, 1)); // Only allow one file for now
+    }
+  };
+
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (file: File) => {
+    if (file.type.startsWith("image/")) return <Image className="h-4 w-4" />;
+    if (file.type.startsWith("video/")) return <Video className="h-4 w-4" />;
+    if (file.type.includes("pdf")) return <FileText className="h-4 w-4" />;
+    return <File className="h-4 w-4" />;
+  };
+
+  const getMediaFileIcon = (media: Media) => {
+    if (media.type === "image") return <Image className="h-4 w-4" />;
+    if (media.type === "video") return <Video className="h-4 w-4" />;
+    if (media.type === "document") return <FileText className="h-4 w-4" />;
+    return <File className="h-4 w-4" />;
+  };
+
+  const renderFileAttachment = (media: Media) => {
+    return (
+      <div className="mt-2 p-2 bg-white bg-opacity-20 rounded border border-white border-opacity-30">
+        <div className="flex items-center space-x-2">
+          {getMediaFileIcon(media)}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{media.filename}</p>
+            <p className="text-xs opacity-75">
+              {(media.filesize / 1024 / 1024).toFixed(2)} MB
+            </p>
+          </div>
+          <a
+            href={media.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs underline hover:no-underline"
+          >
+            Tải xuống
+          </a>
+        </div>
+        {media.type === "image" && (
+          <img
+            src={media.url}
+            alt={media.alt}
+            className="mt-2 max-w-xs max-h-48 rounded object-cover"
+          />
+        )}
+      </div>
+    );
   };
 
   // Helper function to get conversation display name
@@ -295,6 +406,12 @@ export default function MessagesPage() {
                               </p>
                             )}
                             <p className="text-sm">{message.message}</p>
+
+                            {/* File Attachment */}
+                            {message.document &&
+                              typeof message.document === "object" &&
+                              renderFileAttachment(message.document)}
+
                             <p
                               className={`text-xs mt-1 ${
                                 isOwn ? "text-blue-100" : "text-gray-500"
@@ -311,22 +428,82 @@ export default function MessagesPage() {
 
                 {/* Message Input */}
                 <div className="p-4 border-t border-gray-200">
+                  {/* File Preview */}
+                  {selectedFiles.length > 0 && (
+                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-2">
+                        File đính kèm:
+                      </div>
+                      {selectedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-white p-2 rounded border"
+                        >
+                          <div className="flex items-center space-x-2">
+                            {getFileIcon(file)}
+                            <span className="text-sm text-gray-700 truncate max-w-xs">
+                              {file.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => removeSelectedFile(index)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="flex items-center space-x-3">
+                    {/* File Upload Button */}
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id="file-upload"
+                        onChange={handleFileSelect}
+                        accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          document.getElementById("file-upload")?.click()
+                        }
+                        disabled={sendingMessage || uploadingFiles}
+                        className="text-gray-500 hover:text-blue-600 p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Paperclip className="h-5 w-5" />
+                      </button>
+                    </div>
+
                     <input
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyDown}
                       placeholder="Nhập tin nhắn..."
-                      disabled={sendingMessage}
+                      disabled={sendingMessage || uploadingFiles}
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <button
                       onClick={handleSendMessage}
-                      disabled={sendingMessage || !newMessage.trim()}
+                      disabled={
+                        sendingMessage ||
+                        uploadingFiles ||
+                        (!newMessage.trim() && selectedFiles.length === 0)
+                      }
                       className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Send className="h-5 w-5" />
+                      {sendingMessage || uploadingFiles ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      ) : (
+                        <Send className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 </div>
