@@ -5,18 +5,18 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation node server.js",
-    "dev:next": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 4000",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation node server.js",
-    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
-    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
-    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation node server.js",
-    "test": "pnpm run test:int && pnpm run test:e2e",
-    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "build": "NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "dev": "NODE_OPTIONS=--no-deprecation bun server.cjs",
+    "start": "NODE_OPTIONS=--no-deprecation bun server.cjs",
+    "dev:next": "NODE_OPTIONS=--no-deprecation next dev -p 4000",
+    "devsafe": "rm -rf .next && NODE_OPTIONS=--no-deprecation bun server.cjs",
+    "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "NODE_OPTIONS=--no-deprecation next lint",
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "test": "bun run test:int && bun run test:e2e",
+    "test:e2e": "NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" bunx playwright test",
+    "test:int": "NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
     "pm2:dev": "pm2 start ecosystem.config.cjs --env development",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",
@@ -25,10 +25,12 @@
     "pm2:logs": "pm2 logs cms-dev",
     "pm2:status": "pm2 status",
     "pm2:monit": "pm2 monit",
-    "seed:tech:dry": "node seed-technologies.cjs --dry-run",
-    "seed:tech": "node seed-technologies.cjs"
+    "seed:tech:dry": "bun seed-technologies.cjs --dry-run",
+    "seed:tech": "bun seed-technologies.cjs"
   },
   "dependencies": {
+    "@payloadcms/db-mongodb": "3.55.1",
+    "@payloadcms/db-postgres": "3.55.1",
     "@payloadcms/next": "3.55.1",
     "@payloadcms/payload-cloud": "3.55.1",
     "@payloadcms/richtext-lexical": "3.55.1",
@@ -41,8 +43,6 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sharp": "0.34.2",
-    "@payloadcms/db-postgres": "3.55.1",
-    "@payloadcms/db-mongodb": "3.55.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   },
@@ -65,7 +65,7 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
+    "bun": ">=1.1.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -74,5 +74,5 @@
       "unrs-resolver"
     ]
   },
-  "packageManager": "pnpm@10.15.1+sha512.34e538c329b5553014ca8e8f4535997f96180a1d0f614339357449935350d924e22f8614682191264ec33d1462ac21561aff97f6bb18065351c162c7e8f6de67"
+  "packageManager": "bun@1.2.20"
 }
