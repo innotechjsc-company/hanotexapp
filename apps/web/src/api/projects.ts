@@ -17,6 +17,7 @@ export interface ProjectFilters {
   max_goal_money?: number;
   end_date_from?: string;
   end_date_to?: string;
+  open_investment_fund?: boolean;
 }
 
 export interface PaginationParams {
@@ -195,7 +196,7 @@ export async function searchProjects(
 export async function getActiveProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: ProjectStatusEnum.COMPLETED }, pagination);
+  return getProjects({ status: ProjectStatusEnum.ACTIVE }, pagination);
 }
 
 /**
@@ -213,7 +214,7 @@ export async function getPendingProjects(
 export async function getCompletedProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: ProjectStatusEnum.COMPLETED }, pagination);
+  return getProjects({ status: ProjectStatusEnum.ACTIVE }, pagination);
 }
 
 /**
@@ -228,7 +229,7 @@ export async function getProjectsEndingSoon(
 
   return getProjects(
     {
-      status: ProjectStatusEnum.COMPLETED,
+      status: ProjectStatusEnum.ACTIVE,
       end_date_to: endDate.toISOString().split("T")[0], // YYYY-MM-DD format
     },
     { ...pagination, sort: "end_date" }
@@ -267,15 +268,16 @@ export async function getHighFundingProjects(
  * Lấy tất cả dự án đang hoạt động: gồm in_progress và completed
  */
 export async function getActiveProjectsAll(
+  openInvestmentFund: boolean = false,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
   const params: Record<string, any> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
-    // status in [in_progress, completed]
-    "where[or][0][status][equals]": ProjectStatusEnum.COMPLETED,
-    "where[or][1][status][equals]": ProjectStatusEnum.COMPLETED,
+    // status in [ACTIVE]
+    "where[or][0][status][equals]": ProjectStatusEnum.ACTIVE,
+    "where[open_investment_fund][equals]": openInvestmentFund, // Added filter
   };
 
   return payloadApiClient.get<Project[]>(API_ENDPOINTS.PROJECTS, params);

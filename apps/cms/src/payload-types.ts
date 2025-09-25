@@ -735,7 +735,8 @@ export interface Project {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'active' | 'rejected';
+  open_investment_fund?: boolean | null;
   end_date: string;
   updatedAt: string;
   createdAt: string;
@@ -1026,9 +1027,12 @@ export interface Contract {
   technologies: (string | Technology)[];
   technology_propose: string | TechnologyPropose;
   offer: string | Offer;
+  price: number;
   contract_file?: (string | null) | Media;
   documents?: (string | Media)[] | null;
   status: 'signed' | 'in_progress' | 'completed' | 'cancelled';
+  user_a_confirmed?: boolean | null;
+  user_b_confirmed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1587,6 +1591,7 @@ export interface ProjectSelect<T extends boolean = true> {
   share_percentage?: T;
   goal_money_purpose?: T;
   status?: T;
+  open_investment_fund?: T;
   end_date?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1770,9 +1775,12 @@ export interface ContractSelect<T extends boolean = true> {
   technologies?: T;
   technology_propose?: T;
   offer?: T;
+  price?: T;
   contract_file?: T;
   documents?: T;
   status?: T;
+  user_a_confirmed?: T;
+  user_b_confirmed?: T;
   updatedAt?: T;
   createdAt?: T;
 }

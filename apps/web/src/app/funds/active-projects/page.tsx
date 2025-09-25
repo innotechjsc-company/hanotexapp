@@ -4,18 +4,17 @@ import { useRouter } from "next/navigation";
 import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
+import Image from "next/image";
 
-// Helper function to get status label
+// Helper function to get status label (mapped to ProjectStatusEnum)
 const getStatusLabel = (status: string) => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
-    case "in_progress":
-      return "Đang thực hiện";
-    case "completed":
-      return "Hoàn thành";
-    case "cancelled":
-      return "Đã hủy";
+    case "active":
+      return "Đang hoạt động";
+    case "rejected":
+      return "Từ chối";
     default:
       return status;
   }
@@ -26,15 +25,37 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
       return "warning";
-    case "in_progress":
-      return "warning";
-    case "completed":
+    case "active":
       return "success";
-    case "cancelled":
+    case "rejected":
       return "danger";
     default:
       return "default";
   }
+};
+
+// Format number as VND currency
+const formatCurrency = (value?: number) => {
+  if (typeof value !== "number") return "";
+  try {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString("vi-VN")} ₫`;
+  }
+};
+
+// Days remaining until end_date
+const getDaysRemaining = (endDate?: string) => {
+  if (!endDate) return undefined;
+  const end = new Date(endDate);
+  if (Number.isNaN(end.getTime())) return undefined;
+  const now = new Date();
+  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
 };
 
 export default function ActiveProjectsPage() {
@@ -47,7 +68,7 @@ export default function ActiveProjectsPage() {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const response = await getActiveProjectsAll({ limit: 12 });
+        const response = await getActiveProjectsAll(false,{ limit: 12 });
         const list = (response.data as any) || (response.docs as any) || [];
         if (isMounted) setProjects(list);
       } catch (e: any) {
@@ -145,15 +166,35 @@ export default function ActiveProjectsPage() {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => router.push(`/funds/active-projects/${proj.id}`)}
               >
-                <div className="h-40 bg-gradient-to-r from-blue-500 to-purple-600" />
+                <div className="h-40 bg-gradient-to-r from-blue-500 to-purple-600 relative flex items-center justify-center">
+                  <Image
+                    src="/logo.png"
+                    alt="Hanotex"
+                    width={150}
+                    height={150}
+                    className="object-contain object-center p-4 absolute left-0 right-0 top-0 bottom-0"
+                    priority={false}  
+                  />
+                </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                      {(typeof proj.technology === "object" &&
-                        proj.technology &&
-                        proj.technology.name) ||
-                        "Dự án"}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Technologies: array of ids or objects */}
+                      {Array.isArray(proj.technologies) && proj.technologies.length > 0 ? (
+                        proj.technologies.slice(0, 3).map((tech: any, idx: number) => (
+                          <span
+                            key={`tech-${proj.id}-${idx}`}
+                            className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                          >
+                            {typeof tech === "string" ? tech : tech?.name || "Công nghệ"}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                          Dự án
+                        </span>
+                      )}
+                    </div>
                     <Chip color={getStatusColor(proj?.status || "")} size="sm">
                       {getStatusLabel(proj?.status || "")}
                     </Chip>
@@ -166,12 +207,45 @@ export default function ActiveProjectsPage() {
                       {proj.description}
                     </p>
                   )}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      {typeof proj.user === "object" && proj.user
-                        ? proj.user.name || proj.user.email
-                        : "Người tạo"}
-                    </span>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {typeof proj.user === "object" && proj.user
+                          ? proj.user.name || proj.user.email
+                          : "Người tạo"}
+                      </span>
+                      {proj.open_investment_fund && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          Mở gọi vốn
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-700">
+                      <span>Mục tiêu gọi vốn</span>
+                      <span className="font-medium">{formatCurrency(proj.goal_money)}</span>
+                    </div>
+                    {typeof proj.share_percentage === "number" && (
+                      <div className="flex items-center justify-between text-sm text-gray-700">
+                        <span>Tỷ lệ cổ phần đề xuất (%)</span>
+                        <span className="font-medium">{proj.share_percentage}%</span>
+                      </div>
+                    )}
+                    {proj.end_date && (
+                      <div className="flex items-center justify-between text-sm text-gray-700">
+                        <span>Hạn gọi vốn</span>
+                        <span className="font-medium">
+                          {new Date(proj.end_date).toLocaleDateString("vi-VN")}
+                          {(() => {
+                            const d = getDaysRemaining(proj.end_date);
+                            return typeof d === "number"
+                              ? d >= 0
+                                ? ``
+                                : ` • đã kết thúc`
+                              : "";
+                          })()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

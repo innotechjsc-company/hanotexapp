@@ -24,6 +24,7 @@ import {
   Descriptions,
   InputNumber,
   Layout,
+  Checkbox,
 } from "antd";
 import {
   PlusOutlined,
@@ -51,6 +52,8 @@ import { useAuthStore } from "@/store/auth";
 import { uploadFiles } from "@/api/media";
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
+import { getInvestmentFunds } from "@/api/investment-fund";
+import type { InvestmentFund } from "@/types/investment_fund";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -84,13 +87,9 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
       return "orange";
-    case "negotiating":
-      return "blue";
-    case "contract_signed":
-      return "purple";
-    case "completed":
+    case "active":
       return "green";
-    case "cancelled":
+    case "rejected":
       return "red";
     default:
       return "default";
@@ -101,14 +100,10 @@ const getStatusLabel = (status: string) => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
-    case "negotiating":
-      return "Đàm phán";
-    case "contract_signed":
-      return "Đã ký hợp đồng";
-    case "completed":
-      return "Hoàn thành";
-    case "cancelled":
-      return "Đã hủy";
+    case "active":
+      return "Đang hoạt động";
+    case "rejected":
+      return "Từ chối";
     default:
       return 'Không xác định';
   }
@@ -134,6 +129,24 @@ const getTechnologyTitlesFromValues = (
     .join(", ");
 };
 
+const getInvestmentFundTitlesFromValues = (
+  value: string[] | any[] | undefined,
+  list: any[]
+): string => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return "Chưa chọn";
+  return (value as any[])
+    .map((v) => {
+      if (typeof v === "string") {
+        const found = list.find(
+          (f: any) => String((f as any).id || (f as any)._id) === v
+        );
+        return (found as any)?.name || "Không xác định";
+      }
+      return (v as any).name || "Không xác định";
+    })
+    .join(", ");
+};
+
 // Add Project Modal Component
 function AddProjectModal({
   open,
@@ -141,12 +154,14 @@ function AddProjectModal({
   onCreate,
   loading,
   technologies,
+  funds,
 }: {
   open: boolean;
   onCancel: () => void;
   onCreate: (values: any) => Promise<void>;
   loading?: boolean;
   technologies: Technology[];
+  funds: InvestmentFund[];
 }) {
   const [form] = Form.useForm();
   const [docsUploading, setDocsUploading] = useState(false);
@@ -255,6 +270,33 @@ function AddProjectModal({
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
+              name="investment_fund"
+              label="Quỹ đầu tư"
+            >
+              <Select
+                mode="multiple"
+                placeholder="Chọn quỹ đầu tư"
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {funds.map((fund) => (
+                  <Option
+                    key={String((fund as any).id || (fund as any)._id)}
+                    value={String((fund as any).id || (fund as any)._id)}
+                  >
+                    {(fund as any).name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
               name="business_model"
               label="Mô hình kinh doanh"
             >
@@ -270,11 +312,11 @@ function AddProjectModal({
           <Col span={24}>
             <Form.Item
               name="market_data"
-              label="Dữ liệu thị trường"
+              label="Số liệu và thị trường"
             >
               <Input.TextArea
-                rows={3}
-                placeholder="Thông tin thị trường, đối thủ, quy mô..."
+                rows={4}
+                placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
               />
             </Form.Item>
           </Col>
@@ -287,7 +329,7 @@ function AddProjectModal({
               label="Hồ sơ đội ngũ"
             >
               <Input.TextArea
-                rows={3}
+                rows={5}
                 placeholder="Thông tin đội ngũ chính"
               />
             </Form.Item>
@@ -427,6 +469,16 @@ function AddProjectModal({
             </Form.Item>
           </Col>
         </Row>
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="open_investment_fund"
+              valuePropName="checked"
+            >
+              <Checkbox>Mở kêu gọi đầu tư</Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
         </Form>
       </div>
     </Modal>
@@ -440,6 +492,7 @@ function EditProjectModal({
   onUpdate,
   loading,
   technologies,
+  funds,
   project,
 }: {
   open: boolean;
@@ -447,6 +500,7 @@ function EditProjectModal({
   onUpdate: (values: any) => Promise<void>;
   loading?: boolean;
   technologies: Technology[];
+  funds: InvestmentFund[];
   project: EditableProject | null;
 }) {
   const [form] = Form.useForm();
@@ -459,6 +513,11 @@ function EditProjectModal({
         technologies: Array.isArray(project.technologies)
           ? (project.technologies as any[]).map((t) =>
               String((t as any).id || (t as any)._id || t)
+            )
+          : [],
+        investment_fund: Array.isArray((project as any).investment_fund)
+          ? ((project as any).investment_fund as any[]).map((f: any) =>
+              String((f as any).id || (f as any)._id || f)
             )
           : [],
         end_date: project.end_date ? dayjs(project.end_date) : null,
@@ -572,6 +631,33 @@ function EditProjectModal({
         <Row gutter={16}>
           <Col span={24}>
             <Form.Item
+              name="investment_fund"
+              label="Quỹ đầu tư"
+            >
+              <Select
+                mode="multiple"
+                placeholder="Chọn quỹ đầu tư"
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                }
+              >
+                {funds.map((fund) => (
+                  <Option
+                    key={String((fund as any).id || (fund as any)._id)}
+                    value={String((fund as any).id || (fund as any)._id)}
+                  >
+                    {(fund as any).name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
               name="business_model"
               label="Mô hình kinh doanh"
             >
@@ -587,11 +673,11 @@ function EditProjectModal({
           <Col span={24}>
             <Form.Item
               name="market_data"
-              label="Dữ liệu thị trường"
+              label="Số liệu và thị trường"
             >
               <Input.TextArea
-                rows={3}
-                placeholder="Thông tin thị trường, đối thủ, quy mô..."
+                rows={4}
+                placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
               />
             </Form.Item>
           </Col>
@@ -604,7 +690,7 @@ function EditProjectModal({
               label="Hồ sơ đội ngũ"
             >
               <Input.TextArea
-                rows={3}
+                rows={5}
                 placeholder="Thông tin đội ngũ chính"
               />
             </Form.Item>
@@ -687,24 +773,6 @@ function EditProjectModal({
         </Row>
 
         <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="status"
-              label="Trạng thái"
-              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-            >
-              <Select placeholder="Chọn trạng thái">
-                <Option value="pending">Chờ duyệt</Option>
-                <Option value="negotiating">Đàm phán</Option>
-                <Option value="contract_signed">Đã ký hợp đồng</Option>
-                <Option value="completed">Hoàn thành</Option>
-                <Option value="cancelled">Đã hủy</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
           <Col span={12}>
             <Form.Item
               name="goal_money"
@@ -762,6 +830,17 @@ function EditProjectModal({
             </Form.Item>
           </Col>
         </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="open_investment_fund"
+              valuePropName="checked"
+            >
+              <Checkbox>Mở kêu gọi đầu tư</Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
         </Form>
       </div>
     </Modal>
@@ -774,14 +853,18 @@ function ViewProjectModal({
   onCancel,
   project,
   technologies,
+  funds,
 }: {
   open: boolean;
   onCancel: () => void;
   project: EditableProject | null;
   technologies: Technology[];
+  funds: InvestmentFund[];
 }) {
   const getTechnologyNames = (values: string[] | Technology[] | undefined) =>
     getTechnologyTitlesFromValues(values, technologies);
+  const getFundNames = (values: string[] | any[] | undefined) =>
+    getInvestmentFundTitlesFromValues(values, funds);
 
   return (
     <Modal
@@ -820,6 +903,9 @@ function ViewProjectModal({
         </Descriptions.Item>
         <Descriptions.Item label="Công nghệ">
           <Text>{getTechnologyNames((project as any)?.technologies)}</Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Quỹ đầu tư">
+          <Text>{getFundNames((project as any)?.investment_fund)}</Text>
         </Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           <Tag color={getStatusColor((project as any)?.status || "")}>
@@ -866,6 +952,9 @@ function ViewProjectModal({
             <Text>{formatDate((project as any).end_date)}</Text>
           </Descriptions.Item>
         )}
+        <Descriptions.Item label="Mở kêu gọi đầu tư">
+          <Text>{(project as any)?.open_investment_fund ? 'Có' : 'Không'}</Text>
+        </Descriptions.Item>
         {(project as any)?.goal_money_purpose && (
           <Descriptions.Item label="Mục đích sử dụng vốn" span={2}>
             <Text>{(project as any).goal_money_purpose}</Text>
@@ -898,6 +987,7 @@ export default function MyProjectsPage() {
   const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<Project[]>([]);
   const [technologies, setTechnologies] = useState<Technology[]>([]);
+  const [funds, setFunds] = useState<InvestmentFund[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -915,7 +1005,6 @@ export default function MyProjectsPage() {
 
   const filteredItems = useMemo(() => {
     let filtered = items;
-
     if (search) {
       filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -957,12 +1046,22 @@ export default function MyProjectsPage() {
         String((user as any).id || (user as any)._id),
         { limit: 100 }
       );
-      const userList = ((userTechnologies as any).docs ||
+      const techList = ((userTechnologies as any).docs ||
         (userTechnologies as any).data ||
         []) as Technology[];
-      setTechnologies(userList);
+      setTechnologies(techList?.filter((item) => item.status === "active" || item.status === "approved") || []);
     } catch (e) {
       console.error("Failed to fetch technologies:", e);
+    }
+  };
+
+  const fetchFunds = async () => {
+    try {
+      const res = await getInvestmentFunds({ user: String((user as any).id || (user as any)._id) }, { limit: 200 });
+      const list = ((res as any).docs || (res as any).data || []) as InvestmentFund[];
+      setFunds(list); 
+    } catch (e) {
+      console.error("Failed to fetch investment funds:", e);
     }
   };
 
@@ -970,6 +1069,7 @@ export default function MyProjectsPage() {
     if (user) {
       fetchList();
       fetchTechnologies();
+      fetchFunds();
     }
   }, [page, limit, user]);
 
@@ -985,7 +1085,6 @@ export default function MyProjectsPage() {
         user: user!,
       };
       console.log(obj);
-      debugger
       await createProject(obj);
       message.success("Tạo dự án thành công");
       setAddModalOpen(false);
@@ -1077,6 +1176,16 @@ export default function MyProjectsPage() {
       render: (techs: any) => (
         <Text ellipsis style={{ maxWidth: 150 }}>
           {getTechnologyTitlesFromValues(techs, technologies)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Quỹ đầu tư',
+      dataIndex: 'investment_fund',
+      key: 'investment_fund',
+      render: (fundVals: any) => (
+        <Text ellipsis style={{ maxWidth: 150 }}>
+          {getInvestmentFundTitlesFromValues(fundVals, funds)}
         </Text>
       ),
     },
@@ -1218,7 +1327,7 @@ export default function MyProjectsPage() {
             <Card>
               <Statistic
                 title="Đang hoạt động"
-                value={items.filter(item => ['pending', 'negotiating', 'contract_signed'].includes(item.status)).length}
+                value={items.filter(item => item.status === 'active').length}
                 prefix={<CalendarOutlined />}
                 valueStyle={{ color: '#52c41a' }}
               />
@@ -1227,8 +1336,8 @@ export default function MyProjectsPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Hoàn thành"
-                value={items.filter(item => item.status === 'completed').length}
+                title="Bị từ chối"
+                value={items.filter(item => item.status === 'rejected').length}
                 prefix={<TeamOutlined />}
                 valueStyle={{ color: '#722ed1' }}
               />
@@ -1274,10 +1383,8 @@ export default function MyProjectsPage() {
                 }}
               >
                 <Option value="pending">Chờ duyệt</Option>
-                <Option value="negotiating">Đàm phán</Option>
-                <Option value="contract_signed">Đã ký hợp đồng</Option>
-                <Option value="completed">Hoàn thành</Option>
-                <Option value="cancelled">Đã hủy</Option>
+                <Option value="active">Đang hoạt động</Option>
+                <Option value="rejected">Từ chối</Option>
               </Select>
             </Space>
 
@@ -1345,6 +1452,7 @@ export default function MyProjectsPage() {
           onCreate={handleCreate}
           loading={actionLoading}
           technologies={technologies}
+          funds={funds}
         />
 
         <EditProjectModal
@@ -1356,6 +1464,7 @@ export default function MyProjectsPage() {
           onUpdate={handleUpdate}
           loading={actionLoading}
           technologies={technologies}
+          funds={funds}
           project={currentProject}
         />
 
@@ -1367,6 +1476,7 @@ export default function MyProjectsPage() {
           }}
           project={currentProject}
           technologies={technologies}
+          funds={funds}
         />
 
         <Toaster />
