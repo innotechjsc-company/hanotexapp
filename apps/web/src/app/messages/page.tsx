@@ -92,11 +92,18 @@ export default function MessagesPage() {
   >({});
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const loadFromSelectionRef = useRef<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   // Play notification sound
@@ -135,7 +142,7 @@ export default function MessagesPage() {
   // Load messages when conversation is selected
   useEffect(() => {
     if (selectedConversation !== null && conversations[selectedConversation]) {
-      loadMessages(conversations[selectedConversation].id);
+      loadMessages(conversations[selectedConversation].id, true);
       loadRoomUsers(conversations[selectedConversation].id);
     }
   }, [selectedConversation, conversations]);
@@ -347,10 +354,13 @@ export default function MessagesPage() {
     }
   }, [selectedConversation, conversations, isWebSocketConnected]);
 
-  // Auto-scroll when messages change
+  // Auto-scroll when messages change (skip when switching rooms)
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && !loadFromSelectionRef.current) {
       setTimeout(scrollToBottom, 100);
+    }
+    if (loadFromSelectionRef.current) {
+      loadFromSelectionRef.current = false;
     }
   }, [messages]);
 
@@ -528,8 +538,12 @@ export default function MessagesPage() {
     setLastMessages(lastMessagesMap);
   };
 
-  const loadMessages = async (roomId: string) => {
+  const loadMessages = async (
+    roomId: string,
+    fromSelection: boolean = false
+  ) => {
     try {
+      loadFromSelectionRef.current = fromSelection;
       const response = await getMessagesForRoom(roomId, { limit: 100 });
       setMessages(response.docs || []);
     } catch (error) {
@@ -541,9 +555,7 @@ export default function MessagesPage() {
     try {
       const response = await getUsersInRoom(roomId);
       setRoomUsers(response.docs || []);
-    } catch (error) {
-      console.error("Error loading room users:", error);
-    }
+    } catch (error) {}
   };
 
   const handleSendMessage = async () => {
@@ -1322,7 +1334,10 @@ export default function MessagesPage() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div
+                  ref={messagesContainerRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-4"
+                >
                   {messages.length === 0 ? (
                     <div className="text-center text-gray-500 py-8">
                       Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
