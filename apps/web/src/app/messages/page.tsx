@@ -33,6 +33,7 @@ import {
   getUsersInRoom,
   deleteRoomUser,
   getRoomsForUser,
+  getUsersInMultipleRooms,
 } from "@/api/roomUser";
 import {
   getMessagesForRoom,
@@ -65,6 +66,9 @@ export default function MessagesPage() {
   const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [roomParticipants, setRoomParticipants] = useState<
+    Record<string, RoomUser[]>
+  >({});
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -294,8 +298,6 @@ export default function MessagesPage() {
 
       // Handle message status updates
       const cleanupMessageStatus = webSocketService.onMessageStatus((data) => {
-        console.log("📊 Message status received:", data);
-
         setMessageStatuses((prev) => ({
           ...prev,
           [data.messageId]: {
@@ -431,15 +433,10 @@ export default function MessagesPage() {
           ? roomUser.room
           : (roomUser.room as any).id;
       });
-      console.log("🆔 Room IDs:", roomIds);
 
       // Get room chats by IDs (more efficient than filtering all rooms)
-      console.log("📡 Fetching room chats by IDs...");
       const roomsResponse = await getRoomChatsByIds(roomIds, { limit: 100 });
       const conversationsList = roomsResponse.docs || [];
-
-      console.log("💬 Rooms response:", roomsResponse);
-      console.log("💬 Conversations count:", conversationsList.length);
 
       // Sort conversations by updatedAt (most recent first)
       conversationsList.sort(
@@ -448,15 +445,39 @@ export default function MessagesPage() {
       );
 
       setConversations(conversationsList);
-      console.log("✅ Conversations set:", conversationsList);
 
       // Load last message for each conversation
       await loadLastMessagesForConversations(conversationsList);
+
+      // Load participants for each conversation (to display names excluding current user)
+      await loadParticipantsForConversations(conversationsList);
     } catch (error) {
       console.error("❌ Error loading conversations:", error);
       toast.error("Có lỗi xảy ra khi tải cuộc trò chuyện");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadParticipantsForConversations = async (
+    conversationsList: RoomChat[]
+  ) => {
+    try {
+      const roomIds = conversationsList.map((c) => c.id);
+      if (roomIds.length === 0) return;
+
+      const resp = await getUsersInMultipleRooms(roomIds, { limit: 1000 });
+      const docs = resp.docs || [];
+
+      const map: Record<string, RoomUser[]> = {};
+      for (const ru of docs) {
+        const roomId = typeof ru.room === "string" ? ru.room : (ru.room as any);
+        if (!map[roomId]) map[roomId] = [] as RoomUser[];
+        map[roomId].push(ru as RoomUser);
+      }
+      setRoomParticipants(map);
+    } catch (e) {
+      console.error("Error loading room participants:", e);
     }
   };
 
@@ -1045,6 +1066,22 @@ export default function MessagesPage() {
 
   // Helper function to get conversation display name
   const getConversationName = (conversation: RoomChat) => {
+    // Prefer dynamic participant names excluding current user
+    const participants = roomParticipants[conversation.id] || [];
+    if (participants.length > 0) {
+      const others = participants.filter(
+        (ru) => (ru.user as any)?.id !== user?.id
+      );
+      if (others.length > 0) {
+        const names = others
+          .map((ru) => (ru.user as any)?.full_name || (ru.user as any)?.email)
+          .filter(Boolean) as string[];
+        if (names.length === 1) return names[0];
+        if (names.length === 2) return `${names[0]}, ${names[1]}`;
+        if (names.length > 2)
+          return `${names[0]}, ${names[1]} +${names.length - 2}`;
+      }
+    }
     return conversation.title || `Room ${conversation.id}`;
   };
 
@@ -1098,7 +1135,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="min-h-screen h-[100vh] bg-gray-50 flex flex-col">
+    <div className="min-h-screen h-[100vh] bg-gray-50 flex flex-col w-full">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
