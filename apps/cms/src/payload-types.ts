@@ -1031,8 +1031,7 @@ export interface Contract {
   contract_file?: (string | null) | Media;
   documents?: (string | Media)[] | null;
   status: 'signed' | 'in_progress' | 'completed' | 'cancelled';
-  user_a_confirmed?: boolean | null;
-  user_b_confirmed?: boolean | null;
+  users_confirm?: (string | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1779,8 +1778,7 @@ export interface ContractSelect<T extends boolean = true> {
   contract_file?: T;
   documents?: T;
   status?: T;
-  user_a_confirmed?: T;
-  user_b_confirmed?: T;
+  users_confirm?: T;
   updatedAt?: T;
   createdAt?: T;
 }

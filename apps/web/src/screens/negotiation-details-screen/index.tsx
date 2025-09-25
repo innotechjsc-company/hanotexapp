@@ -48,12 +48,9 @@ export const NegotiationDetailsScreen: React.FC<
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
-    handleSignContract,
-    handleDownloadContract,
     handleSendOffer,
     confirmSendOffer,
     setShowOfferModal,
-    handleCompleteContract,
 
     // Offer utilities
     canSendOffer,

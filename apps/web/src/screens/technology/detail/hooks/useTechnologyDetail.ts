@@ -51,16 +51,51 @@ export function useTechnologyDetail(id?: string) {
               technology: id,
               user: user.id,
             });
-            if (existingContacts.data?.length) {
+
+            console.log("Raw API response:", existingContacts);
+
+            // PayloadCMS returns data in 'docs' field, fallback to 'data' field
+            let contactsList = [];
+
+            if (existingContacts) {
+              // Try different possible response structures
+              if (
+                (existingContacts as any).docs &&
+                Array.isArray((existingContacts as any).docs)
+              ) {
+                contactsList = (existingContacts as any).docs;
+              } else if (
+                existingContacts.data &&
+                Array.isArray(existingContacts.data)
+              ) {
+                contactsList = existingContacts.data;
+              } else if (Array.isArray(existingContacts)) {
+                contactsList = existingContacts;
+              }
+            }
+
+            console.log("Processed contacts list:", contactsList);
+            console.log("Has contacts:", contactsList.length > 0);
+
+            if (contactsList.length > 0) {
+              console.log(
+                "Setting hasContacted to TRUE - found contacts:",
+                contactsList
+              );
               setHasContacted(true);
             } else {
+              console.log("Setting hasContacted to FALSE - no contacts found");
               setHasContacted(false);
             }
           } catch (contactError) {
             console.error("Failed to check existing contacts:", contactError);
             // Don't show error for this, just assume no contact exists
+            console.log("Setting hasContacted to FALSE due to error");
             setHasContacted(false);
           }
+        } else {
+          console.log("No user ID, setting hasContacted to FALSE");
+          setHasContacted(false);
         }
       } catch (e) {
         console.error("Failed to load technology detail", e);
