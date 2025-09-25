@@ -20,6 +20,24 @@ export interface SendMessageData {
   user: string;
   message: string;
   documents?: string[]; // Array of Media IDs
+  is_offer?: boolean;
+  offer?: string; // Offer ID if this message contains an offer
+}
+
+export interface SendOfferData {
+  technology_propose: string;
+  message?: string;
+  price: number;
+  content?: string;
+}
+
+// Response type for accept-offer custom route
+export interface AcceptOfferResponse {
+  success: boolean;
+  offer?: any;
+  technology_propose?: any;
+  contract?: any;
+  error?: string;
 }
 
 export interface GetMessagesParams {
@@ -64,6 +82,42 @@ export class NegotiatingMessageApi {
       data
     );
     return response.data!;
+  }
+
+  /**
+   * Send a new offer with negotiation message
+   */
+  async sendOffer(data: SendOfferData): Promise<ApiNegotiatingMessage> {
+    const response = await payloadApiClient.post<ApiNegotiatingMessage>(
+      "/negotiating-message/send-offer",
+      data
+    );
+    // Handle different response formats from PayloadCMS
+    const anyResponse = response as any;
+    return anyResponse?.doc || anyResponse?.data || anyResponse;
+  }
+
+  /**
+   * Accept an offer via CMS custom route
+   */
+  async acceptOffer(offerId: string): Promise<AcceptOfferResponse> {
+    const response = await payloadApiClient.post<AcceptOfferResponse>(
+      "/negotiating-message/accept-offer",
+      { offer_id: offerId }
+    );
+    // Custom routes return raw JSON; ensure we pass through
+    return (response as unknown as AcceptOfferResponse) || { success: true };
+  }
+
+  /**
+   * Reject an offer by updating status on Offer collection
+   */
+  async rejectOffer(offerId: string): Promise<any> {
+    const response = await payloadApiClient.patch<any>(
+      `${API_ENDPOINTS.OFFERS}/${offerId}`,
+      { status: "rejected" }
+    );
+    return response.data || response;
   }
 }
 

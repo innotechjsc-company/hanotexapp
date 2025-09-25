@@ -96,8 +96,8 @@ export async function getProjectById(id: string): Promise<Project> {
   );
 
   // Handle different response formats from PayloadCMS
-  const projectData = (response as any as { data: Project }).data ??
-                     (response as any as Project);
+  const projectData =
+    (response as any as { data: Project }).data ?? (response as any as Project);
 
   if (!projectData) {
     throw new Error("Project not found");

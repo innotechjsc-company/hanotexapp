@@ -20,7 +20,6 @@ import {
 import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
 import { IPSectionRef } from "./components/IPSection";
-import { useMasterData } from "@/hooks/useMasterData";
 import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
 import MediaApi from "@/api/media";
 import { createTechnology } from "@/api/technologies";
@@ -56,7 +55,9 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
         const techMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
+          ? await mediaApi.uploadMulti(basic!.documents, {
+              type: MediaType.DOCUMENT,
+            })
           : [];
         const legalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
@@ -68,7 +69,7 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         const payload = {
           title: basic?.title || "",
           category: basic?.category, // ID string
-          trl_level: basic?.trl_level || "",
+          trl_level: Number(basic?.trl_level) || 0,
           description: basic?.description,
           confidential_detail: basic?.confidential_detail,
           // Relationship fields in Payload expect IDs
@@ -87,7 +88,6 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           // Server route will create related IP docs if provided
           intellectual_property:
             ipDetails && ipDetails.length ? ipDetails : undefined,
-          status: "draft" as const,
           visibility_mode: visibility?.visibility_mode,
         };
 

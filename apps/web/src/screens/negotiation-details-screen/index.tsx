@@ -9,7 +9,8 @@ import { NegotiationHeader } from "./components/NegotiationHeader";
 import { NegotiationChat } from "./components/NegotiationChat";
 import { MessageInput } from "./components/MessageInput";
 import { ConfirmationModal } from "./components/ConfirmationModal";
-import { ContractSigningStep } from "./components/ContractSigningStep";
+import { OfferModal } from "./components/OfferModal";
+import { ContractCompletionStep } from "./components/ContractCompletionStep";
 
 const { Text } = Typography;
 
@@ -28,12 +29,15 @@ export const NegotiationDetailsScreen: React.FC<
     messages,
     attachments,
     pendingMessage,
+    latestOffer,
 
     // Loading states
     loading,
     sendingMessage,
     uploadingFiles,
     showConfirmModal,
+    showOfferModal,
+    sendingOffer,
 
     // Error state
     error,
@@ -46,6 +50,15 @@ export const NegotiationDetailsScreen: React.FC<
     setShowConfirmModal,
     handleSignContract,
     handleDownloadContract,
+    handleSendOffer,
+    confirmSendOffer,
+    setShowOfferModal,
+    handleCompleteContract,
+
+    // Offer utilities
+    canSendOffer,
+    hasPendingOffer,
+    isProposalCreator,
 
     // Utilities
     formatFileSize,
@@ -112,8 +125,8 @@ export const NegotiationDetailsScreen: React.FC<
       icon: <MessageOutlined />,
     },
     {
-      title: "Ký hợp đồng",
-      description: "Xem xét và ký kết hợp đồng",
+      title: "Hoàn thiện hợp đồng",
+      description: "Tải hợp đồng đã ký và hoàn tất",
       icon: <FileTextOutlined />,
     },
   ];
@@ -152,25 +165,34 @@ export const NegotiationDetailsScreen: React.FC<
             messages={messages}
             formatFileSize={formatFileSize}
             messageInputComponent={
-              <MessageInput
-                form={form}
-                attachments={attachments}
-                sendingMessage={sendingMessage}
-                uploadingFiles={uploadingFiles}
-                onSendMessage={onSendMessage}
-                onFileUpload={handleFileUpload}
-                onRemoveAttachment={removeAttachment}
-                formatFileSize={formatFileSize}
-              />
+              isProposalCreator && hasPendingOffer ? (
+                <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
+                  Bạn đã gửi đề xuất, vui lòng chờ xác nhận
+                </div>
+              ) : (
+                <MessageInput
+                  form={form}
+                  attachments={attachments}
+                  sendingMessage={sendingMessage}
+                  uploadingFiles={uploadingFiles}
+                  onSendMessage={onSendMessage}
+                  onFileUpload={handleFileUpload}
+                  onRemoveAttachment={removeAttachment}
+                  formatFileSize={formatFileSize}
+                  onSendOffer={handleSendOffer}
+                  canSendOffer={canSendOffer}
+                  hasPendingOffer={hasPendingOffer}
+                  isProposalCreator={isProposalCreator}
+                />
+              )
             }
           />
         ) : (
           /* Contract Signing Step */
           <div className="h-full overflow-auto">
-            <ContractSigningStep
+            <ContractCompletionStep
               proposal={proposal}
-              onSignContract={handleSignContract}
-              onDownloadContract={handleDownloadContract}
+              onCompleteContract={handleCompleteContract}
             />
           </div>
         )}
@@ -178,15 +200,25 @@ export const NegotiationDetailsScreen: React.FC<
 
       {/* Confirmation Modal - Only show in negotiation step */}
       {currentStep === 0 && (
-        <ConfirmationModal
-          open={showConfirmModal}
-          onOk={onConfirmSend}
-          onCancel={() => setShowConfirmModal(false)}
-          confirmLoading={sendingMessage}
-          uploadingFiles={uploadingFiles}
-          pendingMessage={pendingMessage}
-          formatFileSize={formatFileSize}
-        />
+        <>
+          <ConfirmationModal
+            open={showConfirmModal}
+            onOk={onConfirmSend}
+            onCancel={() => setShowConfirmModal(false)}
+            confirmLoading={sendingMessage}
+            uploadingFiles={uploadingFiles}
+            pendingMessage={pendingMessage}
+            formatFileSize={formatFileSize}
+          />
+
+          <OfferModal
+            open={showOfferModal}
+            onOk={confirmSendOffer}
+            onCancel={() => setShowOfferModal(false)}
+            confirmLoading={sendingOffer}
+            uploadingFiles={uploadingFiles}
+          />
+        </>
       )}
     </div>
   );

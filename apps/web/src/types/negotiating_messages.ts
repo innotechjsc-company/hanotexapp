@@ -1,4 +1,5 @@
 import { Media } from "./media1";
+import { Offer } from "./offer";
 import { Propose } from "./propose";
 import { TechnologyPropose } from "./technology-propose";
 import { User } from "./users";
@@ -9,4 +10,6 @@ export interface NegotiatingMessage {
   user: User;
   message: string;
   documents: Media[];
+  is_offer: boolean;
+  offer: Offer;
 }

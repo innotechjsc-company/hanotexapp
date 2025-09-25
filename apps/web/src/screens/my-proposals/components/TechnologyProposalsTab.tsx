@@ -136,6 +136,8 @@ export default function TechnologyProposalsTab() {
   };
 
   const handleEditProposal = (proposal: TechnologyPropose) => {
+    // Chỉ cho phép sửa khi trạng thái là 'pending'
+    if (proposal.status !== "pending") return;
     setSelectedProposal(proposal);
     setEditModalOpen(true);
   };
@@ -231,15 +233,18 @@ export default function TechnologyProposalsTab() {
                 }
               />
             </Tooltip>
-            <Tooltip title="Sửa đề xuất" color="green">
-              <Button
-                type="text"
-                size="small"
-                icon={<Edit className="h-4 w-4" />}
-                onClick={() => handleEditProposal(record)}
-              />
-            </Tooltip>
-            {record.status === "negotiating" && (
+            {record.status === "pending" && (
+              <Tooltip title="Sửa đề xuất" color="green">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Edit className="h-4 w-4" />}
+                  onClick={() => handleEditProposal(record)}
+                />
+              </Tooltip>
+            )}
+            {(record.status === "negotiating" ||
+              record.status === "contract_signed") && (
               <Tooltip title="Xem đàm phán" color="blue">
                 <Button
                   type="text"

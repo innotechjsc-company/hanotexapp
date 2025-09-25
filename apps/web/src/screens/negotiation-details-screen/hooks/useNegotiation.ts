@@ -5,10 +5,16 @@ import {
   negotiatingMessageApi,
   ApiNegotiatingMessage,
 } from "@/api/negotiating-messages";
+import { offerApi, ApiOffer } from "@/api/offers";
 import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { MediaType } from "@/types/media1";
+import { contractsApi } from "@/api/contracts";
+import { contractStepsApi } from "@/api/contract-steps";
+import type { ContractStepApproval } from "@/types/contract-step";
+import { OfferStatus } from "@/types/offer";
+import type { OfferFormData } from "../components/OfferModal";
 
 export interface UseNegotiationProps {
   proposalId: string;
@@ -20,12 +26,15 @@ export interface UseNegotiationReturn {
   messages: ApiNegotiatingMessage[];
   attachments: File[];
   pendingMessage: { message: string; attachments: File[] };
+  latestOffer: ApiOffer | null;
 
   // Loading states
   loading: boolean;
   sendingMessage: boolean;
   uploadingFiles: boolean;
   showConfirmModal: boolean;
+  showOfferModal: boolean;
+  sendingOffer: boolean;
 
   // Error state
   error: string;
@@ -38,6 +47,20 @@ export interface UseNegotiationReturn {
   setShowConfirmModal: (show: boolean) => void;
   handleSignContract: () => Promise<void>;
   handleDownloadContract: () => Promise<void>;
+  handleCompleteContract: (data: {
+    contractFile?: File | null;
+    attachments?: File[];
+    notes?: string;
+    startDate?: string | null;
+  }) => Promise<void>;
+  handleSendOffer: () => void;
+  confirmSendOffer: (offerData: OfferFormData) => Promise<void>;
+  setShowOfferModal: (show: boolean) => void;
+
+  // Offer utilities
+  canSendOffer: boolean;
+  hasPendingOffer: boolean;
+  isProposalCreator: boolean;
 
   // Utilities
   formatFileSize: (bytes: number) => string;
@@ -138,6 +161,9 @@ export const useNegotiation = ({
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [sendingOffer, setSendingOffer] = useState(false);
+  const [latestOffer, setLatestOffer] = useState<ApiOffer | null>(null);
   const [pendingMessage, setPendingMessage] = useState<{
     message: string;
     attachments: File[];
@@ -147,6 +173,7 @@ export const useNegotiation = ({
     if (proposalId && stableUser) {
       fetchProposalDetails();
       fetchNegotiationMessages();
+      fetchLatestOffer();
     }
   }, [proposalId, stableUser]);
 
@@ -187,6 +214,16 @@ export const useNegotiation = ({
       console.error("Failed to fetch negotiation data:", err);
       // Fallback to empty array on error
       setMessages([]);
+    }
+  };
+
+  const fetchLatestOffer = async () => {
+    try {
+      const offer = await offerApi.getLatestForProposal(proposalId);
+      setLatestOffer(offer);
+    } catch (err) {
+      console.error("Failed to fetch latest offer:", err);
+      setLatestOffer(null);
     }
   };
 
@@ -283,7 +320,7 @@ export const useNegotiation = ({
       }
 
       // Send negotiation using API
-      const sentMessage = await negotiatingMessageApi.sendMessage({
+      await negotiatingMessageApi.sendMessage({
         propose: "", // Leave empty for now - this might be optional
         technology_propose: proposalId,
         user: userForSending.id,
@@ -313,6 +350,35 @@ export const useNegotiation = ({
 
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSendOffer = () => {
+    setShowOfferModal(true);
+  };
+
+  const confirmSendOffer = async (offerData: OfferFormData) => {
+    try {
+      setSendingOffer(true);
+
+      // Send offer using API with new payload shape
+      await negotiatingMessageApi.sendOffer({
+        technology_propose: proposalId,
+        message: offerData.message,
+        price: offerData.price,
+        content: offerData.content,
+      });
+
+      // Refresh data to get the latest information
+      await Promise.all([fetchNegotiationMessages(), fetchLatestOffer()]);
+
+      setShowOfferModal(false);
+      message.success("Đã gửi đề xuất giá thành công");
+    } catch (err) {
+      console.error("Failed to send offer:", err);
+      message.error("Không thể gửi đề xuất giá");
+    } finally {
+      setSendingOffer(false);
+    }
   };
 
   const handleSignContract = async () => {
@@ -352,6 +418,128 @@ export const useNegotiation = ({
     } catch (err) {
       console.error("Failed to download contract:", err);
       message.error("Không thể tải xuống hợp đồng. Vui lòng thử lại.");
+    }
+  };
+
+  const handleCompleteContract = async (data: {
+    contractFile?: File | null;
+    attachments?: File[];
+    notes?: string;
+    startDate?: string | null;
+  }) => {
+    try {
+      if (!proposal) return;
+
+      // 1) Tìm hợp đồng liên quan tới đề xuất hiện tại
+      const contract = await contractsApi.getByTechnologyPropose(proposal.id, 1);
+      if (!contract || !contract.id) {
+        message.error("Không tìm thấy hợp đồng liên quan cho đề xuất này");
+        return;
+      }
+
+      // 2) Xác định vai trò A/B của người hiện tại
+      const userForActions = stableUser || currentUser;
+      if (!userForActions?.id) {
+        message.error("Bạn chưa đăng nhập");
+        return;
+      }
+
+      const ua: any = contract.user_a as any;
+      const ub: any = contract.user_b as any;
+      const userAId = typeof ua === "object" ? ua?.id : ua;
+      const userBId = typeof ub === "object" ? ub?.id : ub;
+
+      const isPartyA = String(userAId) === String(userForActions.id);
+      const isPartyB = String(userBId) === String(userForActions.id);
+      const currentParty: "A" | "B" | null = isPartyA ? "A" : isPartyB ? "B" : null;
+      if (!currentParty) {
+        message.warning("Bạn không phải là Bên A/B của hợp đồng này");
+        return;
+      }
+
+      const otherParty: "A" | "B" = currentParty === "A" ? "B" : "A";
+
+      // 3) Chuẩn bị approvals: bên hiện tại auto 'approved', bên còn lại 'pending'
+      const baseApprovals: ContractStepApproval[] = [
+        {
+          party: currentParty,
+          user: userForActions.id as any,
+          decision: "approved",
+          decided_at: new Date().toISOString(),
+        },
+        {
+          party: otherParty,
+          user: (otherParty === "A" ? userAId : userBId) as any,
+          decision: "pending",
+        },
+      ];
+
+      // 4) Tải file hợp đồng (nếu có) và tạo bước B1: sign_contract
+      if (data.contractFile) {
+        const media = await uploadFile(data.contractFile, {
+          type: MediaType.DOCUMENT,
+          alt: `Hợp đồng ${contract.id}`,
+        });
+
+        await contractStepsApi.createStep({
+          contract: contract.id as any,
+          step: "sign_contract",
+          contract_file: media.id as any,
+          uploaded_by: userForActions.id as any,
+          approvals: baseApprovals,
+          notes: data.notes,
+        });
+      }
+
+      // 5) Tải tài liệu kèm theo (nếu có) và tạo bước B2: upload_attachments
+      const atts = Array.isArray(data.attachments) ? data.attachments : [];
+      if (atts.length > 0) {
+        const uploads = await Promise.all(
+          atts.map((f) =>
+            uploadFile(f, {
+              type: MediaType.DOCUMENT,
+              alt: `Tài liệu HĐ ${contract.id}`,
+            })
+          )
+        );
+        const ids = uploads.map((m) => m.id as any);
+
+        await contractStepsApi.createStep({
+          contract: contract.id as any,
+          step: "upload_attachments",
+          attachments: ids,
+          uploaded_by: userForActions.id as any,
+          approvals: baseApprovals,
+          notes: data.notes,
+        });
+      }
+
+      // 6) Tạo bước B3: complete_contract
+      const extraNotes = `${data.notes || ""}${
+        data.startDate
+          ? `${data.notes ? "\n" : ""}Ngày bắt đầu dự kiến: ${new Date(
+              data.startDate
+            ).toLocaleDateString("vi-VN")}`
+          : ""
+      }`;
+
+      await contractStepsApi.createStep({
+        contract: contract.id as any,
+        step: "complete_contract",
+        approvals: baseApprovals,
+        notes: extraNotes || undefined,
+      });
+
+      // 7) Đánh dấu đề xuất đã hoàn tất để kết thúc luồng đàm phán (như trước đây)
+      const updated = await technologyProposeApi.setStatus(
+        proposalId,
+        "completed"
+      );
+      setProposal(updated);
+      message.success("Đã khởi tạo các bước và đánh dấu hợp đồng hoàn tất");
+    } catch (err) {
+      console.error("Failed to complete contract:", err);
+      message.error("Không thể hoàn tất hợp đồng. Vui lòng thử lại.");
     }
   };
 
@@ -397,18 +585,29 @@ export const useNegotiation = ({
     }
   };
 
+  // Computed properties for offer functionality
+  const userForOfferCheck = stableUser || currentUser;
+  // Người tạo TechnologyPropose (proposal.user) là người có thể gửi đề xuất
+  // Người nhận (chủ công nghệ) thì không có nút gửi đề xuất
+  const isProposalCreator = proposal?.user?.id === userForOfferCheck?.id;
+  const canSendOffer = isProposalCreator && proposal?.status === "negotiating";
+  const hasPendingOffer = latestOffer?.status === OfferStatus.PENDING;
+
   return {
     // Data
     proposal,
     messages,
     attachments,
     pendingMessage,
+    latestOffer,
 
     // Loading states
     loading,
     sendingMessage,
     uploadingFiles,
     showConfirmModal,
+    showOfferModal,
+    sendingOffer,
 
     // Error state
     error,
@@ -421,6 +620,15 @@ export const useNegotiation = ({
     setShowConfirmModal,
     handleSignContract,
     handleDownloadContract,
+    handleSendOffer,
+    confirmSendOffer,
+    setShowOfferModal,
+    handleCompleteContract,
+
+    // Offer utilities
+    canSendOffer,
+    hasPendingOffer,
+    isProposalCreator,
 
     // Utilities
     formatFileSize,

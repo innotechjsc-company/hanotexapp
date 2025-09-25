@@ -59,6 +59,21 @@ export const NegotiatingMessage: CollectionConfig = {
         description: 'Tài liệu đính kèm',
       },
     },
+    {
+      name: 'is_offer',
+      type: 'checkbox',
+      label: 'Là offer',
+      defaultValue: false,
+    },
+    {
+      name: 'offer',
+      type: 'relationship',
+      relationTo: 'offer',
+      label: 'Offer',
+      admin: {
+        description: 'Offer',
+      },
+    },
   ],
   timestamps: true,
 }
