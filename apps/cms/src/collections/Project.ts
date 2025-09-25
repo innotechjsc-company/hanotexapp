@@ -113,15 +113,21 @@ export const Project: CollectionConfig = {
       type: 'select',
       required: true,
       label: 'Trạng thái',
-      options: ['pending', 'negotiating', 'contract_signed', 'completed', 'cancelled'],
+      options: ['pending', 'active', 'rejected'],
       defaultValue: 'pending',
       admin: {
         description: 'Trạng thái',
       },
     },
     {
+      name: 'open_investment_fund',
+      type: 'checkbox',
+      label: 'Mở kêu gọi đầu tư',
+      defaultValue: false,
+    },
+    {
       name: 'end_date',
-      type: 'date', 
+      type: 'date',
       required: true,
       label: 'Ngày kết thúc',
     },

@@ -10,7 +10,7 @@ import { NegotiationChat } from "./components/NegotiationChat";
 import { MessageInput } from "./components/MessageInput";
 import { ConfirmationModal } from "./components/ConfirmationModal";
 import { OfferModal } from "./components/OfferModal";
-import { ContractCompletionStep } from "./components/ContractCompletionStep";
+import { ContractSigningStep } from "./components/ContractSigningStep";
 
 const { Text } = Typography;
 
@@ -190,10 +190,7 @@ export const NegotiationDetailsScreen: React.FC<
         ) : (
           /* Contract Signing Step */
           <div className="h-full overflow-auto">
-            <ContractCompletionStep
-              proposal={proposal}
-              onCompleteContract={handleCompleteContract}
-            />
+            <ContractSigningStep proposal={proposal} />
           </div>
         )}
       </div>

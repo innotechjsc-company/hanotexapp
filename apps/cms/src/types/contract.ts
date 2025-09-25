@@ -21,6 +21,8 @@ export interface Contract {
   contract_file?: Media
   documents?: Media[]
   status: ContractStatusEnum
+  user_a_confirmed: boolean
+  user_b_confirmed: boolean
   createdAt: string
   updatedAt: string
 }
