@@ -46,6 +46,7 @@ import { RoomUser } from "@/types/room_user";
 import { RoomMessage } from "@/api/roomMessage";
 import { uploadFile } from "@/api/media";
 import { getMediaUrlWithDebug } from "@/utils/mediaUrl";
+import { MediaType } from "@/types/media1";
 import toast from "react-hot-toast";
 import webSocketService, { ChatMessage } from "@/services/websocket";
 
@@ -547,15 +548,14 @@ export default function MessagesPage() {
             alt: file.name,
             caption: `File đính kèm từ ${user.full_name || user.email}`,
             type: file.type.startsWith("image/")
-              ? "image"
+              ? MediaType.IMAGE
               : file.type.startsWith("video/")
-                ? "video"
-                : "document",
+                ? MediaType.VIDEO
+                : MediaType.DOCUMENT,
           });
           documentId = uploadedMedia.id.toString();
         } catch (uploadError) {
           console.error("Error uploading file:", uploadError);
-          alert("Có lỗi xảy ra khi tải lên file. Vui lòng thử lại.");
           return;
         } finally {
           setUploadingFiles(false);
@@ -1098,7 +1098,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50  ">
+    <div className="min-h-screen h-[100vh] bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -1112,10 +1112,10 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
           {/* Conversations List */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white rounded-lg shadow flex flex-col h-full">
             <div className="p-4 border-b border-gray-200">
               <div className="relative">
                 <Search className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
@@ -1127,7 +1127,7 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto flex-1">
               {!isAuthenticated ? (
                 <div className="p-4 text-center">
                   <div className="text-gray-500 mb-3">
@@ -1195,7 +1195,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Chat Area */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow flex flex-col max-h-screen overflow-scroll">
+          <div className="lg:col-span-2 bg-white rounded-lg shadow flex flex-col h-full overflow-hidden">
             {selectedConversation !== null ? (
               <>
                 {/* Chat Header */}
