@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Typography, Button } from "antd";
+import { Avatar, Typography, Button, Tag } from "antd";
 import { ArrowLeft } from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
 
@@ -27,6 +27,27 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
     return name.charAt(0).toUpperCase();
   };
 
+  const getStatusInfo = () => {
+    if (!proposal) return { label: "", color: "" };
+
+    switch (proposal.status) {
+      case "negotiating":
+        return { label: "Đang đàm phán", color: "blue" };
+      case "contract_signed":
+        return { label: "Đã ký hợp đồng", color: "green" };
+      case "pending":
+        return { label: "Chờ xác nhận", color: "orange" };
+      case "completed":
+        return { label: "Hoàn thành", color: "green" };
+      case "cancelled":
+        return { label: "Đã hủy", color: "red" };
+      default:
+        return { label: proposal.status, color: "default" };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
   return (
     <div className="border-b border-gray-200 bg-white flex items-center justify-between shadow-sm relative py-2">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
@@ -46,6 +67,38 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
             >
               {getUserName()}
             </Typography.Text>
+            {statusInfo.label && (
+              <div className="mt-1">
+                <Tag color={statusInfo.color} className="text-xs">
+                  {statusInfo.label}
+                </Tag>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Technology Title and Status */}
+        <div className="flex-1 text-center">
+          <div>
+            <Text strong className="text-lg text-gray-800">
+              {proposal?.technology?.title || "Đề xuất công nghệ"}
+            </Text>
+          </div>
+          <div className="mt-1">
+            <Text className="text-sm text-gray-600">
+              Bước{" "}
+              {proposal?.status === "negotiating"
+                ? "1"
+                : proposal?.status === "contract_signed"
+                  ? "2"
+                  : "1"}
+              :{" "}
+              {proposal?.status === "negotiating"
+                ? "Đàm phán"
+                : proposal?.status === "contract_signed"
+                  ? "Ký hợp đồng"
+                  : "Đàm phán"}
+            </Text>
           </div>
         </div>
 

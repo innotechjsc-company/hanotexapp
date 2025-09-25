@@ -30,6 +30,8 @@ export default function TechnologyDetailScreen({
     getTrlLabel,
     showContactForm,
     contactForm,
+    contactSubmitting,
+    hasContacted,
     onOpenContact,
     onCloseContact,
     onContactChange,
@@ -86,6 +88,7 @@ export default function TechnologyDetailScreen({
             <SidebarContactCard
               owner={technology?.owner || technology?.submitter}
               onContact={onOpenContact}
+              hasContacted={hasContacted}
             />
             <PricingCard pricing={technology?.pricing} />
             <TechnologyMetaCard
@@ -107,6 +110,7 @@ export default function TechnologyDetailScreen({
         onSubmit={onSubmitContact}
         onChange={onContactChange}
         value={contactForm}
+        loading={contactSubmitting}
       />
     </div>
   );

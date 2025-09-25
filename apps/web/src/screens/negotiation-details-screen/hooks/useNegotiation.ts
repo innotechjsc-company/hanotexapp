@@ -5,27 +5,10 @@ import {
   negotiatingMessageApi,
   ApiNegotiatingMessage,
 } from "@/api/negotiating-messages";
+import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
-
-// UI-specific types for the negotiation screen
-export interface MessageAttachment {
-  id: string;
-  name: string;
-  url: string;
-  size: number;
-  type: string;
-}
-
-export interface NegotiationMessage {
-  id: string;
-  sender: "owner" | "proposer";
-  message: string;
-  timestamp: string;
-  senderName: string;
-  senderAvatar?: string;
-  attachments?: MessageAttachment[];
-}
+import { MediaType } from "@/types/media1";
 
 export interface UseNegotiationProps {
   proposalId: string;
@@ -34,13 +17,14 @@ export interface UseNegotiationProps {
 export interface UseNegotiationReturn {
   // Data
   proposal: TechnologyPropose | null;
-  messages: NegotiationMessage[];
+  messages: ApiNegotiatingMessage[];
   attachments: File[];
   pendingMessage: { message: string; attachments: File[] };
 
   // Loading states
   loading: boolean;
   sendingMessage: boolean;
+  uploadingFiles: boolean;
   showConfirmModal: boolean;
 
   // Error state
@@ -52,12 +36,84 @@ export interface UseNegotiationReturn {
   handleFileUpload: (file: File) => boolean;
   removeAttachment: (index: number) => void;
   setShowConfirmModal: (show: boolean) => void;
+  handleSignContract: () => Promise<void>;
+  handleDownloadContract: () => Promise<void>;
 
   // Utilities
   formatFileSize: (bytes: number) => string;
   getStatusColor: (status: string) => string;
   getStatusLabel: (status: string) => string;
 }
+
+// Helper function to detect file type based on MIME type or file extension
+const detectFileType = (file: File): MediaType => {
+  const mimeType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+
+  // Check MIME type first
+  if (mimeType.startsWith("image/")) {
+    return MediaType.IMAGE;
+  }
+
+  if (mimeType.startsWith("video/")) {
+    return MediaType.VIDEO;
+  }
+
+  // Check by file extension for documents
+  const documentExtensions = [
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".txt",
+    ".rtf",
+    ".odt",
+    ".ods",
+    ".odp",
+    ".csv",
+  ];
+
+  const imageExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".webp",
+    ".svg",
+    ".ico",
+  ];
+
+  const videoExtensions = [
+    ".mp4",
+    ".avi",
+    ".mov",
+    ".wmv",
+    ".flv",
+    ".webm",
+    ".mkv",
+    ".m4v",
+  ];
+
+  // Check file extensions
+  if (documentExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.DOCUMENT;
+  }
+
+  if (imageExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.IMAGE;
+  }
+
+  if (videoExtensions.some((ext) => fileName.endsWith(ext))) {
+    return MediaType.VIDEO;
+  }
+
+  // Default to document for unknown types
+  return MediaType.DOCUMENT;
+};
 
 export const useNegotiation = ({
   proposalId,
@@ -77,8 +133,9 @@ export const useNegotiation = ({
   const [proposal, setProposal] = useState<TechnologyPropose | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const [messages, setMessages] = useState<NegotiationMessage[]>([]);
+  const [messages, setMessages] = useState<ApiNegotiatingMessage[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<{
@@ -113,26 +170,6 @@ export const useNegotiation = ({
 
   const fetchNegotiationMessages = async () => {
     try {
-      // Use stable user reference to avoid race conditions, fallback to currentUser if needed
-      const userAtCallTime = stableUser || currentUser;
-
-      console.log("fetchNegotiationMessages - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userAtCallTime?.id,
-        email: userAtCallTime?.email,
-        hasUser: !!userAtCallTime,
-      });
-
-      // If we still don't have a user, skip message transformation
-      if (!userAtCallTime?.id) {
-        console.warn(
-          "No user available for message transformation, skipping..."
-        );
-        setMessages([]);
-        return;
-      }
-
       // Fetch negotiation data using the API
       const response = await negotiatingMessageApi.getMessages({
         technology_propose: proposalId,
@@ -140,69 +177,12 @@ export const useNegotiation = ({
         page: 1,
       });
 
-      // Transform API messages to UI format
-      const transformedMessages: NegotiationMessage[] =
-        (response.docs as unknown as ApiNegotiatingMessage[])?.map(
-          (apiMessage: ApiNegotiatingMessage) => {
-            // Determine sender based on user relationship to current user
-            const messageUserId = apiMessage.user?.id;
-            const isCurrentUser = messageUserId === userAtCallTime?.id;
-            const sender = isCurrentUser ? "owner" : "proposer";
+      // Use the messages directly from API without transformation
+      const messages =
+        (response.docs as unknown as ApiNegotiatingMessage[]) || [];
 
-            console.log("Message transform:", {
-              messageId: apiMessage.id,
-              messageUserId,
-              selectedUserId: userAtCallTime?.id,
-              isCurrentUser,
-              sender,
-            });
-
-            // Get user info
-            const user = apiMessage.user;
-            const senderName = user?.full_name || user?.email || "Unknown User";
-            const senderAvatar = user?.full_name?.substring(0, 2).toUpperCase();
-
-            // Transform documents to attachments
-            const attachments: MessageAttachment[] =
-              apiMessage.document?.map((doc, index) => ({
-                id:
-                  typeof doc === "string"
-                    ? doc
-                    : doc.id?.toString() || `doc-${index}`,
-                name:
-                  typeof doc === "string"
-                    ? `document-${index}`
-                    : doc.filename || `document-${index}`,
-                url: typeof doc === "string" ? "#" : doc.url || "#",
-                size: typeof doc === "string" ? 0 : doc.filesize || 0,
-                type:
-                  typeof doc === "string"
-                    ? "application/octet-stream"
-                    : doc.mimeType || "application/octet-stream",
-              })) || [];
-
-            return {
-              id: apiMessage.id || `msg-${Date.now()}-${Math.random()}`,
-              sender: sender as "owner" | "proposer",
-              message: apiMessage.message,
-              timestamp: apiMessage.createdAt || new Date().toISOString(),
-              senderName,
-              senderAvatar,
-              attachments: attachments.length > 0 ? attachments : undefined,
-            };
-          }
-        ) || [];
-
-      console.log(
-        "Transformed messages:",
-        transformedMessages.map((m) => ({
-          id: m.id,
-          sender: m.sender,
-          senderName: m.senderName,
-        }))
-      );
-
-      setMessages(transformedMessages);
+      console.log("Fetched messages:", messages);
+      setMessages(messages);
     } catch (err) {
       console.error("Failed to fetch negotiation data:", err);
       // Fallback to empty array on error
@@ -231,35 +211,76 @@ export const useNegotiation = ({
       // Use stable user reference with fallback to currentUser
       const userForSending = stableUser || currentUser;
 
-      console.log("confirmSendMessage - Start - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
-        email: userForSending?.email,
-        hasUser: !!userForSending,
-      });
-
-      // TODO: Upload files first if any attachments exist
+      // Upload files first if any attachments exist
       const documentIds: string[] = [];
       if (pendingMessage.attachments.length > 0) {
-        // For now, we'll skip file upload and just use empty array
-        // In a real implementation, you would upload files to media API first
-        console.log("File upload not implemented yet, skipping attachments");
+        try {
+          setUploadingFiles(true);
+          console.log("Uploading files:", pendingMessage.attachments.length);
+
+          // Show progress message
+          message.loading("Đang tải lên file đính kèm...", 0);
+
+          // Upload files individually with proper type detection
+          const uploadPromises = pendingMessage.attachments.map(
+            async (file) => {
+              const fileType = detectFileType(file);
+              const fileName = file.name;
+
+              console.log(`Uploading ${fileName} as ${fileType}`);
+
+              // Generate appropriate alt text based on file type
+              let altText = "";
+              switch (fileType) {
+                case MediaType.IMAGE:
+                  altText = `Hình ảnh đính kèm: ${fileName}`;
+                  break;
+                case MediaType.VIDEO:
+                  altText = `Video đính kèm: ${fileName}`;
+                  break;
+                case MediaType.DOCUMENT:
+                  altText = `Tài liệu đính kèm: ${fileName}`;
+                  break;
+                default:
+                  altText = `File đính kèm: ${fileName}`;
+              }
+
+              return await uploadFile(file, {
+                type: fileType,
+                alt: altText,
+              });
+            }
+          );
+
+          const uploadedMedia = await Promise.all(uploadPromises);
+
+          // Extract IDs from uploaded media
+          documentIds.push(
+            ...uploadedMedia.map((media) => media.id.toString())
+          );
+
+          console.log("Files uploaded successfully:", {
+            count: uploadedMedia.length,
+            ids: documentIds,
+          });
+
+          // Hide loading message
+          message.destroy();
+          message.success(`Đã tải lên ${uploadedMedia.length} file thành công`);
+        } catch (uploadError) {
+          console.error("Failed to upload files:", uploadError);
+          message.destroy();
+          message.error("Không thể tải lên file đính kèm");
+          return; // Stop execution if file upload fails
+        } finally {
+          setUploadingFiles(false);
+        }
       }
 
       // Check if user is authenticated - use stable user reference with fallback
       if (!userForSending?.id) {
-        console.error(
-          "User not authenticated - userForSending:",
-          userForSending
-        );
         throw new Error("User not authenticated");
       }
-
-      console.log("confirmSendMessage - Before API call - userForSending:", {
-        id: userForSending?.id,
-        email: userForSending?.email,
-      });
 
       // Send negotiation using API
       const sentMessage = await negotiatingMessageApi.sendMessage({
@@ -267,25 +288,11 @@ export const useNegotiation = ({
         technology_propose: proposalId,
         user: userForSending.id,
         message: pendingMessage.message,
-        document: documentIds,
-      });
-
-      console.log("Negotiation sent successfully:", sentMessage);
-
-      console.log("confirmSendMessage - Before refresh - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
+        documents: documentIds,
       });
 
       // Refresh negotiation data to get the latest data from server
       await fetchNegotiationMessages();
-
-      console.log("confirmSendMessage - After refresh - user reference:", {
-        stableUserId: stableUser?.id,
-        currentUserId: currentUser?.id,
-        selectedUserId: userForSending?.id,
-      });
 
       setAttachments([]);
       setShowConfirmModal(false);
@@ -306,6 +313,46 @@ export const useNegotiation = ({
 
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSignContract = async () => {
+    try {
+      if (!proposal) return;
+
+      // Update proposal status to contract_signed
+      const updatedProposal = await technologyProposeApi.setStatus(
+        proposalId,
+        "contract_signed"
+      );
+
+      setProposal(updatedProposal);
+      message.success("Hợp đồng đã được ký thành công!");
+    } catch (err) {
+      console.error("Failed to sign contract:", err);
+      message.error("Không thể ký hợp đồng. Vui lòng thử lại.");
+    }
+  };
+
+  const handleDownloadContract = async () => {
+    try {
+      if (!proposal?.document?.url) {
+        message.warning("Không tìm thấy tài liệu hợp đồng để tải xuống.");
+        return;
+      }
+
+      // Create a temporary link to download the file
+      const link = document.createElement("a");
+      link.href = proposal.document.url;
+      link.download = proposal.document.filename || "contract.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      message.success("Đã bắt đầu tải xuống hợp đồng.");
+    } catch (err) {
+      console.error("Failed to download contract:", err);
+      message.error("Không thể tải xuống hợp đồng. Vui lòng thử lại.");
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -360,6 +407,7 @@ export const useNegotiation = ({
     // Loading states
     loading,
     sendingMessage,
+    uploadingFiles,
     showConfirmModal,
 
     // Error state
@@ -371,6 +419,8 @@ export const useNegotiation = ({
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
+    handleSignContract,
+    handleDownloadContract,
 
     // Utilities
     formatFileSize,

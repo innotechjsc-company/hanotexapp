@@ -1,4 +1,8 @@
-import type { TechnologyStatus, Currency, PricingType } from "@/types/technologies";
+import type {
+  TechnologyStatus,
+  Currency,
+  PricingType,
+} from "@/types/technologies";
 
 /**
  * Helper function to format currency
@@ -27,7 +31,14 @@ export const formatCurrency = (amount: number, currency: Currency = "vnd") => {
  * Helper function to format date
  */
 export const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("vi-VN");
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day}/${month}/${year} lúc ${hours}:${minutes}`;
 };
 
 /**

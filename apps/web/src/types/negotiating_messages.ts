@@ -8,5 +8,5 @@ export interface NegotiatingMessage {
   technology_propose: TechnologyPropose;
   user: User;
   message: string;
-  document: Media[];
+  documents: Media[];
 }

@@ -20,11 +20,13 @@ import { sendMessage } from "@/api/roomMessage";
 interface SidebarContactCardProps {
   owner?: any;
   onContact: () => void;
+  hasContacted?: boolean;
 }
 
 export default function SidebarContactCard({
   owner,
   onContact,
+  hasContacted = false,
 }: SidebarContactCardProps) {
   const { user } = useAuthStore();
   const router = useRouter();

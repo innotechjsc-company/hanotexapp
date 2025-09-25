@@ -19,7 +19,7 @@ export interface SendMessageData {
   technology_propose: string;
   user: string;
   message: string;
-  document?: string[]; // Array of Media IDs
+  documents?: string[]; // Array of Media IDs
 }
 
 export interface GetMessagesParams {

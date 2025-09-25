@@ -48,6 +48,8 @@ export const API_ENDPOINTS = {
   ROOM_CHAT: "/room-chat",
   ROOM_MESSAGE: "/room-message",
   ROOM_USER: "/room-user",
+  SERVICES: "/services",
+  SERVICE_TICKET: "/service-ticket",
 } as const;
 
 // HTTP Methods
