@@ -34,7 +34,7 @@ import { createPropose } from "@/api/propose";
 import { uploadFile } from "@/api/media";
 import { getDemandById } from "@/api/demands";
 import { getTechnologies } from "@/api/technologies";
-import { Media } from "@/types/media1";
+import { Media, MediaType } from "@/types/media1";
 import { Technology } from "@/types/technologies";
 import { Demand } from "@/types/demand";
 
@@ -164,7 +164,7 @@ function ProposeSolutionPage() {
           uploadedDocument = await uploadFile(file, {
             alt: `Tài liệu đề xuất cho nhu cầu ${demand?.title}`,
             caption: `Tài liệu đính kèm từ ${user?.full_name || user?.email}`,
-            type: "document",
+            type: MediaType.DOCUMENT,
           });
         } catch (uploadError) {
           console.error("File upload failed:", uploadError);

@@ -30,7 +30,7 @@ import {
 import { createEvent } from "@/api/events";
 import { Event } from "@/types/event";
 import { uploadFile } from "@/api/media";
-import { Media } from "@/types/media1";
+import { Media, MediaType } from "@/types/media1";
 
 const { Title, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -64,7 +64,7 @@ export default function EventRegisterPage() {
           console.log("Uploading image:", imageFile.name);
           uploadedImage = await uploadFile(imageFile.originFileObj, {
             alt: `Ảnh đại diện sự kiện: ${values.eventName}`,
-            type: "image",
+            type: MediaType.IMAGE,
             caption: values.eventName,
           });
           console.log("Image uploaded:", uploadedImage);

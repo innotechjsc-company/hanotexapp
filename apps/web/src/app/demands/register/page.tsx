@@ -20,7 +20,7 @@ import { Demand } from "@/types/demand";
 import { useCategories } from "@/hooks/useCategories";
 import { createDemand } from "@/api/demands";
 import { uploadFile, deleteFile } from "@/api/media";
-import { Media } from "@/types/media1";
+import { Media, MediaType } from "@/types/media1";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
@@ -101,18 +101,18 @@ export default function RegisterDemandPage() {
         try {
           const uploadPromises = selectedFiles.map(async (file) => {
             // Determine file type based on MIME type
-            let fileType: Media["type"] = "other";
+            let fileType: Media["type"] = MediaType.OTHER;
             if (file.type.startsWith("image/")) {
-              fileType = "image";
+              fileType = MediaType.IMAGE;
             } else if (file.type.startsWith("video/")) {
-              fileType = "video";
+              fileType = MediaType.VIDEO;
             } else if (
               file.type.includes("pdf") ||
               file.type.includes("document") ||
               file.type.includes("text") ||
               file.type.includes("application")
             ) {
-              fileType = "document";
+              fileType = MediaType.DOCUMENT;
             }
 
             return await uploadFile(file, {

@@ -1,6 +1,7 @@
 import { User } from "./users";
 import { Technology } from "./technologies";
 import { Media } from "./media1";
+import { InvestmentFund } from "./investment_fund";
 
 export enum ProjectStatusEnum {
   PENDING = "pending",
@@ -17,6 +18,7 @@ export type Project = {
   market_data?: string;
   user: string | User;
   technologies?: string[] | Technology[];
+  investment_fund?: string | InvestmentFund;
   revenue?: number;
   profit?: number;
   assets?: number;
