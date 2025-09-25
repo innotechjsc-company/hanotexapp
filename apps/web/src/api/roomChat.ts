@@ -149,3 +149,37 @@ export async function searchRoomChatsByTitle(
 ): Promise<ApiResponse<RoomChat>> {
   return getRoomChats({ search: searchQuery }, pagination);
 }
+
+/**
+ * Get room chats by array of IDs
+ */
+export async function getRoomChatsByIds(
+  roomIds: string[],
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<RoomChat>> {
+  if (roomIds.length === 0) {
+    return {
+      docs: [],
+      totalDocs: 0,
+      limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+      page: pagination.page || PAGINATION_DEFAULTS.page,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false,
+      nextPage: null,
+      prevPage: null,
+    };
+  }
+
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-updatedAt",
+    depth: 1,
+  };
+
+  // Filter by room IDs using 'in' operator
+  params["where[id][in]"] = roomIds.join(",");
+
+  return payloadApiClient.get<RoomChat>(API_ENDPOINTS.ROOM_CHAT, params);
+}

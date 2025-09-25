@@ -149,12 +149,17 @@ export async function getRoomsForUser(
   userId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<RoomUser>> {
-  return getRoomUsers(
-    {
-      user: userId,
-    },
-    pagination
-  );
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    depth: 0, // Don't populate - we only need IDs
+  };
+
+  // User filter
+  params["where[user][equals]"] = userId;
+
+  return payloadApiClient.get<RoomUser>(API_ENDPOINTS.ROOM_USER, params);
 }
 
 /**

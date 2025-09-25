@@ -24,8 +24,16 @@ import {
   LogIn,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-import { getRoomChats, deleteRoomChat } from "@/api/roomChat";
-import { getUsersInRoom, deleteRoomUser } from "@/api/roomUser";
+import {
+  getRoomChats,
+  deleteRoomChat,
+  getRoomChatsByIds,
+} from "@/api/roomChat";
+import {
+  getUsersInRoom,
+  deleteRoomUser,
+  getRoomsForUser,
+} from "@/api/roomUser";
 import {
   getMessagesForRoom,
   sendMessage,
@@ -116,15 +124,63 @@ export default function MessagesPage() {
   const loadConversations = async () => {
     try {
       setLoading(true);
-      // For now, get all room chats - in a real app, you'd filter by user
-      const response = await getRoomChats({}, { limit: 50 });
-      const conversationsList = response.docs || [];
+      console.log("🔍 Starting loadConversations...");
+
+      if (!user?.id) {
+        console.log("❌ No user ID found");
+        setConversations([]);
+        return;
+      }
+
+      console.log("👤 User ID:", user.id);
+
+      // Get rooms that current user is a member of
+      console.log("📡 Fetching user rooms...");
+      const userRoomsResponse = await getRoomsForUser(user.id, { limit: 100 });
+      const userRooms = userRoomsResponse.docs || [];
+
+      console.log("🏠 User rooms response:", userRoomsResponse);
+      console.log("🏠 User rooms count:", userRooms.length);
+
+      if (userRooms.length === 0) {
+        console.log("❌ No rooms found for user");
+        setConversations([]);
+        return;
+      }
+
+      // Extract room IDs from user's room memberships
+      // Handle both string ID and populated object cases
+      const roomIds = userRooms.map((roomUser) => {
+        // If room is populated (object), get the id property
+        // If room is just an ID (string), use it directly
+        return typeof roomUser.room === "string"
+          ? roomUser.room
+          : (roomUser.room as any).id;
+      });
+      console.log("🆔 Room IDs:", roomIds);
+
+      // Get room chats by IDs (more efficient than filtering all rooms)
+      console.log("📡 Fetching room chats by IDs...");
+      const roomsResponse = await getRoomChatsByIds(roomIds, { limit: 100 });
+      const conversationsList = roomsResponse.docs || [];
+
+      console.log("💬 Rooms response:", roomsResponse);
+      console.log("💬 Conversations count:", conversationsList.length);
+
+      // Sort conversations by updatedAt (most recent first)
+      conversationsList.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+
       setConversations(conversationsList);
+      console.log("✅ Conversations set:", conversationsList);
 
       // Load last message for each conversation
       await loadLastMessagesForConversations(conversationsList);
     } catch (error) {
-      console.error("Error loading conversations:", error);
+      console.error("❌ Error loading conversations:", error);
+      toast.error("Có lỗi xảy ra khi tải cuộc trò chuyện");
     } finally {
       setLoading(false);
     }
