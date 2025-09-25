@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Plus,
   ExternalLink,
+  Navigation,
 } from "lucide-react";
 import {
   Card,
@@ -208,7 +209,7 @@ export default function EventsPage() {
     // Check if it's a string URL
     if (typeof image === "string") {
       if (image.startsWith("http")) return image;
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image}`;
+      return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}${image}`;
     }
 
     // Check if it's an image object from PayloadCMS
@@ -217,7 +218,7 @@ export default function EventsPage() {
       if (image.mimeType && image.mimeType.startsWith("image/")) {
         if (image.url) {
           if (image.url.startsWith("http")) return image.url;
-          return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image.url}`;
+          return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}${image.url}`;
         }
       }
       // If it's not an image file (like PDF), use fallback
@@ -236,34 +237,20 @@ export default function EventsPage() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "warning";
-      case "in_progress":
-        return "primary";
-      case "completed":
-        return "success";
-      case "cancelled":
-        return "danger";
-      default:
-        return "default";
+  // Helper function to generate Google Maps URL from address
+  const getGoogleMapsUrl = (address: string): string => {
+    if (!address || address.trim() === "") {
+      return "";
     }
+
+    // Encode the address for URL
+    const encodedAddress = encodeURIComponent(address.trim());
+    return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Chờ duyệt";
-      case "in_progress":
-        return "Đang diễn ra";
-      case "completed":
-        return "Đã kết thúc";
-      case "cancelled":
-        return "Đã hủy";
-      default:
-        return status;
-    }
+  // Helper function to check if address has Google Maps URL
+  const hasValidAddress = (address: string): boolean => {
+    return !!(address && address.trim() !== "");
   };
 
   if (loading) {
@@ -382,7 +369,7 @@ export default function EventsPage() {
                       : event.content}
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
                     <div className="flex items-center text-gray-500">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>{formatDate(event.start_date)}</span>
@@ -391,10 +378,34 @@ export default function EventsPage() {
                       <Clock className="h-4 w-4 mr-2" />
                       <span>{formatDate(event.end_date)}</span>
                     </div>
-                    {event.location && (
-                      <div className="flex items-center text-gray-500">
+                    {event.location && hasValidAddress(event.location) ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center text-gray-500 gap-2 sm:gap-0">
+                        <div className="flex items-start flex-1 min-w-0">
+                          <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-8 w-8 min-w-0 visible opacity-100 z-10 relative flex-shrink-0"
+                            onPress={() =>
+                              window.open(
+                                getGoogleMapsUrl(event.location),
+                                "_blank"
+                              )
+                            }
+                            title="Xem vị trí trên Google Maps"
+                            aria-label={`Xem địa điểm "${event.location}" trên Google Maps`}
+                          >
+                            <Navigation className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-gray-400">
                         <MapPin className="h-4 w-4 mr-2" />
-                        <span className="line-clamp-1">{event.location}</span>
+                        <span>Chưa cập nhật địa điểm</span>
                       </div>
                     )}
                   </div>

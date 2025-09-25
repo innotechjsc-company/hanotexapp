@@ -17,6 +17,8 @@ import {
   Info,
   MessageCircle,
   Send,
+  Mail,
+  Phone,
 } from "lucide-react";
 import Link from "next/link";
 import Map from "@/components/ui/Map";
@@ -274,18 +276,18 @@ export default function EventDetailPage({
     fetchEvent();
   }, [params.id, user?.id]);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Sắp diễn ra";
-      case "in_progress":
-        return "Đang diễn ra";
-      case "completed":
-        return "Đã kết thúc";
-      case "cancelled":
-        return "Đã huỷ";
-      default:
-        return status;
+  const getStatusText = (event: any) => {
+    // Calculate status based on dates instead of database status
+    const now = new Date();
+    const startDate = new Date(event.start_date);
+    const endDate = new Date(event.end_date);
+
+    if (now < startDate) {
+      return "Chưa diễn ra";
+    } else if (now >= startDate && now <= endDate) {
+      return "Đang diễn ra";
+    } else {
+      return "Đã kết thúc";
     }
   };
 
@@ -407,7 +409,7 @@ export default function EventDetailPage({
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
               <span className="px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
-                {getStatusText(event.status)}
+                {getStatusText(event)}
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
@@ -441,17 +443,30 @@ export default function EventDetailPage({
                     {event.location || "Địa điểm"}
                   </h3>
 
-                  {event.location_details?.googleMapsUrl && (
-                    <a
-                      href={event.location_details.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Xem trên Google Maps
-                    </a>
-                  )}
+                  <div className="flex items-center gap-4 mt-3">
+                    {event.location && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium transition-colors duration-200"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Xem trên Google Maps
+                      </a>
+                    )}
+                    {event.location_details?.googleMapsUrl && (
+                      <a
+                        href={event.location_details.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Chỉ đường
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -473,6 +488,45 @@ export default function EventDetailPage({
                     {event.time && `• ${event.time}`}
                   </p>
                 </div>
+
+                {/* Links hữu ích */}
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">
+                    Links hữu ích
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {event.location && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm font-medium"
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Xem bản đồ
+                      </a>
+                    )}
+                    {event.contact_email && (
+                      <a
+                        href={`mailto:${event.contact_email}`}
+                        className="inline-flex items-center px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 text-sm font-medium"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Liên hệ email
+                      </a>
+                    )}
+                    {event.contact_phone && (
+                      <a
+                        href={`tel:${event.contact_phone}`}
+                        className="inline-flex items-center px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 text-sm font-medium"
+                      >
+                        <Phone className="h-4 w-4 mr-2" />
+                        Gọi điện
+                      </a>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
                     Mô tả sự kiện
@@ -642,6 +696,62 @@ export default function EventDetailPage({
                     {registering ? "Đang đăng ký..." : "Đăng ký ngay"}
                   </button>
                 )}
+              </div>
+            )}
+
+            {/* Contact Info Card */}
+            {(event.contact_email || event.contact_phone) && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <Phone className="h-5 w-5 mr-2 text-primary-600" />
+                  Thông tin liên hệ
+                </h3>
+                <div className="space-y-3">
+                  {event.contact_email && (
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        <Mail className="h-4 w-4 mr-3 text-gray-500" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            Email
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {event.contact_email}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={`mailto:${event.contact_email}`}
+                        className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200 text-sm font-medium"
+                      >
+                        <Mail className="h-3 w-3 mr-1" />
+                        Gửi email
+                      </a>
+                    </div>
+                  )}
+                  {event.contact_phone && (
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        <Phone className="h-4 w-4 mr-3 text-gray-500" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            Điện thoại
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {event.contact_phone}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={`tel:${event.contact_phone}`}
+                        className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200 text-sm font-medium"
+                      >
+                        <Phone className="h-3 w-3 mr-1" />
+                        Gọi ngay
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
