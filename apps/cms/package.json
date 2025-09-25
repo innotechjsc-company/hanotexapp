@@ -6,13 +6,14 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 4000",
-    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev -p 4000",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation node server.js",
+    "dev:next": "cross-env NODE_OPTIONS=--no-deprecation next dev -p 4000",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation node server.js",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start -p 4000",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation node server.js",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
@@ -41,7 +42,9 @@
     "react-dom": "19.1.0",
     "sharp": "0.34.2",
     "@payloadcms/db-postgres": "3.55.1",
-    "@payloadcms/db-mongodb": "3.55.1"
+    "@payloadcms/db-mongodb": "3.55.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@playwright/test": "1.54.1",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   MessageSquare,
@@ -47,6 +47,7 @@ import { RoomMessage } from "@/api/roomMessage";
 import { uploadFile } from "@/api/media";
 import { getMediaUrlWithDebug } from "@/utils/mediaUrl";
 import toast from "react-hot-toast";
+import webSocketService, { ChatMessage } from "@/services/websocket";
 
 export default function MessagesPage() {
   const { user, isAuthenticated } = useAuthStore();
@@ -71,6 +72,36 @@ export default function MessagesPage() {
   const [lastMessages, setLastMessages] = useState<
     Record<string, RoomMessage | null>
   >({});
+  const [typingUsers, setTypingUsers] = useState<
+    Record<string, { userId: string; userName: string }[]>
+  >({});
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
+  const [messageReactions, setMessageReactions] = useState<
+    Record<string, { userId: string; userName: string; emoji: string }[]>
+  >({});
+  const [userStatuses, setUserStatuses] = useState<
+    Record<string, { status: "online" | "offline" | "away"; lastSeen?: string }>
+  >({});
+  const [messageStatuses, setMessageStatuses] = useState<
+    Record<string, { status: string; readBy: string[] }>
+  >({});
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Play notification sound
+  const playNotificationSound = () => {
+    if (audioRef.current) {
+      audioRef.current
+        .play()
+        .catch((e) => console.log("Could not play notification sound:", e));
+    }
+  };
 
   // Load conversations on component mount
   useEffect(() => {
@@ -103,6 +134,248 @@ export default function MessagesPage() {
       loadRoomUsers(conversations[selectedConversation].id);
     }
   }, [selectedConversation, conversations]);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    if (isAuthenticated && user?.id && user?.full_name) {
+      console.log("🔌 Initializing WebSocket connection...");
+
+      // Authenticate with WebSocket server
+      webSocketService.authenticate(user.id, user.full_name);
+
+      // Set up event listeners
+      const cleanupMessageReceived = webSocketService.onMessageReceived(
+        (message: ChatMessage) => {
+          console.log("💬 Real-time message received:", message);
+
+          // Add message to current messages if we're in the same room
+          if (
+            selectedConversation !== null &&
+            conversations[selectedConversation]?.id === message.room
+          ) {
+            const newMessage: RoomMessage = {
+              id: message.id,
+              room: message.room,
+              message: message.message,
+              user: message.user,
+              document: message.document as any, // Cast to match RoomMessage type
+              createdAt: message.createdAt,
+              updatedAt: message.updatedAt,
+            };
+
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
+
+          // Update last message for the room
+          const lastMessage: RoomMessage = {
+            id: message.id,
+            room: message.room,
+            message: message.message,
+            user: message.user,
+            document: message.document as any, // Cast to match RoomMessage type
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt,
+          };
+
+          setLastMessages((prev) => ({
+            ...prev,
+            [message.room]: lastMessage,
+          }));
+
+          // Handle UI updates for new message
+          if (
+            selectedConversation !== null &&
+            conversations[selectedConversation]?.id === message.room
+          ) {
+            // Auto-scroll to bottom for messages in current room
+            setTimeout(scrollToBottom, 100);
+          } else {
+            // Show toast notification and play sound for messages in other rooms
+            const roomName =
+              conversations.find((c) => c.id === message.room)?.title ||
+              "Unknown Room";
+            toast.success(
+              `New message in ${roomName}: ${message.message.substring(0, 50)}${message.message.length > 50 ? "..." : ""}`
+            );
+            playNotificationSound();
+          }
+        }
+      );
+
+      const cleanupUserTypingStart = webSocketService.onUserTypingStart(
+        (data) => {
+          if (data.userId !== user.id) {
+            // Don't show our own typing
+            setTypingUsers((prev) => ({
+              ...prev,
+              [data.roomId]: [
+                ...(prev[data.roomId] || []).filter(
+                  (u) => u.userId !== data.userId
+                ),
+                { userId: data.userId, userName: data.userName },
+              ],
+            }));
+          }
+        }
+      );
+
+      const cleanupUserTypingStop = webSocketService.onUserTypingStop(
+        (data) => {
+          setTypingUsers((prev) => ({
+            ...prev,
+            [data.roomId]: (prev[data.roomId] || []).filter(
+              (u) => u.userId !== data.userId
+            ),
+          }));
+        }
+      );
+
+      // Handle message reactions
+      const cleanupMessageReaction = webSocketService.onMessageReaction(
+        (data) => {
+          console.log("🎭 Message reaction received:", data);
+
+          setMessageReactions((prev) => {
+            const messageReactions = prev[data.messageId] || [];
+
+            if (data.action === "add") {
+              // Add reaction if not already exists
+              const existingReaction = messageReactions.find(
+                (r) =>
+                  r.userId === data.reaction.userId &&
+                  r.emoji === data.reaction.emoji
+              );
+
+              if (!existingReaction) {
+                return {
+                  ...prev,
+                  [data.messageId]: [
+                    ...messageReactions,
+                    {
+                      userId: data.reaction.userId,
+                      userName: data.reaction.userName,
+                      emoji: data.reaction.emoji,
+                    },
+                  ],
+                };
+              }
+            } else {
+              // Remove reaction
+              return {
+                ...prev,
+                [data.messageId]: messageReactions.filter(
+                  (r) =>
+                    !(
+                      r.userId === data.reaction.userId &&
+                      r.emoji === data.reaction.emoji
+                    )
+                ),
+              };
+            }
+
+            return prev;
+          });
+        }
+      );
+
+      // Handle user status updates
+      const cleanupUserStatus = webSocketService.onUserStatus((data) => {
+        console.log("👤 User status received:", data);
+
+        setUserStatuses((prev) => ({
+          ...prev,
+          [data.userId]: {
+            status: data.status,
+            lastSeen: data.lastSeen,
+          },
+        }));
+      });
+
+      // Handle message status updates
+      const cleanupMessageStatus = webSocketService.onMessageStatus((data) => {
+        console.log("📊 Message status received:", data);
+
+        setMessageStatuses((prev) => ({
+          ...prev,
+          [data.messageId]: {
+            status: data.status,
+            readBy: [...(prev[data.messageId]?.readBy || []), data.userId],
+          },
+        }));
+      });
+
+      // Monitor connection status
+      const checkConnection = () => {
+        setIsWebSocketConnected(webSocketService.isSocketConnected());
+      };
+
+      const connectionInterval = setInterval(checkConnection, 1000);
+      checkConnection(); // Initial check
+
+      // Cleanup function
+      return () => {
+        cleanupMessageReceived();
+        cleanupUserTypingStart();
+        cleanupUserTypingStop();
+        cleanupMessageReaction();
+        cleanupUserStatus();
+        cleanupMessageStatus();
+        clearInterval(connectionInterval);
+      };
+    }
+  }, [
+    isAuthenticated,
+    user?.id,
+    user?.full_name,
+    selectedConversation,
+    conversations,
+  ]);
+
+  // Join WebSocket room when conversation is selected
+  useEffect(() => {
+    if (
+      selectedConversation !== null &&
+      conversations[selectedConversation] &&
+      isWebSocketConnected
+    ) {
+      const roomId = conversations[selectedConversation].id;
+      console.log(`🏠 Joining WebSocket room: ${roomId}`);
+      webSocketService.joinRoom(roomId);
+    }
+  }, [selectedConversation, conversations, isWebSocketConnected]);
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages]);
+
+  // Initialize audio for notifications
+  useEffect(() => {
+    audioRef.current = new Audio(
+      "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT"
+    );
+  }, []);
+
+  // Mark messages as read when viewing them
+  useEffect(() => {
+    if (
+      selectedConversation !== null &&
+      conversations[selectedConversation] &&
+      messages.length > 0
+    ) {
+      const roomId = conversations[selectedConversation].id;
+      const lastMessage = messages[messages.length - 1];
+
+      if (lastMessage && lastMessage.user.id !== user?.id) {
+        // Mark the last message as read after a short delay
+        setTimeout(() => {
+          webSocketService.markMessageAsRead(lastMessage.id, roomId);
+        }, 1000);
+      }
+    }
+  }, [messages, selectedConversation, conversations, user?.id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -298,6 +571,40 @@ export default function MessagesPage() {
         documentId
       );
 
+      // Send message via WebSocket for real-time delivery
+      if (isWebSocketConnected && sentMessage) {
+        const webSocketMessage: ChatMessage = {
+          id: sentMessage.id,
+          room: currentRoom.id,
+          message: sentMessage.message,
+          user: {
+            id: user.id,
+            full_name: user.full_name || user.email,
+            email: user.email,
+          },
+          document: sentMessage.document
+            ? {
+                id:
+                  typeof sentMessage.document === "string"
+                    ? sentMessage.document
+                    : sentMessage.document.id,
+                filename:
+                  typeof sentMessage.document === "string"
+                    ? "Unknown"
+                    : sentMessage.document.filename || "Unknown",
+                url:
+                  typeof sentMessage.document === "string"
+                    ? ""
+                    : sentMessage.document.url || "",
+              }
+            : undefined,
+          createdAt: sentMessage.createdAt,
+          updatedAt: sentMessage.updatedAt,
+        };
+
+        webSocketService.sendMessage(webSocketMessage);
+      }
+
       setNewMessage("");
       setSelectedFiles([]);
       // Reload messages to show the new message
@@ -349,6 +656,42 @@ export default function MessagesPage() {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+    // Handle typing indicators
+    if (
+      isWebSocketConnected &&
+      selectedConversation !== null &&
+      conversations[selectedConversation]
+    ) {
+      const roomId = conversations[selectedConversation].id;
+
+      if (value.trim()) {
+        // Start typing
+        webSocketService.startTyping(roomId);
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set timeout to stop typing after 3 seconds of inactivity
+        typingTimeoutRef.current = setTimeout(() => {
+          webSocketService.stopTyping(roomId);
+        }, 3000);
+      } else {
+        // Stop typing if input is empty
+        webSocketService.stopTyping(roomId);
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = null;
+        }
+      }
     }
   };
 
@@ -921,7 +1264,7 @@ export default function MessagesPage() {
                       return (
                         <div
                           key={message.id}
-                          className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                          className={`flex group ${isOwn ? "justify-end" : "justify-start"}`}
                         >
                           <div
                             className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -942,19 +1285,158 @@ export default function MessagesPage() {
                               typeof message.document === "object" &&
                               renderFileAttachment(message.document, isOwn)}
 
-                            <p
-                              className={`text-xs mt-1 ${
-                                isOwn ? "text-blue-100" : "text-gray-500"
-                              }`}
-                            >
-                              {formatTime(message.createdAt)}
-                            </p>
+                            {/* Message Reactions */}
+                            {messageReactions[message.id] &&
+                              messageReactions[message.id].length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {messageReactions[message.id].map(
+                                    (reaction, index) => (
+                                      <button
+                                        key={`${reaction.userId}-${reaction.emoji}-${index}`}
+                                        onClick={() => {
+                                          if (reaction.userId === user?.id) {
+                                            // Remove own reaction
+                                            webSocketService.removeMessageReaction(
+                                              message.id,
+                                              typeof message.room === "string"
+                                                ? message.room
+                                                : message.room.id,
+                                              reaction.emoji
+                                            );
+                                          }
+                                        }}
+                                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                                          reaction.userId === user?.id
+                                            ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        } transition-colors`}
+                                        title={`${reaction.userName} reacted with ${reaction.emoji}`}
+                                      >
+                                        <span className="mr-1">
+                                          {reaction.emoji}
+                                        </span>
+                                        <span className="text-xs">
+                                          {
+                                            messageReactions[message.id].filter(
+                                              (r) => r.emoji === reaction.emoji
+                                            ).length
+                                          }
+                                        </span>
+                                      </button>
+                                    )
+                                  )}
+                                </div>
+                              )}
+
+                            {/* Quick Reaction Buttons */}
+                            <div className="flex items-center justify-between mt-2">
+                              <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {["👍", "❤️", "😂", "😮", "😢", "😡"].map(
+                                  (emoji) => (
+                                    <button
+                                      key={emoji}
+                                      onClick={() => {
+                                        const existingReaction =
+                                          messageReactions[message.id]?.find(
+                                            (r) =>
+                                              r.userId === user?.id &&
+                                              r.emoji === emoji
+                                          );
+
+                                        const roomId =
+                                          typeof message.room === "string"
+                                            ? message.room
+                                            : message.room.id;
+
+                                        if (existingReaction) {
+                                          webSocketService.removeMessageReaction(
+                                            message.id,
+                                            roomId,
+                                            emoji
+                                          );
+                                        } else {
+                                          webSocketService.addMessageReaction(
+                                            message.id,
+                                            roomId,
+                                            emoji
+                                          );
+                                        }
+                                      }}
+                                      className="hover:bg-gray-100 rounded-full p-1 text-sm transition-colors"
+                                      title={`React with ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  )
+                                )}
+                              </div>
+
+                              <p
+                                className={`text-xs ${
+                                  isOwn ? "text-blue-100" : "text-gray-500"
+                                }`}
+                              >
+                                {formatTime(message.createdAt)}
+                                {messageStatuses[message.id] && (
+                                  <span className="ml-2">
+                                    {messageStatuses[message.id].status ===
+                                      "read" && "✓✓"}
+                                    {messageStatuses[message.id].status ===
+                                      "delivered" && "✓"}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       );
                     })
                   )}
+
+                  {/* Scroll anchor */}
+                  <div ref={messagesEndRef} />
                 </div>
+
+                {/* Typing Indicators */}
+                {selectedConversation !== null &&
+                  conversations[selectedConversation] &&
+                  typingUsers[conversations[selectedConversation].id] &&
+                  typingUsers[conversations[selectedConversation].id].length >
+                    0 && (
+                    <div className="px-4 py-2 border-t border-gray-100">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div
+                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: "0.1s" }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {typingUsers[conversations[selectedConversation].id]
+                            .map((u) => u.userName)
+                            .join(", ")}{" "}
+                          đang nhập...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                {/* WebSocket Connection Status */}
+                {!isWebSocketConnected && isAuthenticated && (
+                  <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-200">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span className="text-sm text-yellow-700">
+                        Đang kết nối lại real-time chat...
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Message Input */}
                 <div className="p-4 border-t border-gray-200">
@@ -1029,7 +1511,7 @@ export default function MessagesPage() {
                     <input
                       type="text"
                       value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      onChange={(e) => handleInputChange(e as any)}
                       onKeyDown={handleKeyDown}
                       placeholder={
                         isAuthenticated
