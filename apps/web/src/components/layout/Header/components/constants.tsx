@@ -63,12 +63,12 @@ export const mainMenuItems: MenuItem[] = [
     icon: FileText,
     submenu: [
       { name: "Tin tức mới nhất", href: "/news" },
-      { name: "Thông báo", href: "/news?category=announcements" },
-      { name: "Chính sách", href: "/news?category=policies" },
-      { name: "Hướng dẫn", href: "/news?category=guides" },
+      // { name: "Thông báo", href: "/news?category=announcements" },
+      // { name: "Chính sách", href: "/news?category=policies" },
+      // { name: "Hướng dẫn", href: "/news?category=guides" },
       { name: "Sự kiện sắp diễn ra", href: "/events" },
-      { name: "Hội thảo", href: "/events?type=seminar" },
-      { name: "Triển lãm", href: "/events?type=exhibition" },
+      // { name: "Hội thảo", href: "/events?type=seminar" },
+      // { name: "Triển lãm", href: "/events?type=exhibition" },
     ],
   },
   {

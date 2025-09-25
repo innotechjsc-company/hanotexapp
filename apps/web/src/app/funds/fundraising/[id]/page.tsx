@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight, Briefcase, Calendar, DollarSign, Users, Building2, Clock, Target, TrendingUp } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  Briefcase,
+  Calendar,
+  DollarSign,
+  Users,
+  Building2,
+  Clock,
+  Target,
+  TrendingUp,
+} from "lucide-react";
 import Link from "next/link";
 import { getProjectById } from "@/api/projects";
 import { getInvestmentFundById } from "@/api/investment-fund";
@@ -64,7 +75,9 @@ export default function FundraisingProjectDetailPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
-  const [investmentFund, setInvestmentFund] = useState<InvestmentFund | null>(null);
+  const [investmentFund, setInvestmentFund] = useState<InvestmentFund | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -92,9 +105,10 @@ export default function FundraisingProjectDetailPage() {
 
         // Fetch investment fund if exists
         if (projectData && projectData.investment_fund) {
-          const fundId = typeof projectData.investment_fund === "string"
-            ? projectData.investment_fund
-            : (projectData.investment_fund as any)?.id;
+          const fundId =
+            typeof projectData.investment_fund === "string"
+              ? projectData.investment_fund
+              : (projectData.investment_fund as any)?.id;
 
           if (fundId) {
             try {
@@ -105,7 +119,6 @@ export default function FundraisingProjectDetailPage() {
             }
           }
         }
-
       } catch (err: any) {
         console.error("Error fetching project details:", err);
         setError(err.message || "Có lỗi xảy ra khi tải thông tin dự án");
@@ -135,8 +148,8 @@ export default function FundraisingProjectDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {error || "Không tìm thấy dự án"}
           </h1>
-          <Link 
-            href="/funds/fundraising" 
+          <Link
+            href="/funds/fundraising"
             className="text-green-600 hover:text-green-800 font-medium"
           >
             Quay lại danh sách dự án gọi vốn
@@ -183,12 +196,19 @@ export default function FundraisingProjectDetailPage() {
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                {(typeof project.technologies === "object" && project.technologies && (project.technologies as any).name) || "Dự án công nghệ"}
+                {(typeof project.technologies === "object" &&
+                  project.technologies &&
+                  (project.technologies as any).name) ||
+                  "Dự án công nghệ"}
               </span>
-              <Tag color={getStatusColor(project.status || "")}>{getStatusLabel(project.status || "")}</Tag>
+              <Tag color={getStatusColor(project.status || "")}>
+                {getStatusLabel(project.status || "")}
+              </Tag>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{project.name || "Chưa có tên dự án"}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {project.name || "Chưa có tên dự án"}
+            </h2>
             <p className="text-gray-600 text-lg leading-relaxed mb-6">
               {project.description || "Chưa có mô tả dự án"}
             </p>
@@ -205,20 +225,27 @@ export default function FundraisingProjectDetailPage() {
               <div className="bg-blue-50 rounded-lg p-4 text-center">
                 <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                 <div className="text-lg font-bold text-gray-900">
-                  {project.end_date ? formatDate(project.end_date) : "Chưa xác định"}
+                  {project.end_date
+                    ? formatDate(project.end_date)
+                    : "Chưa xác định"}
                 </div>
                 <div className="text-sm text-gray-600">Hạn gọi vốn</div>
               </div>
               <div className="bg-purple-50 rounded-lg p-4 text-center">
                 <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                 <div className="text-lg font-bold text-gray-900">
-                  {(typeof project.user === "object" && project.user && (project.user as any).full_name) || "Chưa xác định"}
+                  {(typeof project.user === "object" &&
+                    project.user &&
+                    (project.user as any).full_name) ||
+                    "Chưa xác định"}
                 </div>
                 <div className="text-sm text-gray-600">Người phụ trách</div>
               </div>
               <div className="bg-orange-50 rounded-lg p-4 text-center">
                 <Target className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-               <div className="text-lg font-bold text-gray-900">{getStatusLabel(project.status || "")}</div>
+                <div className="text-lg font-bold text-gray-900">
+                  {getStatusLabel(project.status || "")}
+                </div>
                 <div className="text-sm text-gray-600">Trạng thái</div>
               </div>
             </div>
@@ -266,28 +293,40 @@ export default function FundraisingProjectDetailPage() {
           <h3 className="text-2xl font-bold text-gray-900 mb-6">
             Cơ hội đầu tư
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Thông tin tài chính</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Thông tin tài chính
+              </h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Mục tiêu gọi vốn:</span>
-                  <span className="font-semibold text-green-600">{formatVND(project.goal_money || 0)}</span>
+                  <span className="font-semibold text-green-600">
+                    {formatVND(project.goal_money || 0)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Hạn chót:</span>
-                  <span className="font-semibold">{project.end_date ? formatDate(project.end_date) : "Chưa xác định"}</span>
+                  <span className="font-semibold">
+                    {project.end_date
+                      ? formatDate(project.end_date)
+                      : "Chưa xác định"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Trạng thái:</span>
-                  <Tag color={getStatusColor(project.status || "")}>{getStatusLabel(project.status || "")}</Tag>
+                  <Tag color={getStatusColor(project.status || "")}>
+                    {getStatusLabel(project.status || "")}
+                  </Tag>
                 </div>
               </div>
             </div>
-            
+
             <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Lý do đầu tư</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Lý do đầu tư
+              </h4>
               <ul className="space-y-2 text-gray-600">
                 <li className="flex items-start">
                   <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
@@ -312,7 +351,7 @@ export default function FundraisingProjectDetailPage() {
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Công nghệ cốt lõi
             </h3>
-            
+
             <div className="border border-gray-200 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
                 {(project.technologies as any).title}
@@ -328,7 +367,9 @@ export default function FundraisingProjectDetailPage() {
 
         {/* Contact CTA */}
         <div className="bg-gradient-to-r from-green-600 to-teal-600 rounded-xl p-8 text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">Quan tâm đầu tư vào dự án này?</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Quan tâm đầu tư vào dự án này?
+          </h2>
           <p className="text-lg mb-6 opacity-90">
             Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội đầu tư và hợp tác
           </p>

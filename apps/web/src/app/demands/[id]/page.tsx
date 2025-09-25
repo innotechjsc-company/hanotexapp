@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Calendar,
   DollarSign,
-  Users,
   FileText,
   Download,
   Send,
@@ -16,9 +15,6 @@ import {
   Eye,
   Clock,
   Target,
-  Phone,
-  Mail,
-  Globe,
   ChevronRight,
   ExternalLink,
 } from "lucide-react";
@@ -29,7 +25,6 @@ import {
   Button,
   Chip,
   Spinner,
-  Avatar,
   Divider,
   Link,
   Badge,
@@ -38,6 +33,7 @@ import {
 import { getDemandById } from "@/api/demands";
 import { Demand } from "@/types/demand";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import DemandContactCard from "@/components/demands/DemandContactCard";
 
 export default function DemandDetailPage() {
   const router = useRouter();
@@ -568,66 +564,11 @@ export default function DemandDetailPage() {
               </CardBody>
             </Card>
 
-            {/* Contact Information */}
-            <Card className="shadow-sm">
-              <CardBody className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-primary" />
-                  Thông tin liên hệ
-                </h3>
-
-                <div className="flex items-center space-x-3 mb-4">
-                  <Avatar
-                    size="md"
-                    name={
-                      typeof demand.user === "object" && demand.user?.full_name
-                        ? demand.user.full_name
-                        : "User"
-                    }
-                    className="flex-shrink-0"
-                  />
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {typeof demand.user === "object" && demand.user?.full_name
-                        ? demand.user.full_name
-                        : "Người đăng"}
-                    </p>
-                    <p className="text-sm text-default-500">
-                      {typeof demand.user === "object" &&
-                      demand.user?.profession
-                        ? demand.user.profession
-                        : "Cá nhân"}
-                    </p>
-                  </div>
-                </div>
-
-                {typeof demand.user === "object" && demand.user && (
-                  <div className="space-y-2 text-sm">
-                    {/* {demand.user.phone && (
-                      <div className="flex items-center text-default-600">
-                        <Phone className="h-4 w-4 mr-2" />
-                        <span>{demand.user.phone}</span>
-                      </div>
-                    )} */}
-                    {demand.user.company &&
-                      typeof demand.user.company === "object" &&
-                      demand.user.company.website && (
-                        <div className="flex items-center text-default-600">
-                          <Globe className="h-4 w-4 mr-2" />
-                          <Link
-                            href={demand.user.company.website}
-                            target="_blank"
-                            className="hover:text-primary"
-                          >
-                            Website công ty
-                            <ExternalLink className="h-3 w-3 ml-1 inline" />
-                          </Link>
-                        </div>
-                      )}
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+            {/* Contact Information with Chat */}
+            <DemandContactCard
+              demandUser={typeof demand.user === "object" ? demand.user : null}
+              demandTitle={demand.title}
+            />
 
             {/* Action Buttons */}
             <div className="space-y-3">

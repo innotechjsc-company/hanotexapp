@@ -10,85 +10,92 @@ import {
   Phone,
   MapPin,
   Globe,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
 import { createSimpleRoomChat } from "@/api/roomChat";
 import { addUserToRoom, findRoomBetweenUsers } from "@/api/roomUser";
 import { sendMessage } from "@/api/roomMessage";
+import { Card, CardBody, Avatar, Link } from "@heroui/react";
 
-interface SidebarContactCardProps {
-  owner?: any;
-  onContact: () => void;
-  hasContacted?: boolean;
+interface DemandContactCardProps {
+  demandUser?: any;
+  demandTitle?: string;
 }
 
-export default function SidebarContactCard({
-  owner,
-  onContact,
-  hasContacted = false,
-}: SidebarContactCardProps) {
+export default function DemandContactCard({
+  demandUser,
+  demandTitle,
+}: DemandContactCardProps) {
   const { user } = useAuthStore();
   const router = useRouter();
-  const [showOwnerModal, setShowOwnerModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
 
-  const ownerName = owner?.full_name || "Chưa cập nhật";
-  const ownerType = String(owner?.user_type || owner?.type || "").toUpperCase();
-  const ownerTypeLabel =
-    ownerType === "INDIVIDUAL"
+  const userName = demandUser?.full_name || "Chưa cập nhật";
+  const userType = String(
+    demandUser?.user_type || demandUser?.type || ""
+  ).toUpperCase();
+  const userTypeLabel =
+    userType === "INDIVIDUAL"
       ? "Cá nhân"
-      : ownerType === "COMPANY"
+      : userType === "COMPANY"
         ? "Doanh nghiệp"
-        : ownerType === "INSTITUTION" || ownerType === "RESEARCH_INSTITUTION"
+        : userType === "INSTITUTION" || userType === "RESEARCH_INSTITUTION"
           ? "Viện/Trường"
           : undefined;
 
-  const ownerId = owner?.id || owner?._id;
+  const demandUserId = demandUser?.id || demandUser?._id;
   const currentUserId = user?.id;
-  const isOwnTechnology =
-    ownerId && currentUserId && String(ownerId) === String(currentUserId);
+  const isOwnDemand =
+    demandUserId &&
+    currentUserId &&
+    String(demandUserId) === String(currentUserId);
   const isAuthenticated = Boolean(currentUserId);
 
-  // Handle opening owner info modal
-  const handleShowOwnerInfo = () => {
-    setShowOwnerModal(true);
+  // Handle opening user info modal
+  const handleShowUserInfo = () => {
+    setShowUserModal(true);
   };
 
   // Handle creating chat and navigating to messages
   const handleStartChat = async () => {
-    if (!currentUserId || !ownerId) return;
+    if (!currentUserId || !demandUserId) return;
 
     try {
       setIsCreatingChat(true);
 
       // 1. Check if room already exists between these two users
-      const existingRoomId = await findRoomBetweenUsers(currentUserId, ownerId);
+      const existingRoomId = await findRoomBetweenUsers(
+        currentUserId,
+        demandUserId
+      );
 
       if (existingRoomId) {
         // Room already exists, navigate to existing chat
-        setShowOwnerModal(false);
+        setShowUserModal(false);
         router.push(`/messages?roomId=${existingRoomId}`);
         return;
       }
 
       // 2. No existing room, create new room chat
-      const roomTitle = `${ownerName}`;
+      const roomTitle = `${userName}`;
       const roomChat = await createSimpleRoomChat(roomTitle);
 
       // 3. Add both users to room
       await addUserToRoom(roomChat.id, currentUserId);
-      await addUserToRoom(roomChat.id, ownerId);
+      await addUserToRoom(roomChat.id, demandUserId);
 
       // 4. Send initial message
       await sendMessage(
         roomChat.id,
         currentUserId,
-        `Xin chào ${ownerName}, tôi quan tâm đến công nghệ của bạn.`
+        `Xin chào ${userName}, tôi quan tâm đến nhu cầu công nghệ của bạn: "${demandTitle}".`
       );
 
       // 5. Close modal and navigate to messages page
-      setShowOwnerModal(false);
+      setShowUserModal(false);
       router.push(`/messages?roomId=${roomChat.id}`);
     } catch (error) {
       console.error("Error creating/finding chat:", error);
@@ -100,114 +107,102 @@ export default function SidebarContactCard({
 
   return (
     <>
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Thông tin liên hệ
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center">
-            <User className="h-5 w-5 text-gray-400 mr-3" />
+      <Card className="shadow-sm">
+        <CardBody className="p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+            <Users className="h-5 w-5 mr-2 text-primary" />
+            Thông tin liên hệ
+          </h3>
+
+          <div className="flex items-center space-x-3 mb-4">
+            <Avatar size="md" name={userName} className="flex-shrink-0" />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-gray-900">{ownerName}</p>
-                {!isOwnTechnology && isAuthenticated && (
+                <p className="font-medium text-foreground">{userName}</p>
+                {!isOwnDemand && isAuthenticated && (
                   <div
                     className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-50 hover:bg-primary-100 cursor-pointer transition-colors group"
                     title="Nhắn tin"
-                    onClick={handleShowOwnerInfo}
+                    onClick={handleShowUserInfo}
                   >
                     <Mail className="h-3 w-3 text-primary-500 group-hover:text-primary-600 transition-colors" />
                   </div>
                 )}
               </div>
+              {userTypeLabel && (
+                <p className="text-sm text-default-500">{userTypeLabel}</p>
+              )}
             </div>
           </div>
-          {ownerTypeLabel ? (
-            <div className="flex items-center">
-              <Building2 className="h-5 w-5 text-gray-400 mr-3" />
-              <p className="text-sm text-gray-600">{ownerTypeLabel}</p>
-            </div>
-          ) : null}
-        </div>
+        </CardBody>
+      </Card>
 
-        {!isOwnTechnology && isAuthenticated ? (
-          <button
-            onClick={onContact}
-            className="w-full mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Liên hệ
-          </button>
-        ) : null}
-      </div>
-
-      {/* Owner Info Modal */}
-      {showOwnerModal && (
+      {/* User Info Modal */}
+      {showUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Thông tin liên hệ
+                Thông tin người đăng
               </h3>
               <button
-                onClick={() => setShowOwnerModal(false)}
+                onClick={() => setShowUserModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="p-6">
-              {/* Owner Avatar & Name */}
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="h-10 w-10 text-primary-600" />
+            <div className="space-y-4">
+              {/* User basic info */}
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <User className="h-6 w-6 text-primary-600" />
                 </div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                  {ownerName}
-                </h4>
-                {ownerTypeLabel && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                    <Building2 className="h-4 w-4 mr-1" />
-                    {ownerTypeLabel}
-                  </span>
-                )}
+                <div>
+                  <p className="font-medium text-gray-900">{userName}</p>
+                  {userTypeLabel && (
+                    <p className="text-sm text-gray-500">{userTypeLabel}</p>
+                  )}
+                </div>
               </div>
 
-              {/* Owner Details */}
-              <div className="space-y-4 mb-6">
-                {owner?.email && (
+              {/* Additional user info */}
+              <div className="space-y-3 pt-4 border-t border-gray-200">
+                {demandUser?.email && (
                   <div className="flex items-center">
                     <Mail className="h-5 w-5 text-gray-400 mr-3" />
-                    <span className="text-sm text-gray-600">{owner.email}</span>
-                  </div>
-                )}
-                {owner?.phone && (
-                  <div className="flex items-center">
-                    <Phone className="h-5 w-5 text-gray-400 mr-3" />
-                    <span className="text-sm text-gray-600">{owner.phone}</span>
-                  </div>
-                )}
-                {owner?.address && (
-                  <div className="flex items-center">
-                    <MapPin className="h-5 w-5 text-gray-400 mr-3" />
                     <span className="text-sm text-gray-600">
-                      {owner.address}
+                      {demandUser.email}
                     </span>
                   </div>
                 )}
-                {owner?.website && (
+                {demandUser?.phone && (
+                  <div className="flex items-center">
+                    <Phone className="h-5 w-5 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-600">
+                      {demandUser.phone}
+                    </span>
+                  </div>
+                )}
+                {demandUser?.address && (
+                  <div className="flex items-center">
+                    <MapPin className="h-5 w-5 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-600">
+                      {demandUser.address}
+                    </span>
+                  </div>
+                )}
+                {demandUser?.website && (
                   <div className="flex items-center">
                     <Globe className="h-5 w-5 text-gray-400 mr-3" />
                     <a
-                      href={owner.website}
+                      href={demandUser.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-primary-600 hover:text-primary-700"
                     >
-                      {owner.website}
+                      {demandUser.website}
                     </a>
                   </div>
                 )}

@@ -9,6 +9,7 @@ export enum ProjectStatusEnum {
   CONTRACT_SIGNED = "contract_signed",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
+  ACTIVE = "active",
 }
 
 export type Project = {
@@ -28,5 +29,5 @@ export type Project = {
   share_percentage?: number;
   goal_money_purpose?: string;
   status: ProjectStatusEnum;
-  end_date: string;
+  end_date?: string;
 };

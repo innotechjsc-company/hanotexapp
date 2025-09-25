@@ -276,16 +276,22 @@ export default function EventDetailPage({
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "upcoming":
+      case "pending":
         return "Sắp diễn ra";
-      case "ongoing":
+      case "in_progress":
         return "Đang diễn ra";
       case "completed":
         return "Đã kết thúc";
+      case "cancelled":
+        return "Đã huỷ";
       default:
         return status;
     }
   };
+
+  useEffect(() => {
+    console.log("event", event);
+  }, [event]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

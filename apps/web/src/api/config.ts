@@ -43,6 +43,11 @@ export const API_ENDPOINTS = {
   EVENT_COMMENT: "/event-comment",
   NEWS: "/news",
   NEWS_LIKE: "/news-like",
+
+  // Chat system
+  ROOM_CHAT: "/room-chat",
+  ROOM_MESSAGE: "/room-message",
+  ROOM_USER: "/room-user",
   SERVICES: "/services",
   SERVICE_TICKET: "/service-ticket",
   OFFERS: "/offer",
