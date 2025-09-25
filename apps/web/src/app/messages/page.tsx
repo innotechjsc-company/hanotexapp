@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   MessageSquare,
   Send,
@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Trash2,
   ChevronDown,
+  LogIn,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { getRoomChats, deleteRoomChat } from "@/api/roomChat";
@@ -37,10 +38,12 @@ import { RoomUser } from "@/types/room_user";
 import { RoomMessage } from "@/api/roomMessage";
 import { uploadFile } from "@/api/media";
 import { getMediaUrlWithDebug } from "@/utils/mediaUrl";
+import toast from "react-hot-toast";
 
 export default function MessagesPage() {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const roomIdFromUrl = searchParams.get("roomId");
 
   const [selectedConversation, setSelectedConversation] = useState<
@@ -63,10 +66,15 @@ export default function MessagesPage() {
 
   // Load conversations on component mount
   useEffect(() => {
-    if (user?.id) {
+    if (isAuthenticated && user?.id) {
       loadConversations();
+    } else if (!isAuthenticated) {
+      // Clear conversations if not authenticated
+      setConversations([]);
+      setMessages([]);
+      setSelectedConversation(null);
     }
-  }, [user?.id]);
+  }, [isAuthenticated, user?.id]);
 
   // Auto-select conversation if roomId is provided in URL
   useEffect(() => {
@@ -173,15 +181,27 @@ export default function MessagesPage() {
   };
 
   const handleSendMessage = async () => {
+    // Kiểm tra authentication trước tiên
+    if (!isAuthenticated || !user?.id) {
+      toast.error("Vui lòng đăng nhập để gửi tin nhắn");
+      router.push("/auth/login?redirect=/messages");
+      return;
+    }
+
+    // Kiểm tra nội dung tin nhắn
     if (
       (!newMessage.trim() && selectedFiles.length === 0) ||
-      !user?.id ||
       selectedConversation === null
-    )
+    ) {
+      toast.error("Vui lòng nhập tin nhắn hoặc chọn file để gửi");
       return;
+    }
 
     const currentRoom = conversations[selectedConversation];
-    if (!currentRoom) return;
+    if (!currentRoom) {
+      toast.error("Không tìm thấy cuộc trò chuyện");
+      return;
+    }
 
     try {
       setSendingMessage(true);
@@ -709,7 +729,24 @@ export default function MessagesPage() {
             </div>
 
             <div className="overflow-y-auto">
-              {loading ? (
+              {!isAuthenticated ? (
+                <div className="p-4 text-center">
+                  <div className="text-gray-500 mb-3">
+                    <LogIn className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm">
+                      Vui lòng đăng nhập để xem tin nhắn
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      router.push("/auth/login?redirect=/messages")
+                    }
+                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Đăng nhập ngay
+                  </button>
+                </div>
+              ) : loading ? (
                 <div className="p-4 text-center text-gray-500">
                   Đang tải cuộc trò chuyện...
                 </div>
@@ -865,6 +902,28 @@ export default function MessagesPage() {
 
                 {/* Message Input */}
                 <div className="p-4 border-t border-gray-200">
+                  {/* Authentication Warning */}
+                  {!isAuthenticated && (
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <LogIn className="h-5 w-5 text-yellow-600" />
+                        <div className="flex-1">
+                          <p className="text-sm text-yellow-800">
+                            Bạn cần đăng nhập để gửi tin nhắn
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            router.push("/auth/login?redirect=/messages")
+                          }
+                          className="text-sm bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded transition-colors"
+                        >
+                          Đăng nhập
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* File Preview */}
                   {selectedFiles.length > 0 && (
                     <div className="mb-3 p-3 bg-gray-50 rounded-lg">
@@ -888,14 +947,24 @@ export default function MessagesPage() {
                         onChange={handleFileSelect}
                         accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                         className="hidden"
+                        disabled={!isAuthenticated}
                       />
                       <button
                         type="button"
                         onClick={() =>
-                          document.getElementById("file-upload")?.click()
+                          isAuthenticated
+                            ? document.getElementById("file-upload")?.click()
+                            : toast.error("Vui lòng đăng nhập để gửi file")
                         }
-                        disabled={sendingMessage || uploadingFiles}
+                        disabled={
+                          sendingMessage || uploadingFiles || !isAuthenticated
+                        }
                         className="text-gray-500 hover:text-blue-600 p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={
+                          !isAuthenticated
+                            ? "Cần đăng nhập để gửi file"
+                            : "Đính kèm file"
+                        }
                       >
                         <Paperclip className="h-5 w-5" />
                       </button>
@@ -906,18 +975,30 @@ export default function MessagesPage() {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyDown={handleKeyDown}
-                      placeholder="Nhập tin nhắn..."
-                      disabled={sendingMessage || uploadingFiles}
+                      placeholder={
+                        isAuthenticated
+                          ? "Nhập tin nhắn..."
+                          : "Đăng nhập để gửi tin nhắn..."
+                      }
+                      disabled={
+                        sendingMessage || uploadingFiles || !isAuthenticated
+                      }
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <button
                       onClick={handleSendMessage}
                       disabled={
+                        !isAuthenticated ||
                         sendingMessage ||
                         uploadingFiles ||
                         (!newMessage.trim() && selectedFiles.length === 0)
                       }
                       className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={
+                        !isAuthenticated
+                          ? "Cần đăng nhập để gửi tin nhắn"
+                          : "Gửi tin nhắn"
+                      }
                     >
                       {sendingMessage || uploadingFiles ? (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
