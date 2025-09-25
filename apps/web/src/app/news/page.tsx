@@ -28,7 +28,7 @@ import {
 } from "@/api/news";
 import { News } from "@/types/news";
 import { useRouter } from "next/navigation";
-import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 interface NewsArticle {
   id: string;
@@ -45,7 +45,13 @@ interface NewsArticle {
   likes: number;
 }
 
-// Helper function to get full image URL
+/**
+ * Helper function to get full image URL with environment-aware domain
+ * Automatically detects environment and uses appropriate domain:
+ * - Production: https://api.hanotex.vn/
+ * - Development: http://localhost:4000/
+ * Uses getFullMediaUrl utility which handles environment detection
+ */
 function getFullImageUrl(imageUrl: string | null | undefined): string {
   if (!imageUrl) {
     return "/images/news/default.svg";
@@ -56,19 +62,33 @@ function getFullImageUrl(imageUrl: string | null | undefined): string {
     return imageUrl;
   }
 
-  // If it's a relative path, combine with PayloadCMS base URL
-  const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", "");
-  return `${baseUrl}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  // Use utility function which handles environment detection automatically
+  const fullUrl = getFullMediaUrl(imageUrl);
+
+  // Log in development for debugging
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[News Image URL] ${imageUrl} -> ${fullUrl}`);
+  }
+
+  return fullUrl;
 }
 
 // Transform PayloadCMS News data to NewsArticle interface
 function transformNewsToArticle(news: News): NewsArticle {
   let imageUrl = "/images/news/default.svg";
 
+  // Handle different image formats from PayloadCMS
   if (typeof news.image === "object" && news.image?.url) {
     imageUrl = getFullImageUrl(news.image.url);
   } else if (typeof news.image === "string") {
     imageUrl = getFullImageUrl(news.image);
+  } else if (
+    news.image &&
+    typeof news.image === "object" &&
+    news.image.filename
+  ) {
+    // Handle case where image object has filename but no URL
+    imageUrl = getFullImageUrl(`/media/${news.image.filename}`);
   }
 
   const tags = news.hashtags
