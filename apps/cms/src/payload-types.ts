@@ -714,11 +714,12 @@ export interface ServiceTicket {
 export interface Project {
   id: string;
   name: string;
-  description?: string | null;
+  description: string;
   business_model?: string | null;
   market_data?: string | null;
   user: string | User;
-  technologies?: (string | Technology)[] | null;
+  technologies: (string | Technology)[];
+  investment_fund?: (string | null) | InvestmentFund;
   revenue?: number | null;
   profit?: number | null;
   assets?: number | null;
@@ -731,7 +732,19 @@ export interface Project {
    * Trạng thái
    */
   status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
-  end_date?: string | null;
+  end_date: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "investment-fund".
+ */
+export interface InvestmentFund {
+  id: string;
+  name: string;
+  description: string;
+  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -765,18 +778,6 @@ export interface Demand {
   to_price?: number | null;
   cooperation?: string | null;
   documents?: (string | Media)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "investment-fund".
- */
-export interface InvestmentFund {
-  id: string;
-  name: string;
-  description: string;
-  user: string | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -1528,6 +1529,7 @@ export interface ProjectSelect<T extends boolean = true> {
   market_data?: T;
   user?: T;
   technologies?: T;
+  investment_fund?: T;
   revenue?: T;
   profit?: T;
   assets?: T;

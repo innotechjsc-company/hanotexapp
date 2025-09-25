@@ -1,69 +1,65 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  FolderOpen,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  DollarSign,
-  Users,
-} from "lucide-react";
 import {
   Button,
   Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Divider,
+  Tag,
   Input,
-  Pagination,
   Select,
-  SelectItem,
   Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Spacer,
+  Space,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Textarea,
-  useDisclosure,
   Tooltip,
   DatePicker,
-} from "@heroui/react";
+  Upload,
+  Form,
+  Row,
+  Col,
+  Statistic,
+  Typography,
+  Popconfirm,
+  message,
+  Descriptions,
+  InputNumber,
+  Layout,
+} from "antd";
 import {
-  getProjects,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  FolderOpenOutlined,
+  CalendarOutlined,
+  DollarOutlined,
+  TeamOutlined,
+  UploadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+import {
   getProjectsByUser,
   createProject,
   updateProject,
   deleteProject,
 } from "@/api/projects";
-import { getTechnologies, getTechnologiesByUser } from "@/api/technologies";
-import { getInvestmentFunds } from "@/api/investment-fund";
+import { getTechnologiesByUser } from "@/api/technologies";
 import type { Project } from "@/types/project";
 import type { Technology } from "@/types/technologies";
-import type { InvestmentFund } from "@/types/investment_fund";
 import { Toaster, toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/auth";
+import { uploadFiles } from "@/api/media";
+import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+
+const { Title, Text } = Typography;
+const { Option } = Select;
+const { Search } = Input;
+const { Content } = Layout;
 
 type EditableProject = Partial<Project> & { id?: string };
 
-type DisclosureLike = {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onClose?: () => void;
-};
-
-// Helper function to check user authentication
+// Helper functions
 const checkUserAuth = (user: any, router: any) => {
   if (!user) {
     toast.error("Vui lòng đăng nhập để tiếp tục");
@@ -73,7 +69,6 @@ const checkUserAuth = (user: any, router: any) => {
   return true;
 };
 
-// Helper function to format currency
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -81,609 +76,859 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-// Helper function to format date
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("vi-VN");
 };
 
-// Helper function to get status color
 const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
-      return "warning";
-    case "in_progress":
-      return "warning";
+      return "orange";
+    case "negotiating":
+      return "blue";
+    case "contract_signed":
+      return "purple";
     case "completed":
-      return "success";
+      return "green";
     case "cancelled":
-      return "danger";
+      return "red";
     default:
       return "default";
   }
 };
 
-// Helper function to get status label
 const getStatusLabel = (status: string) => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
-    case "in_progress":
-      return "Đang thực hiện";
+    case "negotiating":
+      return "Đàm phán";
+    case "contract_signed":
+      return "Đã ký hợp đồng";
     case "completed":
       return "Hoàn thành";
     case "cancelled":
       return "Đã hủy";
     default:
-      return status;
+      return 'Không xác định';
   }
 };
 
-// Normalize id from either string id or populated object
-const getIdFromMaybeObject = (maybeObject: any): string | undefined => {
-  if (!maybeObject) return undefined;
-  if (typeof maybeObject === "string") return maybeObject;
-  const possibleId = (maybeObject as any).id ?? (maybeObject as any)._id;
-  return typeof possibleId !== "undefined" ? String(possibleId) : undefined;
-};
 
-// Resolve display name for technology from either id or object
-const getTechnologyTitleFromValue = (
-  value: string | Technology | undefined,
+
+const getTechnologyTitlesFromValues = (
+  value: string[] | Technology[] | undefined,
   list: Technology[]
 ): string => {
-  if (!value) return "Chưa chọn";
-  if (typeof value === "string") {
-    const found = list.find(
-      (t) => String((t as any).id || (t as any)._id) === value
-    );
-    return found?.title || "Không xác định";
-  }
-  return (value as any).title || "Không xác định";
+  if (!value || (Array.isArray(value) && value.length === 0)) return "Chưa chọn";
+  return (value as any[])
+    .map((v) => {
+      if (typeof v === "string") {
+        const found = list.find(
+          (t) => String((t as any).id || (t as any)._id) === v
+        );
+        return found?.title || "Không xác định";
+      }
+      return (v as any).title || "Không xác định";
+    })
+    .join(", ");
 };
 
-// Resolve display name for investment fund from either id or object
-const getInvestmentFundNameFromValue = (
-  value: string | InvestmentFund | undefined,
-  list: InvestmentFund[]
-): string => {
-  if (!value) return "Chưa chọn";
-  if (typeof value === "string") {
-    const found = list.find(
-      (f) => String((f as any).id || (f as any)._id) === value
-    );
-    return found?.name || "Không xác định";
-  }
-  return (value as any).name || "Không xác định";
-};
-
+// Add Project Modal Component
 function AddProjectModal({
-  disclosure,
-  current,
-  setCurrent,
+  open,
+  onCancel,
   onCreate,
   loading,
   technologies,
-  investmentFunds,
 }: {
-  disclosure: DisclosureLike;
-  current: EditableProject | null;
-  setCurrent: React.Dispatch<React.SetStateAction<EditableProject | null>>;
-  onCreate: () => Promise<void> | void;
+  open: boolean;
+  onCancel: () => void;
+  onCreate: (values: any) => Promise<void>;
   loading?: boolean;
   technologies: Technology[];
-  investmentFunds: InvestmentFund[];
 }) {
+  const [form] = Form.useForm();
+  const [docsUploading, setDocsUploading] = useState(false);
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      await onCreate(values);
+      form.resetFields();
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    onCancel();
+    form.resetFields();
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="lg"
-      scrollBehavior="inside"
+      title="Thêm dự án mới"
+      open={open}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      width="70vw"
+      style={{
+        top: 0,   
+        paddingBottom: 0,
+      }}
+      styles={{
+        body: {
+          height: 'calc(100vh - 110px)',
+          overflow: 'hidden',
+          padding: 0,
+        },
+      }}
+      confirmLoading={loading}
+      okText="Tạo dự án"  
+      cancelText="Hủy"
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Thêm dự án mới</ModalHeader>
-            <ModalBody>
-              <Input
-                label="Tên dự án"
-                placeholder="Nhập tên dự án"
-                value={current?.name || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
-                }
-                variant="bordered"
-                isRequired
-              />
-              <Textarea
-                label="Mô tả dự án"
+      <div style={{
+        height: '100%',
+        overflow: 'auto',
+      }}>
+        <Form
+          form={form}
+          layout="vertical"
+          scrollToFirstError
+        >
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="name"
+              label="Tên dự án"
+              rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+            >
+              <Input placeholder="Nhập tên dự án" />
+            </Form.Item>
+          </Col>
+        </Row>
+        
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="Mô tả dự án"
+              rules={[{ required: true, message: 'Vui lòng nhập mô tả dự án!' }]}
+            >
+              <Input.TextArea
+                rows={4}
                 placeholder="Nhập mô tả chi tiết về dự án"
-                value={current?.description || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    description: e.target.value,
-                  }))
-                }
-                minRows={4}
-                variant="bordered"
-                isRequired
               />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="technologies"
+              label="Công nghệ"
+              rules={[{ required: true, message: 'Vui lòng chọn công nghệ!' }]}
+            >
               <Select
-                label="Công nghệ"
+                mode="multiple"
                 placeholder="Chọn công nghệ"
-                selectedKeys={
-                  current?.technology
-                    ? new Set([getIdFromMaybeObject(current.technology) || ""])
-                    : new Set()
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
                 }
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys as Set<string>)[0];
-                  setCurrent((p) => ({ ...(p || {}), technology: key }));
-                }}
-                isRequired
-                variant="bordered"
               >
                 {technologies.map((tech) => (
-                  <SelectItem
+                  <Option
                     key={String((tech as any).id || (tech as any)._id)}
+                    value={String((tech as any).id || (tech as any)._id)}
                   >
                     {tech.title}
-                  </SelectItem>
+                  </Option>
                 ))}
               </Select>
-              {/* <Select
-                label="Quỹ đầu tư"
-                placeholder="Chọn quỹ đầu tư"
-                selectedKeys={
-                  current?.investment_fund
-                    ? new Set([
-                        getIdFromMaybeObject(current.investment_fund) || "",
-                      ])
-                    : new Set()
-                }
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys as Set<string>)[0];
-                  setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="business_model"
+              label="Mô hình kinh doanh"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Mô tả mô hình kinh doanh"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="market_data"
+              label="Dữ liệu thị trường"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Thông tin thị trường, đối thủ, quy mô..."
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="team_profile"
+              label="Hồ sơ đội ngũ"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Thông tin đội ngũ chính"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name="revenue"
+              label="Doanh thu (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập doanh thu"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="profit"
+              label="Lợi nhuận (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập lợi nhuận"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="assets"
+              label="Tài sản (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập tổng tài sản"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="documents_finance"
+              label="Tài liệu tài chính"
+            >
+              <Upload
+                multiple
+                beforeUpload={() => false}
+                onChange={async (info) => {
+                  const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
+                  if (files.length === 0) return;
+                  try {
+                    setDocsUploading(true);
+                    const uploaded = await uploadFiles(files as File[]);
+                    const ids = uploaded.map((m: any) => String(m.id ?? m._id));
+                    form.setFieldValue('documents_finance', ids);
+                    message.success("Đã upload tài liệu tài chính");
+                  } catch (err) {
+                    message.error("Upload tài liệu thất bại");
+                  } finally {
+                    setDocsUploading(false);
+                  }
                 }}
-                variant="bordered"
               >
-                {investmentFunds.map((fund) => (
-                  <SelectItem
-                    key={String((fund as any).id || (fund as any)._id)}
-                  >
-                    {fund.name}
-                  </SelectItem>
-                ))}
-              </Select> */}
-              <Input
-                label="Số tiền đầu tư kêu gọi (VND)"
-                type="number"
+                <Button icon={<UploadOutlined />} loading={docsUploading}>
+                  Chọn tài liệu
+                </Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="goal_money"
+              label="Số tiền đầu tư kêu gọi (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
                 placeholder="Nhập số tiền"
-                value={current?.goal_money ? String(current.goal_money) : ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    goal_money: parseInt(e.target.value) || 0,
-                  }))
-                }
-                variant="bordered"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
               />
-              <Input
-                label="Ngày kết thúc"
-                type="date"
-                value={current?.end_date || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    end_date: e.target.value,
-                  }))
-                }
-                variant="bordered"
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="share_percentage"
+              label="Tỷ lệ cổ phần đề xuất (%)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập tỷ lệ cổ phần"
+                min={0}
+                max={100}
               />
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                color="primary"
-                variant="bordered"
-                onPress={onCreate}
-                isDisabled={
-                  !current?.name ||
-                  !current?.description ||
-                  !current?.technology ||
-                  !current?.investment_fund ||
-                  loading
-                }
-                isLoading={!!loading}
-              >
-                Tạo dự án
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="goal_money_purpose"
+              label="Mục đích sử dụng vốn"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Mô tả cách sử dụng số tiền kêu gọi"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="end_date"
+              label="Ngày kết thúc"
+              rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="Chọn ngày kết thúc"
+                format="YYYY-MM-DD"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        </Form>
+      </div>
     </Modal>
   );
 }
 
+// Edit Project Modal Component
 function EditProjectModal({
-  disclosure,
-  current,
-  setCurrent,
+  open,
+  onCancel,
   onUpdate,
   loading,
   technologies,
-  investmentFunds,
+  project,
 }: {
-  disclosure: DisclosureLike;
-  current: EditableProject | null;
-  setCurrent: React.Dispatch<React.SetStateAction<EditableProject | null>>;
-  onUpdate: () => Promise<void> | void;
+  open: boolean;
+  onCancel: () => void;
+  onUpdate: (values: any) => Promise<void>;
   loading?: boolean;
   technologies: Technology[];
-  investmentFunds: InvestmentFund[];
+  project: EditableProject | null;
 }) {
-  const [investmentFund, setInvestmentFund] = useState<string>("");
-  const [technology, setTechnology] = useState<string>("");
+  const [form] = Form.useForm();
+  const [docsUploading, setDocsUploading] = useState(false);
 
   useEffect(() => {
-    setInvestmentFund(getIdFromMaybeObject(current?.investment_fund) || "");
-    setTechnology(getIdFromMaybeObject(current?.technology) || "");
-  }, [current]);
+    if (project && open) {
+      const formValues = {
+        ...project,
+        technologies: Array.isArray(project.technologies)
+          ? (project.technologies as any[]).map((t) =>
+              String((t as any).id || (t as any)._id || t)
+            )
+          : [],
+        end_date: project.end_date ? dayjs(project.end_date) : null,
+      };
+      form.setFieldsValue(formValues);
+    }
+  }, [project, open, form]);
+
+  const handleOk = async () => {
+    try {
+      const values = await form.validateFields();
+      await onUpdate(values);
+      form.resetFields();
+    } catch (error) {
+      console.error('Validation failed:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    onCancel();
+    form.resetFields();
+  };
+
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="lg"
-      scrollBehavior="inside"
+      title="Chỉnh sửa dự án"
+      open={open}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      width="70vw"
+      style={{
+        top: 0,   
+        paddingBottom: 0,
+      }}
+      styles={{
+        body: {
+          height: 'calc(100vh - 110px)',
+          overflow: 'hidden',
+          padding: 0,
+        },
+      }}
+      confirmLoading={loading}
+      okText="Cập nhật"
+      cancelText="Hủy"
     >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Chỉnh sửa dự án</ModalHeader>
-            <ModalBody>
-              <Input
-                label="Tên dự án"
-                placeholder="Nhập tên dự án"
-                value={current?.name || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({ ...(p || {}), name: e.target.value }))
-                }
-                isRequired
-                variant="bordered"
-              />
-              <Textarea
-                label="Mô tả dự án"
+      <div style={{
+        height: '100%',
+        overflow: 'auto',
+        padding: '24px 32px'
+      }}>
+        <Form
+          form={form}
+          layout="vertical"
+          scrollToFirstError
+        >
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="name"
+              label="Tên dự án"
+              rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+            >
+              <Input placeholder="Nhập tên dự án" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="description"
+              label="Mô tả dự án"
+              rules={[{ required: true, message: 'Vui lòng nhập mô tả dự án!' }]}
+            >
+              <Input.TextArea
+                rows={4}
                 placeholder="Nhập mô tả chi tiết về dự án"
-                value={current?.description || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    description: e.target.value,
-                  }))
-                }
-                minRows={4}
-                isRequired
-                variant="bordered"
               />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="technologies"
+              label="Công nghệ"
+              rules={[{ required: true, message: 'Vui lòng chọn công nghệ!' }]}
+            >
               <Select
-                label="Công nghệ"
+                mode="multiple"
                 placeholder="Chọn công nghệ"
-                value={technology}
-                selectedKeys={technology ? new Set([technology]) : new Set()}
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys as Set<string>)[0];
-                  setTechnology(key);
-                  setCurrent((p) => ({ ...(p || {}), technology: key }));
-                }}
-                isRequired
-                variant="bordered"
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                }
               >
                 {technologies.map((tech) => (
-                  <SelectItem
+                  <Option
                     key={String((tech as any).id || (tech as any)._id)}
+                    value={String((tech as any).id || (tech as any)._id)}
                   >
                     {tech.title}
-                  </SelectItem>
+                  </Option>
                 ))}
               </Select>
-              {/* <Select
-                label="Quỹ đầu tư"
-                placeholder="Chọn quỹ đầu tư"
-                value={investmentFund}
-                selectedKeys={
-                  investmentFund ? new Set([investmentFund]) : new Set()
-                }
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys as Set<string>)[0];
-                  setInvestmentFund(key);
-                  setCurrent((p) => ({ ...(p || {}), investment_fund: key }));
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="business_model"
+              label="Mô hình kinh doanh"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Mô tả mô hình kinh doanh"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="market_data"
+              label="Dữ liệu thị trường"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Thông tin thị trường, đối thủ, quy mô..."
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="team_profile"
+              label="Hồ sơ đội ngũ"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Thông tin đội ngũ chính"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name="revenue"
+              label="Doanh thu (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập doanh thu"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="profit"
+              label="Lợi nhuận (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập lợi nhuận"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="assets"
+              label="Tài sản (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập tổng tài sản"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="documents_finance"
+              label="Tài liệu tài chính"
+            >
+              <Upload
+                multiple
+                beforeUpload={() => false}
+                onChange={async (info) => {
+                  const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
+                  if (files.length === 0) return;
+                  try {
+                    setDocsUploading(true);
+                    const uploaded = await uploadFiles(files as File[]);
+                    const ids = uploaded.map((m: any) => String(m.id ?? m._id));
+                    form.setFieldValue('documents_finance', ids);
+                    message.success("Đã upload tài liệu tài chính");
+                  } catch (err) {
+                    message.error("Upload tài liệu thất bại");
+                  } finally {
+                    setDocsUploading(false);
+                  }
                 }}
-                variant="bordered"
-                items={investmentFunds}
               >
-                {(item) => (
-                  <SelectItem
-                    key={String((item as any).id || (item as any)._id)}
-                  >
-                    {item.name}
-                  </SelectItem>
-                )}
-              </Select> */}
-              {/* <Select
-                label="Trạng thái"
-                placeholder="Chọn trạng thái"
-                selectedKeys={
-                  current?.status ? new Set([current.status]) : new Set()
-                }
-                onSelectionChange={(keys) => {
-                  const key = Array.from(keys as Set<string>)[0];
-                  setCurrent((p) => ({ ...(p || {}), status: key }));
-                }}
-                variant="bordered"
-              >
-                <SelectItem key="pending">Chờ duyệt</SelectItem>
-                <SelectItem key="in_progress">Đang thực hiện</SelectItem>
-                <SelectItem key="completed">Hoàn thành</SelectItem>
-                <SelectItem key="cancelled">Đã hủy</SelectItem>
-              </Select> */}
-              <Input
-                label="Số tiền đầu tư kêu gọi (VND)"
-                type="number"
+                <Button icon={<UploadOutlined />} loading={docsUploading}>
+                  Chọn tài liệu
+                </Button>
+              </Upload>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="status"
+              label="Trạng thái"
+              rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
+            >
+              <Select placeholder="Chọn trạng thái">
+                <Option value="pending">Chờ duyệt</Option>
+                <Option value="negotiating">Đàm phán</Option>
+                <Option value="contract_signed">Đã ký hợp đồng</Option>
+                <Option value="completed">Hoàn thành</Option>
+                <Option value="cancelled">Đã hủy</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="goal_money"
+              label="Số tiền đầu tư kêu gọi (VND)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
                 placeholder="Nhập số tiền"
-                value={current?.goal_money ? String(current.goal_money) : ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    goal_money: parseInt(e.target.value) || 0,
-                  }))
-                }
-                variant="bordered"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                parser={(value) => value!.replace(/\$\s?|(|,*)/g, '')}
               />
-              <Input
-                label="Ngày kết thúc"
-                type="date"
-                value={current?.end_date || ""}
-                onChange={(e) =>
-                  setCurrent((p) => ({
-                    ...(p || {}),
-                    end_date: e.target.value,
-                  }))
-                }
-                variant="bordered"
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="share_percentage"
+              label="Tỷ lệ cổ phần đề xuất (%)"
+            >
+              <InputNumber
+                style={{ width: '100%' }}
+                placeholder="Nhập tỷ lệ cổ phần"
+                min={0}
+                max={100}
               />
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                color="primary"
-                variant="bordered"
-                onPress={onUpdate}
-                isDisabled={
-                  !current?.name ||
-                  !current?.description ||
-                  !current?.technology ||
-                  !current?.investment_fund ||
-                  loading
-                }
-                isLoading={!!loading}
-              >
-                Cập nhật
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="goal_money_purpose"
+              label="Mục đích sử dụng vốn"
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Mô tả cách sử dụng số tiền kêu gọi"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={24}>
+            <Form.Item
+              name="end_date"
+              label="Ngày kết thúc"
+              rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="Chọn ngày kết thúc"
+                format="YYYY-MM-DD"
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+        </Form>
+      </div>
     </Modal>
   );
 }
 
+// View Project Modal Component
 function ViewProjectModal({
-  disclosure,
-  current,
+  open,
+  onCancel,
+  project,
   technologies,
-  investmentFunds,
 }: {
-  disclosure: DisclosureLike;
-  current: EditableProject | null;
+  open: boolean;
+  onCancel: () => void;
+  project: EditableProject | null;
   technologies: Technology[];
-  investmentFunds: InvestmentFund[];
 }) {
-  const getTechnologyName = (techId: string | Technology) => {
-    if (typeof techId === "string") {
-      const tech = technologies.find(
-        (t) => String((t as any).id || (t as any)._id) === techId
-      );
-      return tech?.title || "Không xác định";
-    }
-    return techId.title || "Không xác định";
-  };
-
-  const getFundName = (fundId: string | InvestmentFund) => {
-    if (typeof fundId === "string") {
-      const fund = investmentFunds.find(
-        (f) => String((f as any).id || (f as any)._id) === fundId
-      );
-      return fund?.name || "Không xác định";
-    }
-    return fundId.name || "Không xác định";
-  };
+  const getTechnologyNames = (values: string[] | Technology[] | undefined) =>
+    getTechnologyTitlesFromValues(values, technologies);
 
   return (
     <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="lg"
-      scrollBehavior="inside"
+      title="Thông tin dự án"
+      open={open}
+      onCancel={onCancel}
+      width="70vw"
+      style={{
+        top: 0,   
+        paddingBottom: 0,
+      }}
+      styles={{
+        body: {
+          height: 'calc(100vh - 110px)',
+          overflow: 'hidden',
+          padding: 0,
+        },
+      }}
+      footer={[
+        <Button key="close" type="primary" onClick={onCancel}>
+          Đóng
+        </Button>
+      ]}
     >
-      <ModalContent>
-        {() => (
-          <>
-            <ModalHeader>Thông tin dự án</ModalHeader>
-            <ModalBody>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-gray-500">Tên dự án</div>
-                  <div className="font-medium text-lg">{current?.name}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Mô tả</div>
-                  <div className="text-gray-700 whitespace-pre-wrap">
-                    {current?.description}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Công nghệ</div>
-                    <div className="font-medium">
-                      {current?.technology
-                        ? getTechnologyName(current.technology)
-                        : "Chưa chọn"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Quỹ đầu tư</div>
-                    <div className="font-medium">
-                      {current?.investment_fund
-                        ? getFundName(current.investment_fund)
-                        : "Chưa chọn"}
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-500">Trạng thái</div>
-                    <Chip
-                      color={getStatusColor(current?.status || "")}
-                      size="sm"
-                    >
-                      {getStatusLabel(current?.status || "")}
-                    </Chip>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Số tiền kêu gọi</div>
-                    <div className="font-medium">
-                      {current?.goal_money
-                        ? formatCurrency(current.goal_money)
-                        : "Chưa xác định"}
-                    </div>
-                  </div>
-                </div>
-                {current?.end_date && (
-                  <div>
-                    <div className="text-sm text-gray-500">Ngày kết thúc</div>
-                    <div className="font-medium">
-                      {formatDate(current.end_date)}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="primary"
-                onPress={() => disclosure.onClose && disclosure.onClose()}
-              >
-                Đóng
-              </Button>
-            </ModalFooter>
-          </>
+      <div style={{
+        height: '100%',
+        overflow: 'auto',
+        paddingTop: 32,
+      }}>
+        <Descriptions bordered column={2}>
+        <Descriptions.Item label="Tên dự án" span={2}>
+          <Text strong>{project?.name}</Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Mô tả" span={2}>
+          <Text>{project?.description}</Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Công nghệ">
+          <Text>{getTechnologyNames((project as any)?.technologies)}</Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Trạng thái">
+          <Tag color={getStatusColor((project as any)?.status || "")}>
+            {getStatusLabel((project as any)?.status || "")}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="Doanh thu">
+          <Text>
+            {(project as any)?.revenue
+              ? formatCurrency((project as any).revenue)
+              : "Chưa xác định"}
+          </Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Lợi nhuận">
+          <Text>
+            {(project as any)?.profit
+              ? formatCurrency((project as any).profit)
+              : "Chưa xác định"}
+          </Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Tài sản">
+          <Text>
+            {(project as any)?.assets
+              ? formatCurrency((project as any).assets)
+              : "Chưa xác định"}
+          </Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Số tiền kêu gọi">
+          <Text>
+            {(project as any)?.goal_money
+              ? formatCurrency((project as any).goal_money)
+              : "Chưa xác định"}
+          </Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Tỷ lệ cổ phần">
+          <Text>
+            {(project as any)?.share_percentage != null
+              ? `${(project as any).share_percentage}%`
+              : "Chưa xác định"}
+          </Text>
+        </Descriptions.Item>
+        {(project as any)?.end_date && (
+          <Descriptions.Item label="Ngày kết thúc">
+            <Text>{formatDate((project as any).end_date)}</Text>
+          </Descriptions.Item>
         )}
-      </ModalContent>
+        {(project as any)?.goal_money_purpose && (
+          <Descriptions.Item label="Mục đích sử dụng vốn" span={2}>
+            <Text>{(project as any).goal_money_purpose}</Text>
+          </Descriptions.Item>
+        )}
+        {(project as any)?.business_model && (
+          <Descriptions.Item label="Mô hình kinh doanh" span={2}>
+            <Text>{(project as any).business_model}</Text>
+          </Descriptions.Item>
+        )}
+        {(project as any)?.market_data && (
+          <Descriptions.Item label="Dữ liệu thị trường" span={2}>
+            <Text>{(project as any).market_data}</Text>
+          </Descriptions.Item>
+        )}
+        {(project as any)?.team_profile && (
+          <Descriptions.Item label="Hồ sơ đội ngũ" span={2}>
+            <Text>{(project as any).team_profile}</Text>
+          </Descriptions.Item>
+        )}
+        </Descriptions>
+      </div>
     </Modal>
   );
 }
 
-function DeleteProjectModal({
-  disclosure,
-  current,
-  onDelete,
-  loading,
-}: {
-  disclosure: DisclosureLike;
-  current: EditableProject | null;
-  onDelete: () => Promise<void> | void;
-  loading?: boolean;
-}) {
-  return (
-    <Modal
-      isOpen={disclosure.isOpen}
-      onOpenChange={disclosure.onOpenChange}
-      size="sm"
-    >
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader>Xác nhận xóa</ModalHeader>
-            <ModalBody>
-              Bạn có chắc chắn muốn xóa dự án "{current?.name}"? Hành động này
-              không thể hoàn tác.
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="flat" onPress={onClose}>
-                Hủy
-              </Button>
-              <Button
-                color="danger"
-                onPress={onDelete}
-                variant="bordered"
-                startContent={<Trash2 className="h-4 w-4" />}
-                isLoading={!!loading}
-              >
-                Xóa
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
-  );
-}
-
+// Main Component
 export default function MyProjectsPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const [items, setItems] = useState<Project[]>([]);
   const [technologies, setTechnologies] = useState<Technology[]>([]);
-  const [investmentFunds, setInvestmentFunds] = useState<InvestmentFund[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalDocs, setTotalDocs] = useState<number | undefined>(undefined);
-  const [totalPages, setTotalPages] = useState<number | undefined>(undefined);
 
-  const addDisclosure = useDisclosure();
-  const editDisclosure = useDisclosure();
-  const viewDisclosure = useDisclosure();
-  const deleteDisclosure = useDisclosure();
-
-  const [current, setCurrent] = useState<EditableProject | null>(null);
-
-  const filteredItems = useMemo(() => items, [items]);
-
+  // Modal states
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [currentProject, setCurrentProject] = useState<EditableProject | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-  const bulkDeleteDisclosure = useDisclosure();
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const selectedCount = useMemo(() => selectedKeys.size, [selectedKeys]);
+  const filteredItems = useMemo(() => {
+    let filtered = items;
 
-  // Check authentication on component mount
-  // useEffect(() => {
-  //   if (!user) {
-  //     toast.error("Vui lòng đăng nhập để xem dự án của bạn", {
-  //       duration: 3000,
-  //     });
-  //     router.push("/auth/login");
-  //     return;
-  //   }
-  // }, [user, router]);
+    if (search) {
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(search.toLowerCase()) ||
+        item.description.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (statusFilter) {
+      filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
+    return filtered;
+  }, [items, search, statusFilter]);
 
   const fetchList = async () => {
     if (!user) return;
@@ -696,16 +941,11 @@ export default function MyProjectsPage() {
       );
       const list = ((res as any).docs || (res as any).data || []) as Project[];
       const tDocs = (res as any).totalDocs ?? list.length;
-      const tPages =
-        (res as any).totalPages ?? Math.max(1, Math.ceil(tDocs / limit));
       setItems(list);
       setTotalDocs(tDocs);
-      setTotalPages(tPages);
     } catch (e) {
       console.error(e);
-      toast.error("Không thể tải danh sách dự án", {
-        duration: 3000,
-      });
+      message.error("Không thể tải danh sách dự án");
     } finally {
       setIsLoading(false);
     }
@@ -713,8 +953,10 @@ export default function MyProjectsPage() {
 
   const fetchTechnologies = async () => {
     try {
-        // get list of technologies by user
-      const userTechnologies = await getTechnologiesByUser(String((user as any).id || (user as any)._id), { limit: 100 });
+      const userTechnologies = await getTechnologiesByUser(
+        String((user as any).id || (user as any)._id),
+        { limit: 100 }
+      );
       const userList = ((userTechnologies as any).docs ||
         (userTechnologies as any).data ||
         []) as Technology[];
@@ -724,133 +966,223 @@ export default function MyProjectsPage() {
     }
   };
 
-  const fetchInvestmentFunds = async () => {
-    try {
-      const res = await getInvestmentFunds({}, { limit: 100 });
-      const list = ((res as any).docs ||
-        (res as any).data ||
-        []) as InvestmentFund[];
-      setInvestmentFunds(list);
-    } catch (e) {
-      console.error("Failed to fetch investment funds:", e);
-    }
-  };
-
   useEffect(() => {
     if (user) {
       fetchList();
       fetchTechnologies();
-      fetchInvestmentFunds();
     }
-  }, [page, limit, search, statusFilter, user]);
+  }, [page, limit, user]);
 
-  const handleCreate = async () => {
-    if (
-      !current?.name ||
-      !current?.description ||
-      !current?.technology ||
-      !current?.investment_fund
-    )
-      return;
+  const handleCreate = async (values: any) => {
     if (!checkUserAuth(user, router)) return;
 
     setActionLoading(true);
     try {
-      await createProject({
-        name: current.name,
-        description: current.description,
-        technology: current.technology,
-        investment_fund: current.investment_fund,
-        status: current.status || "pending",
-        goal_money: current.goal_money || 0,
-        end_date: current.end_date,
+      const obj = {
+        ...values,
+        end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : undefined,
+        status: "pending",
         user: user!,
-      });
-      toast.success("Tạo dự án thành công");
-      setCurrent(null);
-      addDisclosure.onClose();
+      };
+      console.log(obj);
+      debugger
+      await createProject(obj);
+      message.success("Tạo dự án thành công");
+      setAddModalOpen(false);
       await fetchList();
     } catch (e) {
-      toast.error("Tạo dự án thất bại");
+      message.error("Tạo dự án thất bại");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleUpdate = async () => {
-    if (!current?.name || !current?.description || !(current as any).id) return;
+  const handleUpdate = async (values: any) => {
+    if (!currentProject?.id) return;
     if (!checkUserAuth(user, router)) return;
 
-    const id = (current as any).id as string;
+    const id = currentProject.id as string;
     setActionLoading(true);
     try {
       await updateProject(id, {
-        name: current.name,
-        description: current.description,
-        technology: current.technology,
-        investment_fund: current.investment_fund,
-        status: current.status,
-        goal_money: current.goal_money,
-        end_date: current.end_date,
+        ...values,
+        end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : undefined,
         user: user!,
       });
-      toast.success("Cập nhật dự án thành công");
-      setCurrent(null);
-      editDisclosure.onClose();
+      message.success("Cập nhật dự án thành công");
+      setEditModalOpen(false);
+      setCurrentProject(null);
       await fetchList();
     } catch (e) {
-      toast.error("Cập nhật dự án thất bại");
+      message.error("Cập nhật dự án thất bại");
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (!(current as any)?.id) return;
+  const handleDelete = async (id: string) => {
     if (!checkUserAuth(user, router)) return;
 
-    const id = (current as any).id as string;
     setActionLoading(true);
     try {
-      const itemsOnThisPage = items.length;
       await deleteProject(id);
-      toast.success("Đã xóa dự án");
-      setCurrent(null);
-      deleteDisclosure.onClose();
-      if (itemsOnThisPage === 1 && page > 1) {
-        setPage((p) => Math.max(1, p - 1));
-      } else {
-        await fetchList();
-      }
+      message.success("Đã xóa dự án");
+      await fetchList();
     } catch (e) {
-      toast.error("Xóa dự án thất bại");
+      message.error("Xóa dự án thất bại");
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (!selectedKeys || selectedKeys.size === 0) return;
+    if (!selectedRowKeys.length) return;
     if (!checkUserAuth(user, router)) return;
 
     setActionLoading(true);
     try {
-      const ids = Array.from(selectedKeys);
-      const itemsOnThisPage = items.length;
-      await Promise.allSettled(ids.map((id) => deleteProject(String(id))));
-      toast.success("Đã xóa các mục đã chọn");
-      bulkDeleteDisclosure.onClose();
-      setSelectedKeys(new Set());
-      if (itemsOnThisPage === ids.length && page > 1) {
-        setPage((p) => Math.max(1, p - 1));
-      } else {
-        await fetchList();
-      }
+      await Promise.allSettled(
+        selectedRowKeys.map((id) => deleteProject(String(id)))
+      );
+      message.success("Đã xóa các dự án đã chọn");
+      setSelectedRowKeys([]);
+      await fetchList();
     } catch (e) {
-      toast.error("Xóa hàng loạt thất bại");
+      message.error("Xóa hàng loạt thất bại");
     } finally {
       setActionLoading(false);
     }
+  };
+
+  // Table columns configuration
+  const columns: ColumnsType<Project> = [
+    {
+      title: 'Tên dự án',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: Project) => (
+        <div>
+          <Text strong>{text}</Text>
+          <br />
+          <Text type="secondary" ellipsis style={{ maxWidth: 200 }}>
+            {record.description}
+          </Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Công nghệ',
+      dataIndex: 'technologies',
+      key: 'technologies',
+      render: (techs: any) => (
+        <Text ellipsis style={{ maxWidth: 150 }}>
+          {getTechnologyTitlesFromValues(techs, technologies)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Số tiền kêu gọi',
+      dataIndex: 'goal_money',
+      key: 'goal_money',
+      render: (amount: number) => (
+        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+      ),
+    },
+    {
+      title: 'Doanh thu',
+      dataIndex: 'revenue',
+      key: 'revenue',
+      render: (amount: number) => (
+        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+      ),
+    },
+    {
+      title: 'Lợi nhuận',
+      dataIndex: 'profit',
+      key: 'profit',
+      render: (amount: number) => (
+        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+      ),
+    },
+    {
+      title: 'Tỷ lệ cổ phần',
+      dataIndex: 'share_percentage',
+      key: 'share_percentage',
+      render: (percentage: number) => (
+        <Text>{percentage != null ? `${percentage}%` : 'Chưa xác định'}</Text>
+      ),
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Tag color={getStatusColor(status)}>
+          {getStatusLabel(status)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Ngày kết thúc',
+      dataIndex: 'end_date',
+      key: 'end_date',
+      render: (date: string) => (
+        <Text>{date ? formatDate(date) : 'Chưa xác định'}</Text>
+      ),
+    },
+    {
+      title: 'Hành động',
+      key: 'actions',
+      fixed: 'right',
+      width: 150,
+      render: (_, record: Project) => (
+        <Space>
+          <Tooltip title="Xem chi tiết">
+            <Button
+              type="text"
+              icon={<EyeOutlined />}
+              onClick={() => {
+                setCurrentProject(record);
+                setViewModalOpen(true);
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => {
+                if (!checkUserAuth(user, router)) return;
+                setCurrentProject(record);
+                setEditModalOpen(true);
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Xóa">
+            <Popconfirm
+              title="Xác nhận xóa"
+              description={`Bạn có chắc chắn muốn xóa dự án "${record.name}"?`}
+              onConfirm={() => handleDelete(String((record as any).id || (record as any)._id))}
+              okText="Xóa"
+              cancelText="Hủy"
+            >
+              <Button
+                type="text"
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys: React.Key[]) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+    },
   };
 
   // Don't render if user is not authenticated
@@ -859,345 +1191,186 @@ export default function MyProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <FolderOpen className="h-8 w-8 text-blue-600 mr-3" />
-                Dự án của tôi
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Quản lý các dự án đầu tư của bạn
-              </p>
-            </div>
-            {selectedCount > 0 ? (
-              <Button
-                color="danger"
-                variant="bordered"
-                startContent={<Trash2 className="h-5 w-5" />}
-                onPress={() => {
-                  bulkDeleteDisclosure.onOpen();
-                }}
-              >
-                Xóa đã chọn ({selectedCount})
-              </Button>
-            ) : (
-              <Button
-                color="primary"
-                variant="bordered"
-                startContent={<Plus className="h-5 w-5" />}
-                onPress={() => {
-                  if (!checkUserAuth(user, router)) return;
-                  setCurrent({});
-                  addDisclosure.onOpen();
-                }}
-              >
-                Thêm dự án mới
-              </Button>
-            )}
-          </div>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <Content style={{ padding: '24px' }}>
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <FolderOpenOutlined style={{ color: '#1890ff' }} />
+            Dự án của tôi
+          </Title>
+          <Text type="secondary">Quản lý các dự án đầu tư của bạn</Text>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader className="flex flex-col gap-3">
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <FolderOpen className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Tổng dự án</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {totalDocs ?? items.length}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Select
-                    placeholder="Lọc theo trạng thái"
-                    selectedKeys={
-                      statusFilter ? new Set([statusFilter]) : new Set()
-                    }
-                    onSelectionChange={(keys) => {
-                      const key = Array.from(keys as Set<string>)[0];
-                      setPage(1);
-                      setStatusFilter(key || "");
-                    }}
-                    className="max-w-xs"
-                  >
-                    <SelectItem key="">Tất cả trạng thái</SelectItem>
-                    <SelectItem key="pending">Chờ duyệt</SelectItem>
-                    <SelectItem key="in_progress">Đang thực hiện</SelectItem>
-                    <SelectItem key="completed">Hoàn thành</SelectItem>
-                    <SelectItem key="cancelled">Đã hủy</SelectItem>
-                  </Select>
-                  <Input
-                    placeholder="Tìm theo tên, mô tả..."
-                    value={search}
-                    onChange={(e) => {
-                      setPage(1);
-                      setSearch(e.target.value);
-                    }}
-                    className="max-w-sm"
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <Divider />
-            <CardBody>
-              <div className="relative overflow-x-auto">
-                <Table
-                  aria-label="Danh sách dự án"
-                  removeWrapper
-                  selectionMode="multiple"
-                  selectedKeys={selectedKeys as unknown as Set<any>}
-                  onSelectionChange={(keys) => {
-                    if (keys === "all") {
-                      const all = new Set(
-                        (filteredItems as any[]).map((it) =>
-                          String(it.id || it._id)
-                        )
-                      );
-                      setSelectedKeys(all);
-                    } else {
-                      setSelectedKeys(
-                        new Set(Array.from(keys as Set<any>).map(String))
-                      );
-                    }
-                  }}
-                >
-                  <TableHeader>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Tên dự án
-                    </TableColumn>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Công nghệ
-                    </TableColumn>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Quỹ đầu tư
-                    </TableColumn>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Số tiền kêu gọi
-                    </TableColumn>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Trạng thái
-                    </TableColumn>
-                    <TableColumn className="sticky backdrop-blur z-20">
-                      Ngày kết thúc
-                    </TableColumn>
-                    <TableColumn
-                      className="sticky backdrop-blur right-0"
-                      align="end"
-                    >
-                      Hành động
-                    </TableColumn>
-                  </TableHeader>
-                  <TableBody
-                    emptyContent={
-                      isLoading ? "Đang tải..." : "Chưa có dự án nào"
-                    }
-                    items={filteredItems as any}
-                  >
-                    {(item: any) => (
-                      <TableRow key={item.id || item._id}>
-                        <TableCell className="font-medium">
-                          <div>
-                            <div className="font-semibold">{item.name}</div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
-                              {item.description}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-600" key="technology" align="center">
-                          {getTechnologyTitleFromValue(
-                            (item as any).technology,
-                            technologies
-                          )}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {getInvestmentFundNameFromValue(
-                            (item as any).investment_fund,
-                            investmentFunds
-                          )}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {item.goal_money
-                            ? formatCurrency(item.goal_money)
-                            : "Chưa xác định"}
-                        </TableCell>
-                        <TableCell>
-                          <Chip color={getStatusColor(item.status)} size="sm">
-                            {getStatusLabel(item.status)}
-                          </Chip>
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {item.end_date
-                            ? formatDate(item.end_date)
-                            : "Chưa xác định"}
-                        </TableCell>
-                        <TableCell className="sticky backdrop-blur z-10 right-0 text-right justify-end">
-                          {selectedCount > 0 ? null : (
-                            <div className="flex items-center gap-2 justify-end">
-                              <Tooltip content="Xem chi tiết">
-                                <Button
-                                  variant="flat"
-                                  size="sm"
-                                  startContent={<Eye className="h-4 w-4" />}
-                                  onPress={() => {
-                                    setCurrent(item);
-                                    viewDisclosure.onOpen();
-                                  }}
-                                />
-                              </Tooltip>
-                              <Tooltip content="Chỉnh sửa">
-                                <Button
-                                  variant="flat"
-                                  size="sm"
-                                  startContent={<Edit className="h-4 w-4" />}
-                                  onPress={() => {
-                                    if (!checkUserAuth(user, router)) return;
-                                    setCurrent(item);
-                                    editDisclosure.onOpen();
-                                  }}
-                                />
-                              </Tooltip>
-                              <Tooltip content="Xóa">
-                                <Button
-                                  variant="flat"
-                                  size="sm"
-                                  startContent={<Trash2 className="h-4 w-4" />}
-                                  onPress={() => {
-                                    if (!checkUserAuth(user, router)) return;
-                                    setCurrent(item);
-                                    deleteDisclosure.onOpen();
-                                  }}
-                                />
-                              </Tooltip>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardBody>
-          </Card>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-600">
-              {(() => {
-                const start = totalDocs
-                  ? (page - 1) * limit + 1
-                  : items.length
-                    ? 1
-                    : 0;
-                const end = totalDocs
-                  ? Math.min(page * limit, totalDocs)
-                  : items.length;
-                const total = totalDocs ?? items.length;
-                return `${start}–${end} của ${total}`;
-              })()}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Số dòng:</span>
-                <Select
-                  size="sm"
-                  selectedKeys={new Set([String(limit)])}
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys as Set<string>)[0];
-                    const val = parseInt(key || "10", 10);
-                    setPage(1);
-                    setLimit(val);
-                  }}
-                  className="w-24"
-                  disabled={isLoading}
-                >
-                  {[10, 20, 50].map((n) => (
-                    <SelectItem key={String(n)}>{n}</SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <Pagination
-                total={totalPages || 1}
-                page={page}
-                onChange={(p) => setPage(p)}
-                showControls
-                isDisabled={isLoading}
+        {/* Statistics Cards */}
+        <Row gutter={16} style={{ marginBottom: 24 }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Tổng dự án"
+                value={totalDocs ?? items.length}
+                prefix={<FolderOpenOutlined />}
+                valueStyle={{ color: '#1890ff' }}
               />
-            </div>
-          </div>
-        </div>
-      </div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Đang hoạt động"
+                value={items.filter(item => ['pending', 'negotiating', 'contract_signed'].includes(item.status)).length}
+                prefix={<CalendarOutlined />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Hoàn thành"
+                value={items.filter(item => item.status === 'completed').length}
+                prefix={<TeamOutlined />}
+                valueStyle={{ color: '#722ed1' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Tổng vốn kêu gọi"
+                value={items.reduce((sum, item) => sum + (item.goal_money || 0), 0)}
+                formatter={(value) => formatCurrency(Number(value))}
+                prefix={<DollarOutlined />}
+                valueStyle={{ color: '#fa8c16' }}
+              />
+            </Card>
+          </Col>
+        </Row>
 
-      <AddProjectModal
-        disclosure={addDisclosure}
-        current={current}
-        setCurrent={setCurrent}
-        onCreate={handleCreate}
-        loading={actionLoading}
-        technologies={technologies}
-        investmentFunds={investmentFunds}
-      />
-      <EditProjectModal
-        disclosure={editDisclosure}
-        current={current}
-        setCurrent={setCurrent}
-        onUpdate={handleUpdate}
-        loading={actionLoading}
-        technologies={technologies}
-        investmentFunds={investmentFunds}
-      />
-      <ViewProjectModal
-        disclosure={viewDisclosure as any}
-        current={current}
-        technologies={technologies}
-        investmentFunds={investmentFunds}
-      />
-      <DeleteProjectModal
-        disclosure={deleteDisclosure}
-        current={current}
-        onDelete={handleDelete}
-        loading={actionLoading}
-      />
-      {/* Bulk delete modal */}
-      <Modal
-        isOpen={bulkDeleteDisclosure.isOpen}
-        onOpenChange={bulkDeleteDisclosure.onOpenChange}
-        size="sm"
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Xác nhận xóa hàng loạt</ModalHeader>
-              <ModalBody>
-                Bạn có chắc muốn xóa {selectedCount} dự án đã chọn? Hành động
-                này không thể hoàn tác.
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Hủy
-                </Button>
-                <Button
-                  color="danger"
-                  onPress={handleBulkDelete}
-                  variant="bordered"
-                  startContent={<Trash2 className="h-4 w-4" />}
-                  isLoading={!!actionLoading}
+        {/* Main Content Card */}
+        <Card>
+          {/* Toolbar */}
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+            <Space wrap>
+              <Search
+                placeholder="Tìm theo tên, mô tả..."
+                allowClear
+                style={{ width: 300 }}
+                value={search}
+                onChange={(e) => {
+                  setPage(1);
+                  setSearch(e.target.value);
+                }}
+                prefix={<SearchOutlined />}
+              />
+              <Select
+                placeholder="Lọc theo trạng thái"
+                allowClear
+                style={{ width: 200 }}
+                value={statusFilter || undefined}
+                onChange={(value) => {
+                  setPage(1);
+                  setStatusFilter(value || "");
+                }}
+              >
+                <Option value="pending">Chờ duyệt</Option>
+                <Option value="negotiating">Đàm phán</Option>
+                <Option value="contract_signed">Đã ký hợp đồng</Option>
+                <Option value="completed">Hoàn thành</Option>
+                <Option value="cancelled">Đã hủy</Option>
+              </Select>
+            </Space>
+
+            <Space>
+              {selectedRowKeys.length > 0 ? (
+                <Popconfirm
+                  title="Xác nhận xóa"
+                  description={`Bạn có chắc chắn muốn xóa ${selectedRowKeys.length} dự án đã chọn?`}
+                  onConfirm={handleBulkDelete}
+                  okText="Xóa"
+                  cancelText="Hủy"
                 >
-                  Xóa tất cả
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    loading={actionLoading}
+                  >
+                    Xóa đã chọn ({selectedRowKeys.length})
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    if (!checkUserAuth(user, router)) return;
+                    setAddModalOpen(true);
+                  }}
+                >
+                  Thêm dự án mới
                 </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-      <Toaster position="top-right" />
-    </div>
+              )}
+            </Space>
+          </div>
+
+          {/* Table */}
+          <Table
+            columns={columns}
+            dataSource={filteredItems}
+            rowKey={(record) => String((record as any).id || (record as any)._id)}
+            rowSelection={rowSelection}
+            loading={isLoading}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total: totalDocs,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
+              onChange: (newPage, newPageSize) => {
+                setPage(newPage);
+                if (newPageSize !== limit) {
+                  setLimit(newPageSize);
+                }
+              },
+            }}
+            scroll={{ x: 1200 }}
+          />
+        </Card>
+
+        {/* Modals */}
+        <AddProjectModal
+          open={addModalOpen}
+          onCancel={() => setAddModalOpen(false)}
+          onCreate={handleCreate}
+          loading={actionLoading}
+          technologies={technologies}
+        />
+
+        <EditProjectModal
+          open={editModalOpen}
+          onCancel={() => {
+            setEditModalOpen(false);
+            setCurrentProject(null);
+          }}
+          onUpdate={handleUpdate}
+          loading={actionLoading}
+          technologies={technologies}
+          project={currentProject}
+        />
+
+        <ViewProjectModal
+          open={viewModalOpen}
+          onCancel={() => {
+            setViewModalOpen(false);
+            setCurrentProject(null);
+          }}
+          project={currentProject}
+          technologies={technologies}
+        />
+
+        <Toaster />
+      </Content>
+    </Layout>
   );
 }
