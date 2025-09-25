@@ -15,6 +15,10 @@ import {
   Image,
   FileText,
   Video,
+  Download,
+  Play,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { getRoomChats } from "@/api/roomChat";
@@ -29,6 +33,7 @@ import { RoomChat } from "@/api/roomChat";
 import { RoomUser } from "@/types/room_user";
 import { RoomMessage } from "@/api/roomMessage";
 import { uploadFile } from "@/api/media";
+import { getMediaUrlWithDebug } from "@/utils/mediaUrl";
 
 export default function MessagesPage() {
   const { user } = useAuthStore();
@@ -179,6 +184,8 @@ export default function MessagesPage() {
     if (files.length > 0) {
       setSelectedFiles(files.slice(0, 1)); // Only allow one file for now
     }
+    // Reset input value to allow selecting the same file again
+    e.target.value = "";
   };
 
   const removeSelectedFile = (index: number) => {
@@ -192,40 +199,260 @@ export default function MessagesPage() {
     return <File className="h-4 w-4" />;
   };
 
-  const getMediaFileIcon = (media: Media) => {
-    if (media.type === "image") return <Image className="h-4 w-4" />;
-    if (media.type === "video") return <Video className="h-4 w-4" />;
-    if (media.type === "document") return <FileText className="h-4 w-4" />;
-    return <File className="h-4 w-4" />;
+  const renderFilePreview = (file: File, index: number) => {
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    return (
+      <div key={index} className="bg-white p-3 rounded-lg border shadow-sm">
+        {/* Image Preview */}
+        {isImage && (
+          <div className="mb-2">
+            <img
+              src={URL.createObjectURL(file)}
+              alt={file.name}
+              className="max-w-full max-h-32 rounded object-cover"
+              onLoad={(e) => {
+                // Clean up object URL after image loads
+                URL.revokeObjectURL((e.target as HTMLImageElement).src);
+              }}
+            />
+          </div>
+        )}
+
+        {/* Video Preview */}
+        {isVideo && (
+          <div className="mb-2 relative">
+            <video
+              src={URL.createObjectURL(file)}
+              className="max-w-full max-h-32 rounded object-cover"
+              preload="metadata"
+              onLoadedMetadata={(e) => {
+                // Clean up object URL after video loads
+                URL.revokeObjectURL((e.target as HTMLVideoElement).src);
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-black bg-opacity-50 rounded-full p-2">
+                <Play className="h-6 w-6 text-white fill-current" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* File Info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 flex-1 min-w-0">
+            {!isImage && !isVideo && getFileIcon(file)}
+            <div className="flex-1 min-w-0">
+              <span className="text-sm text-gray-700 font-medium truncate block">
+                {file.name}
+              </span>
+              <span className="text-xs text-gray-500">
+                ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => removeSelectedFile(index)}
+            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+            title="Xóa file"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    );
   };
 
-  const renderFileAttachment = (media: Media) => {
-    return (
-      <div className="mt-2 p-2 bg-white bg-opacity-20 rounded border border-white border-opacity-30">
-        <div className="flex items-center space-x-2">
-          {getMediaFileIcon(media)}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{media.filename}</p>
-            <p className="text-xs opacity-75">
-              {(media.filesize / 1024 / 1024).toFixed(2)} MB
-            </p>
-          </div>
-          <a
-            href={media.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs underline hover:no-underline"
-          >
-            Tải xuống
-          </a>
+  const getMediaFileIcon = (media: Media) => {
+    if (media.type === "image") return <Image className="h-6 w-6" />;
+    if (media.type === "video") return <Video className="h-6 w-6" />;
+    if (media.type === "document") return <FileText className="h-6 w-6" />;
+    return <File className="h-6 w-6" />;
+  };
+
+  const renderFileAttachment = (media: Media, isOwn: boolean) => {
+    const mediaUrl = getMediaUrlWithDebug(media.url, "chat-attachment");
+
+    const handleViewDetails = (e: React.MouseEvent) => {
+      e.stopPropagation();
+
+      // Create modal for file details
+      const modal = document.createElement("div");
+      modal.className =
+        "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4";
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      };
+
+      const modalContent = document.createElement("div");
+      modalContent.className = "bg-white rounded-lg p-6 max-w-md w-full mx-4";
+
+      modalContent.innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Chi tiết file</h3>
+          <button class="text-gray-400 hover:text-gray-600 close-btn">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-        {media.type === "image" && (
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm font-medium text-gray-700">Tên file:</label>
+            <p class="text-sm text-gray-900 mt-1">${media.filename}</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-700">Kích thước:</label>
+            <p class="text-sm text-gray-900 mt-1">${(media.filesize / 1024 / 1024).toFixed(2)} MB</p>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-700">Loại file:</label>
+            <p class="text-sm text-gray-900 mt-1">${media.type}</p>
+          </div>
+        </div>
+        <div class="flex space-x-3 mt-6">
+          <button class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors view-btn">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+            Xem file
+          </button>
+       </div>
+      `;
+
+      // Add event listeners
+      const closeBtn = modalContent.querySelector(".close-btn");
+      const viewBtn = modalContent.querySelector(".view-btn");
+      const downloadBtn = modalContent.querySelector(".download-btn");
+
+      closeBtn?.addEventListener("click", () =>
+        document.body.removeChild(modal)
+      );
+      viewBtn?.addEventListener("click", () => {
+        window.open(mediaUrl, "_blank");
+        document.body.removeChild(modal);
+      });
+      downloadBtn?.addEventListener("click", () => {
+        const link = document.createElement("a");
+        link.href = mediaUrl;
+        link.download = media.filename;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        document.body.removeChild(modal);
+      });
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    };
+
+    // Render image - clean and simple
+    if (media.type === "image") {
+      return (
+        <div className="mt-2 relative group">
           <img
-            src={media.url}
+            src={mediaUrl}
             alt={media.alt}
-            className="mt-2 max-w-xs max-h-48 rounded object-cover"
+            className="max-w-xs max-h-64 rounded-lg object-cover cursor-pointer shadow-sm"
+            onClick={() => window.open(mediaUrl, "_blank")}
           />
-        )}
+          {/* View details overlay on hover */}
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+            <button
+              onClick={handleViewDetails}
+              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg"
+              title="Xem chi tiết"
+            >
+              <Eye className="h-5 w-5 text-gray-700" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Render video - clean and simple
+    if (media.type === "video") {
+      return (
+        <div className="mt-2 relative group">
+          <video
+            src={mediaUrl}
+            className="max-w-xs max-h-64 rounded-lg object-cover cursor-pointer shadow-sm"
+            controls={false}
+            preload="metadata"
+            onClick={() => {
+              const video = document.createElement("video");
+              video.src = mediaUrl;
+              video.controls = true;
+              video.autoplay = true;
+              video.style.maxWidth = "90vw";
+              video.style.maxHeight = "90vh";
+
+              const modal = document.createElement("div");
+              modal.className =
+                "fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50";
+              modal.onclick = () => document.body.removeChild(modal);
+              modal.appendChild(video);
+              document.body.appendChild(modal);
+            }}
+          />
+          {/* Play button overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-black bg-opacity-50 rounded-full p-3">
+              <Play className="h-8 w-8 text-white fill-current" />
+            </div>
+          </div>
+          {/* View details overlay on hover */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={handleViewDetails}
+              className="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg"
+              title="Xem chi tiết"
+            >
+              <Eye className="h-4 w-4 text-gray-700" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Render other file types (documents, etc.) - clean and simple
+    return (
+      <div
+        className={`mt-2 p-2 rounded-lg border cursor-pointer transition-colors inline-flex ${
+          isOwn
+            ? "bg-white bg-opacity-20 border-white border-opacity-30 hover:bg-opacity-30"
+            : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+        }`}
+        onClick={() => window.open(mediaUrl, "_blank")}
+      >
+        <div className="flex items-center justify-center space-x-3">
+          <div
+            className={`p-3 rounded-full ${
+              isOwn ? "bg-white bg-opacity-30" : "bg-gray-100"
+            }`}
+          >
+            {getMediaFileIcon(media)}
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDetails(e);
+            }}
+            className={`p-2 rounded-full transition-colors ${
+              isOwn
+                ? "hover:bg-white hover:bg-opacity-20 text-white"
+                : "hover:bg-gray-100 text-gray-600"
+            }`}
+            title="Xem chi tiết"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     );
   };
@@ -410,7 +637,7 @@ export default function MessagesPage() {
                             {/* File Attachment */}
                             {message.document &&
                               typeof message.document === "object" &&
-                              renderFileAttachment(message.document)}
+                              renderFileAttachment(message.document, isOwn)}
 
                             <p
                               className={`text-xs mt-1 ${
@@ -431,31 +658,14 @@ export default function MessagesPage() {
                   {/* File Preview */}
                   {selectedFiles.length > 0 && (
                     <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-2">
+                      <div className="text-sm text-gray-600 mb-3">
                         File đính kèm:
                       </div>
-                      {selectedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-white p-2 rounded border"
-                        >
-                          <div className="flex items-center space-x-2">
-                            {getFileIcon(file)}
-                            <span className="text-sm text-gray-700 truncate max-w-xs">
-                              {file.name}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => removeSelectedFile(index)}
-                            className="text-red-500 hover:text-red-700 p-1"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
+                      <div className="space-y-2">
+                        {selectedFiles.map((file, index) =>
+                          renderFilePreview(file, index)
+                        )}
+                      </div>
                     </div>
                   )}
 
