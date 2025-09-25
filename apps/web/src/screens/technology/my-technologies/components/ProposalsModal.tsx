@@ -35,6 +35,7 @@ import type {
 } from "@/types/technology-propose";
 import { formatDate, formatCurrency } from "../utils";
 import { User } from "@/types";
+import { useUser } from "@/store/auth";
 
 const { Text } = Typography;
 
@@ -52,6 +53,7 @@ export function ProposalsModal({
   technologyTitle,
 }: ProposalsModalProps) {
   const router = useRouter();
+  const currentUser = useUser();
   const [proposals, setProposals] = useState<TechnologyPropose[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -165,8 +167,17 @@ export function ProposalsModal({
   const handleConfirm = async (proposalId: string) => {
     setActionLoading(proposalId);
     try {
-      await technologyProposeApi.setStatus(proposalId, "negotiating");
-      message.success("Đã chuyển sang trạng thái đàm phán");
+      if (!currentUser?.id) {
+        message.error("Vui lòng đăng nhập để xác nhận đề xuất");
+        return;
+      }
+
+      await technologyProposeApi.acceptProposal(
+        proposalId,
+        currentUser.id,
+        "Đã chấp nhận đề xuất và sẵn sàng đàm phán giá."
+      );
+      message.success("Đã xác nhận đề xuất và bắt đầu đàm phán");
       fetchProposals();
     } catch (error) {
       console.error("Failed to confirm proposal:", error);

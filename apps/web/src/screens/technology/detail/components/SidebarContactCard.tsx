@@ -10,6 +10,7 @@ import {
   Phone,
   MapPin,
   Globe,
+  CheckCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
@@ -49,6 +50,15 @@ export default function SidebarContactCard({
   const isOwnTechnology =
     ownerId && currentUserId && String(ownerId) === String(currentUserId);
   const isAuthenticated = Boolean(currentUserId);
+
+  // Debug logging
+  console.log("SidebarContactCard render:", {
+    hasContacted,
+    isOwnTechnology,
+    isAuthenticated,
+    currentUserId,
+    ownerId,
+  });
 
   // Handle opening owner info modal
   const handleShowOwnerInfo = () => {
@@ -131,14 +141,31 @@ export default function SidebarContactCard({
         </div>
 
         {!isOwnTechnology && isAuthenticated ? (
-          <button
-            onClick={onContact}
-            className="w-full mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Liên hệ
-          </button>
-        ) : null}
+          hasContacted ? (
+            <div className="w-full mt-4 px-4 py-2 bg-green-100 text-green-800 rounded-lg flex items-center justify-center border border-green-200">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Đã gửi đề xuất
+            </div>
+          ) : (
+            <button
+              onClick={onContact}
+              className="w-full mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Liên hệ
+            </button>
+          )
+        ) : (
+          <div className="w-full mt-4 px-4 py-2 bg-gray-100 text-gray-600 rounded-lg flex items-center justify-center">
+            <span className="text-sm">
+              {!isAuthenticated
+                ? "Vui lòng đăng nhập để liên hệ"
+                : isOwnTechnology
+                  ? "Đây là công nghệ của bạn"
+                  : "Không thể liên hệ"}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Owner Info Modal */}

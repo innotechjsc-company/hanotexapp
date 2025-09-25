@@ -10,8 +10,6 @@ import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { MediaType } from "@/types/media1";
-import { contractsApi } from "@/api/contracts";
-
 import { OfferStatus } from "@/types/offer";
 import type { OfferFormData } from "../components/OfferModal";
 
@@ -44,14 +42,6 @@ export interface UseNegotiationReturn {
   handleFileUpload: (file: File) => boolean;
   removeAttachment: (index: number) => void;
   setShowConfirmModal: (show: boolean) => void;
-  handleSignContract: () => Promise<void>;
-  handleDownloadContract: () => Promise<void>;
-  handleCompleteContract: (data: {
-    contractFile?: File | null;
-    attachments?: File[];
-    notes?: string;
-    startDate?: string | null;
-  }) => Promise<void>;
   handleSendOffer: () => void;
   confirmSendOffer: (offerData: OfferFormData) => Promise<void>;
   setShowOfferModal: (show: boolean) => void;
@@ -63,8 +53,6 @@ export interface UseNegotiationReturn {
 
   // Utilities
   formatFileSize: (bytes: number) => string;
-  getStatusColor: (status: string) => string;
-  getStatusLabel: (status: string) => string;
 }
 
 // Helper function to detect file type based on MIME type or file extension
@@ -142,16 +130,6 @@ export const useNegotiation = ({
 }: UseNegotiationProps): UseNegotiationReturn => {
   const currentUser = useUser();
 
-  // Create a stable reference to the current user to avoid race conditions
-  const [stableUser, setStableUser] = useState(currentUser);
-
-  // Update stable user when currentUser changes, but only if it's not null
-  useEffect(() => {
-    if (currentUser) {
-      setStableUser(currentUser);
-    }
-  }, [currentUser]);
-
   const [proposal, setProposal] = useState<TechnologyPropose | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -169,12 +147,12 @@ export const useNegotiation = ({
   }>({ message: "", attachments: [] });
 
   useEffect(() => {
-    if (proposalId && stableUser) {
+    if (proposalId && currentUser) {
       fetchProposalDetails();
       fetchNegotiationMessages();
       fetchLatestOffer();
     }
-  }, [proposalId, stableUser]);
+  }, [proposalId, currentUser]);
 
   const fetchProposalDetails = async () => {
     try {
@@ -244,9 +222,6 @@ export const useNegotiation = ({
     try {
       setSendingMessage(true);
 
-      // Use stable user reference with fallback to currentUser
-      const userForSending = stableUser || currentUser;
-
       // Upload files first if any attachments exist
       const documentIds: string[] = [];
       if (pendingMessage.attachments.length > 0) {
@@ -313,8 +288,8 @@ export const useNegotiation = ({
         }
       }
 
-      // Check if user is authenticated - use stable user reference with fallback
-      if (!userForSending?.id) {
+      // Check if user is authenticated
+      if (!currentUser?.id) {
         throw new Error("User not authenticated");
       }
 
@@ -322,7 +297,7 @@ export const useNegotiation = ({
       await negotiatingMessageApi.sendMessage({
         propose: "", // Leave empty for now - this might be optional
         technology_propose: proposalId,
-        user: userForSending.id,
+        user: currentUser.id,
         message: pendingMessage.message,
         documents: documentIds,
       });
@@ -380,118 +355,6 @@ export const useNegotiation = ({
     }
   };
 
-  const handleSignContract = async () => {
-    try {
-      if (!proposal) return;
-
-      // Update proposal status to contract_signed
-      const updatedProposal = await technologyProposeApi.setStatus(
-        proposalId,
-        "contract_signed"
-      );
-
-      setProposal(updatedProposal);
-      message.success("Hợp đồng đã được ký thành công!");
-    } catch (err) {
-      console.error("Failed to sign contract:", err);
-      message.error("Không thể ký hợp đồng. Vui lòng thử lại.");
-    }
-  };
-
-  const handleDownloadContract = async () => {
-    try {
-      if (!proposal?.document?.url) {
-        message.warning("Không tìm thấy tài liệu hợp đồng để tải xuống.");
-        return;
-      }
-
-      // Create a temporary link to download the file
-      const link = document.createElement("a");
-      link.href = proposal.document.url;
-      link.download = proposal.document.filename || "contract.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      message.success("Đã bắt đầu tải xuống hợp đồng.");
-    } catch (err) {
-      console.error("Failed to download contract:", err);
-      message.error("Không thể tải xuống hợp đồng. Vui lòng thử lại.");
-    }
-  };
-
-  const handleCompleteContract = async (data: {
-    contractFile?: File | null;
-    attachments?: File[];
-    notes?: string;
-    startDate?: string | null;
-  }) => {
-    try {
-      if (!proposal) return;
-
-      // 1) Tìm hợp đồng liên quan tới đề xuất hiện tại
-      const contract = await contractsApi.getByTechnologyPropose(
-        proposal.id,
-        1
-      );
-      if (!contract || !contract.id) {
-        message.error("Không tìm thấy hợp đồng liên quan cho đề xuất này");
-        return;
-      }
-
-      // 2) Upload contract file if provided
-      let contractFileId = null;
-      if (data.contractFile) {
-        const media = await uploadFile(data.contractFile, {
-          type: MediaType.DOCUMENT,
-          alt: `Hợp đồng ${contract.id}`,
-        });
-        contractFileId = media.id;
-      }
-
-      // 3) Upload attachments if provided
-      const attachmentIds: string[] = [];
-      const atts = Array.isArray(data.attachments) ? data.attachments : [];
-      if (atts.length > 0) {
-        const uploads = await Promise.all(
-          atts.map((f) =>
-            uploadFile(f, {
-              type: MediaType.DOCUMENT,
-              alt: `Tài liệu HĐ ${contract.id}`,
-            })
-          )
-        );
-        attachmentIds.push(...uploads.map((m) => String(m.id)));
-      }
-
-      // 4) Update contract with files and mark as signed
-      const updateData: any = {
-        status: "signed",
-      };
-
-      if (contractFileId) {
-        updateData.contract_file = contractFileId;
-      }
-
-      if (attachmentIds.length > 0) {
-        updateData.documents = attachmentIds;
-      }
-
-      await contractsApi.update(contract.id, updateData);
-
-      // 5) Mark proposal as completed to end negotiation flow
-      const updated = await technologyProposeApi.setStatus(
-        proposalId,
-        "completed"
-      );
-      setProposal(updated);
-      message.success("Hợp đồng đã được hoàn tất thành công!");
-    } catch (err) {
-      console.error("Failed to complete contract:", err);
-      message.error("Không thể hoàn tất hợp đồng. Vui lòng thử lại.");
-    }
-  };
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -500,45 +363,10 @@ export const useNegotiation = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "orange";
-      case "negotiating":
-        return "blue";
-      case "contract_signed":
-        return "cyan";
-      case "completed":
-        return "green";
-      case "cancelled":
-        return "red";
-      default:
-        return "default";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Chờ xác nhận";
-      case "negotiating":
-        return "Đang đàm phán";
-      case "contract_signed":
-        return "Đã ký hợp đồng";
-      case "completed":
-        return "Hoàn thành";
-      case "cancelled":
-        return "Đã hủy";
-      default:
-        return status;
-    }
-  };
-
   // Computed properties for offer functionality
-  const userForOfferCheck = stableUser || currentUser;
   // Người tạo TechnologyPropose (proposal.user) là người có thể gửi đề xuất
   // Người nhận (chủ công nghệ) thì không có nút gửi đề xuất
-  const isProposalCreator = proposal?.user?.id === userForOfferCheck?.id;
+  const isProposalCreator = proposal?.user?.id === currentUser?.id;
   const canSendOffer = isProposalCreator && proposal?.status === "negotiating";
   const hasPendingOffer = latestOffer?.status === OfferStatus.PENDING;
 
@@ -567,12 +395,9 @@ export const useNegotiation = ({
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
-    handleSignContract,
-    handleDownloadContract,
     handleSendOffer,
     confirmSendOffer,
     setShowOfferModal,
-    handleCompleteContract,
 
     // Offer utilities
     canSendOffer,
@@ -581,7 +406,5 @@ export const useNegotiation = ({
 
     // Utilities
     formatFileSize,
-    getStatusColor,
-    getStatusLabel,
   };
 };

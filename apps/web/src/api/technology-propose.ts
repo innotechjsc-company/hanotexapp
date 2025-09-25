@@ -87,6 +87,19 @@ export class TechnologyProposeApi {
     );
     return res.data!;
   }
+
+  async acceptProposal(
+    technologyProposeId: string,
+    userId: string,
+    message?: string
+  ): Promise<any> {
+    const res = await payloadApiClient.post<any>(`/technology-propose/accept`, {
+      technologyProposeId,
+      userId,
+      message,
+    });
+    return res;
+  }
 }
 
 export const technologyProposeApi = new TechnologyProposeApi();
