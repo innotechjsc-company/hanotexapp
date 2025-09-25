@@ -57,6 +57,9 @@ export default function MessagesPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingChat, setDeletingChat] = useState(false);
+  const [lastMessages, setLastMessages] = useState<
+    Record<string, RoomMessage | null>
+  >({});
 
   // Load conversations on component mount
   useEffect(() => {
@@ -107,12 +110,48 @@ export default function MessagesPage() {
       setLoading(true);
       // For now, get all room chats - in a real app, you'd filter by user
       const response = await getRoomChats({}, { limit: 50 });
-      setConversations(response.docs || []);
+      const conversationsList = response.docs || [];
+      setConversations(conversationsList);
+
+      // Load last message for each conversation
+      await loadLastMessagesForConversations(conversationsList);
     } catch (error) {
       console.error("Error loading conversations:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadLastMessagesForConversations = async (
+    conversationsList: RoomChat[]
+  ) => {
+    const lastMessagesMap: Record<string, RoomMessage | null> = {};
+
+    // Load last message for each conversation
+    for (const conversation of conversationsList) {
+      try {
+        const response = await getMessagesForRoom(conversation.id, {
+          limit: 1,
+          sort: "-createdAt", // Sort by creation time descending to get latest message
+        });
+        const lastMessage =
+          response.docs && response.docs.length > 0 ? response.docs[0] : null;
+        lastMessagesMap[conversation.id] = lastMessage;
+
+        console.log(
+          `Last message for room ${conversation.id}:`,
+          lastMessage?.message || "No message"
+        );
+      } catch (error) {
+        console.error(
+          `Error loading last message for room ${conversation.id}:`,
+          error
+        );
+        lastMessagesMap[conversation.id] = null;
+      }
+    }
+
+    setLastMessages(lastMessagesMap);
   };
 
   const loadMessages = async (roomId: string) => {
@@ -175,7 +214,7 @@ export default function MessagesPage() {
       }
 
       // Send message with or without file
-      await sendMessage(
+      const sentMessage = await sendMessage(
         currentRoom.id,
         user.id,
         newMessage.trim() ||
@@ -187,6 +226,41 @@ export default function MessagesPage() {
       setSelectedFiles([]);
       // Reload messages to show the new message
       await loadMessages(currentRoom.id);
+
+      // Update last message for this conversation immediately with the sent message
+      setLastMessages((prev) => ({
+        ...prev,
+        [currentRoom.id]: sentMessage,
+      }));
+
+      // Move this conversation to the top of the list by updating its updatedAt
+      setConversations((prev) => {
+        const updatedConversations = prev.map((conv) => {
+          if (conv.id === currentRoom.id) {
+            return {
+              ...conv,
+              updatedAt: sentMessage.createdAt, // Use the message timestamp
+            };
+          }
+          return conv;
+        });
+
+        // Sort conversations by updatedAt descending (most recent first)
+        const sortedConversations = updatedConversations.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+
+        // Update selectedConversation index since the list order changed
+        const newIndex = sortedConversations.findIndex(
+          (conv) => conv.id === currentRoom.id
+        );
+        if (newIndex !== -1 && newIndex !== selectedConversation) {
+          setSelectedConversation(newIndex);
+        }
+
+        return sortedConversations;
+      });
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại.");
@@ -261,6 +335,13 @@ export default function MessagesPage() {
       setConversations((prev) =>
         prev.filter((_, index) => index !== selectedConversation)
       );
+
+      // Xóa tin nhắn cuối cùng khỏi state
+      setLastMessages((prev) => {
+        const newLastMessages = { ...prev };
+        delete newLastMessages[chatId];
+        return newLastMessages;
+      });
 
       // Reset selection
       setSelectedConversation(null);
@@ -572,6 +653,24 @@ export default function MessagesPage() {
     }
   };
 
+  // Helper function to get last message display text
+  const getLastMessageDisplay = (message: RoomMessage | null) => {
+    if (!message) return "Chưa có tin nhắn";
+
+    // If message has document attachment, show file indicator
+    if (message.document) {
+      return "📎 Đã gửi file";
+    }
+
+    // If message is empty but has document, show file indicator
+    if (!message.message && message.document) {
+      return "📎 File đính kèm";
+    }
+
+    // Return the actual message text
+    return message.message || "Tin nhắn trống";
+  };
+
   // Helper function to check if message is from current user
   const isOwnMessage = (message: RoomMessage) => {
     const messageUserId =
@@ -641,13 +740,15 @@ export default function MessagesPage() {
                             {getConversationName(conversation)}
                           </h3>
                           <span className="text-xs text-gray-500">
-                            {formatTime(conversation.updatedAt)}
+                            {lastMessages[conversation.id]?.createdAt
+                              ? formatTime(
+                                  lastMessages[conversation.id]!.createdAt
+                                )
+                              : formatTime(conversation.updatedAt)}
                           </span>
                         </div>
                         <p className="text-sm text-gray-600 truncate mt-1">
-                          {messages.length > 0
-                            ? messages[messages.length - 1]?.message
-                            : "Chưa có tin nhắn"}
+                          {getLastMessageDisplay(lastMessages[conversation.id])}
                         </p>
                       </div>
                     </div>
