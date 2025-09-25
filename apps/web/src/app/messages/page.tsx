@@ -481,6 +481,21 @@ export default function MessagesPage() {
     }
   };
 
+  // Ensure participants for a single room if missing
+  const ensureParticipantsForRoom = async (roomId: string) => {
+    if (roomParticipants[roomId]) return;
+    try {
+      const resp = await getUsersInRoom(roomId, { limit: 1000 });
+      const docs = resp.docs || [];
+      setRoomParticipants((prev) => ({
+        ...prev,
+        [roomId]: docs as RoomUser[],
+      }));
+    } catch (e) {
+      console.error("Error ensuring participants for room:", roomId, e);
+    }
+  };
+
   const loadLastMessagesForConversations = async (
     conversationsList: RoomChat[]
   ) => {
@@ -1066,22 +1081,44 @@ export default function MessagesPage() {
 
   // Helper function to get conversation display name
   const getConversationName = (conversation: RoomChat) => {
-    // Prefer dynamic participant names excluding current user
-    const participants = roomParticipants[conversation.id] || [];
-    if (participants.length > 0) {
-      const others = participants.filter(
-        (ru) => (ru.user as any)?.id !== user?.id
-      );
-      if (others.length > 0) {
-        const names = others
-          .map((ru) => (ru.user as any)?.full_name || (ru.user as any)?.email)
-          .filter(Boolean) as string[];
-        if (names.length === 1) return names[0];
-        if (names.length === 2) return `${names[0]}, ${names[1]}`;
-        if (names.length > 2)
-          return `${names[0]}, ${names[1]} +${names.length - 2}`;
-      }
+    const participants = roomParticipants[conversation.id];
+    if (!participants) {
+      // Fire-and-forget to fetch if missing; UI will update on state set
+      ensureParticipantsForRoom(conversation.id);
+      return conversation.title || `Room ${conversation.id}`;
     }
+
+    // Exclude current user
+    const others = participants.filter((ru) => {
+      const ruId = (ru.user as any)?.id;
+      const ruName = (ru.user as any)?.full_name;
+      const currId = user?.id;
+      const currName = user?.full_name;
+      return ruId ? ruId !== currId : ruName !== currName;
+    });
+
+    // 1-1 chat: show the other user's name
+    if (others.length === 1 && participants.length === 2) {
+      const other = others[0];
+      return (
+        ((other.user as any)?.full_name as string) ||
+        ((other.user as any)?.email as string) ||
+        conversation.title ||
+        `Room ${conversation.id}`
+      );
+    }
+
+    // Group chat: join top names
+    if (others.length > 0) {
+      const names = others
+        .map((ru) => (ru.user as any)?.full_name || (ru.user as any)?.email)
+        .filter(Boolean) as string[];
+      if (names.length === 1) return names[0];
+      if (names.length === 2) return `${names[0]}, ${names[1]}`;
+      if (names.length > 2)
+        return `${names[0]}, ${names[1]} +${names.length - 2}`;
+    }
+
     return conversation.title || `Room ${conversation.id}`;
   };
 
