@@ -19,14 +19,17 @@ import {
   Play,
   Eye,
   ExternalLink,
+  Trash2,
+  ChevronDown,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-import { getRoomChats } from "@/api/roomChat";
-import { getUsersInRoom } from "@/api/roomUser";
+import { getRoomChats, deleteRoomChat } from "@/api/roomChat";
+import { getUsersInRoom, deleteRoomUser } from "@/api/roomUser";
 import {
   getMessagesForRoom,
   sendMessage,
   sendMessageWithFile,
+  deleteRoomMessage,
   Media,
 } from "@/api/roomMessage";
 import { RoomChat } from "@/api/roomChat";
@@ -51,6 +54,9 @@ export default function MessagesPage() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingChat, setDeletingChat] = useState(false);
 
   // Load conversations on component mount
   useEffect(() => {
@@ -78,6 +84,23 @@ export default function MessagesPage() {
       loadRoomUsers(conversations[selectedConversation].id);
     }
   }, [selectedConversation, conversations]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDropdown) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const loadConversations = async () => {
     try {
@@ -190,6 +213,69 @@ export default function MessagesPage() {
 
   const removeSelectedFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle delete chat - xóa theo thứ tự: messages -> users -> room
+  const handleDeleteChat = async () => {
+    if (selectedConversation === null || !conversations[selectedConversation]) {
+      return;
+    }
+
+    setDeletingChat(true);
+    try {
+      const chatId = conversations[selectedConversation].id;
+
+      console.log(`Bắt đầu xóa chat room: ${chatId}`);
+
+      try {
+        const messagesResponse = await getMessagesForRoom(chatId, {
+          limit: 1000,
+        });
+        const allMessages = messagesResponse.docs || [];
+
+        for (const message of allMessages) {
+          await deleteRoomMessage(message.id);
+        }
+      } catch (messageError) {
+        console.error("Lỗi khi xóa tin nhắn:", messageError);
+        throw new Error("Không thể xóa tin nhắn trong room");
+      }
+
+      try {
+        // Lấy tất cả users trong room (với limit cao để lấy hết)
+        const usersResponse = await getUsersInRoom(chatId, { limit: 1000 });
+        const allUsers = usersResponse.docs || [];
+
+        // Xóa từng user
+        for (const roomUser of allUsers) {
+          await deleteRoomUser(roomUser.id);
+        }
+      } catch (userError) {
+        console.error("Lỗi khi xóa người dùng:", userError);
+        throw new Error("Không thể xóa người dùng trong room");
+      }
+
+      await deleteRoomChat(chatId);
+
+      // Cập nhật UI
+      setConversations((prev) =>
+        prev.filter((_, index) => index !== selectedConversation)
+      );
+
+      // Reset selection
+      setSelectedConversation(null);
+      setMessages([]);
+      setRoomUsers([]);
+
+      // Close modal
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+    } finally {
+      setDeletingChat(false);
+    }
   };
 
   const getFileIcon = (file: File) => {
@@ -595,9 +681,32 @@ export default function MessagesPage() {
                         </p>
                       </div>
                     </div>
-                    <button className="p-2 text-gray-400 hover:text-gray-600">
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
+                    <div className="relative">
+                      <button
+                        className="p-2 text-gray-400 hover:text-gray-600"
+                        onClick={() => setShowDropdown(!showDropdown)}
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      {showDropdown && (
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                          <div className="py-1">
+                            <button
+                              onClick={() => {
+                                setShowDropdown(false);
+                                setShowDeleteModal(true);
+                              }}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span>Xóa đoạn chat</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -734,6 +843,58 @@ export default function MessagesPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Chat Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Xác nhận xóa
+              </h3>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-600">
+                Bạn có chắc chắn muốn xóa đoạn chat này không?
+              </p>
+              <p className="text-gray-600 mt-2">
+                Hành động này sẽ xóa toàn bộ tin nhắn và không thể hoàn tác.
+              </p>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                disabled={deletingChat}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteChat}
+                disabled={deletingChat}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingChat ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Đang xóa...
+                  </div>
+                ) : (
+                  "Đồng ý xóa"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
