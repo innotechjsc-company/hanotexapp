@@ -192,7 +192,6 @@ export const NegotiationDetailsScreen: React.FC<
           <div className="h-full overflow-auto">
             <ContractCompletionStep
               proposal={proposal}
-              onDownloadTemplate={handleDownloadContract}
               onCompleteContract={handleCompleteContract}
             />
           </div>

@@ -11,7 +11,6 @@ import {
   message as antdMessage,
 } from "antd";
 import {
-  FileText,
   UploadCloud,
   ClipboardList,
   CheckCircle,
@@ -24,7 +23,6 @@ const { TextArea } = Input;
 
 interface ContractCompletionStepProps {
   proposal: TechnologyPropose;
-  onDownloadTemplate?: () => void;
   onCompleteContract: (data: {
     contractFile?: File | null;
     attachments?: File[];
@@ -35,7 +33,6 @@ interface ContractCompletionStepProps {
 
 export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
   proposal,
-  onDownloadTemplate,
   onCompleteContract,
 }) => {
   const [current, setCurrent] = useState(0);
@@ -47,7 +44,6 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
 
   const steps = useMemo(
     () => [
-      { title: "Mẫu hợp đồng" },
       { title: "Tải hợp đồng đã ký" },
       { title: "Tài liệu kèm theo" },
       { title: "Hoàn tất" },
@@ -95,7 +91,8 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
             Hoàn thiện hợp đồng
           </Title>
           <Text className="text-gray-600">
-            Vui lòng hoàn thành các bước dưới đây để hoàn tất hợp đồng cho đề xuất này.
+            Vui lòng hoàn thành các bước dưới đây để hoàn tất hợp đồng cho đề
+            xuất này.
           </Text>
         </div>
 
@@ -109,25 +106,6 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
         {/* Step content */}
         <div className="min-h-[260px]">
           {current === 0 && (
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <FileText size={20} className="text-blue-500 mt-1" />
-                <div>
-                  <Title level={4} className="mb-1">
-                    Tải mẫu hợp đồng
-                  </Title>
-                  <Text className="text-gray-600">
-                    Tải mẫu hợp đồng, điền thông tin và ký, sau đó tải lại bản đã ký ở bước tiếp theo.
-                  </Text>
-                </div>
-              </div>
-              <Button icon={<UploadCloud size={16} />} onClick={onDownloadTemplate}>
-                Tải mẫu hợp đồng
-              </Button>
-            </div>
-          )}
-
-          {current === 1 && (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <ClipboardList size={20} className="text-blue-500 mt-1" />
@@ -170,7 +148,7 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
             </div>
           )}
 
-          {current === 2 && (
+          {current === 1 && (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <Paperclip size={20} className="text-blue-500 mt-1" />
@@ -187,7 +165,9 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
                 multiple
                 beforeUpload={beforeUploadMultiple}
                 showUploadList
-                fileList={attachments.map((f) => ({ uid: f.name, name: f.name } as any))}
+                fileList={attachments.map(
+                  (f) => ({ uid: f.name, name: f.name }) as any
+                )}
                 onRemove={(file) => {
                   const target = attachments.find((f) => f.name === file.name);
                   if (target) removeAttachment(target);
@@ -207,17 +187,34 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
             </div>
           )}
 
-          {current === 3 && (
+          {current === 2 && (
             <div className="space-y-4">
               <Title level={4}>Xác nhận hoàn tất</Title>
               <div className="bg-gray-50 p-4 rounded">
-                <div className="flex justify-between py-1"><Text strong>Công nghệ:</Text><Text>{proposal.technology?.title || "-"}</Text></div>
-                <div className="flex justify-between py-1"><Text strong>Hợp đồng đã chọn:</Text><Text>{contractFile?.name || "Chưa tải lên"}</Text></div>
-                <div className="flex justify-between py-1"><Text strong>Số tài liệu kèm:</Text><Text>{attachments.length}</Text></div>
-                <div className="flex justify-between py-1"><Text strong>Ngày bắt đầu:</Text><Text>{startDate ? new Date(startDate).toLocaleDateString("vi-VN") : "-"}</Text></div>
+                <div className="flex justify-between py-1">
+                  <Text strong>Công nghệ:</Text>
+                  <Text>{proposal.technology?.title || "-"}</Text>
+                </div>
+                <div className="flex justify-between py-1">
+                  <Text strong>Hợp đồng đã chọn:</Text>
+                  <Text>{contractFile?.name || "Chưa tải lên"}</Text>
+                </div>
+                <div className="flex justify-between py-1">
+                  <Text strong>Số tài liệu kèm:</Text>
+                  <Text>{attachments.length}</Text>
+                </div>
+                <div className="flex justify-between py-1">
+                  <Text strong>Ngày bắt đầu:</Text>
+                  <Text>
+                    {startDate
+                      ? new Date(startDate).toLocaleDateString("vi-VN")
+                      : "-"}
+                  </Text>
+                </div>
               </div>
               <Text className="text-gray-600">
-                Nhấn "Hoàn tất hợp đồng" để đánh dấu hợp đồng đã hoàn thiện và kết thúc quy trình đàm phán.
+                Nhấn "Hoàn tất hợp đồng" để đánh dấu hợp đồng đã hoàn thiện và
+                kết thúc quy trình đàm phán.
               </Text>
             </div>
           )}
@@ -236,7 +233,7 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
             )}
           </Space>
 
-        {current === steps.length - 1 && (
+          {current === steps.length - 1 && (
             <Button
               type="primary"
               icon={<CheckCircle size={16} />}
@@ -252,4 +249,3 @@ export const ContractCompletionStep: React.FC<ContractCompletionStepProps> = ({
     </div>
   );
 };
-
