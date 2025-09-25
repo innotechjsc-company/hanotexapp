@@ -71,7 +71,7 @@ export default function SidebarContactCard({
       }
 
       // 2. No existing room, create new room chat
-      const roomTitle = `Chat với ${ownerName}`;
+      const roomTitle = `${ownerName}`;
       const roomChat = await createSimpleRoomChat(roomTitle);
 
       // 3. Add both users to room

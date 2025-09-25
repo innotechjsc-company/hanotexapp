@@ -310,6 +310,7 @@ export async function findRoomBetweenUsers(
   try {
     // Get all rooms for user1
     const user1Rooms = await getRoomsForUser(userId1, { limit: 100 });
+    console.log("user1Rooms---findRoomBetweenUsers", user1Rooms);
 
     if (!user1Rooms.docs || user1Rooms.docs.length === 0) {
       return null;

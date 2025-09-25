@@ -1,8 +1,3 @@
-/**
- * Room Chat API functions
- * Các function để quản lý room chat với PayloadCMS
- */
-
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 

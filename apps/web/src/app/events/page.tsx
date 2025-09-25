@@ -325,7 +325,7 @@ export default function EventsPage() {
               Tham gia các sự kiện, hội thảo và triển lãm công nghệ quan trọng
             </p>
           </div>
-          <Button
+          {/* <Button
             color="primary"
             startContent={<Plus className="h-5 w-5" />}
             className="font-medium bg-blue-600 text-white hover:bg-blue-700 shadow-md visible opacity-100 z-10 relative"
@@ -333,7 +333,7 @@ export default function EventsPage() {
             onPress={() => router.push("/events/register")}
           >
             Đăng sự kiện
-          </Button>
+          </Button> */}
         </div>
 
         {/* Search and Filters */}
@@ -424,18 +424,6 @@ export default function EventsPage() {
                 onPress={() => router.push(`/events/${event.id}`)}
               >
                 <CardBody className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Chip
-                        color={getStatusColor(event.status) as any}
-                        size="sm"
-                        variant="flat"
-                      >
-                        {getStatusText(event.status)}
-                      </Chip>
-                    </div>
-                  </div>
-
                   <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
                     {event.title}
                   </h2>

@@ -156,7 +156,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50  ">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -234,7 +234,7 @@ export default function MessagesPage() {
           </div>
 
           {/* Chat Area */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow flex flex-col">
+          <div className="lg:col-span-2 bg-white rounded-lg shadow flex flex-col max-h-screen overflow-scroll">
             {selectedConversation !== null ? (
               <>
                 {/* Chat Header */}
