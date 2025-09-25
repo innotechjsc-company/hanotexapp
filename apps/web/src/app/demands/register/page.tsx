@@ -101,7 +101,7 @@ export default function RegisterDemandPage() {
         try {
           const uploadPromises = selectedFiles.map(async (file) => {
             // Determine file type based on MIME type
-            let fileType: MediaType = MediaType.OTHER;
+            let fileType: Media["type"] = MediaType.OTHER;
             if (file.type.startsWith("image/")) {
               fileType = MediaType.IMAGE;
             } else if (file.type.startsWith("video/")) {

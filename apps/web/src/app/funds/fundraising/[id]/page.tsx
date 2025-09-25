@@ -183,7 +183,7 @@ export default function FundraisingProjectDetailPage() {
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
               <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                {(typeof project.technology === "object" && project.technology && (project.technology as any).name) || "Dự án công nghệ"}
+                {(typeof project.technologies === "object" && project.technologies && (project.technologies as any).name) || "Dự án công nghệ"}
               </span>
               <Tag color={getStatusColor(project.status || "")}>{getStatusLabel(project.status || "")}</Tag>
             </div>
@@ -307,7 +307,7 @@ export default function FundraisingProjectDetailPage() {
         </div>
 
         {/* Technology Section */}
-        {typeof project.technology === "object" && project.technology && (
+        {typeof project.technologies === "object" && project.technologies && (
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Công nghệ cốt lõi
@@ -315,11 +315,11 @@ export default function FundraisingProjectDetailPage() {
             
             <div className="border border-gray-200 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                {(project.technology as any).title}
+                {(project.technologies as any).title}
               </h4>
-              {(project.technology as any).description && (
+              {(project.technologies as any).description && (
                 <p className="text-gray-600">
-                  {(project.technology as any).description}
+                  {(project.technologies as any).description}
                 </p>
               )}
             </div>

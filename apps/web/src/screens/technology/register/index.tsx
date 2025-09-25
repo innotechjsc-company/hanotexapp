@@ -23,7 +23,7 @@ import { IPSectionRef } from "./components/IPSection";
 import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
 import MediaApi from "@/api/media";
 import { createTechnology } from "@/api/technologies";
-import { MediaType } from "@/types";
+import { MediaType } from "@/types/media1";
 
 export default function RegisterTechnologyPage({ props }: { props?: any }) {
   const router = useRouter();

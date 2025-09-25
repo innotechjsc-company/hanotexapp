@@ -195,7 +195,7 @@ export async function searchProjects(
 export async function getActiveProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: ProjectStatusEnum.NEGOTIATING }, pagination);
+  return getProjects({ status: ProjectStatusEnum.COMPLETED }, pagination);
 }
 
 /**
@@ -228,7 +228,7 @@ export async function getProjectsEndingSoon(
 
   return getProjects(
     {
-      status: ProjectStatusEnum.NEGOTIATING,
+      status: ProjectStatusEnum.COMPLETED,
       end_date_to: endDate.toISOString().split("T")[0], // YYYY-MM-DD format
     },
     { ...pagination, sort: "end_date" }
@@ -273,8 +273,8 @@ export async function getActiveProjectsAll(
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
-    // status in [negotiating, completed]
-    "where[or][0][status][equals]": ProjectStatusEnum.NEGOTIATING,
+    // status in [in_progress, completed]
+    "where[or][0][status][equals]": ProjectStatusEnum.COMPLETED,
     "where[or][1][status][equals]": ProjectStatusEnum.COMPLETED,
   };
 

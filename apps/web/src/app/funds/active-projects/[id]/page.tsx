@@ -180,7 +180,7 @@ export default function ProjectDetailPage() {
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
               <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-                {(typeof project.technology === "object" && project.technology && (project.technology as any).name) || "Dự án công nghệ"}
+                {(typeof project.technologies === "object" && project.technologies && (project.technologies as any).name) || "Dự án công nghệ"}
               </span>
               <Chip color={getStatusColor(project.status || "")} size="lg">
                 {getStatusLabel(project.status || "")}
@@ -263,7 +263,7 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Technology Section */}
-        {typeof project.technology === "object" && project.technology && (
+        {typeof project.technologies === "object" && project.technologies && (
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Công nghệ sử dụng
@@ -271,11 +271,11 @@ export default function ProjectDetailPage() {
             
             <div className="border border-gray-200 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                {(project.technology as any).name}
+                {(project.technologies as any).name}
               </h4>
-              {(project.technology as any).description && (
+              {(project.technologies as any).description && (
                 <p className="text-gray-600">
-                  {(project.technology as any).description}
+                  {(project.technologies as any).description}
                 </p>
               )}
             </div>
@@ -283,14 +283,14 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Documents Section */}
-        {project.documents && project.documents.length > 0 && (
+        {project.documents_finance && project.documents_finance.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Tài liệu dự án
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {project.documents.map((_, index) => (
+              {project.documents_finance.map((_, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
