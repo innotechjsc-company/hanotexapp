@@ -12,22 +12,12 @@ import { PAYLOAD_API_BASE_URL } from "@/api/config";
  */
 export const getFullMediaUrl = (url: string): string => {
   if (!url) return "";
-
-  // If URL already has protocol (http/https), return as is
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
   // Get base URL without /api suffix
   const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", "");
-
-  // If URL starts with /, it's a relative path from CMS root
   if (url.startsWith("/")) {
     return `${baseUrl}${url}`;
   }
-
-  // If it's just a filename or relative path, prepend CMS base URL
-  return `${baseUrl}/${url}`;
+  return url;
 };
 
 /**
@@ -38,11 +28,13 @@ export const getFullMediaUrl = (url: string): string => {
  */
 export const getMediaUrlWithDebug = (url: string, context?: string): string => {
   const fullUrl = getFullMediaUrl(url);
-  
+
   if (process.env.NODE_ENV === "development") {
-    console.log(`[Media URL${context ? ` - ${context}` : ""}] ${url} -> ${fullUrl}`);
+    console.log(
+      `[Media URL${context ? ` - ${context}` : ""}] ${url} -> ${fullUrl}`
+    );
   }
-  
+
   return fullUrl;
 };
 
@@ -53,7 +45,7 @@ export const getMediaUrlWithDebug = (url: string, context?: string): string => {
  */
 export const isValidMediaUrl = (url: string): boolean => {
   if (!url) return false;
-  
+
   try {
     new URL(getFullMediaUrl(url));
     return true;

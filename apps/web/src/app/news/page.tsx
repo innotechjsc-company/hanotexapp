@@ -65,11 +65,6 @@ function getFullImageUrl(imageUrl: string | null | undefined): string {
   // Use utility function which handles environment detection automatically
   const fullUrl = getFullMediaUrl(imageUrl);
 
-  // Log in development for debugging
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[News Image URL] ${imageUrl} -> ${fullUrl}`);
-  }
-
   return fullUrl;
 }
 
