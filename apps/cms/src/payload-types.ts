@@ -719,7 +719,7 @@ export interface Project {
   market_data?: string | null;
   user: string | User;
   technologies: (string | Technology)[];
-  investment_fund?: (string | null) | InvestmentFund;
+  investment_fund?: (string | InvestmentFund)[] | null;
   revenue?: number | null;
   profit?: number | null;
   assets?: number | null;
