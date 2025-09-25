@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight, Briefcase, Calendar, DollarSign, Users, Building2, Target } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  Briefcase,
+  Calendar,
+  DollarSign,
+  Users,
+  Building2,
+  Target,
+} from "lucide-react";
 import Link from "next/link";
 import { getProjectById } from "@/api/projects";
 import { getInvestmentFundById } from "@/api/investment-fund";
@@ -63,7 +72,9 @@ export default function ProjectDetailPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
-  const [investmentFund, setInvestmentFund] = useState<InvestmentFund | null>(null);
+  const [investmentFund, setInvestmentFund] = useState<InvestmentFund | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -90,9 +101,10 @@ export default function ProjectDetailPage() {
 
         // Fetch investment fund if exists
         if (projectData && projectData.investment_fund) {
-          const fundId = typeof projectData.investment_fund === "string"
-            ? projectData.investment_fund
-            : (projectData.investment_fund as any)?.id;
+          const fundId =
+            typeof projectData.investment_fund === "string"
+              ? projectData.investment_fund
+              : (projectData.investment_fund as any)?.id;
 
           if (fundId) {
             try {
@@ -103,7 +115,6 @@ export default function ProjectDetailPage() {
             }
           }
         }
-
       } catch (err: any) {
         console.error("Error fetching project details:", err);
         setError(err.message || "Có lỗi xảy ra khi tải thông tin dự án");
@@ -133,8 +144,8 @@ export default function ProjectDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             {error || "Không tìm thấy dự án"}
           </h1>
-          <Link 
-            href="/funds/active-projects" 
+          <Link
+            href="/funds/active-projects"
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
             Quay lại danh sách dự án
@@ -157,7 +168,10 @@ export default function ProjectDetailPage() {
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex items-center text-sm text-gray-500">
-              <Link href="/funds/active-projects" className="hover:text-blue-600">
+              <Link
+                href="/funds/active-projects"
+                className="hover:text-blue-600"
+              >
                 Dự án hoạt động
               </Link>
               <ChevronRight className="h-4 w-4 mx-2" />
@@ -180,14 +194,19 @@ export default function ProjectDetailPage() {
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
               <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
-                {(typeof project.technology === "object" && project.technology && (project.technology as any).name) || "Dự án công nghệ"}
+                {(typeof project.technologies === "object" &&
+                  project.technologies &&
+                  (project.technologies as any).name) ||
+                  "Dự án công nghệ"}
               </span>
               <Chip color={getStatusColor(project.status || "")} size="lg">
                 {getStatusLabel(project.status || "")}
               </Chip>
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{project.name || "Chưa có tên dự án"}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              {project.name || "Chưa có tên dự án"}
+            </h2>
             <p className="text-gray-600 text-lg leading-relaxed mb-6">
               {project.description || "Chưa có mô tả dự án"}
             </p>
@@ -204,14 +223,20 @@ export default function ProjectDetailPage() {
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                 <div className="text-lg font-bold text-gray-900">
-                  {project.end_date ? formatDate(project.end_date) : "Chưa xác định"}
+                  {project.end_date
+                    ? formatDate(project.end_date)
+                    : "Chưa xác định"}
                 </div>
                 <div className="text-sm text-gray-600">Ngày kết thúc</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                 <div className="text-lg font-bold text-gray-900">
-                  {(typeof project.user === "object" && project.user && (project.user as any).full_name) ? (project.user as any).full_name : "Chưa xác định"}
+                  {typeof project.user === "object" &&
+                  project.user &&
+                  (project.user as any).full_name
+                    ? (project.user as any).full_name
+                    : "Chưa xác định"}
                 </div>
                 <div className="text-sm text-gray-600">Người phụ trách</div>
               </div>
@@ -263,19 +288,19 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Technology Section */}
-        {typeof project.technology === "object" && project.technology && (
+        {typeof project.technologies === "object" && project.technologies && (
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Công nghệ sử dụng
             </h3>
-            
+
             <div className="border border-gray-200 rounded-lg p-6">
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                {(project.technology as any).name}
+                {(project.technologies as any).name}
               </h4>
-              {(project.technology as any).description && (
+              {(project.technologies as any).description && (
                 <p className="text-gray-600">
-                  {(project.technology as any).description}
+                  {(project.technologies as any).description}
                 </p>
               )}
             </div>
@@ -283,23 +308,38 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Documents Section */}
-        {project.documents && project.documents.length > 0 && (
+        {project.documents_finance && project.documents_finance.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Tài liệu dự án
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {project.documents.map((_, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+              {project.documents_finance.map((_, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <svg
+                        className="w-5 h-5 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
                       </svg>
                     </div>
                     <div>
-                      <div className="font-medium text-gray-900">Tài liệu {index + 1}</div>
+                      <div className="font-medium text-gray-900">
+                        Tài liệu {index + 1}
+                      </div>
                       <div className="text-sm text-gray-500">PDF</div>
                     </div>
                   </div>
