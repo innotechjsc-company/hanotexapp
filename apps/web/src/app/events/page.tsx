@@ -266,40 +266,6 @@ export default function EventsPage() {
     }
   };
 
-  // Comment handlers
-  const handleAddComment = () => {
-    if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        author: "Bạn",
-        avatar: "B",
-        avatarColor: "green",
-        time: new Date().toLocaleString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          day: "2-digit",
-          month: "2-digit",
-        }),
-        content: newComment.trim(),
-      };
-      setComments([comment, ...comments]);
-      setNewComment("");
-    }
-  };
-
-  const getAvatarColorClass = (color: string) => {
-    switch (color) {
-      case "purple":
-        return "bg-purple-100 text-purple-600";
-      case "blue":
-        return "bg-blue-100 text-blue-600";
-      case "green":
-        return "bg-green-100 text-green-600";
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -362,7 +328,7 @@ export default function EventsPage() {
               </div>
 
               {/* Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex gap-4 items-center flex-wrap">
                 <Select
                   label="Trạng thái"
                   variant="bordered"
@@ -394,25 +360,7 @@ export default function EventsPage() {
               kiện
             </p>
           </div>
-
-          <div className="flex items-center space-x-4">
-            <Select
-              size="sm"
-              variant="bordered"
-              selectedKeys={[sortBy]}
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys)[0] as string;
-                setSortBy(selected);
-              }}
-              className="w-48"
-            >
-              <SelectItem key="date">Theo ngày</SelectItem>
-              <SelectItem key="title">Theo tên</SelectItem>
-              <SelectItem key="attendees">Theo số lượng tham gia</SelectItem>
-            </Select>
-          </div>
         </div>
-
         {/* Events List */}
         {events.length > 0 ? (
           <div className="space-y-6 w-full">
