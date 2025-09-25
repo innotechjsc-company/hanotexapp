@@ -49,6 +49,12 @@ export const Contract: CollectionConfig = {
       label: 'Đề xuất',
     },
     {
+      name: 'price',
+      type: 'number',
+      required: true,
+      label: 'Giá',
+    },
+    {
       name: 'contract_file',
       type: 'upload',
       relationTo: 'media',
@@ -68,6 +74,18 @@ export const Contract: CollectionConfig = {
       label: 'Trạng thái',
       defaultValue: 'in_progress',
       options: ['signed', 'in_progress', 'completed', 'cancelled'],
+    },
+    {
+      name: 'user_a_confirmed',
+      type: 'checkbox',
+      label: 'Bên A đã xác nhận',
+      defaultValue: false,
+    },
+    {
+      name: 'user_b_confirmed',
+      type: 'checkbox',
+      label: 'Bên B đã xác nhận',
+      defaultValue: false,
     },
   ],
   timestamps: true,

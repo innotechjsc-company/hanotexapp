@@ -4,10 +4,8 @@ import { InvestmentFund, Media } from '@/payload-types'
 
 export enum ProjectStatusEnum {
   PENDING = 'pending',
-  NEGOTIATING = 'negotiating',
-  CONTRACT_SIGNED = 'contract_signed',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
+  ACTIVE = 'active',
+  REJECTED = 'rejected',
 }
 
 export type Project = {
@@ -27,5 +25,6 @@ export type Project = {
   share_percentage?: number
   goal_money_purpose?: string
   status: ProjectStatusEnum
+  open_investment_fund: boolean
   end_date: string
 }

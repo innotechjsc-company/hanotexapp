@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
         technologies: [technologyId],
         technology_propose: technologyProposeId,
         offer: (updatedOffer as any).id,
+        price: (updatedOffer as any).price,
       } as any,
       overrideAccess: true,
     })

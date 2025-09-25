@@ -11,8 +11,7 @@ import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { MediaType } from "@/types/media1";
 import { contractsApi } from "@/api/contracts";
-import { contractStepsApi } from "@/api/contract-steps";
-import type { ContractStepApproval } from "@/types/contract-step";
+
 import { OfferStatus } from "@/types/offer";
 import type { OfferFormData } from "../components/OfferModal";
 
@@ -431,67 +430,27 @@ export const useNegotiation = ({
       if (!proposal) return;
 
       // 1) Tìm hợp đồng liên quan tới đề xuất hiện tại
-      const contract = await contractsApi.getByTechnologyPropose(proposal.id, 1);
+      const contract = await contractsApi.getByTechnologyPropose(
+        proposal.id,
+        1
+      );
       if (!contract || !contract.id) {
         message.error("Không tìm thấy hợp đồng liên quan cho đề xuất này");
         return;
       }
 
-      // 2) Xác định vai trò A/B của người hiện tại
-      const userForActions = stableUser || currentUser;
-      if (!userForActions?.id) {
-        message.error("Bạn chưa đăng nhập");
-        return;
-      }
-
-      const ua: any = contract.user_a as any;
-      const ub: any = contract.user_b as any;
-      const userAId = typeof ua === "object" ? ua?.id : ua;
-      const userBId = typeof ub === "object" ? ub?.id : ub;
-
-      const isPartyA = String(userAId) === String(userForActions.id);
-      const isPartyB = String(userBId) === String(userForActions.id);
-      const currentParty: "A" | "B" | null = isPartyA ? "A" : isPartyB ? "B" : null;
-      if (!currentParty) {
-        message.warning("Bạn không phải là Bên A/B của hợp đồng này");
-        return;
-      }
-
-      const otherParty: "A" | "B" = currentParty === "A" ? "B" : "A";
-
-      // 3) Chuẩn bị approvals: bên hiện tại auto 'approved', bên còn lại 'pending'
-      const baseApprovals: ContractStepApproval[] = [
-        {
-          party: currentParty,
-          user: userForActions.id as any,
-          decision: "approved",
-          decided_at: new Date().toISOString(),
-        },
-        {
-          party: otherParty,
-          user: (otherParty === "A" ? userAId : userBId) as any,
-          decision: "pending",
-        },
-      ];
-
-      // 4) Tải file hợp đồng (nếu có) và tạo bước B1: sign_contract
+      // 2) Upload contract file if provided
+      let contractFileId = null;
       if (data.contractFile) {
         const media = await uploadFile(data.contractFile, {
           type: MediaType.DOCUMENT,
           alt: `Hợp đồng ${contract.id}`,
         });
-
-        await contractStepsApi.createStep({
-          contract: contract.id as any,
-          step: "sign_contract",
-          contract_file: media.id as any,
-          uploaded_by: userForActions.id as any,
-          approvals: baseApprovals,
-          notes: data.notes,
-        });
+        contractFileId = media.id;
       }
 
-      // 5) Tải tài liệu kèm theo (nếu có) và tạo bước B2: upload_attachments
+      // 3) Upload attachments if provided
+      const attachmentIds: string[] = [];
       const atts = Array.isArray(data.attachments) ? data.attachments : [];
       if (atts.length > 0) {
         const uploads = await Promise.all(
@@ -502,41 +461,31 @@ export const useNegotiation = ({
             })
           )
         );
-        const ids = uploads.map((m) => m.id as any);
-
-        await contractStepsApi.createStep({
-          contract: contract.id as any,
-          step: "upload_attachments",
-          attachments: ids,
-          uploaded_by: userForActions.id as any,
-          approvals: baseApprovals,
-          notes: data.notes,
-        });
+        attachmentIds.push(...uploads.map((m) => String(m.id)));
       }
 
-      // 6) Tạo bước B3: complete_contract
-      const extraNotes = `${data.notes || ""}${
-        data.startDate
-          ? `${data.notes ? "\n" : ""}Ngày bắt đầu dự kiến: ${new Date(
-              data.startDate
-            ).toLocaleDateString("vi-VN")}`
-          : ""
-      }`;
+      // 4) Update contract with files and mark as signed
+      const updateData: any = {
+        status: "signed",
+      };
 
-      await contractStepsApi.createStep({
-        contract: contract.id as any,
-        step: "complete_contract",
-        approvals: baseApprovals,
-        notes: extraNotes || undefined,
-      });
+      if (contractFileId) {
+        updateData.contract_file = contractFileId;
+      }
 
-      // 7) Đánh dấu đề xuất đã hoàn tất để kết thúc luồng đàm phán (như trước đây)
+      if (attachmentIds.length > 0) {
+        updateData.documents = attachmentIds;
+      }
+
+      await contractsApi.update(contract.id, updateData);
+
+      // 5) Mark proposal as completed to end negotiation flow
       const updated = await technologyProposeApi.setStatus(
         proposalId,
         "completed"
       );
       setProposal(updated);
-      message.success("Đã khởi tạo các bước và đánh dấu hợp đồng hoàn tất");
+      message.success("Hợp đồng đã được hoàn tất thành công!");
     } catch (err) {
       console.error("Failed to complete contract:", err);
       message.error("Không thể hoàn tất hợp đồng. Vui lòng thử lại.");
