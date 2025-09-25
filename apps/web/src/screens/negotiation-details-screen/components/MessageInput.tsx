@@ -1,6 +1,6 @@
 import React from "react";
 import { Form, Input, Button, Upload, Typography } from "antd";
-import { Send, Paperclip, X } from "lucide-react";
+import { Send, Paperclip, X, DollarSign } from "lucide-react";
 import { FileText } from "lucide-react";
 
 const { Text } = Typography;
@@ -14,6 +14,10 @@ interface MessageInputProps {
   onFileUpload: (file: File) => boolean;
   onRemoveAttachment: (index: number) => void;
   formatFileSize: (bytes: number) => string;
+  onSendOffer?: () => void;
+  canSendOffer?: boolean;
+  hasPendingOffer?: boolean;
+  isProposalCreator?: boolean; // Thêm prop để kiểm tra có phải người tạo proposal
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -25,6 +29,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   onFileUpload,
   onRemoveAttachment,
   formatFileSize,
+  onSendOffer,
+  canSendOffer = true,
+  hasPendingOffer = false,
+  isProposalCreator = false,
 }) => {
   return (
     <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
@@ -99,6 +107,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               />
             </Form.Item>
 
+            {/* Offer button - Only show if user is proposal creator */}
+            {onSendOffer && isProposalCreator && (
+              <Button
+                type="default"
+                icon={<DollarSign size={16} />}
+                onClick={onSendOffer}
+                disabled={!canSendOffer || sendingMessage || uploadingFiles}
+                className="rounded-full w-10 h-10 flex items-center justify-center border-orange-300 text-orange-600 hover:border-orange-400 hover:text-orange-700 hover:bg-orange-50 transition-all duration-200"
+                title={
+                  hasPendingOffer ? "Chờ xác nhận đề xuất" : "Gửi đề xuất giá"
+                }
+              />
+            )}
+
             {/* Send button */}
             <Button
               type="primary"
@@ -117,6 +139,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             />
           </div>
         </Form>
+
+        {/* Pending offer status message */}
+        {hasPendingOffer && isProposalCreator && (
+          <div className="px-3 pb-2">
+            <Text className="text-xs text-amber-600">
+              Bạn đã gửi đề xuất, vui lòng chờ bên bán xác nhận
+            </Text>
+          </div>
+        )}
       </div>
     </div>
   );

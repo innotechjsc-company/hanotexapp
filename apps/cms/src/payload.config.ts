@@ -36,6 +36,9 @@ import { NegotiatingMessage } from './collections/NegotiatingMessage'
 import { RoomChat } from './collections/RoomChat'
 import { RoomMessage } from './collections/RoomMessage'
 import { RoomUser } from './collections/RoomUser'
+import { Offer } from './collections/Offer'
+import { Contract } from './collections/Contract'
+import { ContractStep } from './collections/ContractStep'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -85,6 +88,9 @@ export default buildConfig({
     RoomChat,
     RoomMessage,
     RoomUser,
+    Offer,
+    Contract,
+    ContractStep,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

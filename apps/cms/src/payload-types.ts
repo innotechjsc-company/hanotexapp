@@ -96,6 +96,9 @@ export interface Config {
     'room-chat': RoomChat;
     'room-message': RoomMessage;
     'room-user': RoomUser;
+    offer: Offer;
+    contract: Contract;
+    'contract-step': ContractStep;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -131,6 +134,9 @@ export interface Config {
     'room-chat': RoomChatSelect<false> | RoomChatSelect<true>;
     'room-message': RoomMessageSelect<false> | RoomMessageSelect<true>;
     'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
+    offer: OfferSelect<false> | OfferSelect<true>;
+    contract: ContractSelect<false> | ContractSelect<true>;
+    'contract-step': ContractStepSelect<false> | ContractStepSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -954,6 +960,25 @@ export interface NegotiatingMessage {
    * Tài liệu đính kèm
    */
   documents?: (string | Media)[] | null;
+  is_offer?: boolean | null;
+  /**
+   * Offer
+   */
+  offer?: (string | null) | Offer;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "offer".
+ */
+export interface Offer {
+  id: string;
+  technology_propose: string | TechnologyPropose;
+  negotiating_messages: string | NegotiatingMessage;
+  content: string;
+  price: number;
+  status?: ('pending' | 'accepted' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -988,6 +1013,58 @@ export interface RoomUser {
   id: string;
   room: string | RoomChat;
   user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract".
+ */
+export interface Contract {
+  id: string;
+  user_a: string | User;
+  user_b: string | User;
+  technologies: (string | Technology)[];
+  technology_propose: string | TechnologyPropose;
+  offer: string | Offer;
+  contract_file?: (string | null) | Media;
+  documents?: (string | Media)[] | null;
+  status: 'signed' | 'in_progress' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract-step".
+ */
+export interface ContractStep {
+  id: string;
+  contract: string | Contract;
+  step: 'sign_contract' | 'upload_attachments' | 'complete_contract';
+  uploaded_by?: (string | null) | User;
+  /**
+   * Tệp hợp đồng (bắt buộc ở Bước 1)
+   */
+  contract_file?: (string | null) | Media;
+  /**
+   * Các tài liệu bổ sung (yêu cầu ở Bước 2)
+   */
+  attachments?: (string | Media)[] | null;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  /**
+   * Cần 2 dòng: đại diện Bên A và Bên B
+   */
+  approvals?:
+    | {
+        party: 'A' | 'B';
+        user: string | User;
+        decision: 'pending' | 'approved' | 'rejected';
+        decided_at?: string | null;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1113,6 +1190,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'room-user';
         value: string | RoomUser;
+      } | null)
+    | ({
+        relationTo: 'offer';
+        value: string | Offer;
+      } | null)
+    | ({
+        relationTo: 'contract';
+        value: string | Contract;
+      } | null)
+    | ({
+        relationTo: 'contract-step';
+        value: string | ContractStep;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1661,6 +1750,8 @@ export interface NegotiatingMessagesSelect<T extends boolean = true> {
   user?: T;
   message?: T;
   documents?: T;
+  is_offer?: T;
+  offer?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1692,6 +1783,60 @@ export interface RoomMessageSelect<T extends boolean = true> {
 export interface RoomUserSelect<T extends boolean = true> {
   room?: T;
   user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "offer_select".
+ */
+export interface OfferSelect<T extends boolean = true> {
+  technology_propose?: T;
+  negotiating_messages?: T;
+  content?: T;
+  price?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract_select".
+ */
+export interface ContractSelect<T extends boolean = true> {
+  user_a?: T;
+  user_b?: T;
+  technologies?: T;
+  technology_propose?: T;
+  offer?: T;
+  contract_file?: T;
+  documents?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract-step_select".
+ */
+export interface ContractStepSelect<T extends boolean = true> {
+  contract?: T;
+  step?: T;
+  uploaded_by?: T;
+  contract_file?: T;
+  attachments?: T;
+  status?: T;
+  approvals?:
+    | T
+    | {
+        party?: T;
+        user?: T;
+        decision?: T;
+        decided_at?: T;
+        note?: T;
+        id?: T;
+      };
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

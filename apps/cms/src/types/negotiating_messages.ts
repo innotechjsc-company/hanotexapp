@@ -1,3 +1,4 @@
+import { Offer } from './offer'
 import { Propose } from './propose'
 import { Media, TechnologyPropose, User } from '@/payload-types'
 
@@ -7,4 +8,6 @@ export interface NegotiatingMessage {
   user: User
   message: string
   documents: Media[]
+  is_offer: boolean
+  offer: Offer
 }

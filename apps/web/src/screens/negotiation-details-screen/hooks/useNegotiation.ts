@@ -5,10 +5,13 @@ import {
   negotiatingMessageApi,
   ApiNegotiatingMessage,
 } from "@/api/negotiating-messages";
+import { offerApi, ApiOffer } from "@/api/offers";
 import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { MediaType } from "@/types/media1";
+import { OfferStatus } from "@/types/offer";
+import type { OfferFormData } from "../components/OfferModal";
 
 export interface UseNegotiationProps {
   proposalId: string;
@@ -20,12 +23,15 @@ export interface UseNegotiationReturn {
   messages: ApiNegotiatingMessage[];
   attachments: File[];
   pendingMessage: { message: string; attachments: File[] };
+  latestOffer: ApiOffer | null;
 
   // Loading states
   loading: boolean;
   sendingMessage: boolean;
   uploadingFiles: boolean;
   showConfirmModal: boolean;
+  showOfferModal: boolean;
+  sendingOffer: boolean;
 
   // Error state
   error: string;
@@ -38,6 +44,20 @@ export interface UseNegotiationReturn {
   setShowConfirmModal: (show: boolean) => void;
   handleSignContract: () => Promise<void>;
   handleDownloadContract: () => Promise<void>;
+  handleCompleteContract: (data: {
+    contractFile?: File | null;
+    attachments?: File[];
+    notes?: string;
+    startDate?: string | null;
+  }) => Promise<void>;
+  handleSendOffer: () => void;
+  confirmSendOffer: (offerData: OfferFormData) => Promise<void>;
+  setShowOfferModal: (show: boolean) => void;
+
+  // Offer utilities
+  canSendOffer: boolean;
+  hasPendingOffer: boolean;
+  isProposalCreator: boolean;
 
   // Utilities
   formatFileSize: (bytes: number) => string;
@@ -138,6 +158,9 @@ export const useNegotiation = ({
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [sendingOffer, setSendingOffer] = useState(false);
+  const [latestOffer, setLatestOffer] = useState<ApiOffer | null>(null);
   const [pendingMessage, setPendingMessage] = useState<{
     message: string;
     attachments: File[];
@@ -147,6 +170,7 @@ export const useNegotiation = ({
     if (proposalId && stableUser) {
       fetchProposalDetails();
       fetchNegotiationMessages();
+      fetchLatestOffer();
     }
   }, [proposalId, stableUser]);
 
@@ -187,6 +211,16 @@ export const useNegotiation = ({
       console.error("Failed to fetch negotiation data:", err);
       // Fallback to empty array on error
       setMessages([]);
+    }
+  };
+
+  const fetchLatestOffer = async () => {
+    try {
+      const offer = await offerApi.getLatestForProposal(proposalId);
+      setLatestOffer(offer);
+    } catch (err) {
+      console.error("Failed to fetch latest offer:", err);
+      setLatestOffer(null);
     }
   };
 
@@ -283,7 +317,7 @@ export const useNegotiation = ({
       }
 
       // Send negotiation using API
-      const sentMessage = await negotiatingMessageApi.sendMessage({
+      await negotiatingMessageApi.sendMessage({
         propose: "", // Leave empty for now - this might be optional
         technology_propose: proposalId,
         user: userForSending.id,
@@ -313,6 +347,35 @@ export const useNegotiation = ({
 
   const removeAttachment = (index: number) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSendOffer = () => {
+    setShowOfferModal(true);
+  };
+
+  const confirmSendOffer = async (offerData: OfferFormData) => {
+    try {
+      setSendingOffer(true);
+
+      // Send offer using API with new payload shape
+      await negotiatingMessageApi.sendOffer({
+        technology_propose: proposalId,
+        message: offerData.message,
+        price: offerData.price,
+        content: offerData.content,
+      });
+
+      // Refresh data to get the latest information
+      await Promise.all([fetchNegotiationMessages(), fetchLatestOffer()]);
+
+      setShowOfferModal(false);
+      message.success("Đã gửi đề xuất giá thành công");
+    } catch (err) {
+      console.error("Failed to send offer:", err);
+      message.error("Không thể gửi đề xuất giá");
+    } finally {
+      setSendingOffer(false);
+    }
   };
 
   const handleSignContract = async () => {
@@ -352,6 +415,27 @@ export const useNegotiation = ({
     } catch (err) {
       console.error("Failed to download contract:", err);
       message.error("Không thể tải xuống hợp đồng. Vui lòng thử lại.");
+    }
+  };
+
+  const handleCompleteContract = async (data: {
+    contractFile?: File | null;
+    attachments?: File[];
+    notes?: string;
+    startDate?: string | null;
+  }) => {
+    try {
+      if (!proposal) return;
+      // For now, just mark proposal as completed. In future, persist contract details.
+      const updated = await technologyProposeApi.setStatus(
+        proposalId,
+        "completed"
+      );
+      setProposal(updated);
+      message.success("Đã đánh dấu hợp đồng hoàn tất");
+    } catch (err) {
+      console.error("Failed to complete contract:", err);
+      message.error("Không thể hoàn tất hợp đồng. Vui lòng thử lại.");
     }
   };
 
@@ -397,18 +481,29 @@ export const useNegotiation = ({
     }
   };
 
+  // Computed properties for offer functionality
+  const userForOfferCheck = stableUser || currentUser;
+  // Người tạo TechnologyPropose (proposal.user) là người có thể gửi đề xuất
+  // Người nhận (chủ công nghệ) thì không có nút gửi đề xuất
+  const isProposalCreator = proposal?.user?.id === userForOfferCheck?.id;
+  const canSendOffer = isProposalCreator && proposal?.status === "negotiating";
+  const hasPendingOffer = latestOffer?.status === OfferStatus.PENDING;
+
   return {
     // Data
     proposal,
     messages,
     attachments,
     pendingMessage,
+    latestOffer,
 
     // Loading states
     loading,
     sendingMessage,
     uploadingFiles,
     showConfirmModal,
+    showOfferModal,
+    sendingOffer,
 
     // Error state
     error,
@@ -421,6 +516,15 @@ export const useNegotiation = ({
     setShowConfirmModal,
     handleSignContract,
     handleDownloadContract,
+    handleSendOffer,
+    confirmSendOffer,
+    setShowOfferModal,
+    handleCompleteContract,
+
+    // Offer utilities
+    canSendOffer,
+    hasPendingOffer,
+    isProposalCreator,
 
     // Utilities
     formatFileSize,

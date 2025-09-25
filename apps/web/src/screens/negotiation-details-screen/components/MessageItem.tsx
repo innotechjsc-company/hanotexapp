@@ -1,9 +1,19 @@
-import React from "react";
-import { Avatar, Typography, Button, Tooltip } from "antd";
+import React, { useState } from "react";
+import {
+  Avatar,
+  Typography,
+  Button,
+  Tooltip,
+  Tag,
+  Popconfirm,
+  message as antdMessage,
+} from "antd";
 import { Download, CheckCircle2 } from "lucide-react";
 import type { ApiNegotiatingMessage } from "@/api/negotiating-messages";
+import { negotiatingMessageApi } from "@/api/negotiating-messages";
 import type { Media } from "@/types/media1";
 import { useUser } from "@/store/auth";
+import { OfferStatus } from "@/types/offer";
 
 const { Text } = Typography;
 
@@ -190,6 +200,88 @@ const MessageBubble: React.FC<{
 }> = ({ message, isRightSide, formatFileSize }) => {
   const hasMessage = message.message && message.message.trim().length > 0;
   const hasDocuments = message.documents && message.documents.length > 0;
+  const hasOffer = !!message.is_offer && !!message.offer;
+  const initialOfferStatus =
+    (hasOffer && typeof message.offer === "object"
+      ? (message.offer.status as OfferStatus | undefined)
+      : undefined) || undefined;
+  const [offerStatus, setOfferStatus] = useState<OfferStatus | undefined>(
+    initialOfferStatus
+  );
+  const [actionLoading, setActionLoading] = useState<
+    "accept" | "reject" | null
+  >(null);
+
+  const formatCurrency = (value?: number) => {
+    if (value == null) return "-";
+    try {
+      return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+      }).format(value);
+    } catch {
+      return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ₫";
+    }
+  };
+
+  const getOfferStatusTag = (status?: OfferStatus) => {
+    if (!status) return null;
+    const color =
+      status === OfferStatus.PENDING
+        ? "gold"
+        : status === OfferStatus.ACCEPTED
+          ? "green"
+          : "red";
+    const label =
+      status === OfferStatus.PENDING
+        ? "Chờ xác nhận"
+        : status === OfferStatus.ACCEPTED
+          ? "Đã chấp nhận"
+          : "Đã từ chối";
+    return <Tag color={color}>{label}</Tag>;
+  };
+
+  const canActOnOffer =
+    hasOffer &&
+    typeof message.offer === "object" &&
+    offerStatus === OfferStatus.PENDING &&
+    !isRightSide; // only show actions to the receiver, not the sender
+
+  const handleAcceptOffer = async () => {
+    try {
+      if (!hasOffer || typeof message.offer !== "object") return;
+      setActionLoading("accept");
+      await negotiatingMessageApi.acceptOffer((message.offer as any).id);
+      setOfferStatus(OfferStatus.ACCEPTED);
+      antdMessage.success("Đđề xuất ã chấp nhận giá");
+      // The accept route also updates proposal status and creates contract
+      // Refresh the page to reflect step changes if needed
+      setTimeout(() => {
+        try {
+          window.location.reload();
+        } catch {}
+      }, 800);
+    } catch (e) {
+      antdMessage.error("Không thể chấp nhận đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectOffer = async () => {
+    try {
+      if (!hasOffer || typeof message.offer !== "object") return;
+      setActionLoading("reject");
+      await negotiatingMessageApi.rejectOffer((message.offer as any).id);
+      setOfferStatus(OfferStatus.REJECTED);
+      antdMessage.success("Đã từ chối đề xuất giá");
+    } catch (e) {
+      antdMessage.error("Không thể từ chối đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   return (
     <div className={`flex ${isRightSide ? "justify-end" : "justify-start"}`}>
@@ -203,6 +295,69 @@ const MessageBubble: React.FC<{
           }
         `}
       >
+        {/* Offer block */}
+        {hasOffer && typeof message.offer === "object" && (
+          <div
+            className={`rounded-xl p-3 mb-2 ${
+              isRightSide ? "bg-white/20" : "bg-blue-50 border border-blue-100"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <Text
+                className={`${isRightSide ? "text-white" : "text-blue-700"} font-medium`}
+              >
+                Đề xuất giá
+              </Text>
+              {getOfferStatusTag(offerStatus)}
+            </div>
+            <div className="text-sm">
+              <Text
+                className={`${isRightSide ? "text-white" : "text-gray-800"} font-semibold`}
+              >
+                {formatCurrency((message.offer as any).price)}
+              </Text>
+            </div>
+            {message.offer.content && (
+              <div className="mt-1">
+                <Text
+                  className={`${isRightSide ? "text-white/90" : "text-gray-700"}`}
+                >
+                  {message.offer.content}
+                </Text>
+              </div>
+            )}
+
+            {canActOnOffer && (
+              <div className="mt-3 flex items-center gap-2">
+                <Popconfirm
+                  title="Xác nhận chấp nhận đề xuất"
+                  description="Bạn có chắc chắn muốn chấp nhận đề xuất này? Hệ thống sẽ tạo hợp đồng và chuyển sang bước ký hợp đồng."
+                  okText="Đồng ý"
+                  cancelText="Hủy"
+                  onConfirm={handleAcceptOffer}
+                >
+                  <Button
+                    size="small"
+                    type="primary"
+                    loading={actionLoading === "accept"}
+                    className="bg-green-500 hover:bg-green-600 border-none"
+                  >
+                    Đồng ý
+                  </Button>
+                </Popconfirm>
+                <Button
+                  size="small"
+                  danger
+                  onClick={handleRejectOffer}
+                  loading={actionLoading === "reject"}
+                >
+                  Từ chối
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Message text */}
         {hasMessage && (
           <Text

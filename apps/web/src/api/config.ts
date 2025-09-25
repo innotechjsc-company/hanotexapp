@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
   NEWS_LIKE: "/news-like",
   SERVICES: "/services",
   SERVICE_TICKET: "/service-ticket",
+  OFFERS: "/offer",
 } as const;
 
 // HTTP Methods
