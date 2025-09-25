@@ -3,7 +3,7 @@
  * Các function để quản lý projects với PayloadCMS
  */
 
-import { Project } from "@/types/project";
+import { Project, ProjectStatusEnum } from "@/types/project";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
@@ -195,7 +195,7 @@ export async function searchProjects(
 export async function getActiveProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: "in_progress" }, pagination);
+  return getProjects({ status: ProjectStatusEnum.COMPLETED }, pagination);
 }
 
 /**
@@ -204,7 +204,7 @@ export async function getActiveProjects(
 export async function getPendingProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: "pending" }, pagination);
+  return getProjects({ status: ProjectStatusEnum.PENDING }, pagination);
 }
 
 /**
@@ -213,7 +213,7 @@ export async function getPendingProjects(
 export async function getCompletedProjects(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Project[]>> {
-  return getProjects({ status: "completed" }, pagination);
+  return getProjects({ status: ProjectStatusEnum.COMPLETED }, pagination);
 }
 
 /**
@@ -228,7 +228,7 @@ export async function getProjectsEndingSoon(
 
   return getProjects(
     {
-      status: "in_progress",
+      status: ProjectStatusEnum.COMPLETED,
       end_date_to: endDate.toISOString().split("T")[0], // YYYY-MM-DD format
     },
     { ...pagination, sort: "end_date" }
@@ -274,8 +274,8 @@ export async function getActiveProjectsAll(
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
     // status in [in_progress, completed]
-    "where[or][0][status][equals]": "in_progress",
-    "where[or][1][status][equals]": "completed",
+    "where[or][0][status][equals]": ProjectStatusEnum.COMPLETED,
+    "where[or][1][status][equals]": ProjectStatusEnum.COMPLETED,
   };
 
   return payloadApiClient.get<Project[]>(API_ENDPOINTS.PROJECTS, params);

@@ -5,7 +5,7 @@ export const Project: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     group: 'Quản lý Dự án',
-    defaultColumns: ['name', 'description', 'user'],
+    defaultColumns: ['name', 'description', 'status', 'end_date', 'user'],
   },
   access: {
     read: () => true,
@@ -24,6 +24,7 @@ export const Project: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
+      required: true,
       label: 'Mô tả',
     },
     {
@@ -50,7 +51,15 @@ export const Project: CollectionConfig = {
       type: 'relationship',
       relationTo: 'technologies',
       hasMany: true,
+      required: true,
       label: 'Công nghệ',
+    },
+    // quỹ đầu tư
+    {
+      name: 'investment_fund',
+      type: 'relationship',
+      relationTo: 'investment-fund',
+      label: 'Quỹ đầu tư',
     },
 
     // Thông tin tài chính
@@ -111,7 +120,8 @@ export const Project: CollectionConfig = {
     },
     {
       name: 'end_date',
-      type: 'date',
+      type: 'date', 
+      required: true,
       label: 'Ngày kết thúc',
     },
   ],
