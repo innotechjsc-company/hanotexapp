@@ -21,6 +21,13 @@ export const ContractLogs: CollectionConfig = {
       label: 'Đề xuất đầu tư công nghệ',
     },
     {
+      name: 'contract',
+      type: 'relationship',
+      relationTo: 'contract',
+      required: true,
+      label: 'Hợp đồng',
+    },
+    {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
@@ -40,11 +47,31 @@ export const ContractLogs: CollectionConfig = {
       label: 'Tài liệu',
     },
     {
+      name: 'reason',
+      type: 'text',
+      label: 'Lý do (khi từ chối)',
+      admin: {
+        condition: (_: any, siblingData: any) => siblingData?.status === 'cancelled',
+      },
+      validate: (val: any, { siblingData }: any) => {
+        if (siblingData?.status === 'cancelled' && !val) {
+          return 'Vui lòng nhập lý do khi từ chối'
+        }
+        return true
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       options: ['pending', 'completed', 'cancelled'],
       defaultValue: 'pending',
       label: 'Trạng thái',
+    },
+    {
+      name: 'is_done_contract',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Xác nhận hoàn thành hợp đồng',
     },
   ],
   timestamps: true,
