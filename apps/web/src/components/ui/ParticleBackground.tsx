@@ -1,124 +1,60 @@
 "use client";
-
-import { useEffect, useRef } from "react";
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  opacity: number;
-}
+import React, { useMemo } from "react";
 
 interface ParticleBackgroundProps {
   particleCount?: number;
   colors?: string[];
-  speed?: number;
-  size?: number;
-  opacity?: number;
-  className?: string;
+  speed?: number; // 0.1 - 1.0 multiplier
 }
 
 export default function ParticleBackground({
-  particleCount = 50,
+  particleCount = 24,
   colors = ["#3b82f6", "#60a5fa", "#93c5fd"],
-  speed = 0.5,
-  size = 2,
-  opacity = 0.6,
-  className = "",
+  speed = 0.4,
 }: ParticleBackgroundProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const animationRef = useRef<number>();
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-
-    const createParticles = () => {
-      particlesRef.current = [];
-      for (let i = 0; i < particleCount; i++) {
-        particlesRef.current.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * speed,
-          vy: (Math.random() - 0.5) * speed,
-          size: Math.random() * size + 1,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          opacity: Math.random() * opacity + 0.1,
-        });
-      }
-    };
-
-    const updateParticles = () => {
-      particlesRef.current.forEach((particle) => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-
-        // Wrap around edges
-        if (particle.x < 0) particle.x = canvas.width;
-        if (particle.x > canvas.width) particle.x = 0;
-        if (particle.y < 0) particle.y = canvas.height;
-        if (particle.y > canvas.height) particle.y = 0;
-      });
-    };
-
-    const drawParticles = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particlesRef.current.forEach((particle) => {
-        ctx.save();
-        ctx.globalAlpha = particle.opacity;
-        ctx.fillStyle = particle.color;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
-    };
-
-    const animate = () => {
-      updateParticles();
-      drawParticles();
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    const handleResize = () => {
-      resizeCanvas();
-      createParticles();
-    };
-
-    // Initialize
-    resizeCanvas();
-    createParticles();
-    animate();
-
-    // Event listeners
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [particleCount, colors, speed, size, opacity]);
+  const particles = useMemo(() => {
+    const arr = Array.from({ length: particleCount }).map((_, i) => {
+      const size = Math.random() * 3 + 2; // 2-5px
+      const left = Math.random() * 100; // vw
+      const top = Math.random() * 100; // vh
+      const color = colors[i % colors.length];
+      const duration = 10 - speed * 6 + Math.random() * 6; // 4s - 16s
+      const delay = Math.random() * 5; // 0-5s
+      const amp = 10 + Math.random() * 20; // amplitude in px
+      const dir = Math.random() > 0.5 ? 1 : -1; // up/down
+      return { size, left, top, color, duration, delay, amp, dir };
+    });
+    return arr;
+  }, [particleCount, colors, speed]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`absolute inset-0 pointer-events-none ${className}`}
-      style={{ width: "100%", height: "100%" }}
-    />
+    <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+      {particles.map((p, idx) => (
+        <span
+          key={idx}
+          style={{
+            position: "absolute",
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            width: p.size,
+            height: p.size,
+            borderRadius: "50%",
+            background: p.color,
+            opacity: 0.35,
+            filter: "blur(0.2px)",
+            animation: `pb-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+            transform: `translateY(0px)`,
+          }}
+        />
+      ))}
+      <style jsx global>{`
+        @keyframes pb-float {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+          100% { transform: translateY(0); }
+        }
+      `}</style>
+    </div>
   );
 }
+

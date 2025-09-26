@@ -1,67 +1,47 @@
 "use client";
+import React from "react";
+import { cn } from "@/lib/utils";
 
-import { ReactNode, useEffect, useState } from "react";
+export type AnimatedType = "bounce" | "pulse" | "rotate" | "float";
 
-interface AnimatedIconProps {
-  children: ReactNode;
-  animation?: "bounce" | "pulse" | "float" | "rotate" | "spin" | "wiggle" | "shake";
+export interface AnimatedIconProps {
+  children: React.ReactNode;
+  animation?: AnimatedType;
   delay?: number;
-  duration?: number;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export default function AnimatedIcon({
+function AnimatedIcon({
   children,
-  animation = "bounce",
+  animation = "pulse",
   delay = 0,
-  duration = 2000,
   size = "md",
-  className = "",
+  className,
 }: AnimatedIconProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const animateClass =
+    animation === "bounce"
+      ? "animate-bounce"
+      : animation === "rotate"
+      ? "animate-spin"
+      : animation === "float"
+      ? "animate-pulse"
+      : "animate-pulse";
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, delay);
-
-    return () => clearTimeout(timer);
-  }, [delay]);
-
-  const sizeClasses = {
-    sm: "w-4 h-4",
-    md: "w-6 h-6",
-    lg: "w-8 h-8",
-    xl: "w-12 h-12",
-  };
-
-  const animationClasses = {
-    bounce: "animate-bounce",
-    pulse: "animate-pulse",
-    float: "animate-float",
-    rotate: "animate-spin",
-    spin: "animate-spin",
-    wiggle: "animate-wiggle",
-    shake: "animate-shake",
-  };
-
-  const animationStyle = {
-    animationDuration: `${duration}ms`,
-    animationDelay: `${delay}ms`,
-  };
+  const scale = size === "sm" ? 0.9 : size === "lg" ? 1.1 : 1;
 
   return (
-    <div
-      className={`
-        inline-flex items-center justify-center
-        ${sizeClasses[size]}
-        ${isVisible ? animationClasses[animation] : ""}
-        ${className}
-      `}
-      style={animationStyle}
+    <span
+      className={cn("inline-flex", animateClass, className)}
+      style={{ animationDelay: `${delay}ms`, transform: `scale(${scale})` }}
+      role="presentation"
     >
       {children}
-    </div>
+    </span>
   );
 }
+
+// Support both default and named export for compatibility across files
+export { AnimatedIcon };
+export default AnimatedIcon;
+

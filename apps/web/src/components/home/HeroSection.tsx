@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import AnimatedIcon from "@/components/ui/AnimatedIcon";
+import ParticleBackground from "@/components/ui/ParticleBackground";
 import {
   Search,
   ArrowRight,
@@ -27,20 +28,16 @@ import {
   Wifi,
   Smartphone,
   Laptop,
-  Server,
-  Cloud,
-  Lock,
-  CheckCircle,
-  Play,
-  ChevronRight,
 } from "lucide-react";
-import AnimatedIcon from "@/components/ui/AnimatedIcon";
-import ParticleBackground from "@/components/ui/ParticleBackground";
 
 // Custom hook for counter animation
-const useCountUp = (end: number, duration: number = 2000, shouldStart: boolean = false) => {
+const useCountUp = (
+  end: number,
+  duration: number = 2000,
+  shouldStart: boolean = false
+) => {
   const [count, setCount] = useState(0);
-  
+
   useEffect(() => {
     if (!shouldStart) {
       setCount(0);
@@ -53,18 +50,18 @@ const useCountUp = (end: number, duration: number = 2000, shouldStart: boolean =
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setCount(Math.floor(easeOutQuart * end));
-      
+
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
       }
     };
 
     animationFrame = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
@@ -135,18 +132,18 @@ export default function HeroSection() {
       animation: "pulse" as const,
       duration: 2500,
     },
-    { 
-      icon: Award, 
-      label: "Giao dịch", 
+    {
+      icon: Award,
+      label: "Giao dịch",
       value: 150,
       suffix: "+",
       color: "from-red-500 to-red-700",
       animation: "float" as const,
       duration: 1800,
     },
-    { 
-      icon: Zap, 
-      label: "TRL Level", 
+    {
+      icon: Zap,
+      label: "TRL Level",
       value: 9,
       suffix: "",
       prefix: "1-",
@@ -159,7 +156,11 @@ export default function HeroSection() {
   // Counter hooks for each stat
   const techCount = useCountUp(stats[0].value, stats[0].duration, statsVisible);
   const userCount = useCountUp(stats[1].value, stats[1].duration, statsVisible);
-  const transactionCount = useCountUp(stats[2].value, stats[2].duration, statsVisible);
+  const transactionCount = useCountUp(
+    stats[2].value,
+    stats[2].duration,
+    statsVisible
+  );
   const trlCount = useCountUp(stats[3].value, stats[3].duration, statsVisible);
 
   // Format display values
@@ -212,31 +213,31 @@ export default function HeroSection() {
     },
   ];
 
-
-
   return (
     <div className="min-h-screen">
       {/* Hero Banner Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-20">
         {/* Particle Background */}
-        <ParticleBackground 
+        <ParticleBackground
           particleCount={30}
           colors={["#2563EB", "#3b82f6", "#60a5fa", "#93c5fd"]}
           speed={0.3}
         />
-        
+
         {/* Background Images with Parallax Effect */}
         <div className="absolute inset-0">
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: "url('https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=2125&h=1200&fit=crop')",
+              backgroundImage:
+                "url('https://images.pexels.com/photos/373543/pexels-photo-373543.jpeg?auto=compress&cs=tinysrgb&w=2125&h=1200&fit=crop')",
             }}
           />
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
             style={{
-              backgroundImage: "url('https://images.pexels.com/photos/2599244/pexels-photo-2599244.jpeg?auto=compress&cs=tinysrgb&w=2125&h=1200&fit=crop')",
+              backgroundImage:
+                "url('https://images.pexels.com/photos/2599244/pexels-photo-2599244.jpeg?auto=compress&cs=tinysrgb&w=2125&h=1200&fit=crop')",
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/80 to-blue-700/70" />
@@ -249,14 +250,16 @@ export default function HeroSection() {
             <div
               key={index}
               className="absolute animate-float"
-        style={{
+              style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 animationDelay: `${tech.delay}ms`,
                 animationDuration: `${3000 + Math.random() * 2000}ms`,
               }}
             >
-              <div className={`${tech.color} opacity-20 hover:opacity-40 transition-opacity duration-300`}>
+              <div
+                className={`${tech.color} opacity-20 hover:opacity-40 transition-opacity duration-300`}
+              >
                 <tech.icon className="h-8 w-8 md:h-12 md:w-12" />
               </div>
             </div>
@@ -269,11 +272,11 @@ export default function HeroSection() {
           <div className="absolute top-40 right-20 w-24 h-24 bg-blue-400/20 rounded-full animate-pulse animation-delay-200" />
           <div className="absolute bottom-32 left-20 w-16 h-16 bg-blue-600/20 rounded-full animate-pulse animation-delay-400" />
           <div className="absolute bottom-20 right-10 w-28 h-28 bg-blue-300/20 rounded-full animate-pulse animation-delay-600" />
-          
+
           <div className="absolute top-1/3 left-1/4 w-20 h-20 bg-white/5 rounded-lg rotate-45 animate-spin-slow" />
           <div className="absolute top-2/3 right-1/3 w-16 h-16 bg-white/5 rounded-lg rotate-12 animate-spin-slow animation-delay-1000" />
         </div>
-        
+
         {/* Main Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Logo and Brand */}
@@ -295,7 +298,7 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-            
+
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
               Sàn Giao Dịch Công Nghệ Hà Nội
             </h2>
@@ -312,19 +315,19 @@ export default function HeroSection() {
                 <div className="relative bg-white border border-gray-200 rounded-2xl p-2 shadow-lg">
                   <div className="flex items-center">
                     <Search className="absolute left-6 text-blue-600 h-6 w-6 z-10" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Tìm công nghệ, nhu cầu, chuyên gia, dự án..."
                       className="w-full pl-16 pr-40 py-5 text-lg bg-transparent text-blue-900 placeholder-blue-700 focus:outline-none focus:ring-0"
-                />
-                <button
-                  type="submit"
+                    />
+                    <button
+                      type="submit"
                       className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-lg"
-                >
-                  Tìm kiếm
-                </button>
+                    >
+                      Tìm kiếm
+                    </button>
                   </div>
                 </div>
               </div>
@@ -341,10 +344,14 @@ export default function HeroSection() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {feature.title}
+                  </h3>
                   <p className="text-white/80 text-sm">{feature.description}</p>
                 </div>
               </div>
@@ -360,7 +367,7 @@ export default function HeroSection() {
               <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
               <div className="relative flex items-center">
                 <Plus className="h-6 w-6 mr-3" />
-              Đăng sản phẩm KH&CN
+                Đăng sản phẩm KH&CN
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -370,31 +377,31 @@ export default function HeroSection() {
             >
               <div className="flex items-center">
                 <Target className="h-6 w-6 mr-3" />
-              Đăng nhu cầu KH&CN
+                Đăng nhu cầu KH&CN
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
           </div>
-
         </div>
       </section>
 
       {/* Technology Categories Section */}
       <section className="relative bg-gradient-to-br from-red-900 via-red-800 to-red-700 overflow-hidden py-20">
         {/* Particle Background */}
-        <ParticleBackground 
+        <ParticleBackground
           particleCount={40}
           colors={["#DC2626", "#EF4444", "#F87171", "#FCA5A5"]}
           speed={0.2}
         />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               Công nghệ tiên tiến đang chờ bạn
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Khám phá hàng trăm công nghệ đột phá từ các viện nghiên cứu, doanh nghiệp và chuyên gia hàng đầu
+              Khám phá hàng trăm công nghệ đột phá từ các viện nghiên cứu, doanh
+              nghiệp và chuyên gia hàng đầu
             </p>
           </div>
 
@@ -406,43 +413,73 @@ export default function HeroSection() {
                 description: "AI, Machine Learning, Deep Learning",
                 icon: Brain,
                 color: "from-blue-500 to-cyan-500",
-                technologies: ["Computer Vision", "NLP", "Robotics", "Neural Networks"]
+                technologies: [
+                  "Computer Vision",
+                  "NLP",
+                  "Robotics",
+                  "Neural Networks",
+                ],
               },
               {
                 title: "Công nghệ sinh học",
                 description: "Biotech, Pharma, Medical Devices",
                 icon: Microscope,
                 color: "from-green-500 to-emerald-500",
-                technologies: ["Gene Therapy", "Biomaterials", "Drug Discovery", "Diagnostics"]
+                technologies: [
+                  "Gene Therapy",
+                  "Biomaterials",
+                  "Drug Discovery",
+                  "Diagnostics",
+                ],
               },
               {
                 title: "Công nghệ số",
                 description: "Software, IoT, Blockchain",
                 icon: Code,
                 color: "from-purple-500 to-pink-500",
-                technologies: ["Web3", "IoT Solutions", "Cloud Computing", "Cybersecurity"]
+                technologies: [
+                  "Web3",
+                  "IoT Solutions",
+                  "Cloud Computing",
+                  "Cybersecurity",
+                ],
               },
               {
                 title: "Năng lượng xanh",
                 description: "Renewable Energy, Clean Tech",
                 icon: Zap,
                 color: "from-yellow-500 to-orange-500",
-                technologies: ["Solar Tech", "Wind Energy", "Battery Tech", "Hydrogen"]
+                technologies: [
+                  "Solar Tech",
+                  "Wind Energy",
+                  "Battery Tech",
+                  "Hydrogen",
+                ],
               },
               {
                 title: "Vật liệu tiên tiến",
                 description: "Nanomaterials, Composites",
                 icon: Atom,
                 color: "from-indigo-500 to-blue-500",
-                technologies: ["Graphene", "Smart Materials", "3D Printing", "Coatings"]
+                technologies: [
+                  "Graphene",
+                  "Smart Materials",
+                  "3D Printing",
+                  "Coatings",
+                ],
               },
               {
                 title: "Công nghệ vũ trụ",
                 description: "Aerospace, Satellite Tech",
                 icon: Rocket,
                 color: "from-red-500 to-pink-500",
-                technologies: ["Satellite Systems", "Space Tech", "Aerospace Materials", "Navigation"]
-              }
+                technologies: [
+                  "Satellite Systems",
+                  "Space Tech",
+                  "Aerospace Materials",
+                  "Navigation",
+                ],
+              },
             ].map((category, index) => (
               <Link
                 key={category.title}
@@ -451,12 +488,18 @@ export default function HeroSection() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     <category.icon className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{category.title}</h3>
-                    <p className="text-white/80 text-sm">{category.description}</p>
+                    <h3 className="text-lg font-semibold text-white">
+                      {category.title}
+                    </h3>
+                    <p className="text-white/80 text-sm">
+                      {category.description}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -476,29 +519,31 @@ export default function HeroSection() {
           {/* Stats with Enhanced Design */}
           <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-                <div
+              <div
                 key={stat.label}
                 className="text-center group"
                 style={{ animationDelay: `${index * 200}ms` }}
-                >
+              >
                 <div className="relative mb-4">
                   <div className="absolute inset-0 bg-red-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
                   <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 group-hover:bg-white/20 transition-all duration-300">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${stat.color} mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                  <AnimatedIcon
-                    animation={stat.animation}
-                    delay={index * 200}
+                    <div
+                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${stat.color} mb-3 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <AnimatedIcon
+                        animation={stat.animation}
+                        delay={index * 200}
                         size="lg"
                         className="text-white"
-                  >
+                      >
                         <stat.icon className="h-8 w-8" />
-                  </AnimatedIcon>
-                </div>
+                      </AnimatedIcon>
+                    </div>
                     <div className="text-3xl md:text-4xl font-bold text-white mb-2 group-hover:text-red-200 transition-colors duration-300">
-                  {displayValues[index]}
-                </div>
+                      {displayValues[index]}
+                    </div>
                     <div className="text-white/80 text-sm font-medium">
-                  {stat.label}
+                      {stat.label}
                     </div>
                   </div>
                 </div>
@@ -515,9 +560,10 @@ export default function HeroSection() {
             Sẵn sàng bắt đầu hành trình công nghệ?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-            Tham gia ngay hôm nay để khám phá, kết nối và phát triển cùng cộng đồng công nghệ Hà Nội
+            Tham gia ngay hôm nay để khám phá, kết nối và phát triển cùng cộng
+            đồng công nghệ Hà Nội
           </p>
-          
+
           {/* CTA Buttons with alternating colors */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <Link
@@ -545,36 +591,39 @@ export default function HeroSection() {
                 title: "Nền tảng tin cậy",
                 description: "Được hỗ trợ bởi thành phố Hà Nội",
                 icon: Shield,
-                color: "text-blue-600"
+                color: "text-blue-600",
               },
               {
                 title: "Đổi mới sáng tạo",
                 description: "Thúc đẩy những ý tưởng đột phá",
                 icon: Lightbulb,
-                color: "text-red-600"
+                color: "text-red-600",
               },
               {
                 title: "Kết nối toàn cầu",
                 description: "Mạng lưới đối tác quốc tế",
                 icon: Globe,
-                color: "text-blue-600"
-              }
+                color: "text-blue-600",
+              },
             ].map((feature, index) => (
               <div
                 key={feature.title}
                 className="group text-center p-6 rounded-2xl hover:shadow-lg transition-all duration-300 hover:scale-105"
               >
-                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div
+                  className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 mb-4 group-hover:scale-110 transition-transform duration-300`}
+                >
                   <feature.icon className={`h-8 w-8 ${feature.color}`} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
     </div>
   );
 }
