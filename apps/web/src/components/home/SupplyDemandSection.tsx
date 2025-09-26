@@ -238,11 +238,11 @@ export default function SupplyDemandSection() {
                 className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
               >
                 <TrendingUp className="mr-2 h-5 w-5" />
-                Đăng công nghệ
+                Đăng sản phẩm KH&CN
               </Link>
               <Link
                 href="/demands/register"
-                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500"
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-yellow-400 text-gray-900 hover:bg-yellow-500 focus:ring-yellow-500 shadow-lg hover:shadow-xl"
               >
                 <Users className="mr-2 h-5 w-5" />
                 Đăng nhu cầu

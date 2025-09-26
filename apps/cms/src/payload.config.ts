@@ -40,6 +40,9 @@ import { Offer } from './collections/Offer'
 import { Contract } from './collections/Contract'
 import { ContractLogs } from './collections/ContractLogs'
 import { ProjectPropose } from './collections/ProjectPropose'
+import { Organizations } from './collections/Organizations'
+import { Experts } from './collections/Experts'
+import { Funds } from './collections/Funds'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -93,6 +96,9 @@ export default buildConfig({
     Contract,
     ContractLogs,
     ProjectPropose,
+    Organizations,
+    Experts,
+    Funds,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

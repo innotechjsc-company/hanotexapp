@@ -380,7 +380,7 @@ export default function RegisterDemandPage() {
                 </button>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
-                    Đăng nhu cầu công nghệ
+                    Đăng nhu cầu KH&CN
                   </h1>
                   <p className="text-gray-600">
                     Đăng nhu cầu tìm kiếm công nghệ lên sàn giao dịch HANOTEX

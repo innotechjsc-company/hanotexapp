@@ -39,7 +39,7 @@ export default function Header() {
         onMenuOpenChange={setIsMenuOpen}
         className="bg-white/90 backdrop-blur-md"
       >
-        <NavbarContent justify="center">
+        <NavbarContent justify="start">
           <NavbarMenuToggle
             aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"}
             className="lg:hidden"
@@ -49,9 +49,11 @@ export default function Header() {
           </NavbarBrand>
         </NavbarContent>
 
-        <DesktopNav items={mainMenuItems} isActive={isActive} />
+        <NavbarContent justify="center" className="hidden lg:flex">
+          <DesktopNav items={mainMenuItems} isActive={isActive} />
+        </NavbarContent>
 
-        <NavbarContent justify="center">
+        <NavbarContent justify="end" className="gap-2">
           {isAuthenticated ? (
             <UserMenu
               user={user}

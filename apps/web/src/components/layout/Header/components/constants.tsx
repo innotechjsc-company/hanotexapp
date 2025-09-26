@@ -8,6 +8,8 @@ import {
   User,
   Zap,
   Briefcase,
+  Gavel,
+  Database,
 } from "lucide-react";
 import type { MenuItem, UserMenuItem } from "./types";
 
@@ -16,22 +18,20 @@ export const mainMenuItems: MenuItem[] = [
     name: "Công nghệ",
     href: "/technologies",
     icon: Zap,
-    submenu: [
-      { name: "Tất cả công nghệ", href: "/technologies" },
-      { name: "Công nghệ mới", href: "/technologies?filter=new" },
-      { name: "Công nghệ nổi bật", href: "/technologies?filter=featured" },
-      { name: "Đăng công nghệ", href: "/technologies/register" },
-    ],
   },
   {
     name: "Nhu cầu",
     href: "/demands",
     icon: Target,
+  },
+  {
+    name: "Đấu giá",
+    href: "/auctions",
+    icon: Gavel,
     submenu: [
-      { name: "Tất cả nhu cầu", href: "/demands" },
-      { name: "Nhu cầu mới", href: "/demands?filter=new" },
-      { name: "Nhu cầu khẩn cấp", href: "/demands?filter=urgent" },
-      { name: "Đăng nhu cầu", href: "/demands/register" },
+      { name: "Đang diễn ra", href: "/auctions?status=active" },
+      { name: "Sắp diễn ra", href: "/auctions?status=upcoming" },
+      { name: "Tạo đấu giá", href: "/auctions/create" },
     ],
   },
   {
@@ -72,16 +72,12 @@ export const mainMenuItems: MenuItem[] = [
     ],
   },
   {
-    name: "Giới thiệu",
-    href: "/about",
-    icon: User,
+    name: "Dữ liệu KH&CN",
+    href: "/data",
+    icon: Database,
     submenu: [
-      { name: "Về HANOTEX", href: "/about" },
-      { name: "Liên hệ", href: "/contact" },
-      { name: "Hướng dẫn sử dụng", href: "/user-guide" },
-      { name: "Câu hỏi thường gặp", href: "/faq" },
-      { name: "Chính sách bảo mật", href: "/privacy" },
-      { name: "Điều khoản sử dụng", href: "/terms" },
+      { name: "Danh sách nhà khoa học/phát minh", href: "/data/scientists" },
+      { name: "Danh sách viện/trường/tổ chức", href: "/data/institutions" },
     ],
   },
 ];
@@ -90,6 +86,7 @@ export const userMenuItemsBase: UserMenuItem[] = [
   { name: "Hồ sơ cá nhân", href: "/profile" },
   { name: "Công nghệ của tôi", href: "/my-technologies" },
   { name: "Nhu cầu của tôi", href: "/my-demands" },
+  { name: "Đấu giá của tôi", href: "/my-auctions" },
   { name: "Đề xuất của tôi", href: "/my-proposals" },
   { name: "Dự án của tôi", href: "/my-projects" },
   { name: "Quỹ & Đầu tư của tôi", href: "/my-investments" },
