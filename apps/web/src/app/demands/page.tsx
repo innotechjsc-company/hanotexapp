@@ -63,7 +63,42 @@ export default function DemandsPage() {
     totalPages: 1,
     totalDocs: 0,
   });
+  const [budgetOptions, setBudgetOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
 
+  // Fetch budget options on component mount
+  useEffect(() => {
+    const fetchBudgetOptions = async () => {
+      try {
+        // Fetch a large number of demands to get all possible budget ranges
+        const response = await getDemands({}, { limit: 1000, page: 1 });
+        if (response.docs) {
+          const demands = response.docs.flat();
+          const uniqueBudgets = new Map<string, string>();
+
+          demands.forEach((demand) => {
+            if (demand.from_price != null && demand.to_price != null) {
+              const value = `${demand.from_price}-${demand.to_price}`;
+              const label = `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`;
+              if (!uniqueBudgets.has(value)) {
+                uniqueBudgets.set(value, label);
+              }
+            }
+          });
+
+          const options = Array.from(uniqueBudgets.entries()).map(
+            ([value, label]) => ({ value, label })
+          );
+          setBudgetOptions(options);
+        }
+      } catch (error) {
+        console.error("Error fetching budget options:", error);
+      }
+    };
+
+    fetchBudgetOptions();
+  }, []);
   // Fetch categories from API
   const fetchCategories = async () => {
     try {
@@ -126,19 +161,22 @@ export default function DemandsPage() {
       if (filters.status) {
         apiFilters.status = filters.status;
       }
+      if (filters.budget_range) {
+        const [from_price, to_price] = filters.budget_range
+          .split("-")
+          .map(Number);
+        if (!isNaN(from_price) && !isNaN(to_price)) {
+          // Filter for exact from_price and to_price match
+          apiFilters["where[from_price][equals]"] = from_price;
+          apiFilters["where[to_price][equals]"] = to_price;
+        }
+      }
 
       // Build pagination object
       const paginationParams = {
         page: pagination.page,
         limit: pagination.limit,
       };
-
-      console.log(
-        "Fetching demands with filters:",
-        apiFilters,
-        "pagination:",
-        paginationParams
-      );
 
       const response = await getDemands(apiFilters, paginationParams);
       if (response.docs && response.docs.length > 0) {
@@ -375,14 +413,9 @@ export default function DemandsPage() {
                   isLoading={categoriesLoading}
                 >
                   {[
-                    <SelectItem key="" value="">
-                      Tất cả danh mục
-                    </SelectItem>,
+                    <SelectItem key="">Tất cả danh mục</SelectItem>,
                     ...categories.map((category) => (
-                      <SelectItem
-                        key={category.id || category.name}
-                        value={category.id}
-                      >
+                      <SelectItem key={category.id || category.name}>
                         {category.name}
                       </SelectItem>
                     )),
@@ -407,10 +440,12 @@ export default function DemandsPage() {
                     label: "text-sm font-medium text-foreground",
                   }}
                 >
-                  <SelectItem key="0-100M">Dưới 100M VNĐ</SelectItem>
-                  <SelectItem key="100M-500M">100M - 500M VNĐ</SelectItem>
-                  <SelectItem key="500M-1B">500M - 1B VNĐ</SelectItem>
-                  <SelectItem key="1B+">Trên 1B VNĐ</SelectItem>
+                  {[
+                    <SelectItem key="">Tất cả ngân sách</SelectItem>,
+                    ...budgetOptions.map((option) => (
+                      <SelectItem key={option.value}>{option.label}</SelectItem>
+                    )),
+                  ]}
                 </Select>
               </div>
             </div>
@@ -457,30 +492,6 @@ export default function DemandsPage() {
                 }}
               >
                 Ngày tạo
-              </Button>
-
-              <Button
-                variant={sortBy === "deadline" ? "flat" : "light"}
-                color={sortBy === "deadline" ? "primary" : "default"}
-                size="sm"
-                onPress={() => handleSort("deadline")}
-                endContent={
-                  sortBy === "deadline" &&
-                  (sortOrder === "ASC" ? (
-                    <SortAsc className="h-4 w-4" />
-                  ) : (
-                    <SortDesc className="h-4 w-4" />
-                  ))
-                }
-                style={{
-                  backgroundColor:
-                    sortBy === "deadline" ? "#006FEE20" : "transparent",
-                  color: sortBy === "deadline" ? "#006FEE" : "#71717A",
-                  border: "1px solid #E4E4E7",
-                  minHeight: "32px",
-                }}
-              >
-                Hạn chót
               </Button>
             </div>
 
