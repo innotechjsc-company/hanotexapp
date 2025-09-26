@@ -38,6 +38,8 @@ import { RoomMessage } from './collections/RoomMessage'
 import { RoomUser } from './collections/RoomUser'
 import { Offer } from './collections/Offer'
 import { Contract } from './collections/Contract'
+import { ContractLogs } from './collections/ContractLogs'
+import { ProjectPropose } from './collections/ProjectPropose'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -89,6 +91,8 @@ export default buildConfig({
     RoomUser,
     Offer,
     Contract,
+    ContractLogs,
+    ProjectPropose,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
