@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -38,6 +39,9 @@ function getUserType(type: UserType) {
 }
 export default function UserMenu({ onLogout, onOpenSearch }: Props) {
   const router = useRouter();
+  const [notificationTab, setNotificationTab] = useState<"unread" | "read">(
+    "unread"
+  );
 
   const user = useUser();
   const DisplayIcon = getUserIconByType(user?.user_type);
@@ -70,11 +74,65 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
       </Button>
 
       {/* Notifications */}
-      <Badge content="" color="danger" shape="circle" placement="top-right">
-        <Button isIconOnly variant="light" aria-label="Thông báo">
-          <Bell className="h-5 w-5" />
-        </Button>
-      </Badge>
+      <Dropdown placement="bottom-end">
+        <Badge content="" color="danger" shape="circle" placement="top-right">
+          <DropdownTrigger>
+            <Button isIconOnly variant="light" aria-label="Thông báo">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </DropdownTrigger>
+        </Badge>
+        <DropdownMenu
+          aria-label="Notifications"
+          className="w-96"
+          closeOnSelect={false}
+        >
+          <DropdownItem key="header" isReadOnly className="h-auto p-0">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Thông báo
+              </h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setNotificationTab("unread")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    notificationTab === "unread"
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  Thông báo hệ thống
+                </button>
+                <button
+                  onClick={() => setNotificationTab("read")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    notificationTab === "read"
+                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  Thông báo khác
+                </button>
+              </div>
+            </div>
+          </DropdownItem>
+          <DropdownItem key="content" isReadOnly className="h-auto p-0">
+            <div className="p-4 max-h-96 overflow-y-auto">
+              {notificationTab === "unread" ? (
+                <div className="text-center text-gray-500 py-8">
+                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Không có thông báo chưa đọc</p>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Không có thông báo đã đọc</p>
+                </div>
+              )}
+            </div>
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
 
       {/* User dropdown */}
       <Dropdown placement="bottom-end">
@@ -99,6 +157,7 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
         </DropdownTrigger>
         <DropdownMenu
           aria-label="User menu"
+          className="w-64"
           items={menuItems}
           onAction={(key) => {
             if (key === "logout") {
