@@ -12,12 +12,25 @@ import { PAYLOAD_API_BASE_URL } from "@/api/config";
  */
 export const getFullMediaUrl = (url: string): string => {
   if (!url) return "";
-  // Get base URL without /api suffix
-  const baseUrl = PAYLOAD_API_BASE_URL?.replace("/api", "");
-  if (url.startsWith("/")) {
-    return `${baseUrl}${url}`;
+
+  // If already a full URL, return as is
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
   }
-  return url;
+
+  // Get base URL without /api suffix
+  let baseUrl =
+    process.env.NODE_ENV === "production"
+      ? "https://api.hanotex.vn"
+      : "http://localhost:4000";
+
+  // Remove /api suffix if present
+  baseUrl = baseUrl.replace(/\/api$/, "");
+
+  // Ensure URL starts with /
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+
+  return `${baseUrl}${cleanUrl}`;
 };
 
 /**
