@@ -17,8 +17,19 @@ export const ContractLogs: CollectionConfig = {
       name: 'technology_propose',
       type: 'relationship',
       relationTo: 'technology-propose',
-      required: true,
       label: 'Đề xuất đầu tư công nghệ',
+    },
+    {
+      name: 'propose',
+      type: 'relationship',
+      relationTo: 'propose',
+      label: 'Đề xuất',
+    },
+    {
+      name: 'project_propose',
+      type: 'relationship',
+      relationTo: 'project-propose',
+      label: 'Đề xuất đầu tư dự án',
     },
     {
       name: 'contract',

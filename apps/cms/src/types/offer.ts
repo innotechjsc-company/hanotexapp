@@ -1,5 +1,7 @@
 import { TechnologyPropose } from './technology-propose'
 import { NegotiatingMessage } from './negotiating_messages'
+import { Propose } from './propose'
+import { ProjectPropose } from './project-propose'
 
 export enum OfferStatus {
   PENDING = 'pending',
@@ -9,11 +11,13 @@ export enum OfferStatus {
 
 export interface Offer {
   id: string
-  technology_propose: TechnologyPropose
+  propose?: Propose
+  project_propose?: ProjectPropose
+  technology_propose?: TechnologyPropose
   negotiating_messages: NegotiatingMessage
   content: string
   price: number
   status: OfferStatus
-  createdAt?: string
-  updatedAt?: string
+  createdAt: string
+  updatedAt: string
 }

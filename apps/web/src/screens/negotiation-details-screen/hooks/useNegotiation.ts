@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { message } from "antd";
 import { technologyProposeApi } from "@/api/technology-propose";
+import { getProposeById } from "@/api/propose";
 import {
   negotiatingMessageApi,
   ApiNegotiatingMessage,
@@ -14,12 +15,16 @@ import { OfferStatus } from "@/types/offer";
 import type { OfferFormData } from "../components/OfferModal";
 
 export interface UseNegotiationProps {
-  proposalId: string;
+  proposalId: string; // could be TechnologyPropose ID or Propose ID
+  // If provided, force using a specific API context
+  // 'technology' => call technology-propose APIs only
+  // 'propose' => call propose APIs only
+  forceType?: 'technology' | 'propose';
 }
 
 export interface UseNegotiationReturn {
   // Data
-  proposal: TechnologyPropose | null;
+  proposal: any | null; // TechnologyPropose | Propose
   messages: ApiNegotiatingMessage[];
   attachments: File[];
   pendingMessage: { message: string; attachments: File[] };
@@ -53,6 +58,8 @@ export interface UseNegotiationReturn {
 
   // Utilities
   formatFileSize: (bytes: number) => string;
+  // Context
+  isTechnologyPropose: boolean;
 }
 
 // Helper function to detect file type based on MIME type or file extension
@@ -127,10 +134,11 @@ const detectFileType = (file: File): MediaType => {
 
 export const useNegotiation = ({
   proposalId,
+  forceType,
 }: UseNegotiationProps): UseNegotiationReturn => {
   const currentUser = useUser();
 
-  const [proposal, setProposal] = useState<TechnologyPropose | null>(null);
+  const [proposal, setProposal] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [messages, setMessages] = useState<ApiNegotiatingMessage[]>([]);
@@ -145,25 +153,49 @@ export const useNegotiation = ({
     message: string;
     attachments: File[];
   }>({ message: "", attachments: [] });
+  const [isTechnologyPropose, setIsTechnologyPropose] = useState<boolean>(true);
 
   useEffect(() => {
     if (proposalId && currentUser) {
       fetchProposalDetails();
+    }
+  }, [proposalId, currentUser]);
+
+  // Fetch messages and latest offer after type detection
+  useEffect(() => {
+    if (proposalId && currentUser) {
       fetchNegotiationMessages();
       fetchLatestOffer();
     }
-  }, [proposalId, currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposalId, currentUser, isTechnologyPropose]);
 
   const fetchProposalDetails = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await technologyProposeApi.getById(proposalId);
-      if (!data) {
-        throw new Error("No data received from API");
+      // Respect forced type if provided
+      if (forceType === 'technology') {
+        const data = await technologyProposeApi.getById(proposalId);
+        setProposal(data as any);
+        setIsTechnologyPropose(true);
+      } else if (forceType === 'propose') {
+        const p = await getProposeById(proposalId);
+        setProposal(p as any);
+        setIsTechnologyPropose(false);
+      } else {
+        // Auto-detect: try technology-propose first; if fails, fallback to propose
+        try {
+          const data = await technologyProposeApi.getById(proposalId);
+          if (!data) throw new Error('No data');
+          setProposal(data as any);
+          setIsTechnologyPropose(true);
+        } catch (e) {
+          const p = await getProposeById(proposalId);
+          setProposal(p as any);
+          setIsTechnologyPropose(false);
+        }
       }
-
-      setProposal(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(`Không thể tải thông tin đề xuất: ${errorMessage}`);
@@ -175,11 +207,10 @@ export const useNegotiation = ({
   const fetchNegotiationMessages = async () => {
     try {
       // Fetch negotiation data using the API
-      const response = await negotiatingMessageApi.getMessages({
-        technology_propose: proposalId,
-        limit: 100,
-        page: 1,
-      });
+      const params: any = { limit: 100, page: 1 };
+      if (isTechnologyPropose) params.technology_propose = proposalId;
+      else params.propose = proposalId;
+      const response = await negotiatingMessageApi.getMessages(params);
 
       // Use the messages directly from API without transformation
       const messages =
@@ -196,8 +227,12 @@ export const useNegotiation = ({
 
   const fetchLatestOffer = async () => {
     try {
-      const offer = await offerApi.getLatestForProposal(proposalId);
-      setLatestOffer(offer);
+      if (isTechnologyPropose) {
+        const offer = await offerApi.getLatestForProposal(proposalId);
+        setLatestOffer(offer);
+      } else {
+        setLatestOffer(null);
+      }
     } catch (err) {
       console.error("Failed to fetch latest offer:", err);
       setLatestOffer(null);
@@ -294,13 +329,14 @@ export const useNegotiation = ({
       }
 
       // Send negotiation using API
-      await negotiatingMessageApi.sendMessage({
-        propose: "", // Leave empty for now - this might be optional
-        technology_propose: proposalId,
+      const payload: any = {
         user: currentUser.id,
         message: pendingMessage.message,
         documents: documentIds,
-      });
+      };
+      if (isTechnologyPropose) payload.technology_propose = proposalId;
+      else payload.propose = proposalId;
+      await negotiatingMessageApi.sendMessage(payload);
 
       // Refresh negotiation data to get the latest data from server
       await fetchNegotiationMessages();
@@ -327,6 +363,7 @@ export const useNegotiation = ({
   };
 
   const handleSendOffer = () => {
+    if (!isTechnologyPropose) return; // not supported for demand propose
     setShowOfferModal(true);
   };
 
@@ -335,6 +372,7 @@ export const useNegotiation = ({
       setSendingOffer(true);
 
       // Send offer using API with new payload shape
+      if (!isTechnologyPropose) throw new Error("Offers chỉ hỗ trợ cho đề xuất công nghệ");
       await negotiatingMessageApi.sendOffer({
         technology_propose: proposalId,
         message: offerData.message,
@@ -367,7 +405,8 @@ export const useNegotiation = ({
   // Người tạo TechnologyPropose (proposal.user) là người có thể gửi đề xuất
   // Người nhận (chủ công nghệ) thì không có nút gửi đề xuất
   const isProposalCreator = proposal?.user?.id === currentUser?.id;
-  const canSendOffer = isProposalCreator && proposal?.status === "negotiating";
+  const canSendOffer =
+    isTechnologyPropose && isProposalCreator && proposal?.status === "negotiating";
   const hasPendingOffer = latestOffer?.status === OfferStatus.PENDING;
 
   return {
@@ -406,5 +445,7 @@ export const useNegotiation = ({
 
     // Utilities
     formatFileSize,
+    // Context
+    isTechnologyPropose,
   };
 };

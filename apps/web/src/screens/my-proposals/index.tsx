@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import { useAuth } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { Card, CardBody, Tabs, Tab, Button } from "@heroui/react";
-import { ArrowLeft, Lightbulb, Target } from "lucide-react";
+import { ArrowLeft, Lightbulb, Target, Briefcase } from "lucide-react";
 import TechnologyProposalsTab from "./components/TechnologyProposalsTab";
 import DemandProposalsTab from "./components/DemandProposalsTab";
+import ProjectProposalsTab from "./components/ProjectProposalsTab";
 
 export default function MyProposalsScreen() {
   const { user } = useAuth();
@@ -43,7 +44,7 @@ export default function MyProposalsScreen() {
                 Đề xuất của tôi
               </h1>
               <p className="text-default-600">
-                Quản lý các đề xuất chuyển giao công nghệ và đề xuất nhu cầu
+                Quản lý các đề xuất của bạn
               </p>
             </div>
           </div>
@@ -98,6 +99,20 @@ export default function MyProposalsScreen() {
               >
                 <div className="py-6">
                   <DemandProposalsTab />
+                </div>
+              </Tab>
+
+              <Tab
+                key="project"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base">Đề xuất dự án</span>
+                  </div>
+                }
+              >
+                <div className="py-6">
+                  <ProjectProposalsTab />
                 </div>
               </Tab>
             </Tabs>

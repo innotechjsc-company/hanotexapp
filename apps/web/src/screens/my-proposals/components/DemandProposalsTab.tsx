@@ -131,8 +131,8 @@ export default function DemandProposalsTab() {
   };
 
   const handleViewNegotiation = (proposal: Propose) => {
-    // Navigate to negotiation details page
-    router.push(`/technologies/negotiations/${proposal.id}`);
+    // Navigate to propose negotiation details page
+    router.push(`/proposes/negotiations/${proposal.id}`);
   };
 
   const handleCancelProposal = async (proposal: Propose) => {

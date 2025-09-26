@@ -2,11 +2,12 @@ import React from "react";
 import { Avatar, Typography, Button, Tag } from "antd";
 import { ArrowLeft } from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
+import type { Propose } from "@/types/propose";
 
 const { Text } = Typography;
 
 interface NegotiationHeaderProps {
-  proposal: TechnologyPropose | null;
+  proposal: TechnologyPropose | Propose | null;
   onClose: () => void;
 }
 
@@ -44,7 +45,7 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
       case "cancelled":
         return { label: "Đã hủy", color: "red" };
       default:
-        return { label: proposal.status, color: "default" };
+        return { label: "", color: "default" };
     }
   };
 

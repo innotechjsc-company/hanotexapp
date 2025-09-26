@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   PROJECTS: "/project",
   PROPOSE: "/propose",
   TECHNOLOGY_PROPOSE: "/technology-propose",
+  PROJECT_PROPOSE: "/project-propose",
   NEGOTIATING_MESSAGES: "/negotiating-messages",
   EVENTS: "/events",
   EVENT_USER: "/event-user",

@@ -318,7 +318,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-2xl mx-auto">
       <Card className="shadow-lg">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">

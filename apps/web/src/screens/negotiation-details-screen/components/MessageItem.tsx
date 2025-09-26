@@ -371,7 +371,7 @@ const MessageBubble: React.FC<{
         {/* File attachments */}
         {hasDocuments && (
           <div className={hasMessage ? "mt-2" : ""}>
-            {message.documents.map((doc, index) => (
+            {message.documents?.map((doc, index) => (
               <FileAttachment
                 key={
                   typeof doc === "string"

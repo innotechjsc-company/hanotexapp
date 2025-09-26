@@ -19,22 +19,27 @@ import { getProjectById } from "@/api/projects";
 import { getInvestmentFundById } from "@/api/investment-fund";
 import type { Project } from "@/types/project";
 import type { InvestmentFund } from "@/types/investment_fund";
-import { 
-  Card, 
-  Tag, 
-  Descriptions, 
-  Button, 
+import {
+  Card,
+  Tag,
+  Descriptions,
+  Button,
   Space,
   Typography,
   Badge,
   Progress,
   Row,
   Col,
-  Statistic
+  Statistic,
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  message,
 } from "antd";
 import Image from "next/image";
-import { 
-  ArrowUpOutlined, 
+import {
+  ArrowUpOutlined,
   ArrowDownOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -46,6 +51,9 @@ import {
   ExperimentOutlined, // Replaced FundProjectionOutlined
   ReadOutlined,
 } from "@ant-design/icons";
+import { projectProposeApi } from "@/api/project-propose";
+import { ProjectProposeStatus } from "@/types/project-propose";
+import { useUser } from "@/store/auth";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -93,7 +101,9 @@ const getStatusConfig = (status: string) => {
 const getDaysRemaining = (endDate: string) => {
   const end = new Date(endDate);
   const now = new Date();
-  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diff = Math.ceil(
+    (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
   return diff;
 };
 
@@ -127,6 +137,11 @@ export default function FundraisingProjectDetailPage() {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const currentUser = useUser();
+  const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [isSubmittingProposal, setIsSubmittingProposal] = useState(false);
+  const [form] = Form.useForm();
+  const [hasExistingProposal, setHasExistingProposal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,12 +166,15 @@ export default function FundraisingProjectDetailPage() {
         setProject(projectData);
 
         // Fetch investment fund if exists
-        if (projectData && projectData.investment_fund && Array.isArray(projectData.investment_fund) && projectData.investment_fund.length > 0) {
+        if (
+          projectData &&
+          projectData.investment_fund &&
+          Array.isArray(projectData.investment_fund) &&
+          projectData.investment_fund.length > 0
+        ) {
           const firstFund = projectData.investment_fund[0];
           const fundId =
-            typeof firstFund === "string"
-              ? firstFund
-              : (firstFund as any)?.id;
+            typeof firstFund === "string" ? firstFund : (firstFund as any)?.id;
 
           if (fundId) {
             try {
@@ -177,6 +195,23 @@ export default function FundraisingProjectDetailPage() {
 
     fetchData();
   }, [projectId]);
+
+  useEffect(() => {
+    const checkExistingProposal = async () => {
+      try {
+        if (!projectId || !currentUser?.id) return;
+        const res = await projectProposeApi.list(
+          { project: String(projectId), user: String(currentUser.id) },
+          { limit: 1 }
+        );
+        const count = (res.docs?.length || 0) + (Array.isArray(res.data) ? res.data.length : 0);
+        setHasExistingProposal(count > 0);
+      } catch (err) {
+        console.warn("Could not verify existing proposal:", err);
+      }
+    };
+    checkExistingProposal();
+  }, [projectId, currentUser?.id]);
 
   if (isLoading) {
     return (
@@ -210,17 +245,75 @@ export default function FundraisingProjectDetailPage() {
   const statusConfig = getStatusConfig(project.status);
   const daysRemaining = getDaysRemaining(project.end_date);
 
+  function handleSendProposal(): void {
+    if (!currentUser?.id) {
+      message.warning("Vui lòng đăng nhập để gửi đề xuất đầu tư");
+      router.push("/login");
+      return;
+    }
+    if (hasExistingProposal) {
+      message.info("Bạn đã gửi đề xuất cho dự án này. Vui lòng chờ phản hồi.");
+      return;
+    }
+    setIsProposalModalOpen(true);
+  }
+
+  async function handleSubmitProposal() {
+    try {
+      const values = await form.validateFields();
+      if (!project) {
+        message.error("Không tìm thấy thông tin dự án");
+        return;
+      }
+      if (!currentUser?.id) {
+        message.error("Bạn cần đăng nhập để tiếp tục");
+        return;
+      }
+      setIsSubmittingProposal(true);
+      await projectProposeApi.create({
+        project: (project as any).id || projectId,
+        user: currentUser.id,
+        investor_capacity: values.investor_capacity,
+        investment_amount: values.investment_amount ?? project.goal_money,
+        investment_ratio: values.investment_ratio ?? project.share_percentage,
+        investment_type: values.investment_type,
+        investment_benefits: values.investment_benefits,
+        status: ProjectProposeStatus.Pending,
+      } as any);
+      message.success("Gửi đề xuất thành công");
+      setIsProposalModalOpen(false);
+      setHasExistingProposal(true);
+      form.resetFields();
+    } catch (err: any) {
+      if (err?.errorFields) return; // validation errors already shown
+      console.error("Create project propose error:", err);
+      message.error(err?.message || "Gửi đề xuất thất bại");
+    } finally {
+      setIsSubmittingProposal(false);
+    }
+  }
+
   return (
     // thêm gap cho các cards để tăng tính đồng bộ
     <div className="min-h-screen bg-gray-50 p-6 gap-16">
-        {/* Header with breadcrumb and back button */}
+      {/* Header with breadcrumb and back button */}
       <Card className="mb-6 shadow-sm">
-        <Space direction="horizontal" align="center" className="w-full justify-between">
+        <Space
+          direction="horizontal"
+          align="center"
+          className="w-full justify-between"
+        >
           <Space>
-            <Button icon={<ArrowLeft />} onClick={() => router.back()} type="text" />
+            <Button
+              icon={<ArrowLeft />}
+              onClick={() => router.back()}
+              type="text"
+            />
             <Link href="/funds/fundraising">
-              <Text className="text-green-600 hover:text-green-800">Dự án gọi vốn</Text>
-              </Link>
+              <Text className="text-green-600 hover:text-green-800">
+                Dự án gọi vốn
+              </Text>
+            </Link>
             <ChevronRight className="h-4 w-4 text-gray-400" />
             <Text strong>Chi tiết dự án</Text>
           </Space>
@@ -243,12 +336,14 @@ export default function FundraisingProjectDetailPage() {
 
         <Row gutter={[16, 16]} align="stretch">
           <Col xs={24} sm={12} md={6}>
-            <Card size="small" className="text-center" >
+            <Card size="small" className="text-center">
               <Statistic
                 title="Mục tiêu gọi vốn"
                 value={project.goal_money || 0}
                 formatter={(value) => formatCurrencyAbbr(Number(value))}
-                prefix={<DollarCircleOutlined className="w-6 h-6 text-green-600" />}
+                prefix={
+                  <DollarCircleOutlined className="w-6 h-6 text-green-600" />
+                }
               />
             </Card>
           </Col>
@@ -265,20 +360,28 @@ export default function FundraisingProjectDetailPage() {
             <Card size="small" className="text-center">
               <Statistic
                 title="Hạn gọi vốn"
-                value={project.end_date ? formatDate(project.end_date) : "Chưa xác định"}
-                prefix={<CalendarOutlined className="w-6 h-6 text-purple-600" />}
+                value={
+                  project.end_date
+                    ? formatDate(project.end_date)
+                    : "Chưa xác định"
+                }
+                prefix={
+                  <CalendarOutlined className="w-6 h-6 text-purple-600" />
+                }
               />
-             
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Card size="small" className="text-center">
               <Statistic
                 title="Trạng thái"
-                value={getStatusLabel(project.status)}
-                prefix={<Target className="w-6 h-6 text-orange-600" />}
+                value={
+                  project?.open_investment_fund
+                    ? "Đang kêu gọi vốn"
+                    : "Đã kêu gọi vốn"
+                }
+                prefix={<Target className="w-6 h-4 text-orange-600" />}
               />
-              
             </Card>
           </Col>
         </Row>
@@ -320,61 +423,85 @@ export default function FundraisingProjectDetailPage() {
           </Card>
 
           {/* Technologies */}
-          {Array.isArray(project.technologies) && project.technologies.length > 0 && (
-            <Card title="Công nghệ sử dụng" className="mb-6">
-              <Space wrap>
-                {project.technologies.map((tech: any, index: number) => (
-                  <Tag key={index} color="blue" icon={<ExperimentOutlined />}>
-                    {typeof tech === "string" ? tech : tech?.title || "Công nghệ"}
-                  </Tag>
-                ))}
-              </Space>
-            </Card>
-          )}
+          {Array.isArray(project.technologies) &&
+            project.technologies.length > 0 && (
+              <Card title="Công nghệ sử dụng" className="mb-6">
+                <Space wrap>
+                  {project.technologies.map((tech: any, index: number) => (
+                    <Tag key={index} color="blue" icon={<ExperimentOutlined />}>
+                      {typeof tech === "string"
+                        ? tech
+                        : tech?.title || "Công nghệ"}
+                    </Tag>
+                  ))}
+                </Space>
+              </Card>
+            )}
 
           {/* Investment Fund Section */}
-          {Array.isArray(project.investment_fund) && project.investment_fund.length > 0 && (
-            <Card title="Quỹ đầu tư hỗ trợ" className="mb-6">
-              <Space direction="vertical" style={{ width: '100%' }}>
-                {project.investment_fund.map((fund: any, index: number) => (
-                  <Card key={index} size="small" className="hover:shadow-md transition-shadow">
-                    <Space className="w-full justify-between items-center">
-                      <Space direction="vertical">
-                        <Title level={5}>{typeof fund === "string" ? fund : fund?.name || "Quỹ đầu tư"}</Title>
-                        {typeof fund === "object" && fund?.description && (
-                          <Paragraph className="text-gray-600">{fund.description}</Paragraph>
+          {Array.isArray(project.investment_fund) &&
+            project.investment_fund.length > 0 && (
+              <Card title="Quỹ đầu tư hỗ trợ" className="mb-6">
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  {project.investment_fund.map((fund: any, index: number) => (
+                    <Card
+                      key={index}
+                      size="small"
+                      className="hover:shadow-md transition-shadow"
+                    >
+                      <Space className="w-full justify-between items-center">
+                        <Space direction="vertical">
+                          <Title level={5}>
+                            {typeof fund === "string"
+                              ? fund
+                              : fund?.name || "Quỹ đầu tư"}
+                          </Title>
+                          {typeof fund === "object" && fund?.description && (
+                            <Paragraph className="text-gray-600">
+                              {fund.description}
+                            </Paragraph>
+                          )}
+                        </Space>
+                        {typeof fund === "object" && fund?.id && (
+                          <Button type="link">
+                            <Link href={`/funds/investment-funds/${fund.id}`}>
+                              Xem chi tiết
+                            </Link>
+                          </Button>
                         )}
                       </Space>
-                      {typeof fund === "object" && fund?.id && (
-                        <Button type="link">
-                          <Link href={`/funds/investment-funds/${fund.id}`}>Xem chi tiết</Link>
-                        </Button>
-                      )}
-                    </Space>
-                  </Card>
-                ))}
-              </Space>
-            </Card>
-          )}
+                    </Card>
+                  ))}
+                </Space>
+              </Card>
+            )}
 
           {/* Documents */}
-          {Array.isArray(project.documents_finance) && project.documents_finance.length > 0 && (
-            <Card title="Tài liệu tài chính" className="mb-6">
-              <Row gutter={[16, 16]}>
-                {project.documents_finance.map((doc: any, index: number) => (
-                  <Col xs={24} sm={12} md={8} key={index}>
-                    <Card size="small" className="text-center hover:shadow-md transition-shadow">
-                      <ReadOutlined className="text-4xl text-green-600 mb-2" />
-                      <Space direction="vertical" size={0} className="items-center">
-                        <Text strong>Tài liệu {index + 1}</Text>
-                        <Text type="secondary">PDF</Text>
-                      </Space>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </Card>
-          )}
+          {Array.isArray(project.documents_finance) &&
+            project.documents_finance.length > 0 && (
+              <Card title="Tài liệu tài chính" className="mb-6">
+                <Row gutter={[16, 16]}>
+                  {project.documents_finance.map((doc: any, index: number) => (
+                    <Col xs={24} sm={12} md={8} key={index}>
+                      <Card
+                        size="small"
+                        className="text-center hover:shadow-md transition-shadow"
+                      >
+                        <ReadOutlined className="text-4xl text-green-600 mb-2" />
+                        <Space
+                          direction="vertical"
+                          size={0}
+                          className="items-center"
+                        >
+                          <Text strong>Tài liệu {index + 1}</Text>
+                          <Text type="secondary">PDF</Text>
+                        </Space>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </Card>
+            )}
         </Col>
 
         <Col xs={24} lg={8}>
@@ -382,13 +509,17 @@ export default function FundraisingProjectDetailPage() {
           <Row gutter={[16, 16]} align="stretch">
             <Col xs={24}>
               <Card title="Thông tin tài chính" className="mb-6">
-                <Space direction="vertical" style={{ width: '100%' }} size="large">
+                <Space
+                  direction="vertical"
+                  style={{ width: "100%" }}
+                  size="large"
+                >
                   {project.revenue && (
                     <Statistic
                       title="Doanh thu"
                       value={project.revenue}
                       formatter={(value) => formatCurrencyAbbr(Number(value))}
-                      prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
+                      prefix={<ArrowUpOutlined style={{ color: "#52c41a" }} />}
                     />
                   )}
                   {project.profit && (
@@ -396,7 +527,7 @@ export default function FundraisingProjectDetailPage() {
                       title="Lợi nhuận"
                       value={project.profit}
                       formatter={(value) => formatCurrencyAbbr(Number(value))}
-                      prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
+                      prefix={<ArrowUpOutlined style={{ color: "#52c41a" }} />}
                     />
                   )}
                   {project.assets && (
@@ -416,34 +547,88 @@ export default function FundraisingProjectDetailPage() {
                   <UserOutlined className="w-12 h-12 mx-auto mb-3 text-green-600" />
                   <Title level={5}>
                     {typeof project.user === "object" && project.user
-                      ? (project.user as any).full_name || (project.user as any).email || "Người đăng"
+                      ? (project.user as any).full_name ||
+                        (project.user as any).email ||
+                        "Người đăng"
                       : "Người đăng"}
                   </Title>
-                  {typeof project.user === "object" && project.user && (project.user as any).email && (
-                    <Text type="secondary">{(project.user as any).email}</Text>
-                  )}
+                  {typeof project.user === "object" &&
+                    project.user &&
+                    (project.user as any).email && (
+                      <Text type="secondary">
+                        {(project.user as any).email}
+                      </Text>
+                    )}
+                </div>
+              </Card>
+            </Col>
+            <Col xs={24}>
+              {/* Contact CTA */}
+              <Card className="bg-gradient-to-r from-green-600 to-teal-600 border-none text-white shadow-sm mt-8">
+                <div className="text-center py-4">
+                  <Title level={2} className="text-white mb-4">
+                    Quan tâm đầu tư vào dự án này?
+                  </Title>
+                  <Paragraph className="text-lg mb-6 text-white opacity-90">
+                    Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội đầu tư và
+                    hợp tác
+                  </Paragraph>
+                  <Space size="large">
+                    <Button type="primary" size="large" onClick={handleSendProposal} disabled={hasExistingProposal}>
+                      {hasExistingProposal ? "Đã gửi đề xuất" : "Gửi đề xuất đầu tư"}
+                    </Button>
+                    <Button size="large" type="primary" ghost>
+                      <Link href="/funds/fundraising">Xem dự án khác</Link>
+                    </Button>
+                  </Space>
                 </div>
               </Card>
             </Col>
           </Row>
         </Col>
       </Row>
-
-      {/* Contact CTA */}
-      <Card className="bg-gradient-to-r from-green-600 to-teal-600 border-none text-white shadow-sm mt-8">
-        <div className="text-center py-4">
-          <Title level={2} className="text-white mb-4">Quan tâm đầu tư vào dự án này?</Title>
-          <Paragraph className="text-lg mb-6 text-white opacity-90">Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội đầu tư và hợp tác</Paragraph>
-          <Space size="large">
-            <Button type="primary" size="large" ghost>
-              <Link href="/contact">Liên hệ ngay</Link>
-            </Button>
-            <Button size="large" ghost>
-              <Link href="/funds/fundraising">Xem dự án khác</Link>
-            </Button>
-          </Space>
-        </div>
-      </Card>
+      <Modal
+        title="Gửi đề xuất đầu tư"
+        open={isProposalModalOpen}
+        onOk={handleSubmitProposal}
+        onCancel={() => setIsProposalModalOpen(false)}
+        confirmLoading={isSubmittingProposal}
+        okText="Gửi đề xuất"
+        cancelText="Hủy"
+        width={720}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item label="Năng lực nhà đầu tư" name="investor_capacity">
+            <Input.TextArea rows={3} placeholder="Mô tả ngắn về năng lực, kinh nghiệm" />
+          </Form.Item>
+          <Row gutter={16} wrap={false}>
+            <Col xs={24} flex={1} style={{ flex: 1 }}>
+              <Form.Item
+                label="Số vốn đề xuất (VND)"
+                name="investment_amount"
+                required
+                tooltip="Số vốn đề xuất không được nhỏ hơn mục tiêu gọi vốn của dự án"
+                rules={[{ required: true, message: "Vui lòng nhập số vốn đề xuất" }]}
+              >
+                <InputNumber min={0} className="w-full flex-1" placeholder="Ví dụ: 5.000.000.000" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} flex={1} style={{ flex: 1 }}>
+              <Form.Item label="Tỷ lệ sở hữu mong muốn (%)" name="investment_ratio" 
+                tooltip="Tỷ lệ sở hữu mong muốn không được lớn hơn 100%"
+              >
+                <InputNumber min={0} max={100} className="w-full flex-1" placeholder="Ví dụ: 10" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item label="Hình thức đầu tư" name="investment_type">
+            <Input.TextArea rows={3} placeholder="Ví dụ: Góp vốn, Mua cổ phần..." />
+          </Form.Item>
+          <Form.Item label="Lợi ích mang lại" name="investment_benefits">
+            <Input.TextArea rows={3} placeholder="Ví dụ: mạng lưới, chuyên gia, thị trường..." />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

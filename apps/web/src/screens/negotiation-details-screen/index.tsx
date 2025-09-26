@@ -59,6 +59,7 @@ export const NegotiationDetailsScreen: React.FC<
     canSendOffer,
     hasPendingOffer,
     isProposalCreator,
+    isTechnologyPropose,
 
     // Utilities
     formatFileSize,
@@ -153,7 +154,7 @@ export const NegotiationDetailsScreen: React.FC<
 
       {/* Steps Indicator */}
       <div className="flex-shrink-0 bg-gray-50 border-b">
-        <div className="max-w-4xl mx-auto w-full px-6 py-3">
+        <div className="max-w-2xl mx-auto w-full px-6 py-3">
           <Steps
             current={currentStep}
             size="small"
@@ -201,16 +202,36 @@ export const NegotiationDetailsScreen: React.FC<
             }
           />
         )}
-        {currentStep === 1 && (
+        {currentStep === 1 && isTechnologyPropose && (
           /* Contract Confirmation Step */
           <div className="h-full overflow-auto">
             <ContractSigningStep proposal={proposal} />
           </div>
         )}
-        {currentStep === 2 && (
+        {currentStep === 1 && !isTechnologyPropose && (
+          <div className="h-full overflow-auto p-4">
+            <Alert
+              message="Ký hợp đồng"
+              description="Chức năng ký hợp đồng hiện áp dụng cho đề xuất công nghệ."
+              type="info"
+              showIcon
+            />
+          </div>
+        )}
+        {currentStep === 2 && isTechnologyPropose && (
           /* Contract Completion Logs Step */
           <div className="h-full overflow-auto">
             <ContractLogsStep proposal={proposal} />
+          </div>
+        )}
+        {currentStep === 2 && !isTechnologyPropose && (
+          <div className="h-full overflow-auto p-4">
+            <Alert
+              message="Nhật ký hợp đồng"
+              description="Nhật ký hoàn thiện hợp đồng hiện áp dụng cho đề xuất công nghệ."
+              type="info"
+              showIcon
+            />
           </div>
         )}
       </div>
