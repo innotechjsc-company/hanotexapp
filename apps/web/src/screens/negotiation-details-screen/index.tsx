@@ -12,6 +12,7 @@ import { ConfirmationModal } from "./components/ConfirmationModal";
 import { OfferModal } from "./components/OfferModal";
 import { ContractSigningStep } from "./components/ContractSigningStep";
 import { ContractLogsStep } from "./components/ContractLogsStep";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
@@ -23,6 +24,7 @@ export const NegotiationDetailsScreen: React.FC<
   NegotiationDetailsScreenProps
 > = ({ proposalId }) => {
   const [form] = Form.useForm();
+  const router = useRouter();
 
   const {
     // Data
@@ -63,7 +65,12 @@ export const NegotiationDetailsScreen: React.FC<
   } = useNegotiation({ proposalId });
 
   const handleClose = () => {
-    window.close();
+    try {
+      router.back();
+    } catch {
+      // Fallback if router.back fails in some environments
+      window.history.back();
+    }
   };
 
   const onSendMessage = async (values: { message: string }) => {

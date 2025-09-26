@@ -77,6 +77,17 @@ export const Demand: CollectionConfig = {
       label: 'Hình thức hợp tác',
     },
     {
+      name: 'start_date',
+      type: 'text',
+      label: 'Thời gian dự kiến bắt đầu',
+    },
+    {
+      name: 'end_date',
+      type: 'text',
+      label: 'Thời gian dự kiến kết thúc',
+    },
+
+    {
       name: 'documents',
       type: 'relationship',
       relationTo: 'media',

@@ -1,8 +1,23 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Avatar, Button, Typography, message, Modal, Tag, Upload, Input } from "antd";
-import { FileText, Download, UploadCloud, CheckCircle, X as XIcon } from "lucide-react";
+import {
+  Avatar,
+  Button,
+  Typography,
+  message,
+  Modal,
+  Tag,
+  Upload,
+  Input,
+} from "antd";
+import {
+  FileText,
+  Download,
+  UploadCloud,
+  CheckCircle,
+  X as XIcon,
+} from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { contractLogsApi } from "@/api/contract-logs";
 import { contractsApi } from "@/api/contracts";
@@ -18,15 +33,20 @@ interface ContractLogsStepProps {
   proposal: TechnologyPropose;
 }
 
-export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) => {
+export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
+  proposal,
+}) => {
   const currentUser = useUser();
+  const isCompleted = proposal?.status === 'completed';
 
   const [logs, setLogs] = useState<ContractLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"progress" | "complete">("progress");
+  const [modalMode, setModalMode] = useState<"progress" | "complete">(
+    "progress"
+  );
   const [modalContent, setModalContent] = useState("");
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
@@ -55,7 +75,10 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
     if (isToday) {
-      return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+      return date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
     return date.toLocaleDateString("vi-VN", {
       day: "2-digit",
@@ -71,8 +94,13 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
     try {
       // Load active contract for this proposal (required by CMS schema)
       try {
-        const contract = await contractsApi.getByTechnologyPropose(proposal.id, 1);
-        setActiveContractId((contract as any)?.id || (contract as any)?._id || null);
+        const contract = await contractsApi.getByTechnologyPropose(
+          proposal.id,
+          1
+        );
+        setActiveContractId(
+          (contract as any)?.id || (contract as any)?._id || null
+        );
       } catch {
         setActiveContractId(null);
       }
@@ -85,7 +113,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
       setLogs(data as ContractLog[]);
       setTimeout(() => {
         if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+          scrollContainerRef.current.scrollTop =
+            scrollContainerRef.current.scrollHeight;
         }
       }, 50);
     } catch (e) {
@@ -114,7 +143,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const getUserId = (user: any) => (typeof user === "object" ? user?.id : String(user || ""));
+  const getUserId = (user: any) =>
+    typeof user === "object" ? user?.id : String(user || "");
 
   const performSend = async (content: string) => {
     try {
@@ -161,6 +191,10 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
   };
 
   const openProgressModal = () => {
+    if (isCompleted) {
+      message.info('Hợp đồng đã hoàn thành. Không thể gửi thêm cập nhật.');
+      return;
+    }
     setModalMode("progress");
     setModalContent("");
     setAttachments([]);
@@ -168,6 +202,10 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
   };
 
   const openCompleteModal = () => {
+    if (isCompleted) {
+      message.info('Hợp đồng đã hoàn thành. Không thể xác nhận thêm.');
+      return;
+    }
     setModalMode("complete");
     setModalContent("Xác nhận hoàn thành hợp đồng");
     setAttachments([]);
@@ -187,22 +225,47 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
     await performSend(content);
   };
 
-  const handleApprove = async (log: ContractLog) => {
+  const handleApprove = (log: ContractLog) => {
     if (!log?.id) return;
-    try {
-      const content = (log.content || "").toLowerCase();
-      const isDone = content.includes("hoàn thành hợp đồng") || content.includes("xác nhận hoàn thành") || content.includes("hoan thanh hop dong");
-      await contractLogsApi.confirmLog({
-        contract_log_id: String(log.id),
-        status: 'completed',
-        is_done_contract: isDone,
-      });
-      message.success("Đã xác nhận cập nhật");
-      await fetchLogs();
-    } catch (e) {
-      console.error(e);
-      message.error("Không thể xác nhận");
-    }
+    const contentText = String(log.content || "");
+    const content = contentText.toLowerCase();
+    const isDone =
+      content.includes("hoàn thành hợp đồng") ||
+      content.includes("xác nhận hoàn thành") ||
+      content.includes("hoan thanh hop dong");
+
+    Modal.confirm({
+      title: "Xác nhận cập nhật",
+      content: (
+        <div>
+          <div className="mb-2">
+            <Text className="text-sm">{contentText}</Text>
+          </div>
+          {isDone && (
+            <Text className="text-xs text-gray-500">
+              Thao tác này sẽ đánh dấu hợp đồng đã hoàn tất.
+            </Text>
+          )}
+        </div>
+      ),
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await contractLogsApi.confirmLog({
+            contract_log_id: String(log.id),
+            status: "completed",
+            is_done_contract: isDone,
+          });
+          message.success("Đã xác nhận cập nhật");
+          await fetchLogs();
+        } catch (e) {
+          console.error(e);
+          message.error("Không thể xác nhận");
+          throw e;
+        }
+      },
+    });
   };
 
   const handleOpenReject = (log: ContractLog) => {
@@ -221,7 +284,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
     try {
       await contractLogsApi.confirmLog({
         contract_log_id: rejectTargetId,
-        status: 'cancelled',
+        status: "cancelled",
         reason,
       });
       message.success("Đã từ chối cập nhật");
@@ -238,32 +301,75 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
   return (
     <div className="h-full p-4 bg-gray-50">
       <div className="h-full max-w-4xl mx-auto">
-        <div className="h-full bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col" style={{ maxHeight: "calc(100vh - 200px)" }}>
-          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 min-h-0" style={{ scrollbarWidth: "thin", scrollbarColor: "#d1d5db #f3f4f6" }}>
+        <div
+          className="h-full bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col"
+          style={{ maxHeight: "calc(100vh - 200px)" }}
+        >
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto p-3 min-h-0"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "#d1d5db #f3f4f6",
+            }}
+          >
             <div className="space-y-2">
               {logs.map((log) => {
                 const user = log.user as any;
-                const userName = typeof user === "object" ? user.full_name || user.email || "Người dùng" : String(user || "Người dùng");
+                const userName =
+                  typeof user === "object"
+                    ? user.full_name || user.email || "Người dùng"
+                    : String(user || "Người dùng");
                 const avatar = userName.charAt(0).toUpperCase();
                 const doc = log.documents as any;
-                const docUrl = doc && typeof doc === "object" ? doc.url : undefined;
-                const fileName = doc && typeof doc === "object" ? doc.filename : undefined;
-                const fileSize = doc && typeof doc === "object" ? doc.filesize : undefined;
+                const docUrl =
+                  doc && typeof doc === "object" ? doc.url : undefined;
+                const fileName =
+                  doc && typeof doc === "object" ? doc.filename : undefined;
+                const fileSize =
+                  doc && typeof doc === "object" ? doc.filesize : undefined;
                 const isMine = getUserId(log.user) === String(currentUser?.id);
 
                 return (
-                  <div key={(log as any).id || log.createdAt || Math.random().toString()} className="flex gap-2">
-                    <Avatar size={32} className="bg-blue-500 text-white">{avatar}</Avatar>
+                  <div
+                    key={
+                      (log as any).id ||
+                      log.createdAt ||
+                      Math.random().toString()
+                    }
+                    className="flex gap-2"
+                  >
+                    <Avatar size={32} className="bg-blue-500 text-white">
+                      {avatar}
+                    </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <Text className="text-sm font-medium text-gray-800">{userName}</Text>
-                        <Text className="text-xs text-gray-400">{formatMessageTime(log.createdAt)}</Text>
-                        <Tag color={log.status === ContractLogStatus.Pending ? "gold" : log.status === ContractLogStatus.Completed ? "green" : "red"}>
-                          {log.status === ContractLogStatus.Pending ? "Chờ xác nhận" : log.status === ContractLogStatus.Completed ? "Đã xác nhận" : "Đã từ chối"}
+                        <Text className="text-sm font-medium text-gray-800">
+                          {userName}
+                        </Text>
+                        <Text className="text-xs text-gray-400">
+                          {formatMessageTime(log.createdAt)}
+                        </Text>
+                        <Tag
+                          color={
+                            log.status === ContractLogStatus.Pending
+                              ? "gold"
+                              : log.status === ContractLogStatus.Completed
+                                ? "green"
+                                : "red"
+                          }
+                        >
+                          {log.status === ContractLogStatus.Pending
+                            ? "Chờ xác nhận"
+                            : log.status === ContractLogStatus.Completed
+                              ? "Đã xác nhận"
+                              : "Đã từ chối"}
                         </Tag>
                       </div>
                       <div className="mt-1 p-3 rounded-xl bg-gray-50 border border-gray-200">
-                        <Text className="text-sm text-gray-800 whitespace-pre-wrap">{log.content}</Text>
+                        <Text className="text-sm text-gray-800 whitespace-pre-wrap">
+                          {log.content}
+                        </Text>
 
                         {docUrl && (
                           <div className="mt-2 p-2 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
@@ -272,31 +378,61 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
                                 <FileText size={14} className="text-blue-500" />
                               </div>
                               <div>
-                                <Text className="text-xs font-medium text-gray-800 block">{fileName || "Tài liệu"}</Text>
-                                {fileSize && <Text className="text-xs text-gray-500">{formatFileSize(fileSize)}</Text>}
+                                <Text className="text-xs font-medium text-gray-800 block">
+                                  {fileName || "Tài liệu"}
+                                </Text>
+                                {fileSize && (
+                                  <Text className="text-xs text-gray-500">
+                                    {formatFileSize(fileSize)}
+                                  </Text>
+                                )}
                               </div>
                             </div>
-                            <Button type="text" icon={<Download size={14} />} onClick={() => {
-                              const a = document.createElement("a");
-                              a.href = docUrl;
-                              a.download = fileName || "document";
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
-                            }}>Tải xuống</Button>
+                            <Button
+                              type="text"
+                              icon={<Download size={14} />}
+                              onClick={() => {
+                                const a = document.createElement("a");
+                                a.href = docUrl;
+                                a.download = fileName || "document";
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                              }}
+                            >
+                              Tải xuống
+                            </Button>
                           </div>
                         )}
 
-                        {log.status === ContractLogStatus.Cancelled && (log as any).reason && (
-                          <div className="mt-2 text-xs text-red-500">Lý do từ chối: {(log as any).reason}</div>
-                        )}
+                        {log.status === ContractLogStatus.Cancelled &&
+                          (log as any).reason && (
+                            <div className="mt-2 text-xs text-red-500">
+                              Lý do từ chối: {(log as any).reason}
+                            </div>
+                          )}
 
-                        {!isMine && log.status === ContractLogStatus.Pending && (
-                          <div className="mt-3 flex gap-2">
-                            <Button size="small" type="primary" icon={<CheckCircle size={14} />} onClick={() => handleApprove(log)}>Xác nhận</Button>
-                            <Button size="small" danger icon={<XIcon size={14} />} onClick={() => handleOpenReject(log)}>Từ chối</Button>
-                          </div>
-                        )}
+                        {!isCompleted && !isMine &&
+                          log.status === ContractLogStatus.Pending && (
+                            <div className="mt-3 flex gap-2">
+                              <Button
+                                size="small"
+                                type="primary"
+                                icon={<CheckCircle size={14} />}
+                                onClick={() => handleApprove(log)}
+                              >
+                                Xác nhận
+                              </Button>
+                              <Button
+                                size="small"
+                                danger
+                                icon={<XIcon size={14} />}
+                                onClick={() => handleOpenReject(log)}
+                              >
+                                Từ chối
+                              </Button>
+                            </div>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -308,7 +444,9 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
                   <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                     <FileText size={24} className="text-gray-400" />
                   </div>
-                  <Text className="text-gray-500 text-sm">Chưa có nhật ký hoàn thiện hợp đồng.</Text>
+                  <Text className="text-gray-500 text-sm">
+                    Chưa có nhật ký hoàn thiện hợp đồng.
+                  </Text>
                 </div>
               )}
 
@@ -316,32 +454,53 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
             </div>
           </div>
 
+          {!isCompleted && (
           <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
             {(() => {
-              const myPending = logs.find((l) => l.status === ContractLogStatus.Pending && getUserId(l.user) === String(currentUser?.id));
+              const myPending = logs.find(
+                (l) =>
+                  l.status === ContractLogStatus.Pending &&
+                  getUserId(l.user) === String(currentUser?.id)
+              );
               const disabled = Boolean(myPending);
               return (
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-gray-500">
                     {disabled ? (
-                      <span>⏳ Bạn đã gửi một cập nhật và đang chờ đối tác xác nhận / từ chối.</span>
+                      <span>
+                        ⏳ Bạn đã gửi một cập nhật và đang chờ đối tác xác nhận
+                        / từ chối.
+                      </span>
                     ) : (
                       <span>Chọn một hành động để tiếp tục.</span>
                     )}
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={openProgressModal} disabled={disabled}>Gửi báo cáo tiến độ</Button>
-                    <Button type="primary" onClick={openCompleteModal} disabled={disabled}>Gửi xác nhận hoàn thành hợp đồng</Button>
+                    <Button onClick={openProgressModal} disabled={disabled}>
+                      Gửi báo cáo tiến độ
+                    </Button>
+                    <Button
+                      type="primary"
+                      onClick={openCompleteModal}
+                      disabled={disabled}
+                    >
+                      Gửi xác nhận hoàn thành hợp đồng
+                    </Button>
                   </div>
                 </div>
               );
             })()}
           </div>
+          )}
         </div>
       </div>
 
       <Modal
-        title={modalMode === "progress" ? "Gửi báo cáo tiến độ" : "Gửi xác nhận hoàn thành hợp đồng"}
+        title={
+          modalMode === "progress"
+            ? "Gửi báo cáo tiến độ"
+            : "Gửi xác nhận hoàn thành hợp đồng"
+        }
         open={modalOpen}
         onCancel={() => {
           setModalOpen(false);
@@ -357,26 +516,38 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
             <Typography.Text className="block mb-1">Nội dung</Typography.Text>
             <Input.TextArea
               rows={4}
-              placeholder={modalMode === "progress" ? "Mô tả tiến độ thực hiện hợp đồng..." : "Xác nhận đã hoàn thành các hạng mục của hợp đồng..."}
+              placeholder={
+                modalMode === "progress"
+                  ? "Mô tả tiến độ thực hiện hợp đồng..."
+                  : "Xác nhận đã hoàn thành các hạng mục của hợp đồng..."
+              }
               value={modalContent}
               onChange={(e) => setModalContent(e.target.value)}
             />
           </div>
 
           <div>
-            <Typography.Text className="block mb-1">Tài liệu (tuỳ chọn)</Typography.Text>
+            <Typography.Text className="block mb-1">
+              Tài liệu (tuỳ chọn)
+            </Typography.Text>
             <Upload.Dragger
               multiple={false}
               beforeUpload={onFileUpload}
               showUploadList={!!attachments.length}
               maxCount={1}
               onRemove={(file) => {
-                setAttachments((prev) => prev.filter((f) => f.name !== file.name));
+                setAttachments((prev) =>
+                  prev.filter((f) => f.name !== file.name)
+                );
               }}
               accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
             >
-              <p className="ant-upload-drag-icon"><UploadCloud /></p>
-              <p className="ant-upload-text">Kéo thả file vào đây hoặc bấm để chọn file</p>
+              <p className="ant-upload-drag-icon">
+                <UploadCloud />
+              </p>
+              <p className="ant-upload-text">
+                Kéo thả file vào đây hoặc bấm để chọn file
+              </p>
               <p className="ant-upload-hint">Hỗ trợ PDF, Word, hình ảnh.</p>
             </Upload.Dragger>
           </div>
@@ -392,7 +563,12 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({ proposal }) 
         okButtonProps={{ danger: true }}
       >
         <Typography.Text className="block mb-1">Lý do</Typography.Text>
-        <Input.TextArea rows={3} placeholder="Nhập lý do từ chối..." value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+        <Input.TextArea
+          rows={3}
+          placeholder="Nhập lý do từ chối..."
+          value={rejectReason}
+          onChange={(e) => setRejectReason(e.target.value)}
+        />
       </Modal>
     </div>
   );

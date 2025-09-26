@@ -14,5 +14,7 @@ export interface Demand {
   from_price: number
   to_price: number
   cooperation: string
+  start_date: string
+  end_date: string
   documents: Media[]
 }

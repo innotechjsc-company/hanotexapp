@@ -18,9 +18,10 @@ export interface PaginationParams {
 
 export interface ConfirmLogRequest {
   contract_log_id: string;
-  status?: 'completed' | 'cancelled';
+  status?: "completed" | "cancelled";
   reason?: string;
   is_done_contract?: boolean;
+  contract_id?: string;
 }
 
 export interface ConfirmLogResponse {
@@ -48,7 +49,10 @@ class ContractLogsApi {
     if (filters.status) params["where[status][equals]"] = filters.status;
     if (filters.search) params["search"] = filters.search;
 
-    return payloadApiClient.get<ContractLog[]>(API_ENDPOINTS.CONTRACT_LOGS, params);
+    return payloadApiClient.get<ContractLog[]>(
+      API_ENDPOINTS.CONTRACT_LOGS,
+      params
+    );
   }
 
   async create(data: Partial<ContractLog>): Promise<ContractLog> {
@@ -72,7 +76,7 @@ class ContractLogsApi {
       `/contract/confirm-logs`,
       data
     );
-    return (res as any) as ConfirmLogResponse;
+    return res as any as ConfirmLogResponse;
   }
 }
 
