@@ -44,6 +44,7 @@ export default function DemandsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -67,8 +68,8 @@ export default function DemandsPage() {
 
       // Build filters object
       const apiFilters: any = {};
-      if (searchQuery) {
-        apiFilters.search = searchQuery;
+      if (activeSearchQuery) {
+        apiFilters.search = activeSearchQuery;
       }
       if (filters.category) {
         apiFilters.category = filters.category;
@@ -123,11 +124,22 @@ export default function DemandsPage() {
 
   useEffect(() => {
     fetchDemands();
-  }, [pagination.page, pagination.limit]);
+  }, [pagination.page, pagination.limit, sortBy, sortOrder]); // Added sortBy and sortOrder
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Reset to first page and fetch with search query
+    // If there's an active search query, clear it
+    if (activeSearchQuery) {
+      setSearchQuery("");
+      setActiveSearchQuery("");
+      setPagination((prev) => ({ ...prev, page: 1 }));
+      fetchDemands(); // Re-fetch all demands without search
+      return;
+    }
+
+    // Perform a new search
+    const newSearchQuery = searchQuery.trim();
+    setActiveSearchQuery(newSearchQuery);
     setPagination((prev) => ({ ...prev, page: 1 }));
     fetchDemands();
   };
@@ -144,7 +156,7 @@ export default function DemandsPage() {
     if (pagination.page === 1) {
       fetchDemands();
     }
-  }, [filters, searchQuery]);
+  }, [filters, activeSearchQuery]); // Changed searchQuery to activeSearchQuery
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -274,18 +286,18 @@ export default function DemandsPage() {
                 />
                 <Button
                   type="submit"
-                  color="primary"
+                  color={activeSearchQuery ? "danger" : "primary"}
                   size="lg"
                   className="px-8"
                   style={{
-                    backgroundColor: "#006FEE",
+                    backgroundColor: activeSearchQuery ? "#EF4444" : "#006FEE",
                     color: "#ffffff",
                     minHeight: "48px",
                     fontWeight: "500",
                     border: "none",
                   }}
                 >
-                  Tìm kiếm
+                  {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
                 </Button>
               </div>
 
@@ -368,7 +380,13 @@ export default function DemandsPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <p className="text-default-600">
-              Tìm thấy <span className="font-semibold">{demands.length}</span>{" "}
+              Tìm thấy{" "}
+              <span className="font-semibold">{pagination.totalDocs}</span>
+              {activeSearchQuery && (
+                <span className="ml-1 text-default-500">
+                  cho "{activeSearchQuery}"
+                </span>
+              )}{" "}
               nhu cầu
             </p>
           </div>

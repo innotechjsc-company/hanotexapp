@@ -34,6 +34,7 @@ import { getDemandById } from "@/api/demands";
 import { Demand } from "@/types/demand";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
 import DemandContactCard from "@/components/demands/DemandContactCard";
+import { getProposes } from "@/api/propose";
 
 export default function DemandDetailPage() {
   const router = useRouter();
@@ -43,6 +44,8 @@ export default function DemandDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [hasUserProposed, setHasUserProposed] = useState(false);
+  const [checkingProposal, setCheckingProposal] = useState(false);
 
   const demandId = params.id as string;
 
@@ -57,15 +60,41 @@ export default function DemandDetailPage() {
         return doc.url;
       }
       // If URL is relative, prepend CMS base URL
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${doc.url}`;
+      return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}${doc.url}`;
     }
 
     // If doc has an ID, construct media URL
     if (doc.id) {
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}/api/media/${doc.id}`;
+      return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}/api/media/${doc.id}`;
     }
 
     return null;
+  };
+
+  // Check if user has already proposed for this demand
+  const checkUserProposal = async () => {
+    if (!isAuthenticated || !user?.id || !demandId) {
+      setHasUserProposed(false);
+      return;
+    }
+
+    try {
+      setCheckingProposal(true);
+      const response = await getProposes(
+        {
+          demand: demandId,
+          user: user.id,
+        },
+        { limit: 1 }
+      );
+
+      setHasUserProposed((response.totalDocs || 0) > 0);
+    } catch (err) {
+      console.error("Error checking user proposal:", err);
+      setHasUserProposed(false);
+    } finally {
+      setCheckingProposal(false);
+    }
   };
 
   // Fetch demand details
@@ -79,7 +108,6 @@ export default function DemandDetailPage() {
     try {
       setLoading(true);
       setError("");
-      console.log("Fetching demand detail for ID:", demandId);
 
       const demandData = await getDemandById(demandId);
       console.log("Demand detail response:", demandData);
@@ -100,6 +128,12 @@ export default function DemandDetailPage() {
   useEffect(() => {
     fetchDemandDetail();
   }, [demandId]);
+
+  useEffect(() => {
+    if (demand && isAuthenticated && user?.id) {
+      checkUserProposal();
+    }
+  }, [demand, isAuthenticated, user?.id]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -553,13 +587,6 @@ export default function DemandDetailPage() {
                         : "Thỏa thuận"}
                     </p>
                   </div>
-
-                  {demand.from_price && demand.to_price && (
-                    <div className="text-xs text-default-500">
-                      <p>Giá thấp nhất: {formatPrice(demand.from_price)}</p>
-                      <p>Giá cao nhất: {formatPrice(demand.to_price)}</p>
-                    </div>
-                  )}
                 </div>
               </CardBody>
             </Card>
@@ -594,22 +621,45 @@ export default function DemandDetailPage() {
                   Đăng nhập để đề xuất
                 </Button>
               ) : !isOwner ? (
-                <Button
-                  color="primary"
-                  size="lg"
-                  className="w-full"
-                  onPress={handlePropose}
-                  endContent={<Send className="h-5 w-5" />}
-                  style={{
-                    backgroundColor: "#006FEE",
-                    color: "#ffffff",
-                    minHeight: "48px",
-                    fontWeight: "600",
-                    fontSize: "16px",
-                  }}
-                >
-                  Đề xuất giải pháp
-                </Button>
+                checkingProposal ? (
+                  <div className="w-full flex items-center justify-center py-3">
+                    <Spinner size="sm" color="primary" />
+                    <span className="ml-2 text-sm text-default-600">
+                      Đang kiểm tra...
+                    </span>
+                  </div>
+                ) : hasUserProposed ? (
+                  <div className="w-full p-4 bg-success-50 border border-success-200 rounded-lg text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="w-8 h-8 bg-success-100 rounded-full flex items-center justify-center">
+                        <Send className="h-4 w-4 text-success-600" />
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-success-700">
+                      Bạn đã gửi đề xuất
+                    </p>
+                    <p className="text-xs text-success-600 mt-1">
+                      Đề xuất của bạn đang được xem xét
+                    </p>
+                  </div>
+                ) : (
+                  <Button
+                    color="primary"
+                    size="lg"
+                    className="w-full"
+                    onPress={handlePropose}
+                    endContent={<Send className="h-5 w-5" />}
+                    style={{
+                      backgroundColor: "#006FEE",
+                      color: "#ffffff",
+                      minHeight: "48px",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Đề xuất giải pháp
+                  </Button>
+                )
               ) : null}
 
               <Button
