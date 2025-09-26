@@ -47,6 +47,7 @@ export default function DemandsPage() {
   const [loading, setLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isFiltering, setIsFiltering] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
   const [sortBy, setSortBy] = useState("createdAt");
@@ -145,7 +146,6 @@ export default function DemandsPage() {
   // Fetch demands from API
   const fetchDemands = async () => {
     try {
-      setLoading(true);
       setError("");
 
       // Build filters object
@@ -204,6 +204,7 @@ export default function DemandsPage() {
       setDemands([]);
     } finally {
       setLoading(false);
+      setIsFiltering(false);
     }
   };
 
@@ -225,6 +226,7 @@ export default function DemandsPage() {
 
   // Extracted search logic to be reusable
   const performSearch = () => {
+    setIsFiltering(true);
     const newActiveQuery = activeSearchQuery ? "" : searchQuery.trim();
     setActiveSearchQuery(newActiveQuery);
     if (activeSearchQuery) {
@@ -240,6 +242,7 @@ export default function DemandsPage() {
 
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
+    setIsFiltering(true);
     setFilters(newFilters);
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
@@ -534,215 +537,222 @@ export default function DemandsPage() {
         </div>
 
         {/* Demands Grid/List */}
-        {demands.length > 0 ? (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                : "space-y-4"
-            }
-          >
-            {demands.map((demand, index) => (
-              <Card
-                key={demand.id || index}
-                className={`shadow-sm hover:shadow-md transition-shadow ${
-                  viewMode === "grid" ? "h-full flex flex-col" : ""
-                }`}
-                isPressable={false}
-              >
-                <CardBody className="p-6 flex flex-col h-full">
-                  {viewMode === "grid" ? (
-                    // Grid View
-                    <>
-                      <div className="flex items-start justify-between mb-4">
-                        <Chip
-                          size="sm"
-                          color="primary"
-                          variant="flat"
-                          className="text-xs"
-                        >
-                          {typeof demand.category === "object" &&
-                          demand.category?.name
-                            ? demand.category.name
-                            : typeof demand.category === "string"
-                              ? demand.category
-                              : "Chưa phân loại"}
-                        </Chip>
-                        <Chip
-                          size="sm"
-                          color="success"
-                          variant="flat"
-                          className="text-xs"
-                        >
-                          TRL {demand.trl_level}
-                        </Chip>
-                      </div>
-
-                      <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
-                        {demand.title}
-                      </h3>
-
-                      <p className="text-default-600 text-sm mb-4 line-clamp-3 flex-grow">
-                        {demand.description}
-                      </p>
-
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-default-500">
-                          <DollarSign className="h-4 w-4 mr-2" />
-                          <span>
-                            {demand.from_price && demand.to_price
-                              ? `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`
-                              : "Thỏa thuận"}
-                          </span>
+        <div className="relative">
+          {isFiltering && (
+            <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
+              <Spinner size="lg" color="primary" />
+            </div>
+          )}
+          {demands.length > 0 ? (
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-4"
+              }
+            >
+              {demands.map((demand, index) => (
+                <Card
+                  key={demand.id || index}
+                  className={`shadow-sm hover:shadow-md transition-shadow ${
+                    viewMode === "grid" ? "h-full flex flex-col" : ""
+                  }`}
+                  isPressable={false}
+                >
+                  <CardBody className="p-6 flex flex-col h-full">
+                    {viewMode === "grid" ? (
+                      // Grid View
+                      <>
+                        <div className="flex items-start justify-between mb-4">
+                          <Chip
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            className="text-xs"
+                          >
+                            {typeof demand.category === "object" &&
+                            demand.category?.name
+                              ? demand.category.name
+                              : typeof demand.category === "string"
+                                ? demand.category
+                                : "Chưa phân loại"}
+                          </Chip>
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="flat"
+                            className="text-xs"
+                          >
+                            TRL {demand.trl_level}
+                          </Chip>
                         </div>
-                        <div className="flex items-center text-sm text-default-500">
-                          <Users className="h-4 w-4 mr-2" />
-                          <span>
-                            {typeof demand.user === "object" &&
-                            demand.user?.full_name
-                              ? demand.user.full_name
-                              : "Người dùng"}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm text-default-500">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span>Mới đăng</span>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center justify-between text-sm text-default-500 mb-4">
-                        <div className="flex items-center">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                            {demand.cooperation || "Hợp tác"}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-xs text-default-400">
-                            {demand.documents?.length || 0} tài liệu
-                          </span>
-                        </div>
-                      </div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+                          {demand.title}
+                        </h3>
 
-                      <div className="space-y-2 mt-auto">
-                        <Button
-                          color="primary"
-                          className="w-full"
-                          onPress={() => {
-                            const target = `/demands/${demand.id || index}`;
-                            if (isAuthenticated) {
-                              router.push(target);
-                            } else {
-                              router.push(
-                                `/auth/login?redirect=${encodeURIComponent(target)}`
-                              );
-                            }
-                          }}
-                          endContent={<ArrowRight className="h-4 w-4" />}
-                          style={{
-                            backgroundColor: "#006FEE",
-                            color: "#ffffff",
-                            minHeight: "40px",
-                            fontWeight: "500",
-                            border: "none",
-                          }}
-                        >
-                          Xem chi tiết
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    // List View
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {demand.title}
-                          </h3>
-                          <div className="flex items-center space-x-2">
-                            <Chip
-                              size="sm"
-                              color="primary"
-                              variant="flat"
-                              className="text-xs"
-                            >
-                              {typeof demand.category === "object" &&
-                              demand.category?.name
-                                ? demand.category.name
-                                : typeof demand.category === "string"
-                                  ? demand.category
-                                  : "Chưa phân loại"}
-                            </Chip>
-                            <Chip
-                              size="sm"
-                              color="success"
-                              variant="flat"
-                              className="text-xs"
-                            >
-                              TRL {demand.trl_level}
-                            </Chip>
+                        <p className="text-default-600 text-sm mb-4 line-clamp-3 flex-grow">
+                          {demand.description}
+                        </p>
+
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center text-sm text-default-500">
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            <span>
+                              {demand.from_price && demand.to_price
+                                ? `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`
+                                : "Thỏa thuận"}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-sm text-default-500">
+                            <Users className="h-4 w-4 mr-2" />
+                            <span>
+                              {typeof demand.user === "object" &&
+                              demand.user?.full_name
+                                ? demand.user.full_name
+                                : "Người dùng"}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-sm text-default-500">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            <span>Mới đăng</span>
                           </div>
                         </div>
 
-                        <p className="text-default-600 text-sm mb-3 line-clamp-2">
-                          {demand.description}
-                        </p>
-                      </div>
+                        <div className="flex items-center justify-between text-sm text-default-500 mb-4">
+                          <div className="flex items-center">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                              {demand.cooperation || "Hợp tác"}
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-xs text-default-400">
+                              {demand.documents?.length || 0} tài liệu
+                            </span>
+                          </div>
+                        </div>
 
-                      <div className="flex flex-col space-y-2">
-                        <Button
-                          color="primary"
-                          size="sm"
-                          onPress={() => router.push(`/demands/${demand.id}`)}
-                          endContent={<ArrowRight className="h-4 w-4" />}
-                          style={{
-                            backgroundColor: "#006FEE",
-                            color: "#ffffff",
-                            minHeight: "32px",
-                            fontWeight: "500",
-                            border: "none",
-                          }}
-                        >
-                          Xem chi tiết
-                        </Button>
-                        {isAuthenticated && (
+                        <div className="space-y-2 mt-auto">
                           <Button
-                            color="success"
-                            variant="bordered"
-                            size="sm"
-                            onPress={() =>
-                              router.push(`/demands/${demand.id}/propose`)
-                            }
-                            endContent={<Send className="h-4 w-4" />}
+                            color="primary"
+                            className="w-full"
+                            onPress={() => {
+                              const target = `/demands/${demand.id || index}`;
+                              if (isAuthenticated) {
+                                router.push(target);
+                              } else {
+                                router.push(
+                                  `/auth/login?redirect=${encodeURIComponent(target)}`
+                                );
+                              }
+                            }}
+                            endContent={<ArrowRight className="h-4 w-4" />}
                             style={{
-                              backgroundColor: "transparent",
-                              color: "#17C964",
-                              border: "1px solid #17C964",
-                              minHeight: "32px",
+                              backgroundColor: "#006FEE",
+                              color: "#ffffff",
+                              minHeight: "40px",
                               fontWeight: "500",
+                              border: "none",
                             }}
                           >
-                            Đề xuất
+                            Xem chi tiết
                           </Button>
-                        )}
+                        </div>
+                      </>
+                    ) : (
+                      // List View
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {demand.title}
+                            </h3>
+                            <div className="flex items-center space-x-2">
+                              <Chip
+                                size="sm"
+                                color="primary"
+                                variant="flat"
+                                className="text-xs"
+                              >
+                                {typeof demand.category === "object" &&
+                                demand.category?.name
+                                  ? demand.category.name
+                                  : typeof demand.category === "string"
+                                    ? demand.category
+                                    : "Chưa phân loại"}
+                              </Chip>
+                              <Chip
+                                size="sm"
+                                color="success"
+                                variant="flat"
+                                className="text-xs"
+                              >
+                                TRL {demand.trl_level}
+                              </Chip>
+                            </div>
+                          </div>
+
+                          <p className="text-default-600 text-sm mb-3 line-clamp-2">
+                            {demand.description}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col space-y-2">
+                          <Button
+                            color="primary"
+                            size="sm"
+                            onPress={() => router.push(`/demands/${demand.id}`)}
+                            endContent={<ArrowRight className="h-4 w-4" />}
+                            style={{
+                              backgroundColor: "#006FEE",
+                              color: "#ffffff",
+                              minHeight: "32px",
+                              fontWeight: "500",
+                              border: "none",
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                          {isAuthenticated && (
+                            <Button
+                              color="success"
+                              variant="bordered"
+                              size="sm"
+                              onPress={() =>
+                                router.push(`/demands/${demand.id}/propose`)
+                              }
+                              endContent={<Send className="h-4 w-4" />}
+                              style={{
+                                backgroundColor: "transparent",
+                                color: "#17C964",
+                                border: "1px solid #17C964",
+                                minHeight: "32px",
+                                fontWeight: "500",
+                              }}
+                            >
+                              Đề xuất
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="py-12">
-            <CardBody className="flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-default-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Không tìm thấy nhu cầu nào
-              </h3>
-            </CardBody>
-          </Card>
-        )}
+                    )}
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="py-12">
+              <CardBody className="flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-default-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Không tìm thấy nhu cầu nào
+                </h3>
+              </CardBody>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Floating Action Button */}
