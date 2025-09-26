@@ -1,25 +1,30 @@
 import React, { useState } from "react";
-import { Avatar, Typography, Button, Tooltip, Tag, Popconfirm, message as antdMessage } from "antd";
+import {
+  Avatar,
+  Typography,
+  Button,
+  Tooltip,
+  Tag,
+  Popconfirm,
+  message as antdMessage,
+} from "antd";
 import { Download, CheckCircle2 } from "lucide-react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/vi";
 import type { ApiNegotiatingMessage } from "@/api/negotiating-messages";
 import { negotiatingMessageApi } from "@/api/negotiating-messages";
+import type { Media } from "@/types/media1";
 import { useUser } from "@/store/auth";
 import { OfferStatus } from "@/types/offer";
-
-dayjs.extend(relativeTime);
-dayjs.locale("vi");
 
 const { Text } = Typography;
 
 interface MessageItemProps {
   message: ApiNegotiatingMessage;
   formatFileSize: (bytes: number) => string;
+  formatMessageTime: (timestamp: string) => string;
+  side?: "left" | "right";
 }
 
-// Avatar component
+// Avatar component with online status
 const MessageAvatar: React.FC<{
   message: ApiNegotiatingMessage;
   isRightSide: boolean;
@@ -29,7 +34,7 @@ const MessageAvatar: React.FC<{
     if (typeof message.user === "object") {
       return message.user.full_name || message.user.email || "Unknown User";
     }
-    return message.user as unknown as string;
+    return message.user;
   };
 
   const getUserAvatar = () => {
@@ -49,7 +54,7 @@ const MessageAvatar: React.FC<{
   );
 };
 
-// Sender name
+// Sender name component
 const SenderName: React.FC<{
   message: ApiNegotiatingMessage;
   isRightSide: boolean;
@@ -59,7 +64,7 @@ const SenderName: React.FC<{
     if (typeof message.user === "object") {
       return message.user.full_name || message.user.email || "Unknown User";
     }
-    return message.user as unknown as string;
+    return message.user;
   };
 
   return (
@@ -73,9 +78,9 @@ const SenderName: React.FC<{
   );
 };
 
-// File attachment
+// File attachment component
 const FileAttachment: React.FC<{
-  attachment: any;
+  attachment: Media | string; // Can be string or Media object
   isRightSide: boolean;
   formatFileSize: (bytes: number) => string;
 }> = ({ attachment, isRightSide, formatFileSize }) => {
@@ -83,6 +88,7 @@ const FileAttachment: React.FC<{
     if (typeof attachment === "string") {
       return "Document";
     }
+    // Use filename first, then alt as fallback, then default
     return attachment.filename || attachment.alt || "Tài liệu";
   };
 
@@ -110,19 +116,25 @@ const FileAttachment: React.FC<{
   const getFileIcon = () => {
     const mimeType = getMimeType();
     const fileName = getFileName().toLowerCase();
+
+    // Check by mime type first
     if (mimeType.includes("pdf")) return "📄";
     if (mimeType.includes("word") || fileName.includes(".doc")) return "📝";
     if (mimeType.includes("excel") || fileName.includes(".xls")) return "📊";
-    if (mimeType.includes("powerpoint") || fileName.includes(".ppt")) return "📋";
+    if (mimeType.includes("powerpoint") || fileName.includes(".ppt"))
+      return "📋";
     if (mimeType.includes("image")) return "🖼️";
     if (mimeType.includes("video")) return "🎥";
     if (mimeType.includes("audio")) return "🎵";
+
+    // Fallback to generic document icon
     return "📎";
   };
 
   const handleDownload = () => {
     const url = getFileUrl();
     if (url && url !== "#") {
+      // Create a temporary link element to trigger download
       const link = document.createElement("a");
       link.href = url;
       link.download = getFileName();
@@ -180,7 +192,7 @@ const FileAttachment: React.FC<{
   );
 };
 
-// Message bubble including offer block
+// Message bubble component
 const MessageBubble: React.FC<{
   message: ApiNegotiatingMessage;
   isRightSide: boolean;
@@ -189,18 +201,16 @@ const MessageBubble: React.FC<{
   const hasMessage = message.message && message.message.trim().length > 0;
   const hasDocuments = message.documents && message.documents.length > 0;
   const hasOffer = !!message.is_offer && !!message.offer;
-
   const initialOfferStatus =
     (hasOffer && typeof message.offer === "object"
       ? (message.offer.status as OfferStatus | undefined)
       : undefined) || undefined;
-
   const [offerStatus, setOfferStatus] = useState<OfferStatus | undefined>(
     initialOfferStatus
   );
-  const [actionLoading, setActionLoading] = useState<"accept" | "reject" | null>(
-    null
-  );
+  const [actionLoading, setActionLoading] = useState<
+    "accept" | "reject" | null
+  >(null);
 
   const formatCurrency = (value?: number) => {
     if (value == null) return "-";
@@ -236,7 +246,7 @@ const MessageBubble: React.FC<{
     hasOffer &&
     typeof message.offer === "object" &&
     offerStatus === OfferStatus.PENDING &&
-    !isRightSide;
+    !isRightSide; // only show actions to the receiver, not the sender
 
   const handleAcceptOffer = async () => {
     try {
@@ -245,6 +255,8 @@ const MessageBubble: React.FC<{
       await negotiatingMessageApi.acceptOffer((message.offer as any).id);
       setOfferStatus(OfferStatus.ACCEPTED);
       antdMessage.success("Đđề xuất ã chấp nhận giá");
+      // The accept route also updates proposal status and creates contract
+      // Refresh the page to reflect step changes if needed
       setTimeout(() => {
         try {
           window.location.reload();
@@ -364,7 +376,7 @@ const MessageBubble: React.FC<{
                 key={
                   typeof doc === "string"
                     ? doc
-                    : (doc as any).id?.toString() || `doc-${index}`
+                    : doc.id?.toString() || `doc-${index}`
                 }
                 attachment={doc}
                 isRightSide={isRightSide}
@@ -374,7 +386,7 @@ const MessageBubble: React.FC<{
           </div>
         )}
 
-        {/* Placeholder when empty */}
+        {/* Show placeholder if neither message nor documents */}
         {!hasMessage && !hasDocuments && (
           <Text
             className={`text-sm italic ${isRightSide ? "text-white/70" : "text-gray-500"}`}
@@ -387,32 +399,38 @@ const MessageBubble: React.FC<{
   );
 };
 
-// Timestamp
+// Timestamp and status component
 const MessageTimestamp: React.FC<{
   message: ApiNegotiatingMessage;
   isRightSide: boolean;
-}> = ({ message, isRightSide }) => (
+  formatMessageTime: (timestamp: string) => string;
+}> = ({ message, isRightSide, formatMessageTime }) => (
   <div
     className={`flex items-center gap-1 mt-1 ${isRightSide ? "justify-end" : "justify-start"}`}
   >
     <Text className="text-xs text-gray-400">
-      {dayjs(message.createdAt || new Date().toISOString()).fromNow()}
+      {formatMessageTime(message.createdAt || new Date().toISOString())}
     </Text>
+
     {isRightSide && <CheckCircle2 size={10} className="text-blue-400" />}
   </div>
 );
 
+// Main MessageItem component
 export const MessageItem: React.FC<MessageItemProps> = ({
   message,
   formatFileSize,
+  formatMessageTime,
+  side,
 }) => {
   const currentUser = useUser();
 
+  // Determine side: use prop if provided, otherwise check if message is from current user
   const isCurrentUser =
     message.user && typeof message.user === "object"
       ? message.user.id === currentUser?.id
       : false;
-  const isRightSide = isCurrentUser;
+  const isRightSide = side ? side === "right" : isCurrentUser;
 
   return (
     <div
@@ -430,6 +448,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         <MessageTimestamp
           message={message}
           isRightSide={isRightSide}
+          formatMessageTime={formatMessageTime}
         />
       </div>
     </div>

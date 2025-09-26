@@ -56,6 +56,9 @@ export interface UseProjectNegotiationReturn {
 
   // Utilities
   formatFileSize: (bytes: number) => string;
+  
+  // Refresh
+  reloadProposal: () => Promise<void>;
 }
 
 // Helper function to detect file type based on MIME type or file extension
@@ -473,5 +476,8 @@ export const useProjectNegotiation = ({
     handleAcceptProposal,
     handleRejectProposal,
     handleCompleteProposal,
+
+    // Refresh
+    reloadProposal: fetchProjectProposalDetails,
   };
 };

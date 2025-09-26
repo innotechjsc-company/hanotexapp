@@ -12,6 +12,17 @@ class ContractsApi {
     const contract = (res.docs && res.docs[0]) as unknown as Contract | undefined;
     return contract || null;
   }
+
+  async getByProjectPropose(projectProposeId: string, depth = 1) {
+    const params: Record<string, any> = {
+      [`where[project_propose][equals]`]: projectProposeId,
+      depth,
+      limit: 1,
+    };
+    const res = await payloadApiClient.get<Contract>(`/contract`, params);
+    const contract = (res.docs && res.docs[0]) as unknown as Contract | undefined;
+    return contract || null;
+  }
   async getByTechnologyPropose(technologyProposeId: string, depth = 1) {
     const params: Record<string, any> = {
       [`where[technology_propose][equals]`]: technologyProposeId,

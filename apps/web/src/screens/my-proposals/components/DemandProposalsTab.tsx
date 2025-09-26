@@ -267,7 +267,7 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
                 onClick={() => handleViewNegotiation(record)}
               />
             </Tooltip>
-            {record.status !== "completed" && (
+            {(record.status === "pending" || record.status === "cancelled") && (
               <Tooltip title="Hủy đề xuất" color="red">
                 <Button
                   type="text"

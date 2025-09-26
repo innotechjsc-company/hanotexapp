@@ -1,158 +1,153 @@
 import React from "react";
-import { Form, Input, Button, Upload, Space, Tag, Tooltip } from "antd";
-import {
-  SendOutlined,
-  PaperClipOutlined,
-  DeleteOutlined,
-  DollarOutlined,
-} from "@ant-design/icons";
-import type { FormInstance } from "antd/es/form";
+import { Form, Input, Button, Upload, Typography } from "antd";
+import { Send, Paperclip, X, DollarSign } from "lucide-react";
+import { FileText } from "lucide-react";
 
-const { TextArea } = Input;
+const { Text } = Typography;
 
 interface MessageInputProps {
-  form: FormInstance;
+  form: any;
   attachments: File[];
   sendingMessage: boolean;
-  uploadingFiles: boolean;
+  uploadingFiles?: boolean;
   onSendMessage: (values: { message: string }) => Promise<void>;
   onFileUpload: (file: File) => boolean;
   onRemoveAttachment: (index: number) => void;
   formatFileSize: (bytes: number) => string;
-  onSendOffer: () => void;
-  canSendOffer: boolean;
-  hasPendingOffer: boolean;
-  isProposalCreator: boolean;
+  onSendOffer?: () => void;
+  canSendOffer?: boolean;
+  hasPendingOffer?: boolean;
+  isProposalCreator?: boolean; // Thêm prop để kiểm tra có phải người tạo proposal
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   form,
   attachments,
   sendingMessage,
-  uploadingFiles,
+  uploadingFiles = false,
   onSendMessage,
   onFileUpload,
   onRemoveAttachment,
   formatFileSize,
   onSendOffer,
-  canSendOffer,
-  hasPendingOffer,
-  isProposalCreator,
+  canSendOffer = true,
+  hasPendingOffer = false,
+  isProposalCreator = false,
 }) => {
-  const handleSubmit = async (values: { message: string }) => {
-    if (!values.message?.trim() && attachments.length === 0) {
-      return;
-    }
-    await onSendMessage(values);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      form.submit();
-    }
-  };
-
   return (
-    <div className="p-4 bg-white border-t">
-      <Form form={form} onFinish={handleSubmit} layout="vertical">
-        {/* Attachments display */}
+    <div className="bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="max-w-7xl mx-auto">
+        {/* File Attachments Preview */}
         {attachments.length > 0 && (
-          <div className="mb-3">
-            <div className="flex flex-wrap gap-2">
+          <div className="mb-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <Text className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">
+              File đính kèm ({attachments.length})
+            </Text>
+            <div className="space-y-2">
               {attachments.map((file, index) => (
-                <Tag
+                <div
                   key={index}
-                  closable
-                  onClose={() => onRemoveAttachment(index)}
-                  closeIcon={<DeleteOutlined />}
-                  className="flex items-center space-x-1 px-2 py-1"
+                  className="flex items-center gap-3 p-2 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
                 >
-                  <PaperClipOutlined className="text-xs" />
-                  <span className="text-xs">
-                    {file.name} ({formatFileSize(file.size)})
-                  </span>
-                </Tag>
+                  <div className="p-1.5 rounded-md bg-blue-50">
+                    <FileText size={14} className="text-blue-500" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <Text className="text-xs font-medium text-gray-800 block truncate">
+                      {file.name}
+                    </Text>
+                    <Text className="text-xs text-gray-500">
+                      {formatFileSize(file.size)}
+                    </Text>
+                  </div>
+
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<X size={12} />}
+                    onClick={() => onRemoveAttachment(index)}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 border-none rounded-md w-6 h-6 flex items-center justify-center"
+                  />
+                </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="flex items-end space-x-2">
-          {/* Message input */}
-          <div className="flex-1">
-            <Form.Item name="message" className="mb-0">
-              <TextArea
-                placeholder="Nhập nội dung đàm phán đầu tư..."
-                autoSize={{ minRows: 1, maxRows: 4 }}
-                onKeyPress={handleKeyPress}
-                disabled={sendingMessage || uploadingFiles}
-              />
-            </Form.Item>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center space-x-2">
-            {/* File upload */}
+        {/* Message Input Form */}
+        <Form form={form} onFinish={onSendMessage}>
+          <div className="flex gap-3 p-3 bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            {/* File upload button */}
             <Upload
               beforeUpload={onFileUpload}
               showUploadList={false}
               multiple
-              disabled={sendingMessage || uploadingFiles}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
             >
-              <Tooltip title="Đính kèm file">
-                <Button
-                  type="text"
-                  icon={<PaperClipOutlined />}
-                  loading={uploadingFiles}
-                  disabled={sendingMessage}
-                />
-              </Tooltip>
+              <Button
+                type="text"
+                icon={<Paperclip size={16} />}
+                className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 border-none rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              />
             </Upload>
 
-            {/* Send offer button - only for proposal creators */}
-            {canSendOffer && (
-              <Tooltip 
+            {/* Message input */}
+            <Form.Item name="message" className="flex-1 mb-0">
+              <Input
+                placeholder="Nhập nội dung đàm phán của bạn..."
+                className="border-none text-sm px-0 py-2 bg-transparent focus:shadow-none"
+                style={{ boxShadow: "none" }}
+                onPressEnter={(e) => {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    form.submit();
+                  }
+                }}
+              />
+            </Form.Item>
+
+            {/* Offer button - Only show if user is proposal creator */}
+            {onSendOffer && isProposalCreator && (
+              <Button
+                type="default"
+                icon={<DollarSign size={16} />}
+                onClick={onSendOffer}
+                disabled={!canSendOffer || sendingMessage || uploadingFiles}
+                className="rounded-full w-10 h-10 flex items-center justify-center border-orange-300 text-orange-600 hover:border-orange-400 hover:text-orange-700 hover:bg-orange-50 transition-all duration-200"
                 title={
-                  hasPendingOffer 
-                    ? "Đã có đề xuất đang chờ xử lý" 
-                    : "Gửi đề xuất giá đầu tư"
+                  hasPendingOffer ? "Chờ xác nhận đề xuất" : "Gửi đề xuất giá"
                 }
-              >
-                <Button
-                  type="default"
-                  icon={<DollarOutlined />}
-                  onClick={onSendOffer}
-                  disabled={hasPendingOffer || sendingMessage || uploadingFiles}
-                  className="text-green-600 border-green-600 hover:bg-green-50"
-                >
-                  Đề xuất
-                </Button>
-              </Tooltip>
+              />
             )}
 
-            {/* Send message button */}
+            {/* Send button */}
             <Button
               type="primary"
               htmlType="submit"
-              icon={<SendOutlined />}
-              loading={sendingMessage}
-              disabled={uploadingFiles}
-            >
-              Gửi
-            </Button>
+              icon={<Send size={16} />}
+              loading={sendingMessage || uploadingFiles}
+              disabled={sendingMessage || uploadingFiles}
+              className="rounded-full w-10 h-10 flex items-center justify-center border-none bg-blue-500 hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-200"
+              title={
+                uploadingFiles
+                  ? "Đang tải lên file..."
+                  : sendingMessage
+                    ? "Đang gửi tin nhắn..."
+                    : "Gửi tin nhắn"
+              }
+            />
           </div>
-        </div>
-      </Form>
+        </Form>
 
-      {/* Helper text */}
-      <div className="mt-2 text-xs text-gray-500">
-        <Space split={<span>•</span>}>
-          <span>Nhấn Enter để gửi, Shift+Enter để xuống dòng</span>
-          {isProposalCreator && (
-            <span>Bạn có thể gửi đề xuất giá đầu tư</span>
-          )}
-        </Space>
+        {/* Pending offer status message */}
+        {hasPendingOffer && isProposalCreator && (
+          <div className="px-3 pb-2">
+            <Text className="text-xs text-amber-600">
+              Bạn đã gửi đề xuất, vui lòng chờ chủ dự án xác nhận
+            </Text>
+          </div>
+        )}
       </div>
     </div>
   );

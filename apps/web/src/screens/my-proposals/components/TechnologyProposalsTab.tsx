@@ -250,7 +250,7 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-            {record.status !== "completed" && (
+           {(record.status === "pending" || record.status === "cancelled") && (
               <Tooltip title="Hủy đề xuất" color="red">
                 <Button
                   type="text"

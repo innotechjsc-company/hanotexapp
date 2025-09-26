@@ -1100,7 +1100,7 @@ function ProjectProposalsModal({
 
     // Handle opening negotiation details
     const handleViewNegotiationDetails = (proposalId: string) => {
-      const url = `/projects/negotiations/${proposalId}`;
+      const url = `/my-projects/negotiations/${proposalId}`;
       router.push(url);
     };
 

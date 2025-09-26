@@ -90,6 +90,7 @@ export const userMenuItemsBase: UserMenuItem[] = [
   { name: "Đề xuất của tôi", href: "/my-proposals" },
   { name: "Dự án của tôi", href: "/my-projects" },
   { name: "Quỹ & Đầu tư của tôi", href: "/my-investments" },
+  { name: "Phiếu dịch vụ của tôi", href: "/my-services-tickets" },
   { name: "Tin nhắn", href: "/messages" },
   { name: "Cài đặt", href: "/settings" },
 ];

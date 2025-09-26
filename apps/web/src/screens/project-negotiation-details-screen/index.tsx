@@ -62,10 +62,8 @@ export const ProjectNegotiationDetailsScreen: React.FC<
 
     // Utilities
     formatFileSize,
-
-    // Actions
-    handleAcceptProposal,
-    handleRejectProposal,
+    // Refresh
+    reloadProposal,
   } = useProjectNegotiation({ projectProposeId });
 
   const handleClose = () => {
@@ -91,7 +89,7 @@ export const ProjectNegotiationDetailsScreen: React.FC<
       <div className="text-center py-24">
         <Spin size="large" />
         <div className="mt-4">
-          <Text>Đang tải thông tin đàm phán dự án...</Text>
+          <Text>Đang tải thông tin đàm phán...</Text>
         </div>
       </div>
     );
@@ -104,7 +102,7 @@ export const ProjectNegotiationDetailsScreen: React.FC<
       <div className="p-10">
         <Alert
           message="Lỗi"
-          description={error || "Không tìm thấy thông tin đề xuất dự án"}
+          description={error || "Không tìm thấy thông tin đề xuất"}
           type="error"
           showIcon
           action={<Button onClick={handleClose}>Đóng cửa sổ</Button>}
@@ -129,16 +127,17 @@ export const ProjectNegotiationDetailsScreen: React.FC<
   };
 
   const currentStep = getCurrentStep();
+  const isCompleted = projectProposal.status === "completed";
 
   const steps = [
     {
       title: "Đàm phán",
-      description: "Thảo luận và thương lượng điều kiện đầu tư",
+      description: "Thảo luận và thương lượng điều kiện",
       icon: <MessageOutlined />,
     },
     {
       title: "Xác nhận hợp đồng",
-      description: "Hai bên xác nhận hợp đồng đầu tư",
+      description: "Hai bên xác nhận hợp đồng",
       icon: <FileTextOutlined />,
     },
     {
@@ -176,50 +175,57 @@ export const ProjectNegotiationDetailsScreen: React.FC<
 
       {/* Content area - Takes remaining space with proper scrolling */}
       <div className="flex-1 overflow-hidden">
-        {currentStep === 0 && (
-          /* Negotiation Step - Chat Interface */
-          <ProjectNegotiationChat
-            messages={messages}
-            formatFileSize={formatFileSize}
-            messageInputComponent={
-              isProposalCreator && hasPendingOffer ? (
-                <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
-                  Bạn đã gửi đề xuất, vui lòng chờ xác nhận
-                </div>
-              ) : (
-                <MessageInput
-                  form={form}
-                  attachments={attachments}
-                  sendingMessage={sendingMessage}
-                  uploadingFiles={uploadingFiles}
-                  onSendMessage={onSendMessage}
-                  onFileUpload={handleFileUpload}
-                  onRemoveAttachment={removeAttachment}
-                  formatFileSize={formatFileSize}
-                  onSendOffer={handleSendOffer}
-                  canSendOffer={canSendOffer}
-                  hasPendingOffer={hasPendingOffer}
-                  isProposalCreator={isProposalCreator}
-                />
-              )
-            }
-          />
-        )}
-        {currentStep === 1 && (
-          /* Contract Confirmation Step */
-          <div className="h-full overflow-auto">
-            <ContractSigningStep
-              projectProposal={projectProposal}
-              onAccept={handleAcceptProposal}
-              onReject={handleRejectProposal}
+        {isCompleted ? (
+          <div className="h-full overflow-auto space-y-6">
+            <ProjectNegotiationChat 
+              messages={messages} 
+              formatFileSize={formatFileSize}
+              messageInputComponent={<div />}
             />
+            <ContractSigningStep proposal={projectProposal} readOnly onBothAccepted={reloadProposal} />
+            <ContractLogsStep proposal={projectProposal} />
           </div>
-        )}
-        {currentStep === 2 && (
-          /* Contract Completion Logs Step */
-          <div className="h-full overflow-auto">
-            <ContractLogsStep projectProposal={projectProposal} />
-          </div>
+        ) : (
+          <>
+            {currentStep === 0 && (
+              <ProjectNegotiationChat
+                messages={messages}
+                formatFileSize={formatFileSize}
+                messageInputComponent={
+                  isProposalCreator && hasPendingOffer ? (
+                    <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
+                      Bạn đã gửi đề xuất, vui lòng chờ xác nhận
+                    </div>
+                  ) : (
+                    <MessageInput
+                      form={form}
+                      attachments={attachments}
+                      sendingMessage={sendingMessage}
+                      uploadingFiles={uploadingFiles}
+                      onSendMessage={onSendMessage}
+                      onFileUpload={handleFileUpload}
+                      onRemoveAttachment={removeAttachment}
+                      formatFileSize={formatFileSize}
+                      onSendOffer={handleSendOffer}
+                      canSendOffer={canSendOffer}
+                      hasPendingOffer={hasPendingOffer}
+                      isProposalCreator={isProposalCreator}
+                    />
+                  )
+                }
+              />
+            )}
+            {currentStep === 1 && (
+              <div className="h-full overflow-auto">
+                <ContractSigningStep proposal={projectProposal} onBothAccepted={reloadProposal} />
+              </div>
+            )}
+            {currentStep === 2 && (
+              <div className="h-full overflow-auto">
+                <ContractLogsStep proposal={projectProposal} />
+              </div>
+            )}
+          </>
         )}
       </div>
 

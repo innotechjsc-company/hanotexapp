@@ -11,6 +11,7 @@ import type {
   ProjectProposeStatus,
 } from "@/types/project-propose";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import EditProjectProposalModal from "./EditProjectProposalModal";
 
 const statusColors: Record<ProjectProposeStatus, string> = {
   pending: "orange",
@@ -43,7 +44,9 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProposal, setSelectedProposal] =
+    useState<ProjectPropose | null>(null);
   const pageSize = 10;
 
   const fetchProposals = async () => {
@@ -99,8 +102,15 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
     window.open(`/funds/fundraising/${project.id}`, "_blank");
   };
 
+  const handleEditProposal = (proposal: ProjectPropose) => {
+    // Chỉ cho phép sửa khi trạng thái là 'pending'
+    if (proposal.status !== "pending") return;
+    setSelectedProposal(proposal);
+    setEditModalOpen(true);
+  };
+
   const handleViewNegotiation = (proposal: ProjectPropose) => {
-    router.push(`/projects/negotiations/${proposal.id}`);
+    router.push(`/my-projects/negotiations/${proposal.id}`);
   };
 
   const handleCancelProposal = async (proposal: ProjectPropose) => {
@@ -112,6 +122,19 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       console.log("Proposal cancelled successfully");
     } catch (err) {
       console.error("Failed to cancel proposal:", err);
+    }
+  };
+
+  const handleEditSubmit = async (updatedData: Partial<ProjectPropose>) => {
+    if (!selectedProposal?.id) return;
+
+    try {
+      await projectProposeApi.update(selectedProposal.id, updatedData);
+      await fetchProposals();
+      setEditModalOpen(false);
+      setSelectedProposal(null);
+    } catch (err) {
+      console.error("Failed to update proposal:", err);
     }
   };
 
@@ -186,14 +209,16 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
         const project = record.project;
         return (
           <Space>
-            <Tooltip title="Xem dự án" color="blue">
+            {record.status === "pending" && (
+              <Tooltip title="Sửa đề xuất" color="blue">
               <Button
                 type="text"
                 size="small"
                 icon={<Eye className="h-4 w-4" />}
-                onClick={() => handleViewProject(project)}
-              />
-            </Tooltip>
+                  onClick={() => handleEditProposal(record)}
+                />
+              </Tooltip>
+            )}
             {(record.status === "negotiating" ||
               record.status === "contact_signing" ||
               record.status === "contract_signed") && (
@@ -206,15 +231,17 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-            <Tooltip title="Hủy đề xuất" color="red">
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<X className="h-4 w-4" />}
-                onClick={() => handleCancelProposal(record)}
-              />
-            </Tooltip>
+            {(record.status === "pending" || record.status === "cancelled") && (
+              <Tooltip title="Hủy đề xuất" color="red">
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<X className="h-4 w-4" />}
+                  onClick={() => handleCancelProposal(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         );
       },
@@ -281,6 +308,17 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
           scroll={{ x: 900 }}
         />
       </div>
+
+      {/* Edit Modal */}
+      <EditProjectProposalModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedProposal(null);
+        }}
+        proposal={selectedProposal}
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 }
