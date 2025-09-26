@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
 import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Search, Eye, MessageSquare, X, Edit } from "lucide-react";
+import { Search, ExternalLink, X, Edit } from "lucide-react";
 import { technologyProposeApi } from "@/api/technology-propose";
 import type {
   TechnologyPropose,
@@ -32,9 +31,8 @@ const statusLabels: Record<TechnologyProposeStatus, string> = {
   cancelled: "Đã hủy",
 };
 
-export default function TechnologyProposalsTab() {
+export default function TechnologyProposalsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { user } = useAuth();
   const [proposals, setProposals] = useState<TechnologyPropose[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -54,14 +52,14 @@ export default function TechnologyProposalsTab() {
 
   // Fetch proposals
   const fetchProposals = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     setLoading(true);
     setError("");
 
     try {
       const filters: any = {
-        user: user.id,
+        user: userId,
       };
 
       if (statusFilter !== "all") {
@@ -98,15 +96,15 @@ export default function TechnologyProposalsTab() {
 
   useEffect(() => {
     fetchProposals();
-  }, [user?.id, currentPage, statusFilter, searchTerm]);
+  }, [userId, currentPage, statusFilter, searchTerm]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1); // Reset to first page when searching
   };
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as TechnologyProposeStatus | "all");
+  const handleStatusFilter = (value: string | undefined) => {
+    setStatusFilter((value as TechnologyProposeStatus) || "all");
     setCurrentPage(1); // Reset to first page when filtering
   };
 
@@ -174,9 +172,16 @@ export default function TechnologyProposalsTab() {
           typeof technology === "string"
             ? "Công nghệ"
             : technology?.title || "Công nghệ";
+        const technologyId =
+          typeof technology === "string" ? technology : technology?.id;
         return (
           <div>
-            <div className="font-semibold">{technologyTitle}</div>
+            <div
+              className="font-semibold text-blue-600 hover:underline cursor-pointer"
+              onClick={() => technologyId && handleViewTechnology(technologyId)}
+            >
+              {technologyTitle}
+            </div>
             {record.description && (
               <div className="text-sm text-gray-500 truncate max-w-xs">
                 {record.description}
@@ -225,16 +230,6 @@ export default function TechnologyProposalsTab() {
 
         return (
           <Space>
-            <Tooltip title="Xem công nghệ" color="blue">
-              <Button
-                type="text"
-                size="small"
-                icon={<Eye className="h-4 w-4" />}
-                onClick={() =>
-                  technologyId && handleViewTechnology(technologyId)
-                }
-              />
-            </Tooltip>
             {record.status === "pending" && (
               <Tooltip title="Sửa đề xuất" color="green">
                 <Button
@@ -245,27 +240,27 @@ export default function TechnologyProposalsTab() {
                 />
               </Tooltip>
             )}
-            {(record.status === "negotiating" ||
-              record.status === "contact_signing" ||
-              record.status === "contract_signed") && (
+            {record.status !== "pending" && record.status !== "cancelled" && (
               <Tooltip title="Xem đàm phán" color="blue">
                 <Button
                   type="text"
                   size="small"
-                  icon={<MessageSquare className="h-4 w-4" />}
+                  icon={<ExternalLink className="h-4 w-4" />}
                   onClick={() => handleViewNegotiation(record)}
                 />
               </Tooltip>
             )}
-            <Tooltip title="Hủy đề xuất" color="red">
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<X className="h-4 w-4" />}
-                onClick={() => handleCancelProposal(record)}
-              />
-            </Tooltip>
+            {record.status !== "completed" && (
+              <Tooltip title="Hủy đề xuất" color="red">
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<X className="h-4 w-4" />}
+                  onClick={() => handleCancelProposal(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         );
       },

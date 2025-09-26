@@ -18,7 +18,7 @@ import {
   CheckCircle,
   X as XIcon,
 } from "lucide-react";
-import type { TechnologyPropose } from "@/types/technology-propose";
+import type { Propose } from "@/types/propose";
 import { contractLogsApi } from "@/api/contract-logs";
 import { contractsApi } from "@/api/contracts";
 import { useUser } from "@/store/auth";
@@ -30,7 +30,7 @@ import { ContractLogStatus } from "@/types/contract-log";
 const { Text } = Typography;
 
 interface ContractLogsStepProps {
-  proposal: TechnologyPropose;
+  proposal: Propose;
 }
 
 export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
@@ -94,10 +94,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     try {
       // Load active contract for this proposal (required by CMS schema)
       try {
-        const contract = await contractsApi.getByTechnologyPropose(
-          proposal.id,
-          1
-        );
+        const contract = await contractsApi.getByPropose(proposal.id, 1);
         setActiveContractId(
           (contract as any)?.id || (contract as any)?._id || null
         );
@@ -106,7 +103,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       }
 
       const res = await contractLogsApi.list(
-        { technology_propose: proposal.id },
+        { propose: proposal.id },
         { limit: 100, sort: "createdAt" }
       );
       const data = (res as any).docs || (res as any).data || [];
@@ -170,7 +167,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       }
 
       await contractLogsApi.create({
-        technology_propose: proposal?.id as any,
+        propose: proposal?.id as any,
         contract: activeContractId as any,
         user: currentUser!.id as any,
         content: content.trim(),

@@ -16,7 +16,7 @@ import {
   UploadCloud,
   Paperclip,
 } from "lucide-react";
-import type { TechnologyPropose } from "@/types/technology-propose";
+import type { Propose } from "@/types/propose";
 import type { Contract } from "@/types/contract";
 import { ContractStatusEnum } from "@/types/contract";
 import { contractsApi } from "@/api/contracts";
@@ -28,7 +28,7 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 interface ContractSigningStepProps {
-  proposal: TechnologyPropose;
+  proposal: Propose;
   onBothAccepted?: () => void;
   readOnly?: boolean;
 }
@@ -96,7 +96,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
       setLoading(true);
       console.log("Refreshing contract for proposal:", proposal.id);
       if(!proposal.id) return;
-      const found = await contractsApi.getByTechnologyPropose(proposal.id, 1);
+      const found = await contractsApi.getByPropose(proposal.id, 1);
       console.log("Found contract:", found);
       setActiveContract(found);
     } catch (e) {
@@ -284,25 +284,17 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     Modal.confirm({
       title: "Xác nhận hợp đồng",
       content: "Bạn có chắc chắn muốn xác nhận hợp đồng này?",
+      okText: "Xác nhận",
+      cancelText: "Hủy",
       onOk: async () => {
         try {
           setAcceptingContract(true);
-
-          console.log("Accepting contract:", {
-            contractId: activeContract.id,
-            userId: currentUser.id,
-            userRole: getCurrentUserRole(),
-            hasAccepted: hasCurrentUserAccepted(),
-          });
-
           const result = await contractsApi.acceptContract(
             activeContract.id,
             currentUser.id
           );
-
-          message.success(result.message);
-
-          // If both parties accepted, refresh contract and notify parent to refresh proposal
+          const msg = (result as any)?.message || "Đã ghi nhận xác nhận hợp đồng";
+          message.success(msg);
           if ((result as any)?.bothAccepted) {
             try {
               await refreshContract();
@@ -311,22 +303,15 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             }
             return;
           }
-
-          // Otherwise, just refresh local contract state
           await refreshContract();
         } catch (error) {
           console.error("Error accepting contract:", error);
           message.error(
-            error instanceof Error
-              ? error.message
-              : "Không thể xác nhận hợp đồng"
+            error instanceof Error ? error.message : "Không thể xác nhận hợp đồng"
           );
         } finally {
           setAcceptingContract(false);
         }
-      },
-      onCancel() {
-        // optional
       },
     });
   };

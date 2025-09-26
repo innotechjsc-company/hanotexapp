@@ -2,24 +2,26 @@
 
 import React from "react";
 import { Spin, Alert, Button, Form, Steps } from "antd";
-import { MessageOutlined } from "@ant-design/icons";
+import { MessageOutlined, FileTextOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
-import { useNegotiation } from "@/screens/negotiation-details-screen/hooks/useNegotiation";
-import { NegotiationHeader } from "@/screens/negotiation-details-screen/components/NegotiationHeader";
-import { NegotiationChat } from "@/screens/negotiation-details-screen/components/NegotiationChat";
-import { MessageInput } from "@/screens/negotiation-details-screen/components/MessageInput";
-import { ConfirmationModal } from "@/screens/negotiation-details-screen/components/ConfirmationModal";
+import { useNegotiation } from "./hooks/useNegotiation";
+import { NegotiationHeader } from "./components/NegotiationHeader";
+import { NegotiationChat } from "./components/NegotiationChat";
+import { MessageInput } from "./components/MessageInput";
+import { ConfirmationModal } from "./components/ConfirmationModal";
+import { OfferModal } from "./components/OfferModal";
+import { ContractSigningStep } from "./components/ContractSigningStep";
+import { ContractLogsStep } from "./components/ContractLogsStep";
 import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
-interface ProposeNegotiationDetailsScreenProps {
+interface NegotiationDetailsScreenProps {
   proposalId: string;
 }
 
-// Propose-only negotiation screen (no technology-only features like offers/contracts)
-export const ProposeNegotiationDetailsScreen: React.FC<
-  ProposeNegotiationDetailsScreenProps
+export const NegotiationDetailsScreen: React.FC<
+  NegotiationDetailsScreenProps
 > = ({ proposalId }) => {
   const [form] = Form.useForm();
   const router = useRouter();
@@ -30,12 +32,15 @@ export const ProposeNegotiationDetailsScreen: React.FC<
     messages,
     attachments,
     pendingMessage,
+    latestOffer,
 
     // Loading states
     loading,
     sendingMessage,
     uploadingFiles,
     showConfirmModal,
+    showOfferModal,
+    sendingOffer,
 
     // Error state
     error,
@@ -46,15 +51,27 @@ export const ProposeNegotiationDetailsScreen: React.FC<
     handleFileUpload,
     removeAttachment,
     setShowConfirmModal,
+    handleSendOffer,
+    confirmSendOffer,
+    setShowOfferModal,
+
+    // Offer utilities
+    canSendOffer,
+    hasPendingOffer,
+    isProposalCreator,
+    // isTechnologyPropose, // always false in propose screen
 
     // Utilities
     formatFileSize,
+    // Refresh
+    reloadProposal,
   } = useNegotiation({ proposalId, forceType: 'propose' });
 
   const handleClose = () => {
     try {
       router.back();
     } catch {
+      // Fallback if router.back fails in some environments
       window.history.back();
     }
   };
@@ -79,6 +96,8 @@ export const ProposeNegotiationDetailsScreen: React.FC<
     );
   }
 
+  console.log("proposal", proposal);
+  console.log("error", error);
   if (error || !proposal) {
     return (
       <div className="p-10">
@@ -93,12 +112,40 @@ export const ProposeNegotiationDetailsScreen: React.FC<
     );
   }
 
-  // Propose screen shows only negotiation step
+  // Determine current step based on status
+  const getCurrentStep = () => {
+    switch (proposal.status) {
+      case "negotiating":
+        return 0; // Bước 1: Đàm phán
+      case "contact_signing":
+        return 1; // Bước 2: Xác nhận hợp đồng
+      case "contract_signed":
+      case "completed":
+        return 2; // Bước 3: Hoàn thiện hợp đồng
+      default:
+        return 0; // Mặc định về đàm phán
+    }
+  };
+
+  const currentStep = getCurrentStep();
+
+  const isCompleted = proposal.status === "completed";
+
   const steps = [
     {
       title: "Đàm phán",
       description: "Thảo luận và thương lượng điều kiện",
       icon: <MessageOutlined />,
+    },
+    {
+      title: "Xác nhận hợp đồng",
+      description: "Hai bên xác nhận hợp đồng",
+      icon: <FileTextOutlined />,
+    },
+    {
+      title: "Hoàn thiện hợp đồng",
+      description: "Tải hợp đồng đã ký và hoàn tất",
+      icon: <FileTextOutlined />,
     },
   ];
 
@@ -113,7 +160,7 @@ export const ProposeNegotiationDetailsScreen: React.FC<
       <div className="flex-shrink-0 bg-gray-50 border-b">
         <div className="max-w-2xl mx-auto w-full px-6 py-3">
           <Steps
-            current={0}
+            current={currentStep}
             size="small"
             labelPlacement="vertical"
             progressDot
@@ -128,40 +175,80 @@ export const ProposeNegotiationDetailsScreen: React.FC<
         </div>
       </div>
 
-      {/* Content area - Chat only */}
+      {/* Content area - Takes remaining space with proper scrolling */}
       <div className="flex-1 overflow-hidden">
-        <NegotiationChat
-          messages={messages}
-          formatFileSize={formatFileSize}
-          messageInputComponent={
-            <MessageInput
-              form={form}
-              attachments={attachments}
-              sendingMessage={sendingMessage}
-              uploadingFiles={uploadingFiles}
-              onSendMessage={onSendMessage}
-              onFileUpload={handleFileUpload}
-              onRemoveAttachment={removeAttachment}
+        {isCompleted ? (
+          <div className="h-full overflow-auto space-y-6">
+            <NegotiationChat
+              messages={messages}
               formatFileSize={formatFileSize}
-              // Do not pass onSendOffer to hide offer actions for propose
-              canSendOffer={false}
-              hasPendingOffer={false}
-              isProposalCreator={false}
             />
-          }
-        />
+            <ContractSigningStep proposal={proposal} readOnly onBothAccepted={reloadProposal} />
+            <ContractLogsStep proposal={proposal} />
+          </div>
+        ) : (
+          <>
+            {currentStep === 0 && (
+              <NegotiationChat
+                messages={messages}
+                formatFileSize={formatFileSize}
+                messageInputComponent={
+                  <MessageInput
+                    form={form}
+                    attachments={attachments}
+                    sendingMessage={sendingMessage}
+                    uploadingFiles={uploadingFiles}
+                    onSendMessage={onSendMessage}
+                    onFileUpload={handleFileUpload}
+                    onRemoveAttachment={removeAttachment}
+                    formatFileSize={formatFileSize}
+                    onSendOffer={handleSendOffer}
+                    canSendOffer={canSendOffer && !hasPendingOffer}
+                    hasPendingOffer={hasPendingOffer}
+                    isProposalCreator={isProposalCreator}
+                  />
+                }
+              />
+            )}
+            {currentStep === 1 && (
+              <div className="h-full overflow-auto">
+                <ContractSigningStep proposal={proposal} onBothAccepted={reloadProposal} />
+              </div>
+            )}
+            {currentStep === 2 && (
+              <div className="h-full overflow-auto">
+                <ContractLogsStep proposal={proposal} />
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        open={showConfirmModal}
-        onOk={onConfirmSend}
-        onCancel={() => setShowConfirmModal(false)}
-        confirmLoading={sendingMessage}
-        uploadingFiles={uploadingFiles}
-        pendingMessage={pendingMessage}
-        formatFileSize={formatFileSize}
-      />
+      {/* Confirmation Modal - Only show in negotiation step */}
+      {currentStep === 0 && (
+        <>
+          <ConfirmationModal
+            open={showConfirmModal}
+            onOk={onConfirmSend}
+            onCancel={() => setShowConfirmModal(false)}
+            confirmLoading={sendingMessage}
+            uploadingFiles={uploadingFiles}
+            pendingMessage={pendingMessage}
+            formatFileSize={formatFileSize}
+          />
+
+          <OfferModal
+            open={showOfferModal}
+            onOk={confirmSendOffer}
+            onCancel={() => setShowOfferModal(false)}
+            confirmLoading={sendingOffer}
+            uploadingFiles={uploadingFiles}
+          />
+        </>
+      )}
     </div>
   );
 };
+
+// Alias export to match route imports
+export const ProposeNegotiationDetailsScreen = NegotiationDetailsScreen;

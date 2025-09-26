@@ -28,6 +28,7 @@ export interface SendMessageData {
 export interface SendOfferData {
   technology_propose?: string;
   project_propose?: string;
+  propose?: string;
   message?: string;
   price: number;
   content?: string;
@@ -38,6 +39,7 @@ export interface AcceptOfferResponse {
   success: boolean;
   offer?: any;
   technology_propose?: any;
+  propose?: any;
   contract?: any;
   error?: string;
 }

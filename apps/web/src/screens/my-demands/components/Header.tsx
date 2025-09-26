@@ -12,7 +12,7 @@ export default function HeaderSection({ onCreateNew }: HeaderProps) {
     <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0" }}>
       <div
         style={{
-          maxWidth: 1120,
+          maxWidth: 1440,
           margin: "0 auto",
           padding: "24px 16px",
           display: "flex",
@@ -37,4 +37,3 @@ export default function HeaderSection({ onCreateNew }: HeaderProps) {
     </div>
   );
 }
-

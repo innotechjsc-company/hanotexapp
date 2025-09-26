@@ -2,6 +2,16 @@ import { payloadApiClient, ApiResponse } from "./client";
 import type { Contract } from "@/types/contract";
 
 class ContractsApi {
+  async getByPropose(proposeId: string, depth = 1) {
+    const params: Record<string, any> = {
+      [`where[propose][equals]`]: proposeId,
+      depth,
+      limit: 1,
+    };
+    const res = await payloadApiClient.get<Contract>(`/contract`, params);
+    const contract = (res.docs && res.docs[0]) as unknown as Contract | undefined;
+    return contract || null;
+  }
   async getByTechnologyPropose(technologyProposeId: string, depth = 1) {
     const params: Record<string, any> = {
       [`where[technology_propose][equals]`]: technologyProposeId,
@@ -27,15 +37,16 @@ class ContractsApi {
   }
 
   async acceptContract(contractId: string, userId: string) {
+    // Use unified CMS route for contract acceptance
     const response = await payloadApiClient.post<{
-      message: string;
-    }>(`/technology-propose/accept-contract`, {
-      body: {
-        contractId,
-        userId,
-      },
+      success: boolean;
+      contract?: any;
+      bothAccepted?: boolean;
+      message?: string;
+    }>(`/contract/accept-contract`, {
+      contractId,
+      userId,
     });
-
     return response;
   }
 }
