@@ -69,18 +69,39 @@ export default function DemandsPage() {
     try {
       setCategoriesLoading(true);
       const response = await getAllCategories({ limit: 100 }); // Get all categories
+
       if (response.docs && Array.isArray(response.docs)) {
-        // Flatten the array if it's nested
-        const flattenedCategories = response.docs.flat();
-        setCategories(flattenedCategories);
+        setCategories(response.docs.flat());
       } else if (response.data && Array.isArray(response.data)) {
         setCategories(response.data);
       } else {
+        console.log("No categories found, setting empty array");
         setCategories([]);
       }
     } catch (err: any) {
       console.error("Error fetching categories:", err);
-      setCategories([]);
+      // Set fallback categories for testing if API fails
+      setCategories([
+        {
+          id: "fallback-1",
+          name: "Công nghệ thông tin",
+          code_intl: "1.0",
+          code_vn: "100",
+        },
+        { id: "fallback-2", name: "Y tế", code_intl: "2.0", code_vn: "200" },
+        {
+          id: "fallback-3",
+          name: "Nông nghiệp",
+          code_intl: "3.0",
+          code_vn: "300",
+        },
+        {
+          id: "fallback-4",
+          name: "Môi trường",
+          code_intl: "4.0",
+          code_vn: "400",
+        },
+      ]);
     } finally {
       setCategoriesLoading(false);
     }
@@ -335,7 +356,7 @@ export default function DemandsPage() {
               </form>
 
               {/* Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
                   label="Danh mục"
                   placeholder="Tất cả danh mục"
@@ -353,11 +374,19 @@ export default function DemandsPage() {
                   }}
                   isLoading={categoriesLoading}
                 >
-                  {categories.map((category) => (
-                    <SelectItem key={category.id || category.name}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
+                  {[
+                    <SelectItem key="" value="">
+                      Tất cả danh mục
+                    </SelectItem>,
+                    ...categories.map((category) => (
+                      <SelectItem
+                        key={category.id || category.name}
+                        value={category.id}
+                      >
+                        {category.name}
+                      </SelectItem>
+                    )),
+                  ]}
                 </Select>
 
                 <Select
@@ -382,27 +411,6 @@ export default function DemandsPage() {
                   <SelectItem key="100M-500M">100M - 500M VNĐ</SelectItem>
                   <SelectItem key="500M-1B">500M - 1B VNĐ</SelectItem>
                   <SelectItem key="1B+">Trên 1B VNĐ</SelectItem>
-                </Select>
-
-                <Select
-                  label="Trạng thái"
-                  placeholder="Tất cả trạng thái"
-                  selectedKeys={filters.status ? [filters.status] : []}
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0] as string;
-                    handleFilterChange({
-                      ...filters,
-                      status: selectedKey || "",
-                    });
-                  }}
-                  variant="bordered"
-                  classNames={{
-                    label: "text-sm font-medium text-foreground",
-                  }}
-                >
-                  <SelectItem key="ACTIVE">Đang tìm kiếm</SelectItem>
-                  <SelectItem key="FULFILLED">Đã tìm thấy</SelectItem>
-                  <SelectItem key="EXPIRED">Hết hạn</SelectItem>
                 </Select>
               </div>
             </div>
