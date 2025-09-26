@@ -424,7 +424,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   <Text className="text-blue-600">
                     {proposal.status === "contract_signed"
                       ? "Đã ký hợp đồng"
-                      : "Đang đàm phán"}
+                      : proposal.status === "contact_signing"
+                        ? "Đang ký hợp đồng"
+                        : "Đang đàm phán"}
                   </Text>
                 </div>
               </div>

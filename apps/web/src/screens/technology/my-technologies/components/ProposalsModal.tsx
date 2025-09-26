@@ -94,6 +94,8 @@ export function ProposalsModal({
         return "orange"; // Màu cam cho trạng thái chờ xử lý
       case "negotiating":
         return "blue"; // Màu xanh dương cho đang đàm phán
+      case "contact_signing":
+        return "cyan"; // Màu xanh lam cho đang ký hợp đồng
       case "contract_signed":
         return "cyan"; // Màu xanh lam cho đã ký hợp đồng
       case "completed":
@@ -111,6 +113,8 @@ export function ProposalsModal({
         return "Chờ xác nhận";
       case "negotiating":
         return "Đang đàm phán";
+      case "contact_signing":
+        return "Đang ký hợp đồng";
       case "contract_signed":
         return "Đã ký hợp đồng";
       case "completed":
@@ -297,6 +301,7 @@ export function ProposalsModal({
         const isPending = record.status === "pending";
         const canViewNegotiation =
           record.status === "negotiating" ||
+          record.status === "contact_signing" ||
           record.status === "contract_signed";
 
         return (

@@ -3,6 +3,7 @@ import { Technology, User, Media } from '@/payload-types'
 export type TechnologyProposeStatus =
   | 'pending'
   | 'negotiating'
+  | 'contact_signing'
   | 'contract_signed'
   | 'completed'
   | 'cancelled'

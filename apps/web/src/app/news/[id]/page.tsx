@@ -63,7 +63,7 @@ function getImageUrl(imageData: any): string {
   }
 
   // For relative URLs, construct proper URL
-  const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", ""); // Remove /api from base URL
+  const baseUrl = PAYLOAD_API_BASE_URL?.replace("/api", ""); // Remove /api from base URL
 
   // Handle different URL formats
   let cleanUrl = originalUrl;

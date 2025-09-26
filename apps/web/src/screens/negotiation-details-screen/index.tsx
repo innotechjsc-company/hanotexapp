@@ -106,6 +106,8 @@ export const NegotiationDetailsScreen: React.FC<
     switch (proposal.status) {
       case "negotiating":
         return 0; // Negotiation step
+      case "contact_signing":
+        return 1; // Contract signing step (in progress)
       case "contract_signed":
         return 1; // Contract signing step
       default:
