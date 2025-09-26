@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Spinner } from "@heroui/react";
-import { Cpu, Lightbulb, Zap, TrendingUp } from "lucide-react";
+import { Button, Spin } from "antd";
 import TechnologyCard from "./components/TechnologyCard";
 import EmptyState from "./components/EmptyState";
 import { getPublicTechnologies } from "@/api/technologies";
 import { getAllCategories } from "@/api/categories";
 import Filters from "./components/Filters";
-import SectionBanner from "@/components/ui/SectionBanner";
-import AnimatedIcon from "@/components/ui/AnimatedIcon";
 
 export default function TechnologyListScreen() {
   const [query, setQuery] = useState("");
@@ -118,6 +115,19 @@ export default function TechnologyListScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, categorySelectedKeys, trlSelectedKeys]);
 
+  // Debounced refetch when search query changes
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      if (page === 1) {
+        fetchData();
+      } else {
+        setPage(1);
+      }
+    }, 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
   const onSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (page === 1) {
@@ -132,20 +142,8 @@ export default function TechnologyListScreen() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Technology Banner */}
-      <SectionBanner
-        title="Kho Công nghệ"
-        subtitle="Khám phá và tìm kiếm các công nghệ tiên tiến từ doanh nghiệp, viện nghiên cứu và trường đại học trên toàn quốc"
-        icon={<AnimatedIcon animation="rotate" delay={500}><Cpu className="h-12 w-12 text-white" /></AnimatedIcon>}
-        variant="hero"
-        className="mb-8"
-      />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center space-x-3">
-          <AnimatedIcon animation="pulse">
-            <Lightbulb className="h-8 w-8 text-blue-600" />
-          </AnimatedIcon>
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Danh sách công nghệ
@@ -186,11 +184,11 @@ export default function TechnologyListScreen() {
         {/* Content */}
         {loading ? (
           <div className="flex justify-center py-10">
-            <Spinner size="lg" color="primary" />
+            <Spin size="large" />
           </div>
         ) : items.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {items.map((tech) => (
                 <TechnologyCard
                   key={tech.id}
@@ -213,10 +211,9 @@ export default function TechnologyListScreen() {
               </p>
               <div className="flex items-center gap-2">
                 <Button
-                  size="sm"
-                  variant="bordered"
-                  isDisabled={!canPrev}
-                  onPress={() => canPrev && setPage((p) => Math.max(1, p - 1))}
+                  size="small"
+                  disabled={!canPrev}
+                  onClick={() => canPrev && setPage((p) => Math.max(1, p - 1))}
                 >
                   Trang trước
                 </Button>
@@ -226,10 +223,9 @@ export default function TechnologyListScreen() {
                   / {totalPages}
                 </span>
                 <Button
-                  size="sm"
-                  variant="bordered"
-                  isDisabled={!canNext}
-                  onPress={() => canNext && setPage((p) => p + 1)}
+                  size="small"
+                  disabled={!canNext}
+                  onClick={() => canNext && setPage((p) => p + 1)}
                 >
                   Trang sau
                 </Button>

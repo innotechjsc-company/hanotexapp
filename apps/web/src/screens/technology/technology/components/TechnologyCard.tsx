@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Chip,
-} from "@heroui/react";
+import { Button, Card, Tag, Tooltip } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
@@ -92,58 +85,95 @@ export default function TechnologyCard({
   if (viewMode === "list") {
     return (
       <Card
-        shadow="sm"
-        className="w-full overflow-hidden hover:shadow-lg transition-all"
+        hoverable
+        className="w-full overflow-hidden transition-all"
+        style={{ height: 180, display: "flex", flexDirection: "column" }}
+        bodyStyle={{ padding: 12, display: "flex", flexDirection: "column", height: "100%" }}
       >
-        <div className="flex flex-col sm:flex-row">
-          {/* Content */}
-          <div className="p-4 flex flex-col flex-1">
-            <div className="flex justify-between items-start gap-2 mb-2">
+        <div className="flex h-full flex-col sm:flex-row">
+          <div className="flex h-full flex-1 flex-col">
+            <div className="mb-1 flex items-start justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 {categoryName && (
-                  <Chip size="sm" variant="flat" color="primary">
-                    {categoryName}
-                  </Chip>
+                  <Tooltip title={categoryName}>
+                    <Tag
+                      color="blue"
+                      style={{
+                        maxWidth: 160,
+                        display: "inline-block",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        padding: "0 6px",
+                        fontSize: 12,
+                      }}
+                    >
+                      {categoryName}
+                    </Tag>
+                  </Tooltip>
                 )}
                 {item.trl_level && (
-                  <Chip
-                    size="sm"
-                    variant="flat"
-                    color={trlChipColor(Number(item.trl_level))}
+                  <Tag
+                    color={
+                      trlChipColor(Number(item.trl_level)) === "danger"
+                        ? "red"
+                        : trlChipColor(Number(item.trl_level)) === "warning"
+                          ? "orange"
+                          : "green"
+                    }
+                    style={{ padding: "0 6px", fontSize: 12 }}
                   >
                     TRL {item.trl_level}
-                  </Chip>
+                  </Tag>
                 )}
               </div>
-              <Chip
-                size="sm"
-                variant="flat"
-                color={statusChipColor(item.status)}
+              <Tag
+                color={
+                  statusChipColor(item.status) === "success"
+                    ? "green"
+                    : statusChipColor(item.status) === "warning"
+                      ? "orange"
+                      : "default"
+                }
                 className="shrink-0"
+                style={{ padding: "0 6px", fontSize: 12 }}
               >
                 {StatusLabel}
-              </Chip>
+              </Tag>
             </div>
 
-            <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
-              <Link
-                href={href}
-                className="hover:text-primary transition-colors"
-              >
+            <h3
+              className="mb-1 font-semibold text-foreground"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              } as any}
+            >
+              <Link href={href} className="transition-colors hover:text-primary">
                 {item.title}
               </Link>
             </h3>
 
             {item.description && (
-              <p className="text-sm text-default-600 mb-4 line-clamp-2">
+              <p
+                className="mb-3 text-sm text-default-600"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                } as any}
+              >
                 {item.description}
               </p>
             )}
 
-            <div className="flex items-end justify-between mt-auto">
+            <div className="mt-auto flex items-end justify-between">
               <div className="min-w-0">
                 {formattedPrice ? (
-                  <p className="font-bold text-primary truncate">
+                  <p className="truncate font-bold text-primary">
                     {formattedPrice} {currency}
                   </p>
                 ) : (
@@ -152,9 +182,11 @@ export default function TechnologyCard({
                   </p>
                 )}
               </div>
-              <Button as={Link} href={href} color="primary" size="sm">
-                Xem chi tiết
-              </Button>
+              <Link href={href}>
+                <Button type="primary" size="small">
+                  Xem chi tiết
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -165,54 +197,92 @@ export default function TechnologyCard({
   // Grid mode
   return (
     <Card
-      shadow="sm"
-      className="h-full overflow-hidden hover:shadow-lg transition-all flex flex-col"
+      hoverable
+      className="flex flex-col overflow-hidden transition-all"
+      style={{ height: 240 }}
+      bodyStyle={{ padding: 12, display: "flex", flexDirection: "column", flex: "1 1 auto" }}
     >
-      <CardBody className="p-4 flex-1">
-        <div className="flex justify-between items-center gap-2 mb-2">
+      <div className="flex-1">
+        <div className="mb-1 flex items-center justify-between gap-2">
           {categoryName && (
-            <Chip
-              size="sm"
-              variant="flat"
-              color="primary"
-              className="max-w-max"
-            >
-              {categoryName}
-            </Chip>
+            <Tooltip title={categoryName}>
+              <Tag
+                color="blue"
+                className="max-w-max"
+                style={{
+                  maxWidth: 160,
+                  display: "inline-block",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  padding: "0 6px",
+                  fontSize: 12,
+                }}
+              >
+                {categoryName}
+              </Tag>
+            </Tooltip>
           )}
           {item.trl_level && (
-            <Chip size="sm" variant="flat" color={trlChipColor(item.trl_level)}>
+            <Tag
+              color={
+                trlChipColor(Number(item.trl_level)) === "danger"
+                  ? "red"
+                  : trlChipColor(Number(item.trl_level)) === "warning"
+                    ? "orange"
+                    : "green"
+              }
+              style={{ padding: "0 6px", fontSize: 12 }}
+            >
               TRL {item.trl_level}
-            </Chip>
+            </Tag>
           )}
         </div>
 
-        <h3 className="font-semibold text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
-          <Link href={href} className="hover:text-primary transition-colors">
+        <h3
+          className="mb-1 min-h-[2.5rem] font-semibold text-foreground"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          } as any}
+        >
+          <Link href={href} className="transition-colors hover:text-primary">
             {item.title}
           </Link>
         </h3>
 
         {item.description && (
-          <p className="text-sm text-default-600 mb-4 line-clamp-3 min-h-[4.5rem]">
+          <p
+            className="min-h-[4.5rem] text-sm text-default-600"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            } as any}
+          >
             {item.description}
           </p>
         )}
-      </CardBody>
-      <CardFooter className="p-4 flex items-center justify-between bg-content2">
+      </div>
+      <div className="flex items-center justify-between bg-gray-50 p-3">
         <div className="min-w-0">
           {formattedPrice ? (
-            <p className="font-bold text-primary truncate">
+            <p className="truncate font-bold text-primary">
               {formattedPrice} {currency}
             </p>
           ) : (
             <p className="text-sm font-medium text-default-600">Thương lượng</p>
           )}
         </div>
-        <Button as={Link} href={href} color="primary" size="sm">
-          Chi tiết
-        </Button>
-      </CardFooter>
+        <Link href={href}>
+          <Button type="primary" size="small">
+            Chi tiết
+          </Button>
+        </Link>
+      </div>
     </Card>
   );
 }

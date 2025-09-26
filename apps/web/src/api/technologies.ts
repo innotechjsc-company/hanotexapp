@@ -61,13 +61,10 @@ export async function getTechnologies(
     params["where[pricing][pricing_type][equals]"] = filters.pricing_type;
   }
 
-  // Text search: match title or public_summary using [like]
+  // Text search: only match title using [contains]
   if (filters.search && filters.search.trim()) {
     const q = filters.search.trim();
-    params["where[or][0][title][like]"] = q;
-    params["where[or][1][public_summary][like]"] = q;
-    // Fallback generic search param (Payload supports a top-level 'search' in some configs)
-    params["search"] = q;
+    params["where[title][contains]"] = q;
   }
 
   return payloadApiClient.get<Technology[]>(API_ENDPOINTS.TECHNOLOGIES, params);
