@@ -37,9 +37,20 @@ export const Contract: CollectionConfig = {
     {
       name: 'technology_propose',
       type: 'relationship',
-      required: true,
       relationTo: 'technology-propose',
       label: 'Đề xuất công nghệ',
+    },
+    {
+      name: 'propose',
+      type: 'relationship',
+      relationTo: 'propose',
+      label: 'Đề xuất',
+    },
+    {
+      name: 'project_propose',
+      type: 'relationship',
+      relationTo: 'project-propose',
+      label: 'Đề xuất dự án',
     },
     {
       name: 'offer',

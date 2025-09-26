@@ -2,11 +2,12 @@ import React from "react";
 import { Avatar, Typography, Button, Tag } from "antd";
 import { ArrowLeft } from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
+import type { Propose } from "@/types/propose";
 
 const { Text } = Typography;
 
 interface NegotiationHeaderProps {
-  proposal: TechnologyPropose | null;
+  proposal: TechnologyPropose | Propose | null;
   onClose: () => void;
 }
 

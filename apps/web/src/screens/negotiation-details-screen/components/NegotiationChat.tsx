@@ -54,7 +54,7 @@ export const NegotiationChat: React.FC<NegotiationChatProps> = ({
 
   return (
     <div className="h-full p-4 bg-gray-50">
-      <div className="h-full max-w-4xl mx-auto">
+      <div className="h-full max-w-2xl mx-auto">
         {/* Messages container with border and scroll */}
         <div
           className="h-full bg-white rounded-lg border border-gray-200 shadow-sm flex flex-col"

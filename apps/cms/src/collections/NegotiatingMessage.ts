@@ -22,6 +22,15 @@ export const NegotiatingMessage: CollectionConfig = {
       },
     },
     {
+      name: 'project_propose',
+      type: 'relationship',
+      relationTo: 'project-propose',
+      label: 'Đề xuất dự án',
+      admin: {
+        description: 'Đề xuất dự án',
+      },
+    },
+    {
       name: 'technology_propose',
       type: 'relationship',
       relationTo: 'technology-propose',

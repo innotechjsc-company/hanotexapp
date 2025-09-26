@@ -1,15 +1,20 @@
 import { Media } from "./media1";
 import { Offer } from "./offer";
 import { Propose } from "./propose";
+import { ProjectPropose } from "./project-propose";
 import { TechnologyPropose } from "./technology-propose";
 import { User } from "./users";
 
 export interface NegotiatingMessage {
-  propose: Propose;
-  technology_propose: TechnologyPropose;
+  id: string;
+  propose?: Propose;
+  project_propose?: ProjectPropose;
+  technology_propose?: TechnologyPropose;
   user: User;
   message: string;
-  documents: Media[];
+  documents?: Media[];
   is_offer: boolean;
-  offer: Offer;
+  offer?: Offer;
+  createdAt: string;
+  updatedAt: string;
 }

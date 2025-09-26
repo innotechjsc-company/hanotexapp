@@ -2,6 +2,8 @@ import type { User } from "./users";
 import type { Technology } from "./technologies";
 import type { TechnologyPropose } from "./technology-propose";
 import type { Offer } from "./offer";
+import type { Propose } from "./propose";
+import type { ProjectPropose } from "./project-propose";
 import { Media } from "./media1";
 
 export enum ContractStatusEnum {
@@ -16,7 +18,9 @@ export interface Contract {
   user_a: User;
   user_b: User;
   technologies: Technology[];
-  technology_propose: TechnologyPropose;
+  technology_propose?: TechnologyPropose;
+  propose?: Propose;
+  project_propose?: ProjectPropose;
   offer: Offer;
   price: number;
   contract_file?: Media;
