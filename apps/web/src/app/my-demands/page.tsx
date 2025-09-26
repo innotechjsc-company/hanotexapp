@@ -140,7 +140,7 @@ export default function MyDemandsPage() {
   const handleOpenDocument = (document: any) => {
     if (document.url) {
       // Construct full URL using CMS base URL
-      const cmsBaseUrl = PAYLOAD_API_BASE_URL.replace("/api", ""); // Remove /api from base URL
+      const cmsBaseUrl = PAYLOAD_API_BASE_URL?.replace("/api", ""); // Remove /api from base URL
       const fullUrl = document.url.startsWith("http")
         ? document.url
         : `${cmsBaseUrl}${document.url}`;
@@ -1079,10 +1079,10 @@ export default function MyDemandsPage() {
                 >
                   Hủy
                 </button>
-                <button
+                <HButton
                   type="submit"
+                  color="primary"
                   disabled={editLoading || uploadingFiles}
-                  className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {uploadingFiles ? (
                     <>
@@ -1100,7 +1100,7 @@ export default function MyDemandsPage() {
                       Chỉnh sửa
                     </>
                   )}
-                </button>
+                </HButton>
               </div>
             </form>
           </div>

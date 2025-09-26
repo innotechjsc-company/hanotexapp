@@ -40,7 +40,7 @@ export class PayloadApiClient {
   private baseURL: string;
   private token: string | null = null;
 
-  constructor(baseURL: string = PAYLOAD_API_BASE_URL) {
+  constructor(baseURL: string = PAYLOAD_API_BASE_URL || "") {
     this.baseURL = baseURL;
   }
 
