@@ -10,6 +10,8 @@ export interface Demand {
   user: string | User;
   trl_level: number;
   option: string;
+  start_date: string;
+  end_date: string;
   option_technology: string;
   option_rule: string;
   from_price: number;

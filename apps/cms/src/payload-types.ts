@@ -782,6 +782,8 @@ export interface Demand {
   from_price?: number | null;
   to_price?: number | null;
   cooperation?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
   documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1554,6 +1556,8 @@ export interface DemandSelect<T extends boolean = true> {
   from_price?: T;
   to_price?: T;
   cooperation?: T;
+  start_date?: T;
+  end_date?: T;
   documents?: T;
   updatedAt?: T;
   createdAt?: T;

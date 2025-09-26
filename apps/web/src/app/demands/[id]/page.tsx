@@ -45,8 +45,28 @@ export default function DemandDetailPage() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [hasUserProposed, setHasUserProposed] = useState(false);
   const [checkingProposal, setCheckingProposal] = useState(false);
+  const [activeTab, setActiveTab] = useState("features");
 
   const demandId = params.id as string;
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
 
   // Helper function to get document URL
   const getDocumentUrl = (doc: any): string | null => {
@@ -465,6 +485,19 @@ export default function DemandDetailPage() {
                     <p className="text-sm text-default-500 mb-1">
                       Yêu cầu về thời gian
                     </p>
+                    {demand.start_date || demand.end_date ? (
+                      <p className="text-base font-medium text-foreground">
+                        {demand.start_date
+                          ? formatDate(demand.start_date)
+                          : "N/A"}{" "}
+                        -{" "}
+                        {demand.end_date ? formatDate(demand.end_date) : "N/A"}
+                      </p>
+                    ) : (
+                      <p className="text-base font-medium text-foreground">
+                        Không có yêu cầu cụ thể
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardBody>
@@ -475,7 +508,61 @@ export default function DemandDetailPage() {
               demandUser={typeof demand.user === "object" ? demand.user : null}
               demandTitle={demand.title}
             />
+            <div>
+              <h4 className="font-medium text-foreground mb-2">
+                Tài liệu đính kèm
+              </h4>
+              {demand.documents && demand.documents.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {demand.documents.map((doc, index) => {
+                    const documentUrl = getDocumentUrl(doc);
+                    const documentName =
+                      typeof doc === "object" && doc.filename
+                        ? doc.filename
+                        : `Tài liệu ${index + 1}`;
 
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 border border-default-200 rounded-lg hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 group"
+                      >
+                        <div
+                          className="flex items-center space-x-3 flex-1 min-w-0 cursor-pointer"
+                          onClick={() => {
+                            if (documentUrl) {
+                              window.open(documentUrl, "_blank");
+                            }
+                          }}
+                        >
+                          <div className="flex-shrink-0">
+                            <FileText className="h-6 w-6 text-primary group-hover:text-primary-600 transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground group-hover:text-primary-700 truncate transition-colors">
+                              {documentName}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (documentUrl) {
+                              handleDownload(documentUrl, documentName);
+                            }
+                          }}
+                          className="flex-shrink-0 p-2 rounded-md hover:bg-gray-200 transition-colors opacity-50 group-hover:opacity-100"
+                          aria-label={`Tải xuống ${documentName}`}
+                        >
+                          <Download className="h-4 w-4 text-primary-500" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-default-600">Không có tài liệu.</p>
+              )}
+            </div>
             {/* Action Buttons */}
             <div className="space-y-3">
               {!isAuthenticated ? (
@@ -557,71 +644,56 @@ export default function DemandDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-16">
-          <div>
-            <h4 className="font-medium text-foreground mb-2">
-              Tính năng/chức năng
-            </h4>
-            <p className="text-sm text-default-600">
-              {demand.option || "Không có"}
-            </p>
+        <div className="mt-8">
+          <div className="border-b border-gray-200">
+            <div className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab("features")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "features"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Tính năng/chức năng
+              </button>
+              <button
+                onClick={() => setActiveTab("tech")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "tech"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Kỹ thuật/công nghệ
+              </button>
+              <button
+                onClick={() => setActiveTab("standards")}
+                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "standards"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Quy chuẩn/Tiêu chuẩn
+              </button>
+            </div>
           </div>
-          <div>
-            <h4 className="font-medium text-foreground mb-2">
-              Kỹ thuật/công nghệ
-            </h4>
-            <p className="text-sm text-default-600">
-              {demand.option_technology || "Không có yêu cầu cụ thể"}
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium text-foreground mb-2">
-              Quy chuẩn/Tiêu chuẩn
-            </h4>
-            <p className="text-sm text-default-600">
-              {demand.option_rule || "Theo quy định chung"}
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium text-foreground mb-2">
-              Tài liệu đính kèm
-            </h4>
-            {demand.documents && demand.documents.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3">
-                {demand.documents.map((doc, index) => {
-                  const documentUrl = getDocumentUrl(doc);
-                  const documentName =
-                    typeof doc === "object" && doc.filename
-                      ? doc.filename
-                      : `Tài liệu ${index + 1}`;
-
-                  return (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-3 p-2 border border-default-200 rounded-lg hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 cursor-pointer group"
-                      onClick={() => {
-                        if (documentUrl) {
-                          window.open(documentUrl, "_blank");
-                        }
-                      }}
-                    >
-                      <div className="flex-shrink-0">
-                        <FileText className="h-6 w-6 text-primary group-hover:text-primary-600 transition-colors" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground group-hover:text-primary-700 truncate transition-colors">
-                          {documentName}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Download className="h-4 w-4 text-primary-500" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-default-600">Không có tài liệu.</p>
+          <div className="py-6">
+            {activeTab === "features" && (
+              <p className="text-sm text-default-600">
+                {demand.option || "Không có"}
+              </p>
+            )}
+            {activeTab === "tech" && (
+              <p className="text-sm text-default-600">
+                {demand.option_technology || "Không có yêu cầu cụ thể"}
+              </p>
+            )}
+            {activeTab === "standards" && (
+              <p className="text-sm text-default-600">
+                {demand.option_rule || "Theo quy định chung"}
+              </p>
             )}
           </div>
         </div>

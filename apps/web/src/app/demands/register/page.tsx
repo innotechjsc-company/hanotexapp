@@ -21,6 +21,8 @@ import { useCategories } from "@/hooks/useCategories";
 import { createDemand } from "@/api/demands";
 import { uploadFile, deleteFile } from "@/api/media";
 import { Media, MediaType } from "@/types/media1";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
@@ -42,10 +44,12 @@ export default function RegisterDemandPage() {
   } = useCategories();
 
   const [formData, setFormData] = useState<
-    Partial<Demand> & {
+    Omit<Partial<Demand>, "start_date" | "end_date"> & {
       categoryId: string;
       from_price_display: string;
       to_price_display: string;
+      start_date: Date | null;
+      end_date: Date | null;
     }
   >({
     title: "",
@@ -62,6 +66,8 @@ export default function RegisterDemandPage() {
     to_price_display: "",
     cooperation: "",
     documents: [],
+    start_date: null,
+    end_date: null,
   });
 
   // Redirect if not authenticated
@@ -152,6 +158,12 @@ export default function RegisterDemandPage() {
         to_price: formData.to_price || 0,
         cooperation: formData.cooperation || "",
         documents: documentIds as any, // Send uploaded media IDs
+        start_date: formData.start_date
+          ? formData.start_date.toISOString()
+          : undefined,
+        end_date: formData.end_date
+          ? formData.end_date.toISOString()
+          : undefined,
       };
 
       console.log("Creating demand with uploaded media:", {
@@ -181,6 +193,8 @@ export default function RegisterDemandPage() {
         to_price_display: "",
         cooperation: "",
         documents: [],
+        start_date: null,
+        end_date: null,
       });
 
       // Reset file states
@@ -526,7 +540,7 @@ export default function RegisterDemandPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label
                       htmlFor="from_price_display"
@@ -576,6 +590,42 @@ export default function RegisterDemandPage() {
                       placeholder="Nhập giá đến"
                     />
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor="start_date"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Thời gian bắt đầu
+                    </label>
+                    <DatePicker
+                      selected={formData.start_date}
+                      onChange={(date) =>
+                        setFormData((prev) => ({ ...prev, start_date: date }))
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholderText="Chọn ngày bắt đầu"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="end_date"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Thời gian kết thúc
+                    </label>
+                    <DatePicker
+                      selected={formData.end_date}
+                      onChange={(date) =>
+                        setFormData((prev) => ({ ...prev, end_date: date }))
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholderText="Chọn ngày kết thúc"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -611,7 +661,7 @@ export default function RegisterDemandPage() {
                     htmlFor="option"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Mô tả yêu cầu mong muốn
+                    Mô tả yêu cầu tính năng/chức năng
                   </label>
                   <textarea
                     id="option"
@@ -629,7 +679,7 @@ export default function RegisterDemandPage() {
                     htmlFor="option_technology"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Mô tả yêu cầu công nghệ
+                    Mô tả yêu cầu kỹ thuật/công nghệ
                   </label>
                   <textarea
                     id="option_technology"
@@ -647,7 +697,7 @@ export default function RegisterDemandPage() {
                     htmlFor="option_rule"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Mô tả yêu cầu quy tắc
+                    Mô tả yêu cầu quy chuẩn/tiêu chuẩn
                   </label>
                   <textarea
                     id="option_rule"
