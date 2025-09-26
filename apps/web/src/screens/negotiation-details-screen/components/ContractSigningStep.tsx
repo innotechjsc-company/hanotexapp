@@ -91,6 +91,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     try {
       setLoading(true);
       console.log("Refreshing contract for proposal:", proposal.id);
+      if(!proposal.id) return;
       const found = await contractsApi.getByTechnologyPropose(proposal.id, 1);
       console.log("Found contract:", found);
       setActiveContract(found);

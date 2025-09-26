@@ -58,10 +58,10 @@ export default function FundsPage() {
         // Fetch counts with minimal payload
         const [activeRes, pendingRes, fundsRes, activeListRes] =
           await Promise.all([
-            getActiveProjectsAll({ limit: 1 }),
+            getActiveProjectsAll(true, { limit: 1 }),
             getPendingProjects({ limit: 1 }),
             getInvestmentFunds({}, { limit: 1 }),
-            getActiveProjectsAll({ limit: 6 }),
+            getActiveProjectsAll(true, { limit: 6 }),
           ]);
 
         if (!isMounted) return;

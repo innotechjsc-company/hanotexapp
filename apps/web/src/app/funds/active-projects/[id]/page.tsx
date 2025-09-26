@@ -47,6 +47,10 @@ import {
   ExperimentOutlined, // Replaced FundProjectionOutlined
   ReadOutlined,
 } from "@ant-design/icons";
+import { useAuthStore } from "@/store/auth";
+import { addUserToRoom, findRoomBetweenUsers } from "@/api/roomUser";
+import { createSimpleRoomChat } from "@/api/roomChat";
+import { sendMessage } from "@/api/roomMessage";
 
 function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", {
@@ -110,6 +114,72 @@ export default function ProjectDetailPage() {
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const { user } = useAuthStore();
+  const [demandUser, setDemandUser] = useState<any>(null);
+
+  // Handle creating chat and navigating to messages
+  const handleStartChat = async () => {
+    const userName = demandUser?.full_name || "Chưa cập nhật";
+  const userType = String(
+    demandUser?.user_type || demandUser?.type || ""
+  ).toUpperCase();
+  const userTypeLabel =
+    userType === "INDIVIDUAL"
+      ? "Cá nhân"
+      : userType === "COMPANY"
+        ? "Doanh nghiệp"
+        : userType === "INSTITUTION" || userType === "RESEARCH_INSTITUTION"
+          ? "Viện/Trường"
+          : undefined;
+
+  const demandUserId = demandUser?.id || demandUser?._id;
+  const currentUserId = user?.id;
+  const isOwnDemand =
+    demandUserId &&
+    currentUserId &&
+    String(demandUserId) === String(currentUserId);
+  const isAuthenticated = Boolean(currentUserId);
+    if (!currentUserId || !demandUserId || !project) return;
+
+    try {
+      setIsCreatingChat(true);
+
+      // 1. Check if room already exists between these two users
+      const existingRoomId = await findRoomBetweenUsers(
+        currentUserId,
+        demandUserId
+      );
+
+      if (existingRoomId) {
+        // Room already exists, navigate to existing chat
+        router.push(`/messages?roomId=${existingRoomId}`);
+        return;
+      }
+
+      // 2. No existing room, create new room chat
+      const roomTitle = `${userName}`;
+      const roomChat = await createSimpleRoomChat(roomTitle);
+
+      // 3. Add both users to room
+      await addUserToRoom(roomChat.id, currentUserId);
+      await addUserToRoom(roomChat.id, demandUserId);
+
+      // 4. Send initial message
+      await sendMessage(
+        roomChat.id,
+        currentUserId,
+        `Xin chào ${userName}, tôi quan tâm đến dự án của bạn: "${project?.name}".`
+      );
+
+      router.push(`/messages?roomId=${roomChat.id}`);
+    } catch (error) {
+      console.error("Error creating/finding chat:", error);
+      alert("Có lỗi xảy ra khi tạo cuộc trò chuyện. Vui lòng thử lại.");
+    } finally {
+      setIsCreatingChat(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,6 +201,7 @@ export default function ProjectDetailPage() {
           throw new Error("Không tìm thấy dự án");
         }
         setProject(projectData);
+        setDemandUser(projectData.user);
 
       } catch (err: any) {
         console.error("Error fetching project details:", err);
@@ -209,20 +280,22 @@ export default function ProjectDetailPage() {
               <Paragraph>{project.market_data}</Paragraph>
             </Descriptions.Item>
           )}
-          <Descriptions.Item label="Người tạo">
+          <Descriptions.Item label="Người đăng">
             <Space>
               <UserOutlined />
               <Text>
                 {typeof project.user === "object" && project.user
-                  ? (project.user as any).name || (project.user as any).email
-                  : "Người tạo"}
+                  ? (project.user as any).full_name || (project.user as any).email
+                  : "Người đăng"}
               </Text>
             </Space>
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái dự án">
-            <Tag color={statusConfig.color} icon={statusConfig.icon}>
-              {getStatusLabel(project.status)}
-            </Tag>
+            {project.open_investment_fund == false && (
+              <Tag color="default" icon={<CloseCircleOutlined />}>
+                Đã kêu gọi vốn
+              </Tag>
+            )}
           </Descriptions.Item>
           <Descriptions.Item label="Ngày kết thúc">
             <Space>
@@ -381,20 +454,22 @@ export default function ProjectDetailPage() {
       )}
 
       {/* Contact CTA */}
+      {user && demandUser && user?.id !== demandUser?.id && (
       <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-none text-white shadow-sm">
         <div className="text-center py-4">
           <Title level={2} className="text-white mb-4">Quan tâm đến dự án này?</Title>
-          <Paragraph className="text-lg mb-6 text-white opacity-90">Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội hợp tác và đầu tư</Paragraph>
+          <Paragraph className="text-lg mb-6 text-white opacity-90">Liên hệ ngay để tìm hiểu thêm về cơ hội hợp tác và đầu tư</Paragraph>
           <Space size="large">
-            <Button type="primary" size="large" ghost>
-              <Link href="/contact">Liên hệ ngay</Link>
+            <Button type="primary" size="large"  onClick={handleStartChat}>
+              Chat ngay
             </Button>
-            <Button size="large" ghost>
+            <Button size="large" type="primary" ghost>
               <Link href="/funds/active-projects">Xem dự án khác</Link>
             </Button>
-          </Space>
-        </div>
-      </Card>
+            </Space>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
