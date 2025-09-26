@@ -255,10 +255,9 @@ export default function FundraisingProjectDetailPage() {
           <Col xs={24} sm={12} md={6}>
             <Card size="small" className="text-center">
               <Statistic
-                title="Tỷ lệ cổ phần"
+                title="Tỷ lệ cổ phần đề xuất"
                 value={project.share_percentage || 0}
                 suffix="%"
-                prefix={<PercentageOutlined className="w-6 h-6 text-blue-600" />}
               />
             </Card>
           </Col>
@@ -412,13 +411,13 @@ export default function FundraisingProjectDetailPage() {
               </Card>
             </Col>
             <Col xs={24}>
-              <Card title="Thông tin chủ dự án" className="mb-6">
+              <Card title="Thông tin người đăng" className="mb-6">
                 <div className="text-center">
                   <UserOutlined className="w-12 h-12 mx-auto mb-3 text-green-600" />
                   <Title level={5}>
                     {typeof project.user === "object" && project.user
-                      ? (project.user as any).name || (project.user as any).email || "Người tạo"
-                      : "Người tạo"}
+                      ? (project.user as any).full_name || (project.user as any).email || "Người đăng"
+                      : "Người đăng"}
                   </Title>
                   {typeof project.user === "object" && project.user && (project.user as any).email && (
                     <Text type="secondary">{(project.user as any).email}</Text>
