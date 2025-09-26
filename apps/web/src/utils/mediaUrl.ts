@@ -13,7 +13,7 @@ import { PAYLOAD_API_BASE_URL } from "@/api/config";
 export const getFullMediaUrl = (url: string): string => {
   if (!url) return "";
   // Get base URL without /api suffix
-  const baseUrl = PAYLOAD_API_BASE_URL.replace("/api", "");
+  const baseUrl = PAYLOAD_API_BASE_URL?.replace("/api", "");
   if (url.startsWith("/")) {
     return `${baseUrl}${url}`;
   }
