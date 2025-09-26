@@ -5,6 +5,7 @@ import { ContractLogStatus } from "@/types/contract-log";
 
 export interface ContractLogFilters {
   technology_propose?: string;
+  propose?: string;
   user?: string;
   status?: ContractLogStatus;
   search?: string;
@@ -45,6 +46,7 @@ class ContractLogsApi {
 
     if (filters.technology_propose)
       params["where[technology_propose][equals]"] = filters.technology_propose;
+    if (filters.propose) params["where[propose][equals]"] = filters.propose;
     if (filters.user) params["where[user][equals]"] = filters.user;
     if (filters.status) params["where[status][equals]"] = filters.status;
     if (filters.search) params["search"] = filters.search;

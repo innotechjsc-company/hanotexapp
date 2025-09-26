@@ -43,9 +43,7 @@ export default function MyProposalsScreen() {
               <h1 className="text-2xl font-bold text-foreground">
                 Đề xuất của tôi
               </h1>
-              <p className="text-default-600">
-                Quản lý các đề xuất của bạn
-              </p>
+              <p className="text-default-600">Quản lý các đề xuất của bạn</p>
             </div>
           </div>
         </CardBody>
@@ -82,7 +80,7 @@ export default function MyProposalsScreen() {
                 }
               >
                 <div className="py-6">
-                  <TechnologyProposalsTab />
+                  <TechnologyProposalsTab userId={user.id} />
                 </div>
               </Tab>
 
@@ -98,7 +96,7 @@ export default function MyProposalsScreen() {
                 }
               >
                 <div className="py-6">
-                  <DemandProposalsTab />
+                  <DemandProposalsTab userId={user.id} />
                 </div>
               </Tab>
 
@@ -112,7 +110,7 @@ export default function MyProposalsScreen() {
                 }
               >
                 <div className="py-6">
-                  <ProjectProposalsTab />
+                  <ProjectProposalsTab userId={user.id} />
                 </div>
               </Tab>
             </Tabs>

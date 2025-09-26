@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
 import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye } from "lucide-react";
@@ -31,9 +30,8 @@ const statusLabels: Record<ProjectProposeStatus, string> = {
   cancelled: "Đã hủy",
 };
 
-export default function ProjectProposalsTab() {
+export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { user } = useAuth();
   const [proposals, setProposals] = useState<ProjectPropose[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -49,13 +47,13 @@ export default function ProjectProposalsTab() {
   const pageSize = 10;
 
   const fetchProposals = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const filters: any = { user: user.id };
+      const filters: any = { user: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
       if (searchTerm.trim()) filters.search = searchTerm.trim();
 
@@ -84,15 +82,15 @@ export default function ProjectProposalsTab() {
 
   useEffect(() => {
     fetchProposals();
-  }, [user?.id, currentPage, statusFilter, searchTerm]);
+  }, [userId, currentPage, statusFilter, searchTerm]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
   };
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as ProjectProposeStatus | "all");
+  const handleStatusFilter = (value: string | undefined) => {
+    setStatusFilter((value as ProjectProposeStatus) || "all");
     setCurrentPage(1);
   };
 
@@ -249,5 +247,3 @@ export default function ProjectProposalsTab() {
     </div>
   );
 }
-
-

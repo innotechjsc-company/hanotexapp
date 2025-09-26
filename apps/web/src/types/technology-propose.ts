@@ -18,4 +18,6 @@ export interface TechnologyPropose {
   document: Media;
   budget: number;
   status: TechnologyProposeStatus;
+  createdAt?: string;
+  updatedAt?: string;
 }
