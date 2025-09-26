@@ -49,6 +49,12 @@ export const Contract: CollectionConfig = {
       label: 'Đề xuất',
     },
     {
+      name: 'price',
+      type: 'number',
+      required: true,
+      label: 'Giá',
+    },
+    {
       name: 'contract_file',
       type: 'upload',
       relationTo: 'media',
@@ -68,6 +74,13 @@ export const Contract: CollectionConfig = {
       label: 'Trạng thái',
       defaultValue: 'in_progress',
       options: ['signed', 'in_progress', 'completed', 'cancelled'],
+    },
+    {
+      name: 'users_confirm',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Bên đã xác nhận',
+      hasMany: true,
     },
   ],
   timestamps: true,

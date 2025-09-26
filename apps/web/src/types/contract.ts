@@ -18,9 +18,11 @@ export interface Contract {
   technologies: Technology[];
   technology_propose: TechnologyPropose;
   offer: Offer;
+  price: number;
   contract_file?: Media;
   documents?: Media[];
   status: ContractStatusEnum;
+  users_confirm: User[];
   createdAt: string;
   updatedAt: string;
 }

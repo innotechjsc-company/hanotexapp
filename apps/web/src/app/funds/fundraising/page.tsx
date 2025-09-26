@@ -4,18 +4,17 @@ import { useRouter } from "next/navigation";
 import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
+import Image from "next/image";
 
 // Helper function to get status label
 const getStatusLabel = (status: string) => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
-    case "in_progress":
-      return "Đang thực hiện";
-    case "completed":
-      return "Hoàn thành";
-    case "cancelled":
-      return "Đã hủy";
+    case "active":
+      return "Đang hoạt động";
+    case "rejected":
+      return "Từ chối";
     default:
       return status;
   }
@@ -26,15 +25,42 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
       return "warning";
-    case "in_progress":
-      return "warning";
-    case "completed":
+    case "active":
       return "success";
-    case "cancelled":
+    case "rejected":
       return "danger";
     default:
       return "default";
   }
+};
+
+// Format number as VND currency
+const formatCurrency = (value?: number) => {
+  if (typeof value !== "number") return "";
+  if (value >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}B ₫`;
+  } else if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}M ₫`;
+  }
+  try {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString("vi-VN")} ₫`;
+  }
+};
+
+// Days remaining until end_date
+const getDaysRemaining = (endDate?: string) => {
+  if (!endDate) return undefined;
+  const end = new Date(endDate);
+  if (Number.isNaN(end.getTime())) return undefined;
+  const now = new Date();
+  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
 };
 
 export default function FundraisingPage() {
@@ -42,16 +68,34 @@ export default function FundraisingPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalProjects, setTotalProjects] = useState<number>(0);
+  const [totalGoalMoney, setTotalGoalMoney] = useState<number>(0);
+  const [totalInvestors, setTotalInvestors] = useState<number>(0);
 
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const response = await getActiveProjectsAll({ limit: 12 });
+        const response = await getActiveProjectsAll(true, { limit: 12 });
         const list = (response.data as any) || (response.docs as any) || [];
-        // chỉ lấy những dự án không có investment_fund
-        const projects = list.filter((p: any) => !p.investment_fund);
-        if (isMounted) setProjects(projects);
+        if (isMounted) {
+          setProjects(list);
+
+          // Calculate statistics
+          setTotalProjects(list.length);
+          const sumGoalMoney = list.reduce((sum: number, proj: Project) => sum + (proj.goal_money || 0), 0);
+          setTotalGoalMoney(sumGoalMoney);
+
+          const uniqueUsers = new Set<string>();
+          list.forEach((proj: Project) => {
+            if (typeof proj.user === "object" && proj.user && proj.user.id) {
+              uniqueUsers.add(proj.user.id);
+            } else if (typeof proj.user === "string") {
+              uniqueUsers.add(proj.user);
+            }
+          });
+          setTotalInvestors(uniqueUsers.size);
+        }
       } catch (e: any) {
         if (isMounted) setError(e?.message || "Đã xảy ra lỗi");
       } finally {
@@ -79,36 +123,24 @@ export default function FundraisingPage() {
         </div>
 
         {/* Investment Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">50+</div>
+            <div className="text-3xl font-bold text-green-600 mb-2">{totalProjects}</div>
             <div className="text-gray-600">Dự án đang gọi vốn</div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">200B+</div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">{formatCurrency(totalGoalMoney)}</div>
             <div className="text-gray-600">Tổng vốn cần huy động (VNĐ)</div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">30+</div>
-            <div className="text-gray-600">Nhà đầu tư quan tâm</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">15</div>
-            <div className="text-gray-600">Dự án đã gọi vốn thành công</div>
+            <div className="text-3xl font-bold text-purple-600 mb-2">{totalInvestors}+</div>
+            <div className="text-gray-600">Người tạo dự án</div>
           </div>
         </div>
 
         {/* Filters */}
         {/* <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-wrap gap-4">
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Tất cả lĩnh vực</option>
-              <option>AI & Machine Learning</option>
-              <option>IoT & Smart Systems</option>
-              <option>Blockchain</option>
-              <option>FinTech</option>
-              <option>EdTech</option>
-            </select>
             <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <option>Tất cả mức vốn</option>
               <option>Dưới 1 tỷ VNĐ</option>
@@ -170,15 +202,18 @@ export default function FundraisingPage() {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => router.push(`/funds/fundraising/${proj.id}`)}
               >
-                <div className="h-40 bg-gradient-to-r from-green-500 to-teal-600" />
+                <div className="h-40 bg-gradient-to-r from-green-500 to-teal-600 relative flex items-center justify-center">
+                  <Image
+                    src="/logo.png"
+                    alt="Hanotex"
+                    width={150}
+                    height={150}
+                    className="object-contain object-center p-4 absolute left-0 right-0 top-0 bottom-0"
+                    priority={false}
+                  />
+                </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                      {(typeof proj.technology === "object" &&
-                        proj.technology &&
-                        proj.technology.name) ||
-                        "Dự án gọi vốn"}
-                    </span>
                     <Chip color={getStatusColor(proj?.status || "")} size="sm">
                       {getStatusLabel(proj?.status || "")}
                     </Chip>
@@ -191,15 +226,52 @@ export default function FundraisingPage() {
                       {proj.description}
                     </p>
                   )}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">
-                      {typeof proj.user === "object" && proj.user
-                        ? proj.user.name || proj.user.email
-                        : "Người tạo"}
-                    </span>
-                    <span className="text-sm font-semibold text-green-600">
-                      {proj.goal_money ? `${Math.round(proj.goal_money / 1000000)}M VNĐ` : "Liên hệ"}
-                    </span>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {typeof proj.user === "object" && proj.user
+                          ? proj.user.name || proj.user.email
+                          : "Người tạo"}
+                      </span>
+                      {proj.open_investment_fund && (
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                          Mở gọi vốn
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-700">
+                      <span>Mục tiêu gọi vốn</span>
+                      <span className="font-medium">{formatCurrency(proj.goal_money)}</span>
+                    </div>
+                    {typeof proj.share_percentage === "number" && (
+                      <div className="flex items-center justify-between text-sm text-gray-700">
+                        <span>Tỷ lệ cổ phần đề xuất (%)</span>
+                        <span className="font-medium">{proj.share_percentage}%</span>
+                      </div>
+                    )}
+                    {/* technologies */}
+                    {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
+                      <div className="flex items-center justify-between text-sm text-gray-700">
+                        <span>Công nghệ sử dụng</span>
+                        <span className="font-medium">{proj.technologies.length} công nghệ</span>
+                      </div>
+                    )}
+                    {proj.end_date && (
+                      <div className="flex items-center justify-between text-sm text-gray-700">
+                        <span>Hạn gọi vốn</span>
+                        <span className="font-medium">
+                          {new Date(proj.end_date).toLocaleDateString("vi-VN")}
+                          {(() => {
+                            const d = getDaysRemaining(proj.end_date);
+                            return typeof d === "number"
+                              ? d >= 0
+                                ? ``
+                                : ` • đã kết thúc`
+                              : "";
+                          })()}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -19,8 +19,35 @@ import { getProjectById } from "@/api/projects";
 import { getInvestmentFundById } from "@/api/investment-fund";
 import type { Project } from "@/types/project";
 import type { InvestmentFund } from "@/types/investment_fund";
-import { Chip } from "@heroui/react";
-import { Tag } from "antd";
+import { 
+  Card, 
+  Tag, 
+  Descriptions, 
+  Button, 
+  Space,
+  Typography,
+  Badge,
+  Progress,
+  Row,
+  Col,
+  Statistic
+} from "antd";
+import Image from "next/image";
+import { 
+  ArrowUpOutlined, 
+  ArrowDownOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  DollarCircleOutlined,
+  PercentageOutlined,
+  CalendarOutlined,
+  UserOutlined,
+  ExperimentOutlined, // Replaced FundProjectionOutlined
+  ReadOutlined,
+} from "@ant-design/icons";
+
+const { Title, Paragraph, Text } = Typography;
 
 function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", {
@@ -37,35 +64,55 @@ function formatDate(dateString: string) {
   });
 }
 
-// Helper function to get status label
 const getStatusLabel = (status: string) => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
-    case "in_progress":
-      return "Đang thực hiện";
-    case "completed":
-      return "Hoàn thành";
-    case "cancelled":
-      return "Đã hủy";
+    case "active":
+      return "Đang hoạt động";
+    case "rejected":
+      return "Từ chối";
     default:
       return status || "Chưa xác định";
   }
 };
 
-// Helper function to get status color
-const getStatusColor = (status: string) => {
+const getStatusConfig = (status: string) => {
   switch (status) {
     case "pending":
-      return "magenta";
-    case "in_progress":
-      return "blue";
-    case "completed":
-      return "green";
-    case "cancelled":
-      return "red";
+      return { color: "processing", icon: <ClockCircleOutlined /> };
+    case "active":
+      return { color: "success", icon: <CheckCircleOutlined /> };
+    case "rejected":
+      return { color: "error", icon: <CloseCircleOutlined /> };
     default:
-      return "gray";
+      return { color: "default", icon: null };
+  }
+};
+
+const getDaysRemaining = (endDate: string) => {
+  const end = new Date(endDate);
+  const now = new Date();
+  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+};
+
+// Format number as VND currency with abbreviations
+const formatCurrencyAbbr = (value?: number) => {
+  if (typeof value !== "number") return "";
+  if (value >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}B ₫`;
+  } else if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })}M ₫`;
+  }
+  try {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString("vi-VN")} ₫`;
   }
 };
 
@@ -104,11 +151,12 @@ export default function FundraisingProjectDetailPage() {
         setProject(projectData);
 
         // Fetch investment fund if exists
-        if (projectData && projectData.investment_fund) {
+        if (projectData && projectData.investment_fund && Array.isArray(projectData.investment_fund) && projectData.investment_fund.length > 0) {
+          const firstFund = projectData.investment_fund[0];
           const fundId =
-            typeof projectData.investment_fund === "string"
-              ? projectData.investment_fund
-              : (projectData.investment_fund as any)?.id;
+            typeof firstFund === "string"
+              ? firstFund
+              : (firstFund as any)?.id;
 
           if (fundId) {
             try {
@@ -159,236 +207,244 @@ export default function FundraisingProjectDetailPage() {
     );
   }
 
+  const statusConfig = getStatusConfig(project.status);
+  const daysRemaining = getDaysRemaining(project.end_date);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    // thêm gap cho các cards để tăng tính đồng bộ
+    <div className="min-h-screen bg-gray-50 p-6 gap-16">
         {/* Header with breadcrumb and back button */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 hover:bg-gray-100 transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <div className="flex items-center text-sm text-gray-500">
-              <Link href="/funds/fundraising" className="hover:text-green-600">
-                Dự án gọi vốn
+      <Card className="mb-6 shadow-sm">
+        <Space direction="horizontal" align="center" className="w-full justify-between">
+          <Space>
+            <Button icon={<ArrowLeft />} onClick={() => router.back()} type="text" />
+            <Link href="/funds/fundraising">
+              <Text className="text-green-600 hover:text-green-800">Dự án gọi vốn</Text>
               </Link>
-              <ChevronRight className="h-4 w-4 mx-2" />
-              <span className="text-gray-900 font-medium">Chi tiết</span>
-            </div>
-          </div>
+            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <Text strong>Chi tiết dự án</Text>
+          </Space>
+          <Badge
+            status={statusConfig.color as any}
+            text={getStatusLabel(project.status)}
+          />
+        </Space>
+      </Card>
+
+      {/* Project Header and Key Statistics */}
+      <Card className="mb-6 shadow-sm gap-6">
+        <div className="text-center mb-6">
+          <TrendingUp className="w-16 h-16 mx-auto mb-4 text-green-600" />
+          <Title level={1}>{project.name}</Title>
+          <Paragraph className="text-lg text-gray-600 max-w-3xl mx-auto">
+            {project.description}
+          </Paragraph>
         </div>
 
-        {/* Project Header */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
-          {/* Project Image/Banner */}
-          <div className="h-64 bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center">
-            <div className="text-center text-white">
-              <TrendingUp className="w-16 h-16 mx-auto mb-4" />
-              <h1 className="text-3xl font-bold">{project.name}</h1>
-              <p className="text-lg opacity-90 mt-2">Dự án đang gọi vốn</p>
-            </div>
-          </div>
+        <Row gutter={[16, 16]} align="stretch">
+          <Col xs={24} sm={12} md={6}>
+            <Card size="small" className="text-center" >
+              <Statistic
+                title="Mục tiêu gọi vốn"
+                value={project.goal_money || 0}
+                formatter={(value) => formatCurrencyAbbr(Number(value))}
+                prefix={<DollarCircleOutlined className="w-6 h-6 text-green-600" />}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card size="small" className="text-center">
+              <Statistic
+                title="Tỷ lệ cổ phần"
+                value={project.share_percentage || 0}
+                suffix="%"
+                prefix={<PercentageOutlined className="w-6 h-6 text-blue-600" />}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card size="small" className="text-center">
+              <Statistic
+                title="Hạn gọi vốn"
+                value={project.end_date ? formatDate(project.end_date) : "Chưa xác định"}
+                prefix={<CalendarOutlined className="w-6 h-6 text-purple-600" />}
+              />
+             
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card size="small" className="text-center">
+              <Statistic
+                title="Trạng thái"
+                value={getStatusLabel(project.status)}
+                prefix={<Target className="w-6 h-6 text-orange-600" />}
+              />
+              
+            </Card>
+          </Col>
+        </Row>
+      </Card>
 
-          {/* Project Info */}
-          <div className="p-8">
-            <div className="flex items-center justify-between mb-6">
-              <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
-                {(typeof project.technologies === "object" &&
-                  project.technologies &&
-                  (project.technologies as any).name) ||
-                  "Dự án công nghệ"}
-              </span>
-              <Tag color={getStatusColor(project.status || "")}>
-                {getStatusLabel(project.status || "")}
-              </Tag>
-            </div>
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              {project.name || "Chưa có tên dự án"}
-            </h2>
-            <p className="text-gray-600 text-lg leading-relaxed mb-6">
-              {project.description || "Chưa có mô tả dự án"}
-            </p>
-
-            {/* Fundraising Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="bg-green-50 rounded-lg p-4 text-center">
-                <DollarSign className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">
-                  {formatVND(project.goal_money || 0)}
-                </div>
-                <div className="text-sm text-gray-600">Mục tiêu gọi vốn</div>
-              </div>
-              <div className="bg-blue-50 rounded-lg p-4 text-center">
-                <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-lg font-bold text-gray-900">
-                  {project.end_date
-                    ? formatDate(project.end_date)
-                    : "Chưa xác định"}
-                </div>
-                <div className="text-sm text-gray-600">Hạn gọi vốn</div>
-              </div>
-              <div className="bg-purple-50 rounded-lg p-4 text-center">
-                <Users className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-lg font-bold text-gray-900">
-                  {(typeof project.user === "object" &&
-                    project.user &&
-                    (project.user as any).full_name) ||
-                    "Chưa xác định"}
-                </div>
-                <div className="text-sm text-gray-600">Người phụ trách</div>
-              </div>
-              <div className="bg-orange-50 rounded-lg p-4 text-center">
-                <Target className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-lg font-bold text-gray-900">
-                  {getStatusLabel(project.status || "")}
-                </div>
-                <div className="text-sm text-gray-600">Trạng thái</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Investment Fund Section */}
-        {investmentFund && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <Building2 className="w-6 h-6 mr-2 text-purple-600" />
-              Quỹ đầu tư hỗ trợ
-            </h3>
-
-            <div className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="text-xl font-semibold text-gray-900 mb-2">
-                    {investmentFund.name || "Chưa có tên"}
-                  </h4>
-                  <p className="text-gray-600 mb-4">
-                    {investmentFund.description || "Chưa có mô tả"}
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">
-                      Quỹ đầu tư
-                    </span>
-                  </div>
-                </div>
-                {(investmentFund as any)?.id && (
-                  <Link
-                    href={`/funds/investment-funds/${(investmentFund as any).id}`}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors ml-4"
-                  >
-                    Xem chi tiết
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Investment Opportunity */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">
-            Cơ hội đầu tư
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                Thông tin tài chính
-              </h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Mục tiêu gọi vốn:</span>
-                  <span className="font-semibold text-green-600">
-                    {formatVND(project.goal_money || 0)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Hạn chót:</span>
-                  <span className="font-semibold">
-                    {project.end_date
-                      ? formatDate(project.end_date)
-                      : "Chưa xác định"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Trạng thái:</span>
-                  <Tag color={getStatusColor(project.status || "")}>
-                    {getStatusLabel(project.status || "")}
-                  </Tag>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                Lý do đầu tư
-              </h4>
-              <ul className="space-y-2 text-gray-600">
-                <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  Công nghệ tiên tiến và có tiềm năng thương mại hóa cao
-                </li>
-                <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  Đội ngũ có kinh nghiệm và chuyên môn sâu
-                </li>
-                <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  Thị trường mục tiêu rộng lớn và đang phát triển
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Technology Section */}
-        {typeof project.technologies === "object" && project.technologies && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Công nghệ cốt lõi
-            </h3>
-
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                {(project.technologies as any).title}
-              </h4>
-              {(project.technologies as any).description && (
-                <p className="text-gray-600">
-                  {(project.technologies as any).description}
-                </p>
+      {/* Project Details */}
+      <Row gutter={[16, 16]} align="stretch">
+        <Col xs={24} lg={16}>
+          {/* Business Information */}
+          <Card title="Thông tin dự án" className="mb-6">
+            <Descriptions column={1} bordered>
+              <Descriptions.Item label="Tên dự án">
+                <Text strong>{project.name}</Text>
+              </Descriptions.Item>
+              <Descriptions.Item label="Mô tả">
+                <Paragraph>{project.description}</Paragraph>
+              </Descriptions.Item>
+              {project.business_model && (
+                <Descriptions.Item label="Mô hình kinh doanh">
+                  <Paragraph>{project.business_model}</Paragraph>
+                </Descriptions.Item>
               )}
-            </div>
-          </div>
-        )}
+              {project.market_data && (
+                <Descriptions.Item label="Số liệu và thị trường">
+                  <Paragraph>{project.market_data}</Paragraph>
+                </Descriptions.Item>
+              )}
+              {project.goal_money_purpose && (
+                <Descriptions.Item label="Mục đích kêu gọi vốn">
+                  <Paragraph>{project.goal_money_purpose}</Paragraph>
+                </Descriptions.Item>
+              )}
+              {project.team_profile && (
+                <Descriptions.Item label="Profile đội ngũ">
+                  <Paragraph>{project.team_profile}</Paragraph>
+                </Descriptions.Item>
+              )}
+            </Descriptions>
+          </Card>
 
-        {/* Contact CTA */}
-        <div className="bg-gradient-to-r from-green-600 to-teal-600 rounded-xl p-8 text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">
-            Quan tâm đầu tư vào dự án này?
-          </h2>
-          <p className="text-lg mb-6 opacity-90">
-            Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội đầu tư và hợp tác
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/contact"
-              className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Đầu tư ngay
-            </Link>
-            <Link
-              href="/funds/fundraising"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors"
-            >
-              Xem dự án khác
-            </Link>
-          </div>
+          {/* Technologies */}
+          {Array.isArray(project.technologies) && project.technologies.length > 0 && (
+            <Card title="Công nghệ sử dụng" className="mb-6">
+              <Space wrap>
+                {project.technologies.map((tech: any, index: number) => (
+                  <Tag key={index} color="blue" icon={<ExperimentOutlined />}>
+                    {typeof tech === "string" ? tech : tech?.title || "Công nghệ"}
+                  </Tag>
+                ))}
+              </Space>
+            </Card>
+          )}
+
+          {/* Investment Fund Section */}
+          {Array.isArray(project.investment_fund) && project.investment_fund.length > 0 && (
+            <Card title="Quỹ đầu tư hỗ trợ" className="mb-6">
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {project.investment_fund.map((fund: any, index: number) => (
+                  <Card key={index} size="small" className="hover:shadow-md transition-shadow">
+                    <Space className="w-full justify-between items-center">
+                      <Space direction="vertical">
+                        <Title level={5}>{typeof fund === "string" ? fund : fund?.name || "Quỹ đầu tư"}</Title>
+                        {typeof fund === "object" && fund?.description && (
+                          <Paragraph className="text-gray-600">{fund.description}</Paragraph>
+                        )}
+                      </Space>
+                      {typeof fund === "object" && fund?.id && (
+                        <Button type="link">
+                          <Link href={`/funds/investment-funds/${fund.id}`}>Xem chi tiết</Link>
+                        </Button>
+                      )}
+                    </Space>
+                  </Card>
+                ))}
+              </Space>
+            </Card>
+          )}
+
+          {/* Documents */}
+          {Array.isArray(project.documents_finance) && project.documents_finance.length > 0 && (
+            <Card title="Tài liệu tài chính" className="mb-6">
+              <Row gutter={[16, 16]}>
+                {project.documents_finance.map((doc: any, index: number) => (
+                  <Col xs={24} sm={12} md={8} key={index}>
+                    <Card size="small" className="text-center hover:shadow-md transition-shadow">
+                      <ReadOutlined className="text-4xl text-green-600 mb-2" />
+                      <Space direction="vertical" size={0} className="items-center">
+                        <Text strong>Tài liệu {index + 1}</Text>
+                        <Text type="secondary">PDF</Text>
+                      </Space>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Card>
+          )}
+        </Col>
+
+        <Col xs={24} lg={8}>
+          {/* Financial Information and Project Owner */}
+          <Row gutter={[16, 16]} align="stretch">
+            <Col xs={24}>
+              <Card title="Thông tin tài chính" className="mb-6">
+                <Space direction="vertical" style={{ width: '100%' }} size="large">
+                  {project.revenue && (
+                    <Statistic
+                      title="Doanh thu"
+                      value={project.revenue}
+                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
+                    />
+                  )}
+                  {project.profit && (
+                    <Statistic
+                      title="Lợi nhuận"
+                      value={project.profit}
+                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
+                    />
+                  )}
+                  {project.assets && (
+                    <Statistic
+                      title="Tài sản"
+                      value={project.assets}
+                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      prefix={<DollarCircleOutlined className="w-4 h-4" />}
+                    />
+                  )}
+                </Space>
+              </Card>
+            </Col>
+            <Col xs={24}>
+              <Card title="Thông tin chủ dự án" className="mb-6">
+                <div className="text-center">
+                  <UserOutlined className="w-12 h-12 mx-auto mb-3 text-green-600" />
+                  <Title level={5}>
+                    {typeof project.user === "object" && project.user
+                      ? (project.user as any).name || (project.user as any).email || "Người tạo"
+                      : "Người tạo"}
+                  </Title>
+                  {typeof project.user === "object" && project.user && (project.user as any).email && (
+                    <Text type="secondary">{(project.user as any).email}</Text>
+                  )}
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
+
+      {/* Contact CTA */}
+      <Card className="bg-gradient-to-r from-green-600 to-teal-600 border-none text-white shadow-sm mt-8">
+        <div className="text-center py-4">
+          <Title level={2} className="text-white mb-4">Quan tâm đầu tư vào dự án này?</Title>
+          <Paragraph className="text-lg mb-6 text-white opacity-90">Liên hệ với chúng tôi để tìm hiểu thêm về cơ hội đầu tư và hợp tác</Paragraph>
+          <Space size="large">
+            <Button type="primary" size="large" ghost>
+              <Link href="/contact">Liên hệ ngay</Link>
+            </Button>
+            <Button size="large" ghost>
+              <Link href="/funds/fundraising">Xem dự án khác</Link>
+            </Button>
+          </Space>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

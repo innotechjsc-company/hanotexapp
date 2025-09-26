@@ -9,6 +9,7 @@ import type { InvestmentFund } from "@/types/investment_fund";
 
 export interface InvestmentFundFilters {
   search?: string;
+  user?: string;
 }
 
 export interface PaginationParams {

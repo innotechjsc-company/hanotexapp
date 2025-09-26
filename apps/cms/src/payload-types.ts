@@ -98,7 +98,6 @@ export interface Config {
     'room-user': RoomUser;
     offer: Offer;
     contract: Contract;
-    'contract-step': ContractStep;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -136,7 +135,6 @@ export interface Config {
     'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
     offer: OfferSelect<false> | OfferSelect<true>;
     contract: ContractSelect<false> | ContractSelect<true>;
-    'contract-step': ContractStepSelect<false> | ContractStepSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -737,7 +735,8 @@ export interface Project {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'active' | 'rejected';
+  open_investment_fund?: boolean | null;
   end_date: string;
   updatedAt: string;
   createdAt: string;
@@ -1028,44 +1027,11 @@ export interface Contract {
   technologies: (string | Technology)[];
   technology_propose: string | TechnologyPropose;
   offer: string | Offer;
+  price: number;
   contract_file?: (string | null) | Media;
   documents?: (string | Media)[] | null;
   status: 'signed' | 'in_progress' | 'completed' | 'cancelled';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract-step".
- */
-export interface ContractStep {
-  id: string;
-  contract: string | Contract;
-  step: 'sign_contract' | 'upload_attachments' | 'complete_contract';
-  uploaded_by?: (string | null) | User;
-  /**
-   * Tệp hợp đồng (bắt buộc ở Bước 1)
-   */
-  contract_file?: (string | null) | Media;
-  /**
-   * Các tài liệu bổ sung (yêu cầu ở Bước 2)
-   */
-  attachments?: (string | Media)[] | null;
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
-  /**
-   * Cần 2 dòng: đại diện Bên A và Bên B
-   */
-  approvals?:
-    | {
-        party: 'A' | 'B';
-        user: string | User;
-        decision: 'pending' | 'approved' | 'rejected';
-        decided_at?: string | null;
-        note?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  notes?: string | null;
+  users_confirm?: (string | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1199,10 +1165,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'contract';
         value: string | Contract;
-      } | null)
-    | ({
-        relationTo: 'contract-step';
-        value: string | ContractStep;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1628,6 +1590,7 @@ export interface ProjectSelect<T extends boolean = true> {
   share_percentage?: T;
   goal_money_purpose?: T;
   status?: T;
+  open_investment_fund?: T;
   end_date?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1811,34 +1774,11 @@ export interface ContractSelect<T extends boolean = true> {
   technologies?: T;
   technology_propose?: T;
   offer?: T;
+  price?: T;
   contract_file?: T;
   documents?: T;
   status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract-step_select".
- */
-export interface ContractStepSelect<T extends boolean = true> {
-  contract?: T;
-  step?: T;
-  uploaded_by?: T;
-  contract_file?: T;
-  attachments?: T;
-  status?: T;
-  approvals?:
-    | T
-    | {
-        party?: T;
-        user?: T;
-        decision?: T;
-        decided_at?: T;
-        note?: T;
-        id?: T;
-      };
-  notes?: T;
+  users_confirm?: T;
   updatedAt?: T;
   createdAt?: T;
 }

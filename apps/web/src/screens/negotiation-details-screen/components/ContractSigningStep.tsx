@@ -1,44 +1,58 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Card, Button, Typography, Space, Divider, Tag, message } from "antd";
-import { FileText, Download, CheckCircle } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  Button,
+  Typography,
+  Divider,
+  Upload,
+  Input,
+  message,
+  Modal,
+} from "antd";
+import {
+  FileText,
+  Download,
+  CheckCircle,
+  UploadCloud,
+  Paperclip,
+} from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import type { Contract } from "@/types/contract";
 import { ContractStatusEnum } from "@/types/contract";
 import { contractsApi } from "@/api/contracts";
-import { contractStepsApi } from "@/api/contract-steps";
-import type { ContractStep, ContractStepStatus, ContractStepApproval } from "@/types/contract-step";
 import { useUser } from "@/store/auth";
 import { uploadFile } from "@/api/media";
 import { MediaType } from "@/types/media1";
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
+const { TextArea } = Input;
 
 interface ContractSigningStepProps {
   proposal: TechnologyPropose;
-  contract?: Contract;
-  onSignContract?: () => void;
-  onDownloadContract?: () => void;
 }
 
 export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
   proposal,
-  contract,
-  onSignContract,
-  onDownloadContract,
 }) => {
   const currentUser = useUser();
   const [loading, setLoading] = useState(false);
-  const [activeContract, setActiveContract] = useState<Contract | undefined | null>(contract);
-  const [steps, setSteps] = useState<ContractStep[]>([]);
+  const [activeContract, setActiveContract] = useState<
+    Contract | undefined | null
+  >(null);
   const [submitting, setSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const attachmentsInputRef = useRef<HTMLInputElement | null>(null);
+  const [savingContractFile, setSavingContractFile] = useState(false);
 
-  const isContractSigned = (activeContract || contract)
-    ? (contract?.status === ContractStatusEnum.SIGNED ||
-        contract?.status === ContractStatusEnum.COMPLETED ||
-        activeContract?.status === ContractStatusEnum.SIGNED ||
-        activeContract?.status === ContractStatusEnum.COMPLETED)
+  // Unified contract completion state
+  const [contractFile, setContractFile] = useState<File | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [notes, setNotes] = useState("");
+
+  // Contract acceptance state
+  const [acceptingContract, setAcceptingContract] = useState(false);
+
+  const isContractSigned = activeContract
+    ? activeContract.status === ContractStatusEnum.SIGNED ||
+      activeContract.status === ContractStatusEnum.COMPLETED
     : proposal.status === "contract_signed";
 
   const getContractStatusLabel = (status?: ContractStatusEnum) => {
@@ -60,12 +74,11 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     iso ? new Date(iso).toLocaleString("vi-VN") : "-";
 
   const handleDownload = () => {
-    // Prefer downloading the contract file if available, otherwise fallback
-    const c = activeContract || contract;
-    if (c?.contract_file?.url) {
+    // Download the contract file if available
+    if (activeContract?.contract_file?.url) {
       const link = document.createElement("a");
-      link.href = c.contract_file.url;
-      link.download = c.contract_file.filename || "contract.pdf";
+      link.href = activeContract.contract_file.url;
+      link.download = activeContract.contract_file.filename || "contract.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -74,237 +87,233 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     // No template download. Start from upload only.
   };
 
-  const refreshContractAndSteps = async () => {
+  const refreshContract = async () => {
     try {
       setLoading(true);
+      console.log("Refreshing contract for proposal:", proposal.id);
       const found = await contractsApi.getByTechnologyPropose(proposal.id, 1);
+      console.log("Found contract:", found);
       setActiveContract(found);
-      if (found?.id) {
-        const s = await contractStepsApi.listByContract(found.id as any, 1);
-        setSteps(s);
-      } else {
-        setSteps([]);
-      }
     } catch (e) {
-      // no-op
+      console.error("Error refreshing contract:", e);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!contract) {
-      refreshContractAndSteps();
-    } else {
-      setActiveContract(contract);
-    }
+    refreshContract();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposal.id]);
 
-  useEffect(() => {
-    if (contract) setActiveContract(contract);
-  }, [contract]);
-
-  const stepSign = useMemo(
-    () => steps.find((s) => s.step === "sign_contract"),
-    [steps]
-  );
-  const stepAttach = useMemo(
-    () => steps.find((s) => s.step === "upload_attachments"),
-    [steps]
-  );
-  const stepComplete = useMemo(
-    () => steps.find((s) => s.step === "complete_contract"),
-    [steps]
-  );
-
-  const isUserPartyA = useMemo(() => {
-    const c = activeContract || contract;
-    if (!c || !currentUser?.id) return false;
-    const ua: any = c.user_a as any;
-    const userAId = typeof ua === "object" ? ua?.id : ua;
-    return String(userAId) === String(currentUser.id);
-  }, [activeContract, contract, currentUser]);
-
-  const isUserPartyB = useMemo(() => {
-    const c = activeContract || contract;
-    if (!c || !currentUser?.id) return false;
-    const ub: any = c.user_b as any;
-    const userBId = typeof ub === "object" ? ub?.id : ub;
-    return String(userBId) === String(currentUser.id);
-  }, [activeContract, contract, currentUser]);
-
-  const currentParty: 'A' | 'B' | null = isUserPartyA ? 'A' : isUserPartyB ? 'B' : null;
-
-  const approvalTag = (st?: ContractStepStatus | string) => {
-    const map: Record<string, { color: string; text: string }> = {
-      pending: { color: 'default', text: 'Chờ duyệt' },
-      approved: { color: 'green', text: 'Đã duyệt' },
-      rejected: { color: 'red', text: 'Từ chối' },
-      cancelled: { color: 'volcano', text: 'Hủy' },
-    };
-    const meta = (st && map[st]) || map.pending;
-    return <Tag color={meta.color}>{meta.text}</Tag>;
+  // File upload handlers
+  const handleContractFileUpload = (file: File) => {
+    setContractFile(file);
+    message.success(`Đã chọn hợp đồng: ${file.name}`);
+    return false; // prevent auto upload
   };
 
-  const getApproval = (s?: ContractStep, party?: 'A' | 'B') =>
-    s?.approvals?.find((a) => a.party === party);
+  const handleAttachmentUpload = (file: File) => {
+    setAttachments((prev) => [...prev, file]);
+    message.success(`Đã thêm tài liệu: ${file.name}`);
+    return false; // prevent auto upload
+  };
 
-  const createSignStep = async (file: File) => {
-    if (!activeContract?.id) return;
+  const removeAttachment = (file: File) => {
+    setAttachments((prev) => prev.filter((f) => f !== file));
+  };
+
+  // Upload only the contract file into contract_file field (without completing/signing)
+  const handleUploadContractFileOnly = async () => {
+    if (!activeContract?.id) {
+      message.error("Không tìm thấy hợp đồng");
+      return;
+    }
+    if (!contractFile) {
+      message.warning("Vui lòng chọn tệp hợp đồng để tải lên");
+      return;
+    }
+
     try {
-      setSubmitting(true);
-      const media = await uploadFile(file, {
+      setSavingContractFile(true);
+      const contractMedia = await uploadFile(contractFile, {
         type: MediaType.DOCUMENT,
         alt: `Hợp đồng ${activeContract.id}`,
       });
-      const fileId = media.id;
 
-      if (!currentParty || !currentUser?.id) {
-        message.warning("Bạn không phải là Bên A/B của hợp đồng này");
-        return;
-      }
-      const otherParty: 'A' | 'B' = currentParty === 'A' ? 'B' : 'A';
-
-      const approvals: ContractStepApproval[] = [
-        {
-          party: currentParty,
-          user: currentUser.id as any,
-          decision: 'approved',
-          decided_at: new Date().toISOString(),
-        },
-        {
-          party: otherParty,
-          user: otherParty === 'A' ? (activeContract.user_a as any)?.id : (activeContract.user_b as any)?.id,
-          decision: 'pending',
-        },
-      ];
-
-      await contractStepsApi.createStep({
-        contract: activeContract.id as any,
-        step: 'sign_contract',
-        contract_file: fileId,
-        uploaded_by: currentUser.id as any,
-        approvals,
+      await contractsApi.update(activeContract.id, {
+        contract_file: contractMedia.id as any,
       });
 
-      message.success('Đã khởi tạo Bước 1');
-      await refreshContractAndSteps();
-    } catch (e) {
-      message.error('Thao tác thất bại');
+      message.success("Đã tải lên hợp đồng thành công");
+      setContractFile(null);
+      await refreshContract();
+    } catch (error) {
+      console.error("Error uploading contract file:", error);
+      message.error("Không thể tải lên hợp đồng. Vui lòng thử lại.");
     } finally {
-      setSubmitting(false);
+      setSavingContractFile(false);
     }
   };
 
-  const createAttachmentsStep = async (files: File[]) => {
-    if (!activeContract?.id) return;
+  // Helper functions for contract acceptance
+  const getCurrentUserRole = () => {
+    if (!activeContract || !currentUser?.id) return null;
+
+    const userAId =
+      typeof activeContract.user_a === "object"
+        ? activeContract.user_a.id
+        : activeContract.user_a;
+    const userBId =
+      typeof activeContract.user_b === "object"
+        ? activeContract.user_b.id
+        : activeContract.user_b;
+
+    if (String(userAId) === String(currentUser.id)) return "A";
+    if (String(userBId) === String(currentUser.id)) return "B";
+    return null;
+  };
+
+  const hasCurrentUserAccepted = () => {
+    if (!activeContract || !currentUser?.id) return false;
+
+    // Check if current user is in the users_confirm array
+    const confirmedUsers = activeContract.users_confirm || [];
+    return confirmedUsers.some((user) => {
+      const userId = typeof user === "object" ? user.id : user;
+      return String(userId) === String(currentUser.id);
+    });
+  };
+
+  const bothPartiesAccepted = () => {
+    if (!activeContract) return false;
+
+    const confirmedUsers = activeContract.users_confirm || [];
+    const userAId =
+      typeof activeContract.user_a === "object"
+        ? activeContract.user_a.id
+        : activeContract.user_a;
+    const userBId =
+      typeof activeContract.user_b === "object"
+        ? activeContract.user_b.id
+        : activeContract.user_b;
+
+    const userAConfirmed = confirmedUsers.some((user) => {
+      const userId = typeof user === "object" ? user.id : user;
+      return String(userId) === String(userAId);
+    });
+
+    const userBConfirmed = confirmedUsers.some((user) => {
+      const userId = typeof user === "object" ? user.id : user;
+      return String(userId) === String(userBId);
+    });
+
+    return userAConfirmed && userBConfirmed;
+  };
+
+  // Unified contract completion function
+  const handleCompleteContract = async () => {
+    if (!activeContract?.id) {
+      message.error("Không tìm thấy hợp đồng");
+      return;
+    }
+
+    if (!contractFile) {
+      message.error("Vui lòng tải lên tệp hợp đồng");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      const uploads = await Promise.all(
-        files.map((f) =>
-          uploadFile(f, { type: MediaType.DOCUMENT, alt: `Tài liệu HĐ ${activeContract?.id}` })
+
+      // Upload contract file
+      const contractMedia = await uploadFile(contractFile, {
+        type: MediaType.DOCUMENT,
+        alt: `Hợp đồng ${activeContract.id}`,
+      });
+
+      // Upload attachments if any
+      const attachmentMedias = await Promise.all(
+        attachments.map((file) =>
+          uploadFile(file, {
+            type: MediaType.DOCUMENT,
+            alt: `Tài liệu hợp đồng ${activeContract.id}`,
+          })
         )
       );
-      const ids = uploads.map((m) => m.id);
 
-      if (!currentParty || !currentUser?.id) {
-        message.warning("Bạn không phải là Bên A/B của hợp đồng này");
-        return;
-      }
-      const otherParty: 'A' | 'B' = currentParty === 'A' ? 'B' : 'A';
-      const approvals: ContractStepApproval[] = [
-        {
-          party: currentParty,
-          user: currentUser.id as any,
-          decision: 'approved',
-          decided_at: new Date().toISOString(),
-        },
-        {
-          party: otherParty,
-          user: otherParty === 'A' ? (activeContract.user_a as any)?.id : (activeContract.user_b as any)?.id,
-          decision: 'pending',
-        },
-      ];
-
-      await contractStepsApi.createStep({
-        contract: activeContract.id as any,
-        step: 'upload_attachments',
-        attachments: ids as any,
-        uploaded_by: currentUser.id as any,
-        approvals,
+      // Update contract with files and mark as signed
+      await contractsApi.update(activeContract.id, {
+        contract_file: contractMedia.id as any,
+        documents: attachmentMedias.map((m) => m.id) as any,
+        status: ContractStatusEnum.SIGNED,
       });
-      message.success('Đã khởi tạo Bước 2');
-      await refreshContractAndSteps();
-    } catch (e) {
-      message.error('Tải lên tài liệu thất bại');
+
+      message.success("Hợp đồng đã được hoàn tất thành công!");
+      await refreshContract();
+
+      // Clear form
+      setContractFile(null);
+      setAttachments([]);
+      setNotes("");
+    } catch (error) {
+      console.error("Error completing contract:", error);
+      message.error("Không thể hoàn tất hợp đồng. Vui lòng thử lại.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const createCompleteStep = async () => {
-    if (!activeContract?.id) return;
-    try {
-      setSubmitting(true);
-      if (!currentParty || !currentUser?.id) {
-        message.warning("Bạn không phải là Bên A/B của hợp đồng này");
-        return;
-      }
-      const otherParty: 'A' | 'B' = currentParty === 'A' ? 'B' : 'A';
-      const approvals: ContractStepApproval[] = [
-        {
-          party: currentParty,
-          user: currentUser.id as any,
-          decision: 'approved',
-          decided_at: new Date().toISOString(),
-        },
-        {
-          party: otherParty,
-          user: otherParty === 'A' ? (activeContract.user_a as any)?.id : (activeContract.user_b as any)?.id,
-          decision: 'pending',
-        },
-      ];
-      await contractStepsApi.createStep({
-        contract: activeContract.id as any,
-        step: 'complete_contract',
-        approvals,
-      });
-      message.success('Đã khởi tạo Bước 3');
-      await refreshContractAndSteps();
-    } catch (e) {
-      message.error('Thao tác thất bại');
-    } finally {
-      setSubmitting(false);
+  // Contract acceptance function
+  const handleAcceptContract = () => {
+    if (!currentUser?.id) {
+      message.error("Vui lòng đăng nhập để xác nhận hợp đồng");
+      return;
     }
-  };
 
-  const updateDecision = async (
-    step: ContractStep,
-    decision: 'approved' | 'rejected'
-  ) => {
-    if (!currentParty) return;
-    try {
-      setSubmitting(true);
-      const approvals = step.approvals.map((a) => {
-        if (a.party === currentParty) {
-          return {
-            ...a,
-            user: (currentUser?.id as any) || a.user,
-            decision,
-            decided_at: new Date().toISOString(),
-          };
+    if (!activeContract?.id) {
+      message.error("Không tìm thấy thông tin hợp đồng");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Xác nhận hợp đồng",
+      content: "Bạn có chắc chắn muốn xác nhận hợp đồng này?",
+      onOk: async () => {
+        try {
+          setAcceptingContract(true);
+
+          console.log("Accepting contract:", {
+            contractId: activeContract.id,
+            userId: currentUser.id,
+            userRole: getCurrentUserRole(),
+            hasAccepted: hasCurrentUserAccepted(),
+          });
+
+          const result = await contractsApi.acceptContract(
+            activeContract.id,
+            currentUser.id
+          );
+
+          message.success(result.message);
+
+          // Refresh contract data
+          await refreshContract();
+        } catch (error) {
+          console.error("Error accepting contract:", error);
+          message.error(
+            error instanceof Error
+              ? error.message
+              : "Không thể xác nhận hợp đồng"
+          );
+        } finally {
+          setAcceptingContract(false);
         }
-        return a;
-      });
-      await contractStepsApi.updateApprovals(step.id as any, approvals);
-      message.success(decision === 'approved' ? 'Đã đồng ý' : 'Đã từ chối');
-      await refreshContractAndSteps();
-    } catch (e) {
-      message.error('Không thể cập nhật phê duyệt');
-    } finally {
-      setSubmitting(false);
-    }
+      },
+      onCancel() {
+        // optional
+      },
+    });
   };
 
   return (
@@ -334,36 +343,36 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
           {/* Contract Information */}
           <div>
             <Title level={4}>Thông tin hợp đồng</Title>
-            {contract ? (
+            {activeContract ? (
               <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <div className="flex justify-between">
                   <Text strong>Mã hợp đồng:</Text>
-                  <Text>{contract.id}</Text>
+                  <Text>{activeContract.id}</Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Người A:</Text>
                   <Text>
-                    {typeof (contract.user_a as any) === "object"
-                      ? (contract.user_a as any).full_name ||
-                        (contract.user_a as any).email
-                      : String(contract.user_a)}
+                    {typeof (activeContract.user_a as any) === "object"
+                      ? (activeContract.user_a as any).full_name ||
+                        (activeContract.user_a as any).email
+                      : String(activeContract.user_a)}
                   </Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Người B:</Text>
                   <Text>
-                    {typeof (contract.user_b as any) === "object"
-                      ? (contract.user_b as any).full_name ||
-                        (contract.user_b as any).email
-                      : String(contract.user_b)}
+                    {typeof (activeContract.user_b as any) === "object"
+                      ? (activeContract.user_b as any).full_name ||
+                        (activeContract.user_b as any).email
+                      : String(activeContract.user_b)}
                   </Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Công nghệ:</Text>
                   <Text>
-                    {Array.isArray(contract.technologies) &&
-                    contract.technologies.length > 0
-                      ? contract.technologies
+                    {Array.isArray(activeContract.technologies) &&
+                    activeContract.technologies.length > 0
+                      ? activeContract.technologies
                           .map((t) => (t as any)?.title || "-")
                           .join(", ")
                       : "-"}
@@ -372,22 +381,22 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 <div className="flex justify-between">
                   <Text strong>Giá trị đề xuất:</Text>
                   <Text className="text-green-600 font-semibold">
-                    {contract.offer?.price?.toLocaleString("vi-VN")} VND
+                    {activeContract.offer?.price?.toLocaleString("vi-VN")} VND
                   </Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Trạng thái:</Text>
                   <Text className="text-blue-600">
-                    {getContractStatusLabel(contract.status)}
+                    {getContractStatusLabel(activeContract.status)}
                   </Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Ngày tạo:</Text>
-                  <Text>{formatDateTime(contract.createdAt)}</Text>
+                  <Text>{formatDateTime(activeContract.createdAt)}</Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Cập nhật:</Text>
-                  <Text>{formatDateTime(contract.updatedAt)}</Text>
+                  <Text>{formatDateTime(activeContract.updatedAt)}</Text>
                 </div>
               </div>
             ) : (
@@ -422,210 +431,290 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             )}
           </div>
 
-          {/* Workflow Steps */}
+          {/* Contract Acceptance Status */}
           {activeContract?.id && (
-            <div className="space-y-4">
-              <Title level={4}>Quy trình 3 bước</Title>
-              {/* Bước 1: Ký hợp đồng */}
-              <Card size="small">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text strong>Bước 1: Ký hợp đồng</Text>
-                    <div className="mt-1">
-                      {approvalTag(stepSign?.status)}
-                    </div>
-                  </div>
-                  <div>
-                    {!stepSign && (
-                      <Space>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) createSignStep(f);
-                            e.currentTarget.value = '';
-                          }}
-                        />
-                        <Button
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={!currentParty || submitting}
-                        >
-                          Tải lên hợp đồng
-                        </Button>
-                      </Space>
-                    )}
+            <div>
+              <Title level={4}>Trạng thái xác nhận hợp đồng</Title>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <div className="flex justify-between items-center">
+                  <Text strong>Bên A:</Text>
+                  <div className="flex items-center gap-2">
+                    <Text>
+                      {typeof activeContract.user_a === "object"
+                        ? activeContract.user_a.full_name ||
+                          activeContract.user_a.email
+                        : String(activeContract.user_a)}
+                    </Text>
+                    {(() => {
+                      const confirmedUsers = activeContract.users_confirm || [];
+                      const userAId =
+                        typeof activeContract.user_a === "object"
+                          ? activeContract.user_a.id
+                          : activeContract.user_a;
+                      const isUserAConfirmed = confirmedUsers.some((user) => {
+                        const userId =
+                          typeof user === "object" ? user.id : user;
+                        return String(userId) === String(userAId);
+                      });
+                      return isUserAConfirmed ? (
+                        <CheckCircle size={16} className="text-green-500" />
+                      ) : (
+                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      );
+                    })()}
                   </div>
                 </div>
-                {stepSign && (
-                  <div className="mt-4 space-y-2">
-                    <div className="flex justify-between">
-                      <Text>Tệp hợp đồng:</Text>
-                      <div className="flex items-center gap-2">
-                        <Text>
-                          {stepSign.contract_file?.filename || 'Không có tệp'}
-                        </Text>
-                        {stepSign.contract_file?.url && (
-                          <Button size="small" type="link" onClick={() => {
-                            const a = document.createElement('a');
-                            a.href = stepSign.contract_file?.url!;
-                            a.download = stepSign.contract_file?.filename || 'contract';
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                          }}>Tải xuống</Button>
+                <div className="flex justify-between items-center">
+                  <Text strong>Bên B:</Text>
+                  <div className="flex items-center gap-2">
+                    <Text>
+                      {typeof activeContract.user_b === "object"
+                        ? activeContract.user_b.full_name ||
+                          activeContract.user_b.email
+                        : String(activeContract.user_b)}
+                    </Text>
+                    {(() => {
+                      const confirmedUsers = activeContract.users_confirm || [];
+                      const userBId =
+                        typeof activeContract.user_b === "object"
+                          ? activeContract.user_b.id
+                          : activeContract.user_b;
+                      const isUserBConfirmed = confirmedUsers.some((user) => {
+                        const userId =
+                          typeof user === "object" ? user.id : user;
+                        return String(userId) === String(userBId);
+                      });
+                      return isUserBConfirmed ? (
+                        <CheckCircle size={16} className="text-green-500" />
+                      ) : (
+                        <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Accept Contract Button */}
+                {getCurrentUserRole() &&
+                  !hasCurrentUserAccepted() &&
+                  !bothPartiesAccepted() && (
+                    <div className="text-center pt-4">
+                      <Button
+                        type="primary"
+                        size="large"
+                        icon={<CheckCircle size={20} />}
+                        loading={acceptingContract}
+                        onClick={handleAcceptContract}
+                        className="bg-blue-600 hover:bg-blue-700 px-8"
+                      >
+                        Xác nhận hợp đồng
+                      </Button>
+                    </div>
+                  )}
+
+                {/* Status Messages */}
+                {bothPartiesAccepted() && (
+                  <div className="text-center pt-2">
+                    <Text className="text-green-600 font-semibold">
+                      ✅ Cả hai bên đã xác nhận hợp đồng
+                    </Text>
+                  </div>
+                )}
+
+                {hasCurrentUserAccepted() && !bothPartiesAccepted() && (
+                  <div className="text-center pt-2">
+                    <Text className="text-blue-600">
+                      ⏳ Đang chờ bên kia xác nhận
+                    </Text>
+                  </div>
+                )}
+              </div>
+
+              {/* Contract File Upload (contract_file) - visible when contract exists and not signed */}
+              {!isContractSigned && !bothPartiesAccepted() && (
+                <div className="mt-6">
+                  <Title level={5} className="mb-3">
+                    <FileText size={20} className="inline mr-2" />
+                    Tệp hợp đồng (tải lên vào contract_file)
+                  </Title>
+                  {/* Existing contract file preview */}
+                  {activeContract.contract_file && (
+                    <Card size="small" className="mb-3 border-dashed">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText size={20} className="text-gray-500" />
+                          <div>
+                            <Text strong>
+                              {activeContract.contract_file.filename || 'Hợp đồng hiện tại'}
+                            </Text>
+                            <br />
+                            <Text type="secondary" className="text-xs">
+                              {activeContract.contract_file.filesize
+                                ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
+                                : ''}
+                            </Text>
+                          </div>
+                        </div>
+                        {activeContract.contract_file.url && (
+                          <Button icon={<Download size={14} />} type="text" onClick={handleDownload}>
+                            Tải xuống
+                          </Button>
                         )}
                       </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên A:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepSign, 'A')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên B:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepSign, 'B')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    {/* Actions for current user if pending */}
-                    {currentParty && getApproval(stepSign, currentParty)?.decision === 'pending' && (
-                      <div className="text-right">
-                        <Space>
-                          <Button onClick={() => updateDecision(stepSign, 'rejected')} disabled={submitting}>Từ chối</Button>
-                          <Button type="primary" onClick={() => updateDecision(stepSign, 'approved')} disabled={submitting}>Đồng ý</Button>
-                        </Space>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
+                    </Card>
+                  )}
 
-              {/* Bước 2: Tài liệu kèm theo */}
-              <Card size="small">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text strong>Bước 2: Tài liệu kèm theo</Text>
-                    <div className="mt-1">{approvalTag(stepAttach?.status)}</div>
-                  </div>
-                  <div>
-                    {!stepAttach && stepSign?.status === 'approved' && (
-                      <Space>
-                        <input
-                          ref={attachmentsInputRef}
-                          type="file"
-                          multiple
-                          accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
-                          className="hidden"
-                          onChange={(e) => {
-                            const list = e.target.files ? Array.from(e.target.files) : [];
-                            if (list.length > 0) createAttachmentsStep(list);
-                            e.currentTarget.value = '';
-                          }}
-                        />
-                        <Button onClick={() => attachmentsInputRef.current?.click()} disabled={!currentParty || submitting}>
-                          Tải lên tài liệu
-                        </Button>
-                      </Space>
-                    )}
-                  </div>
-                </div>
-                {stepAttach && (
-                  <div className="mt-4 space-y-2">
-                    <div>
-                      <Text strong>Danh sách tài liệu:</Text>
-                      <div className="mt-2 space-y-1">
-                        {(stepAttach.attachments || []).map((doc) => (
-                          <div key={doc.id} className="flex items-center justify-between">
-                            <Text>{doc.filename || `Tài liệu #${doc.id}`}</Text>
-                            {doc.url && (
-                              <Button size="small" type="link" onClick={() => {
-                                const a = document.createElement('a');
-                                a.href = doc.url!;
-                                a.download = doc.filename || 'attachment';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                              }}>Tải xuống</Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên A:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepAttach, 'A')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên B:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepAttach, 'B')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    {currentParty && getApproval(stepAttach, currentParty)?.decision === 'pending' && (
-                      <div className="text-right">
-                        <Space>
-                          <Button onClick={() => updateDecision(stepAttach, 'rejected')} disabled={submitting}>Từ chối</Button>
-                          <Button type="primary" onClick={() => updateDecision(stepAttach, 'approved')} disabled={submitting}>Đồng ý</Button>
-                        </Space>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
+                  <Upload.Dragger
+                    multiple={false}
+                    beforeUpload={handleContractFileUpload}
+                    showUploadList={!!contractFile}
+                    maxCount={1}
+                    onRemove={() => setContractFile(null)}
+                    accept=".pdf,.doc,.docx"
+                    className="mb-3"
+                  >
+                    <p className="ant-upload-drag-icon">
+                      <UploadCloud />
+                    </p>
+                    <p className="ant-upload-text">
+                      Kéo thả file vào đây hoặc bấm để chọn file
+                    </p>
+                    <p className="ant-upload-hint">Hỗ trợ PDF, Word.</p>
+                  </Upload.Dragger>
 
-              {/* Bước 3: Hoàn tất hợp đồng */}
-              <Card size="small">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Text strong>Bước 3: Hoàn tất hợp đồng</Text>
-                    <div className="mt-1">{approvalTag(stepComplete?.status)}</div>
-                  </div>
-                  <div>
-                    {!stepComplete && stepAttach?.status === 'approved' && (
-                      <Space>
-                        <Button onClick={() => createCompleteStep()} disabled={!currentParty || submitting}>
-                          Khởi tạo hoàn tất
-                        </Button>
-                      </Space>
-                    )}
-                  </div>
+                  <Button
+                    type="primary"
+                    onClick={handleUploadContractFileOnly}
+                    loading={savingContractFile}
+                    disabled={!contractFile}
+                  >
+                    Lưu tệp hợp đồng
+                  </Button>
                 </div>
-                {stepComplete && (
-                  <div className="mt-4 space-y-2">
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên A:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepComplete, 'A')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    <div className="flex justify-between">
-                      <Text>Phê duyệt Bên B:</Text>
-                      <div>
-                        {approvalTag(getApproval(stepComplete, 'B')?.decision as ContractStepStatus)}
-                      </div>
-                    </div>
-                    {currentParty && getApproval(stepComplete, currentParty)?.decision === 'pending' && (
-                      <div className="text-right">
-                        <Space>
-                          <Button onClick={() => updateDecision(stepComplete, 'rejected')} disabled={submitting}>Từ chối</Button>
-                          <Button type="primary" onClick={() => updateDecision(stepComplete, 'approved')} disabled={submitting}>Đồng ý</Button>
-                        </Space>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
+              )}
+
+              {/* Attachments Upload - Available when contract exists */}
+              <div className="mt-6">
+                <Title level={5} className="mb-3">
+                  <Paperclip size={20} className="inline mr-2" />
+                  Tài liệu kèm theo (tuỳ chọn)
+                </Title>
+                <Upload
+                  multiple
+                  beforeUpload={handleAttachmentUpload}
+                  showUploadList
+                  fileList={attachments.map((f) => ({
+                    uid: f.name,
+                    name: f.name,
+                    status: "done" as const,
+                  }))}
+                  onRemove={(file) => {
+                    const target = attachments.find(
+                      (f) => f.name === file.name
+                    );
+                    if (target) removeAttachment(target);
+                  }}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
+                >
+                  <Button icon={<UploadCloud size={16} />}>
+                    Thêm tài liệu
+                  </Button>
+                </Upload>
+              </div>
+            </div>
+          )}
+
+          {/* Unified Contract Completion */}
+          {!isContractSigned && activeContract?.id && bothPartiesAccepted() && (
+            <div className="space-y-6">
+              <Title level={4}>Hoàn thiện hợp đồng</Title>
+
+              {/* Contract File Upload */}
+              <div>
+                <Title level={5} className="mb-3">
+                  <FileText size={20} className="inline mr-2" />
+                  Tải lên hợp đồng đã ký
+                </Title>
+                <Upload.Dragger
+                  multiple={false}
+                  beforeUpload={handleContractFileUpload}
+                  showUploadList={!!contractFile}
+                  maxCount={1}
+                  onRemove={() => setContractFile(null)}
+                  accept=".pdf,.doc,.docx"
+                  className="mb-4"
+                >
+                  <p className="ant-upload-drag-icon">
+                    <UploadCloud />
+                  </p>
+                  <p className="ant-upload-text">
+                    Kéo thả file vào đây hoặc bấm để chọn file
+                  </p>
+                  <p className="ant-upload-hint">
+                    Hỗ trợ PDF, Word. Dung lượng tối đa 10MB.
+                  </p>
+                </Upload.Dragger>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <Title level={5} className="mb-3">
+                  Ghi chú (tuỳ chọn) Tài liệu kèm theo (tuỳ chọn)
+                </Title>
+                <Upload
+                  multiple
+                  beforeUpload={handleAttachmentUpload}
+                  showUploadList
+                  fileList={attachments.map((f) => ({
+                    uid: f.name,
+                    name: f.name,
+                    status: "done" as const,
+                  }))}
+                  onRemove={(file) => {
+                    const target = attachments.find(
+                      (f) => f.name === file.name
+                    );
+                    if (target) removeAttachment(target);
+                  }}
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
+                >
+                  <Button icon={<UploadCloud size={16} />}>
+                    Thêm tài liệu
+                  </Button>
+                </Upload>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <Title level={5} className="mb-3">
+                  Ghi chú (tuỳ chọn)
+                </Title>
+                <TextArea
+                  rows={3}
+                  placeholder="Ghi chú thêm về hợp đồng..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+
+              {/* Complete Button */}
+              <div className="text-center pt-4">
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<CheckCircle size={20} />}
+                  loading={submitting}
+                  onClick={handleCompleteContract}
+                  disabled={!contractFile}
+                  className="bg-green-600 hover:bg-green-700 px-8"
+                >
+                  Hoàn tất hợp đồng
+                </Button>
+              </div>
             </div>
           )}
 
           {/* Contract Document */}
-          {(activeContract || contract)?.contract_file && (
+          {activeContract?.contract_file && (
             <div>
               <Title level={4}>Tài liệu hợp đồng</Title>
               <Card size="small" className="border-dashed">
@@ -634,17 +723,21 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                     <FileText size={24} className="text-gray-500" />
                     <div>
                       <Text strong>
-                        {(activeContract || contract)?.contract_file?.filename || "Hợp đồng"}
+                        {activeContract.contract_file?.filename || "Hợp đồng"}
                       </Text>
                       <br />
                       <Text type="secondary" className="text-sm">
-                        {(activeContract || contract)?.contract_file?.filesize
-                          ? `${((((activeContract || contract)!.contract_file!.filesize || 0) / 1024 / 1024).toFixed(2))} MB`
+                        {activeContract.contract_file?.filesize
+                          ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
                           : ""}
                       </Text>
                     </div>
                   </div>
-                  <Button icon={<Download size={16} />} onClick={handleDownload} type="text">
+                  <Button
+                    icon={<Download size={16} />}
+                    onClick={handleDownload}
+                    type="text"
+                  >
                     Tải xuống
                   </Button>
                 </div>
@@ -652,55 +745,48 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             </div>
           )}
 
-          {Array.isArray((activeContract || contract)?.documents) && (activeContract || contract)!.documents!.length > 0 && (
-            <div>
-              <Title level={5}>Tài liệu đính kèm</Title>
-              <div className="space-y-2">
-                {(activeContract || contract)!.documents!.map((doc) => (
-                  <Card key={doc.id} size="small" className="border-dashed">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText size={20} className="text-gray-400" />
-                        <div>
-                          <Text>{doc.filename || `Tài liệu #${doc.id}`}</Text>
-                          <br />
-                          <Text type="secondary" className="text-xs">
-                            {doc.filesize
-                              ? `${((doc.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
-                              : ""}
-                          </Text>
+          {Array.isArray(activeContract?.documents) &&
+            activeContract.documents.length > 0 && (
+              <div>
+                <Title level={5}>Tài liệu đính kèm</Title>
+                <div className="space-y-2">
+                  {activeContract.documents.map((doc: any) => (
+                    <Card key={doc.id} size="small" className="border-dashed">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText size={20} className="text-gray-400" />
+                          <div>
+                            <Text>{doc.filename || `Tài liệu #${doc.id}`}</Text>
+                            <br />
+                            <Text type="secondary" className="text-xs">
+                              {doc.filesize
+                                ? `${((doc.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
+                                : ""}
+                            </Text>
+                          </div>
                         </div>
+                        {doc.url && (
+                          <Button
+                            icon={<Download size={14} />}
+                            type="text"
+                            onClick={() => {
+                              const a = document.createElement("a");
+                              a.href = doc.url || "#";
+                              a.download = doc.filename || `document-${doc.id}`;
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                            }}
+                          >
+                            Tải xuống
+                          </Button>
+                        )}
                       </div>
-                      {doc.url && (
-                        <Button
-                          icon={<Download size={14} />}
-                          type="text"
-                          onClick={() => {
-                            const a = document.createElement("a");
-                            a.href = doc.url || "#";
-                            a.download = doc.filename || `document-${doc.id}`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                          }}
-                        >
-                          Tải xuống
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Description */}
-          <div>
-            <Title level={4}>Mô tả đề xuất</Title>
-            <Paragraph className="text-gray-700 bg-gray-50 p-4 rounded-lg">
-              {proposal.description || "Không có mô tả chi tiết."}
-            </Paragraph>
-          </div>
+            )}
 
           {/* No template download or direct sign fallback. Start from uploading only. */}
 
