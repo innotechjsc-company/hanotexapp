@@ -3,7 +3,6 @@ import { CollectionConfig } from 'payload'
 export const ProjectPropose: CollectionConfig = {
   slug: 'project-propose',
   admin: {
-    useAsTitle: 'title',
     group: 'Đề xuất đầu tư dự án',
   },
   access: {
@@ -57,6 +56,24 @@ export const ProjectPropose: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       label: 'Tài liệu',
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      label: 'Trạng thái',
+      options: [
+        'pending',
+        'negotiating',
+        'contact_signing',
+        'contract_signed',
+        'completed',
+        'cancelled',
+      ],
+      defaultValue: 'pending',
+      admin: {
+        description: 'Trạng thái',
+      },
     },
   ],
   timestamps: true,
