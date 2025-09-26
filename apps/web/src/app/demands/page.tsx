@@ -69,7 +69,8 @@ export default function DemandsPage() {
       // Build filters object
       const apiFilters: any = {};
       if (activeSearchQuery) {
-        apiFilters.search = activeSearchQuery;
+        // Use a specific filter for title search
+        apiFilters["where[title][like]"] = activeSearchQuery;
       }
       if (filters.category) {
         apiFilters.category = filters.category;
@@ -93,7 +94,6 @@ export default function DemandsPage() {
 
       const response = await getDemands(apiFilters, paginationParams);
       console.log("Demands API response:", response);
-
       if (response.docs && response.docs.length > 0) {
         // response.docs is Demand[][], so we need to flatten it
         const flattenedDemands = response.docs.flat();
@@ -124,39 +124,35 @@ export default function DemandsPage() {
 
   useEffect(() => {
     fetchDemands();
-  }, [pagination.page, pagination.limit, sortBy, sortOrder]); // Added sortBy and sortOrder
+  }, [
+    pagination.page,
+    pagination.limit,
+    sortBy,
+    sortOrder,
+    filters,
+    activeSearchQuery,
+  ]);
+
+  // Extracted search logic to be reusable
+  const performSearch = () => {
+    const newActiveQuery = activeSearchQuery ? "" : searchQuery.trim();
+    setActiveSearchQuery(newActiveQuery);
+    if (activeSearchQuery) {
+      setSearchQuery("");
+    }
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // If there's an active search query, clear it
-    if (activeSearchQuery) {
-      setSearchQuery("");
-      setActiveSearchQuery("");
-      setPagination((prev) => ({ ...prev, page: 1 }));
-      fetchDemands(); // Re-fetch all demands without search
-      return;
-    }
-
-    // Perform a new search
-    const newSearchQuery = searchQuery.trim();
-    setActiveSearchQuery(newSearchQuery);
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    fetchDemands();
+    performSearch();
   };
 
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
     setPagination((prev) => ({ ...prev, page: 1 }));
-    // Fetch will be triggered by useEffect when filters change
   };
-
-  // Add useEffect to refetch when filters change
-  useEffect(() => {
-    if (pagination.page === 1) {
-      fetchDemands();
-    }
-  }, [filters, activeSearchQuery]); // Changed searchQuery to activeSearchQuery
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -268,9 +264,8 @@ export default function DemandsPage() {
         {/* Search and Filters */}
         <Card className="shadow-sm mb-8">
           <CardBody className="p-6">
-            <form onSubmit={handleSearch} className="space-y-4">
-              {/* Search Bar */}
-              <div className="flex gap-4">
+            <div className="flex flex-col gap-4">
+              <form onSubmit={handleSearch} className="flex gap-4">
                 <Input
                   type="text"
                   value={searchQuery}
@@ -283,12 +278,19 @@ export default function DemandsPage() {
                     input: "text-sm",
                     inputWrapper: "h-12",
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault(); // Prevent form submission
+                      performSearch();
+                    }
+                  }}
                 />
                 <Button
                   type="submit"
                   color={activeSearchQuery ? "danger" : "primary"}
                   size="lg"
                   className="px-8"
+                  onPress={() => performSearch()}
                   style={{
                     backgroundColor: activeSearchQuery ? "#EF4444" : "#006FEE",
                     color: "#ffffff",
@@ -299,7 +301,7 @@ export default function DemandsPage() {
                 >
                   {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
                 </Button>
-              </div>
+              </form>
 
               {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -372,7 +374,7 @@ export default function DemandsPage() {
                   <SelectItem key="EXPIRED">Hết hạn</SelectItem>
                 </Select>
               </div>
-            </form>
+            </div>
           </CardBody>
         </Card>
 
