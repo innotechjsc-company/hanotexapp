@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
           collection: 'technology-propose',
           id: technologyProposeId,
           data: {
-            status: 'completed',
+            status: 'contract_signed',
           },
         })
       } catch (error) {

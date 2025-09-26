@@ -98,6 +98,8 @@ export interface Config {
     'room-user': RoomUser;
     offer: Offer;
     contract: Contract;
+    'contract-logs': ContractLog;
+    'project-propose': ProjectPropose;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -135,6 +137,8 @@ export interface Config {
     'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
     offer: OfferSelect<false> | OfferSelect<true>;
     contract: ContractSelect<false> | ContractSelect<true>;
+    'contract-logs': ContractLogsSelect<false> | ContractLogsSelect<true>;
+    'project-propose': ProjectProposeSelect<false> | ProjectProposeSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -848,7 +852,7 @@ export interface TechnologyPropose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -1039,6 +1043,44 @@ export interface Contract {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract-logs".
+ */
+export interface ContractLog {
+  id: string;
+  technology_propose: string | TechnologyPropose;
+  contract: string | Contract;
+  user: string | User;
+  content: string;
+  documents?: (string | null) | Media;
+  reason?: string | null;
+  status?: ('pending' | 'completed' | 'cancelled') | null;
+  is_done_contract?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-propose".
+ */
+export interface ProjectPropose {
+  id: string;
+  project: string | Project;
+  user: string | User;
+  investor_capacity?: string | null;
+  investment_amount?: number | null;
+  investment_ratio?: number | null;
+  investment_type?: string | null;
+  investment_benefits?: string | null;
+  documents?: (string | null) | Media;
+  /**
+   * Trạng thái
+   */
+  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1167,6 +1209,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'contract';
         value: string | Contract;
+      } | null)
+    | ({
+        relationTo: 'contract-logs';
+        value: string | ContractLog;
+      } | null)
+    | ({
+        relationTo: 'project-propose';
+        value: string | ProjectPropose;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1783,6 +1833,39 @@ export interface ContractSelect<T extends boolean = true> {
   documents?: T;
   status?: T;
   users_confirm?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contract-logs_select".
+ */
+export interface ContractLogsSelect<T extends boolean = true> {
+  technology_propose?: T;
+  contract?: T;
+  user?: T;
+  content?: T;
+  documents?: T;
+  reason?: T;
+  status?: T;
+  is_done_contract?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-propose_select".
+ */
+export interface ProjectProposeSelect<T extends boolean = true> {
+  project?: T;
+  user?: T;
+  investor_capacity?: T;
+  investment_amount?: T;
+  investment_ratio?: T;
+  investment_type?: T;
+  investment_benefits?: T;
+  documents?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

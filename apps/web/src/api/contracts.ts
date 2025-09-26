@@ -29,7 +29,7 @@ class ContractsApi {
   async acceptContract(contractId: string, userId: string) {
     const response = await payloadApiClient.post<{
       message: string;
-    }>(`/technology/accept-contract`, {
+    }>(`/technology-propose/accept-contract`, {
       body: {
         contractId,
         userId,

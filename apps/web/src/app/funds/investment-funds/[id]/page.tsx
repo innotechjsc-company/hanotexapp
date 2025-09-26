@@ -206,12 +206,12 @@ export default function InvestmentFundDetailPage() {
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       project.status === ProjectStatusEnum.PENDING
                         ? 'bg-green-100 text-green-800'
-                        : project.status === ProjectStatusEnum.COMPLETED
+                        : project.status === ProjectStatusEnum.ACTIVE
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-gray-100 text-gray-800'
                     }`}>
                       {project.status === ProjectStatusEnum.PENDING ? 'Đang hoạt động' :
-                       project.status === ProjectStatusEnum.COMPLETED ? 'Hoàn thành' : project.status === ProjectStatusEnum.CONTRACT_SIGNED ? 'Đang thực hiện' : project.status === ProjectStatusEnum.CANCELLED ? 'Đã hủy' :
+                       project.status === ProjectStatusEnum.ACTIVE ? 'Đang hoạt động' : project.status === ProjectStatusEnum.REJECTED ? 'Đã hủy' :
                        project.status || 'Chưa xác định'}
                     </span>
                   </div>

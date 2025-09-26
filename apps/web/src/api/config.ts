@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
   SERVICES: "/services",
   SERVICE_TICKET: "/service-ticket",
   OFFERS: "/offer",
+  CONTRACT_LOGS: "/contract-logs",
 } as const;
 
 // HTTP Methods

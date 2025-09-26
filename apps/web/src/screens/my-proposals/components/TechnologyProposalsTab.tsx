@@ -17,6 +17,7 @@ import EditTechnologyProposalModal from "./EditTechnologyProposalModal";
 const statusColors: Record<TechnologyProposeStatus, string> = {
   pending: "orange",
   negotiating: "blue",
+  contact_signing: "cyan",
   contract_signed: "green",
   completed: "green",
   cancelled: "red",
@@ -25,6 +26,7 @@ const statusColors: Record<TechnologyProposeStatus, string> = {
 const statusLabels: Record<TechnologyProposeStatus, string> = {
   pending: "Chờ xem xét",
   negotiating: "Đang đàm phán",
+  contact_signing: "Đang ký hợp đồng",
   contract_signed: "Đã ký hợp đồng",
   completed: "Hoàn thành",
   cancelled: "Đã hủy",
@@ -244,6 +246,7 @@ export default function TechnologyProposalsTab() {
               </Tooltip>
             )}
             {(record.status === "negotiating" ||
+              record.status === "contact_signing" ||
               record.status === "contract_signed") && (
               <Tooltip title="Xem đàm phán" color="blue">
                 <Button

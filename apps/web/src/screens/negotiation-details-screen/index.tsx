@@ -11,6 +11,8 @@ import { MessageInput } from "./components/MessageInput";
 import { ConfirmationModal } from "./components/ConfirmationModal";
 import { OfferModal } from "./components/OfferModal";
 import { ContractSigningStep } from "./components/ContractSigningStep";
+import { ContractLogsStep } from "./components/ContractLogsStep";
+import { useRouter } from "next/navigation";
 
 const { Text } = Typography;
 
@@ -22,6 +24,7 @@ export const NegotiationDetailsScreen: React.FC<
   NegotiationDetailsScreenProps
 > = ({ proposalId }) => {
   const [form] = Form.useForm();
+  const router = useRouter();
 
   const {
     // Data
@@ -62,7 +65,12 @@ export const NegotiationDetailsScreen: React.FC<
   } = useNegotiation({ proposalId });
 
   const handleClose = () => {
-    window.close();
+    try {
+      router.back();
+    } catch {
+      // Fallback if router.back fails in some environments
+      window.history.back();
+    }
   };
 
   const onSendMessage = async (values: { message: string }) => {
@@ -105,11 +113,14 @@ export const NegotiationDetailsScreen: React.FC<
   const getCurrentStep = () => {
     switch (proposal.status) {
       case "negotiating":
-        return 0; // Negotiation step
+        return 0; // Bước 1: Đàm phán
+      case "contact_signing":
+        return 1; // Bước 2: Xác nhận hợp đồng
       case "contract_signed":
-        return 1; // Contract signing step
+      case "completed":
+        return 2; // Bước 3: Hoàn thiện hợp đồng
       default:
-        return 0; // Default to negotiation
+        return 0; // Mặc định về đàm phán
     }
   };
 
@@ -120,6 +131,11 @@ export const NegotiationDetailsScreen: React.FC<
       title: "Đàm phán",
       description: "Thảo luận và thương lượng điều kiện",
       icon: <MessageOutlined />,
+    },
+    {
+      title: "Xác nhận hợp đồng",
+      description: "Hai bên xác nhận hợp đồng",
+      icon: <FileTextOutlined />,
     },
     {
       title: "Hoàn thiện hợp đồng",
@@ -156,7 +172,7 @@ export const NegotiationDetailsScreen: React.FC<
 
       {/* Content area - Takes remaining space with proper scrolling */}
       <div className="flex-1 overflow-hidden">
-        {currentStep === 0 ? (
+        {currentStep === 0 && (
           /* Negotiation Step - Chat Interface */
           <NegotiationChat
             messages={messages}
@@ -184,10 +200,17 @@ export const NegotiationDetailsScreen: React.FC<
               )
             }
           />
-        ) : (
-          /* Contract Signing Step */
+        )}
+        {currentStep === 1 && (
+          /* Contract Confirmation Step */
           <div className="h-full overflow-auto">
             <ContractSigningStep proposal={proposal} />
+          </div>
+        )}
+        {currentStep === 2 && (
+          /* Contract Completion Logs Step */
+          <div className="h-full overflow-auto">
+            <ContractLogsStep proposal={proposal} />
           </div>
         )}
       </div>

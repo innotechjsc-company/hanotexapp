@@ -91,6 +91,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     try {
       setLoading(true);
       console.log("Refreshing contract for proposal:", proposal.id);
+      if(!proposal.id) return;
       const found = await contractsApi.getByTechnologyPropose(proposal.id, 1);
       console.log("Found contract:", found);
       setActiveContract(found);
@@ -424,7 +425,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   <Text className="text-blue-600">
                     {proposal.status === "contract_signed"
                       ? "Đã ký hợp đồng"
-                      : "Đang đàm phán"}
+                      : proposal.status === "contact_signing"
+                        ? "Đang ký hợp đồng"
+                        : "Đang đàm phán"}
                   </Text>
                 </div>
               </div>
