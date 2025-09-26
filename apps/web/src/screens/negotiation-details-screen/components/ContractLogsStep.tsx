@@ -37,7 +37,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
   proposal,
 }) => {
   const currentUser = useUser();
-  const isCompleted = proposal?.status === 'completed';
+  const isCompleted = proposal?.status === "completed";
 
   const [logs, setLogs] = useState<ContractLog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -155,6 +155,11 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
         return;
       }
 
+      if (!proposal?.id) {
+        message.error("Không tìm thấy đề xuất");
+        return;
+      }
+
       let documentId: any = undefined;
       if (attachments[0]) {
         const uploaded = await uploadFile(attachments[0], {
@@ -165,8 +170,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       }
 
       await contractLogsApi.create({
-        technology_propose: proposal.id,
-        contract: activeContractId || undefined,
+        technology_propose: proposal?.id as any,
+        contract: activeContractId as any,
         user: currentUser!.id as any,
         content: content.trim(),
         documents: documentId,
@@ -192,7 +197,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
 
   const openProgressModal = () => {
     if (isCompleted) {
-      message.info('Hợp đồng đã hoàn thành. Không thể gửi thêm cập nhật.');
+      message.info("Hợp đồng đã hoàn thành. Không thể gửi thêm cập nhật.");
       return;
     }
     setModalMode("progress");
@@ -203,7 +208,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
 
   const openCompleteModal = () => {
     if (isCompleted) {
-      message.info('Hợp đồng đã hoàn thành. Không thể xác nhận thêm.');
+      message.info("Hợp đồng đã hoàn thành. Không thể xác nhận thêm.");
       return;
     }
     setModalMode("complete");
@@ -412,7 +417,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
                             </div>
                           )}
 
-                        {!isCompleted && !isMine &&
+                        {!isCompleted &&
+                          !isMine &&
                           log.status === ContractLogStatus.Pending && (
                             <div className="mt-3 flex gap-2">
                               <Button
@@ -455,42 +461,42 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
           </div>
 
           {!isCompleted && (
-          <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
-            {(() => {
-              const myPending = logs.find(
-                (l) =>
-                  l.status === ContractLogStatus.Pending &&
-                  getUserId(l.user) === String(currentUser?.id)
-              );
-              const disabled = Boolean(myPending);
-              return (
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    {disabled ? (
-                      <span>
-                        ⏳ Bạn đã gửi một cập nhật và đang chờ đối tác xác nhận
-                        / từ chối.
-                      </span>
-                    ) : (
-                      <span>Chọn một hành động để tiếp tục.</span>
-                    )}
+            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
+              {(() => {
+                const myPending = logs.find(
+                  (l) =>
+                    l.status === ContractLogStatus.Pending &&
+                    getUserId(l.user) === String(currentUser?.id)
+                );
+                const disabled = Boolean(myPending);
+                return (
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-500">
+                      {disabled ? (
+                        <span>
+                          ⏳ Bạn đã gửi một cập nhật và đang chờ đối tác xác
+                          nhận / từ chối.
+                        </span>
+                      ) : (
+                        <span>Chọn một hành động để tiếp tục.</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={openProgressModal} disabled={disabled}>
+                        Gửi báo cáo tiến độ
+                      </Button>
+                      <Button
+                        type="primary"
+                        onClick={openCompleteModal}
+                        disabled={disabled}
+                      >
+                        Gửi xác nhận hoàn thành hợp đồng
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button onClick={openProgressModal} disabled={disabled}>
-                      Gửi báo cáo tiến độ
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={openCompleteModal}
-                      disabled={disabled}
-                    >
-                      Gửi xác nhận hoàn thành hợp đồng
-                    </Button>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
+                );
+              })()}
+            </div>
           )}
         </div>
       </div>

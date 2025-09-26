@@ -103,24 +103,44 @@ export async function POST(request: NextRequest) {
       data: updateData,
     })
 
-    // If both parties have accepted, also update the technology-propose status
+    // If both parties have accepted, also update the related proposal status
     if (bothAccepted) {
       try {
-        const technologyProposeId =
-          typeof contract.technology_propose === 'object'
-            ? contract.technology_propose.id
-            : contract.technology_propose
+        const techPropId =
+          typeof (contract as any).technology_propose === 'object'
+            ? (contract as any).technology_propose?.id
+            : (contract as any).technology_propose
+        const projPropId =
+          typeof (contract as any).project_propose === 'object'
+            ? (contract as any).project_propose?.id
+            : (contract as any).project_propose
+        const propId =
+          typeof (contract as any).propose === 'object'
+            ? (contract as any).propose?.id
+            : (contract as any).propose
 
-        await payload.update({
-          collection: 'technology-propose',
-          id: technologyProposeId,
-          data: {
-            status: 'contract_signed',
-          },
-        })
+        if (techPropId) {
+          await payload.update({
+            collection: 'technology-propose',
+            id: String(techPropId),
+            data: { status: 'contract_signed' },
+          })
+        } else if (projPropId) {
+          await payload.update({
+            collection: 'project-propose',
+            id: String(projPropId),
+            data: { status: 'contract_signed' },
+          })
+        } else if (propId) {
+          await payload.update({
+            collection: 'propose',
+            id: String(propId),
+            data: { status: 'contract_signed' },
+          })
+        }
       } catch (error) {
-        console.error('Failed to update technology-propose status:', error)
-        // Don't fail the contract acceptance if technology-propose update fails
+        console.error('Failed to update related proposal status:', error)
+        // Don't fail the contract acceptance if proposal update fails
       }
     }
 

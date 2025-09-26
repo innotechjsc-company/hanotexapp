@@ -45,7 +45,7 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
       case "cancelled":
         return { label: "Đã hủy", color: "red" };
       default:
-        return { label: proposal.status, color: "default" };
+        return { label: "", color: "default" };
     }
   };
 

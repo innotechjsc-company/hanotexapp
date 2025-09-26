@@ -4,9 +4,11 @@ import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'
 
 type SendOfferBody = {
-  technology_propose: string
+  // Support any single propose type
+  technology_propose?: string
+  project_propose?: string
+  propose?: string
   message?: string
-  //
   price: number
   content?: string
 }
@@ -42,10 +44,21 @@ export async function POST(req: NextRequest) {
     const corsHeaders = await buildCorsHeaders(req)
     const body = (await req.json()) as SendOfferBody
 
-    // Basic validation
-    if (!body?.technology_propose) {
+    // Determine which relation is provided (exactly one)
+    const providedRelations = ['technology_propose', 'project_propose', 'propose'] as const
+    const relationKey = providedRelations.find((k) => (body as any)[k])
+
+    if (!relationKey) {
       return Response.json(
-        { error: 'Missing technology_propose' },
+        { error: 'Missing relation: provide one of technology_propose, project_propose, propose' },
+        { status: 400, headers: corsHeaders },
+      )
+    }
+    // Ensure only one is provided
+    const providedCount = providedRelations.filter((k) => (body as any)[k]).length
+    if (providedCount !== 1) {
+      return Response.json(
+        { error: 'Provide exactly one of technology_propose, project_propose, propose' },
         { status: 400, headers: corsHeaders },
       )
     }
@@ -70,7 +83,7 @@ export async function POST(req: NextRequest) {
     const negotiatingMessage = await payload.create({
       collection: 'negotiating-messages',
       data: {
-        technology_propose: body.technology_propose,
+        [relationKey]: (body as any)[relationKey],
         message: body.message,
         is_offer: true,
         user: user.id,
@@ -82,7 +95,7 @@ export async function POST(req: NextRequest) {
     const offer = await payload.create({
       collection: 'offer',
       data: {
-        technology_propose: body.technology_propose,
+        [relationKey]: (body as any)[relationKey],
         negotiating_messages: (negotiatingMessage as any).id,
         content: body.content,
         price: body.price,

@@ -119,8 +119,8 @@ export default function ProposalsModal({
   };
 
   const handleViewDetails = (proposalId: string) => {
-    // Reuse negotiation details screen route
-    router.push(`/technologies/negotiations/${proposalId}`);
+    // Chuyển sang màn đàm phán chi tiết của đề xuất (propose)
+    router.push(`/proposes/negotiations/${proposalId}`);
   };
 
   const getUserName = (user: User | string) => {
@@ -249,11 +249,8 @@ export default function ProposalsModal({
       render: (_: any, record: any) => {
         const proposalId = record.id || record._id;
         const isPending = record.status === "pending";
-        const canViewDetails =
-          record.status === "negotiating" ||
-          record.status === "contact_signing" ||
-          record.status === "contract_signed" ||
-          record.status === "completed";
+        // Cho phép xem chi tiết ở mọi trạng thái để chuyển sang màn đàm phán đề xuất
+        const canViewDetails = true;
 
         return (
           <Space>

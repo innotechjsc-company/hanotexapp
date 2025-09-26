@@ -16,6 +16,10 @@ import type { OfferFormData } from "../components/OfferModal";
 
 export interface UseNegotiationProps {
   proposalId: string; // could be TechnologyPropose ID or Propose ID
+  // If provided, force using a specific API context
+  // 'technology' => call technology-propose APIs only
+  // 'propose' => call propose APIs only
+  forceType?: 'technology' | 'propose';
 }
 
 export interface UseNegotiationReturn {
@@ -130,6 +134,7 @@ const detectFileType = (file: File): MediaType => {
 
 export const useNegotiation = ({
   proposalId,
+  forceType,
 }: UseNegotiationProps): UseNegotiationReturn => {
   const currentUser = useUser();
 
@@ -169,16 +174,27 @@ export const useNegotiation = ({
     try {
       setLoading(true);
       setError("");
-      // Try technology-propose first; if fails, fallback to propose
-      try {
+      // Respect forced type if provided
+      if (forceType === 'technology') {
         const data = await technologyProposeApi.getById(proposalId);
-        if (!data) throw new Error("No data");
         setProposal(data as any);
         setIsTechnologyPropose(true);
-      } catch (e) {
+      } else if (forceType === 'propose') {
         const p = await getProposeById(proposalId);
         setProposal(p as any);
         setIsTechnologyPropose(false);
+      } else {
+        // Auto-detect: try technology-propose first; if fails, fallback to propose
+        try {
+          const data = await technologyProposeApi.getById(proposalId);
+          if (!data) throw new Error('No data');
+          setProposal(data as any);
+          setIsTechnologyPropose(true);
+        } catch (e) {
+          const p = await getProposeById(proposalId);
+          setProposal(p as any);
+          setIsTechnologyPropose(false);
+        }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
