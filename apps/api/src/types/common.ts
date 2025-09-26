@@ -36,3 +36,17 @@ export interface PaginationParams {
   sort?: string;
   order?: "ASC" | "DESC";
 }
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}

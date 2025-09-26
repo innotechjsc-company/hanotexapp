@@ -13,5 +13,4 @@ export * from "./transaction";
 export * from "./document";
 export * from "./notification";
 
-// API types
-export * from "./api";
+// API types are included in common.ts

@@ -346,7 +346,7 @@ export default function DemandsPage() {
             }}
             title={
               isAuthenticated
-                ? "Đăng nhu cầu công nghệ mới"
+                ? "Đăng nhu cầu KH&CN mới"
                 : "Đăng nhập để đăng nhu cầu"
             }
           >
@@ -776,7 +776,7 @@ export default function DemandsPage() {
           }}
           title={
             isAuthenticated
-              ? "Đăng nhu cầu công nghệ mới"
+              ? "Đăng nhu cầu KH&CN mới"
               : "Đăng nhập để đăng nhu cầu"
           }
         >

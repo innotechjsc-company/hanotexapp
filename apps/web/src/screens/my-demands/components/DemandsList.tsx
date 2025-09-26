@@ -54,9 +54,14 @@ export default function DemandsList({
       title: "Giá",
       key: "price",
       render: (_: any, record: Demand) => {
-        const from = record.from_price ? `${record.from_price.toLocaleString()} VNĐ` : null;
-        const to = record.to_price ? `${record.to_price.toLocaleString()} VNĐ` : null;
-        const value = from && to ? `${from} - ${to}` : from || to || "Chưa xác định";
+        const from = record.from_price
+          ? `${record.from_price.toLocaleString()} VNĐ`
+          : null;
+        const to = record.to_price
+          ? `${record.to_price.toLocaleString()} VNĐ`
+          : null;
+        const value =
+          from && to ? `${from} - ${to}` : from || to || "Chưa xác định";
         return <span className="text-gray-600">{value}</span>;
       },
     },
@@ -84,7 +89,11 @@ export default function DemandsList({
       align: "right" as const,
       render: (_: any, record: Demand) => (
         <Space>
-          <Tooltip title="Xem chi tiết" color="#1677ff" overlayInnerStyle={{ color: "white" }}>
+          <Tooltip
+            title="Xem chi tiết"
+            color="#1677ff"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -92,7 +101,11 @@ export default function DemandsList({
               onClick={() => onView(record)}
             />
           </Tooltip>
-          <Tooltip title="Xem đề xuất" color="#1677ff" overlayInnerStyle={{ color: "white" }}>
+          <Tooltip
+            title="Xem đề xuất"
+            color="#1677ff"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -100,7 +113,11 @@ export default function DemandsList({
               onClick={() => onViewProposals(record)}
             />
           </Tooltip>
-          <Tooltip title="Chỉnh sửa" color="#52c41a" overlayInnerStyle={{ color: "white" }}>
+          <Tooltip
+            title="Chỉnh sửa"
+            color="#52c41a"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -111,7 +128,11 @@ export default function DemandsList({
           <Tooltip
             title={<span style={{ color: "#ff4d4f" }}>Xóa</span>}
             color="#fff"
-            overlayInnerStyle={{ color: "#ff4d4f", border: "1px solid #ff4d4f", backgroundColor: "white" }}
+            overlayInnerStyle={{
+              color: "#ff4d4f",
+              border: "1px solid #ff4d4f",
+              backgroundColor: "white",
+            }}
           >
             <Button
               type="text"
@@ -127,10 +148,19 @@ export default function DemandsList({
   ];
 
   return (
-    <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 16px 24px" }}>
+    <div
+      style={{
+        maxWidth: 1440,
+        margin: "0 auto",
+        padding: "0 16px 24px",
+        marginTop: 16,
+      }}
+    >
       <Card title={<Typography.Text strong>Danh sách nhu cầu</Typography.Text>}>
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+          <div
+            style={{ display: "flex", justifyContent: "center", padding: 48 }}
+          >
             <Spin size="large" />
           </div>
         ) : (

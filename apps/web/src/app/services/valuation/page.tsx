@@ -322,11 +322,11 @@ export default function ValuationPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="tel:02438251234"
+              href="tel:0848567193"
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               <Phone className="h-5 w-5 mr-2" />
-              024 3825 1234
+              0848567193
             </a>
             <a 
               href="mailto:contact@hanotex.vn"

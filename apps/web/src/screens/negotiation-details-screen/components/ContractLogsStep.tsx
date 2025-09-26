@@ -176,6 +176,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
         content: content.trim(),
         documents: documentId,
         status: ContractLogStatus.Pending,
+        // Mark completion logs so UI can gate sending until confirmed
+        is_done_contract: modalMode === "complete",
       });
 
       setModalOpen(false);
@@ -235,9 +237,11 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     const contentText = String(log.content || "");
     const content = contentText.toLowerCase();
     const isDone =
-      content.includes("hoàn thành hợp đồng") ||
-      content.includes("xác nhận hoàn thành") ||
-      content.includes("hoan thanh hop dong");
+      typeof (log as any).is_done_contract === "boolean"
+        ? Boolean((log as any).is_done_contract)
+        : content.includes("hoàn thành hợp đồng") ||
+          content.includes("xác nhận hoàn thành") ||
+          content.includes("hoan thanh hop dong");
 
     Modal.confirm({
       title: "Xác nhận cập nhật",
@@ -461,21 +465,21 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
           </div>
 
           {!isCompleted && (
-            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
+          <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
               {(() => {
-                const myPending = logs.find(
+                // Only block sending when there is a pending completion log
+                const hasPendingCompletion = logs.some(
                   (l) =>
                     l.status === ContractLogStatus.Pending &&
-                    getUserId(l.user) === String(currentUser?.id)
+                    (l as any).is_done_contract === true
                 );
-                const disabled = Boolean(myPending);
+                const disabled = Boolean(hasPendingCompletion);
                 return (
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">
                       {disabled ? (
                         <span>
-                          ⏳ Bạn đã gửi một cập nhật và đang chờ đối tác xác
-                          nhận / từ chối.
+                          ⏳ Đang chờ xác nhận hoàn thành hợp đồng.
                         </span>
                       ) : (
                         <span>Chọn một hành động để tiếp tục.</span>

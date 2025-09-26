@@ -8,11 +8,11 @@ HANOTEX Smart Chatbot là một trợ lý thông minh được thiết kế đ�
 
 ### 1. Nhận diện Intent thông minh
 - **Đăng công nghệ**: Hướng dẫn quy trình đăng sản phẩm KH&CN
-- **Tìm nhu cầu**: Hỗ trợ tìm kiếm nhu cầu công nghệ phù hợp
-- **Đầu tư**: Hướng dẫn tham gia đầu tư và kết nối với dự án
-- **Môi giới**: Hỗ trợ hoạt động môi giới công nghệ
+- **Tìm kiếm công nghệ**: Hỗ trợ tìm kiếm công nghệ phù hợp
+- **Quản lý nhu cầu**: Hỗ trợ quản lý nhu cầu công nghệ
 - **Pháp lý**: Tư vấn và hỗ trợ pháp lý
 - **Định giá**: Hướng dẫn yêu cầu định giá và thẩm định
+- **Trò chuyện chung**: Trò chuyện như ChatGPT về mọi chủ đề
 
 ### 2. Step-by-step Guidance
 - **Checklist tương tác**: Hướng dẫn từng bước với checkbox
@@ -45,6 +45,10 @@ Người dùng: "Tôi muốn đăng công nghệ AI xử lý ảnh y tế"
 Chatbot: "Tuyệt! Tôi sẽ hướng dẫn bạn đăng công nghệ từng bước:"
 - Hiển thị 6 bước checklist
 - Quick actions: "Mở form đăng công nghệ", "Tải mẫu mô tả"
+
+Người dùng: "Hôm nay thời tiết thế nào?"
+
+Chatbot: "Tôi không thể cung cấp thông tin thời tiết thời gian thực, nhưng bạn có thể kiểm tra trên các ứng dụng thời tiết. Có điều gì khác tôi có thể giúp bạn không?"
 ```
 
 ### 3. Sử dụng Step Guide
@@ -154,8 +158,10 @@ const getResponseForIntent = (intent: string, message: string) => {
 // Test cases
 const testCases = [
   { input: "đăng công nghệ", expected: "register_technology" },
-  { input: "tìm nhu cầu", expected: "search_demand" },
-  { input: "đầu tư", expected: "investment" }
+  { input: "tìm kiếm công nghệ", expected: "search_technology" },
+  { input: "quản lý nhu cầu", expected: "manage_demand" },
+  { input: "xin chào", expected: "general_chat" },
+  { input: "thời tiết hôm nay", expected: "general_chat" }
 ];
 ```
 

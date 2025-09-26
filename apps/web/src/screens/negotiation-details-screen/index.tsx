@@ -63,6 +63,8 @@ export const NegotiationDetailsScreen: React.FC<
 
     // Utilities
     formatFileSize,
+    // Refresh
+    reloadProposal,
   } = useNegotiation({ proposalId });
 
   const handleClose = () => {
@@ -126,6 +128,7 @@ export const NegotiationDetailsScreen: React.FC<
   };
 
   const currentStep = getCurrentStep();
+  const isCompleted = proposal.status === "completed";
 
   const steps = [
     {
@@ -173,66 +176,95 @@ export const NegotiationDetailsScreen: React.FC<
 
       {/* Content area - Takes remaining space with proper scrolling */}
       <div className="flex-1 overflow-hidden">
-        {currentStep === 0 && (
-          /* Negotiation Step - Chat Interface */
-          <NegotiationChat
-            messages={messages}
-            formatFileSize={formatFileSize}
-            messageInputComponent={
-              isProposalCreator && hasPendingOffer ? (
-                <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
-                  Bạn đã gửi đề xuất, vui lòng chờ xác nhận
-                </div>
-              ) : (
-                <MessageInput
-                  form={form}
-                  attachments={attachments}
-                  sendingMessage={sendingMessage}
-                  uploadingFiles={uploadingFiles}
-                  onSendMessage={onSendMessage}
-                  onFileUpload={handleFileUpload}
-                  onRemoveAttachment={removeAttachment}
-                  formatFileSize={formatFileSize}
-                  onSendOffer={handleSendOffer}
-                  canSendOffer={canSendOffer}
-                  hasPendingOffer={hasPendingOffer}
-                  isProposalCreator={isProposalCreator}
+        {isCompleted ? (
+          <div className="h-full overflow-auto space-y-6">
+            <NegotiationChat messages={messages} formatFileSize={formatFileSize} />
+            {isTechnologyPropose ? (
+              <ContractSigningStep proposal={proposal} readOnly onBothAccepted={reloadProposal} />
+            ) : (
+              <div className="h-full overflow-auto p-4">
+                <Alert
+                  message="Ký hợp đồng"
+                  description="Chức năng ký hợp đồng hiện áp dụng cho đề xuất công nghệ."
+                  type="info"
+                  showIcon
                 />
-              )
-            }
-          />
-        )}
-        {currentStep === 1 && isTechnologyPropose && (
-          /* Contract Confirmation Step */
-          <div className="h-full overflow-auto">
-            <ContractSigningStep proposal={proposal} />
+              </div>
+            )}
+            {isTechnologyPropose ? (
+              <ContractLogsStep proposal={proposal} />
+            ) : (
+              <div className="h-full overflow-auto p-4">
+                <Alert
+                  message="Nhật ký hợp đồng"
+                  description="Nhật ký hoàn thiện hợp đồng hiện áp dụng cho đề xuất công nghệ."
+                  type="info"
+                  showIcon
+                />
+              </div>
+            )}
           </div>
-        )}
-        {currentStep === 1 && !isTechnologyPropose && (
-          <div className="h-full overflow-auto p-4">
-            <Alert
-              message="Ký hợp đồng"
-              description="Chức năng ký hợp đồng hiện áp dụng cho đề xuất công nghệ."
-              type="info"
-              showIcon
-            />
-          </div>
-        )}
-        {currentStep === 2 && isTechnologyPropose && (
-          /* Contract Completion Logs Step */
-          <div className="h-full overflow-auto">
-            <ContractLogsStep proposal={proposal} />
-          </div>
-        )}
-        {currentStep === 2 && !isTechnologyPropose && (
-          <div className="h-full overflow-auto p-4">
-            <Alert
-              message="Nhật ký hợp đồng"
-              description="Nhật ký hoàn thiện hợp đồng hiện áp dụng cho đề xuất công nghệ."
-              type="info"
-              showIcon
-            />
-          </div>
+        ) : (
+          <>
+            {currentStep === 0 && (
+              <NegotiationChat
+                messages={messages}
+                formatFileSize={formatFileSize}
+                messageInputComponent={
+                  isProposalCreator && hasPendingOffer ? (
+                    <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
+                      Bạn đã gửi đề xuất, vui lòng chờ xác nhận
+                    </div>
+                  ) : (
+                    <MessageInput
+                      form={form}
+                      attachments={attachments}
+                      sendingMessage={sendingMessage}
+                      uploadingFiles={uploadingFiles}
+                      onSendMessage={onSendMessage}
+                      onFileUpload={handleFileUpload}
+                      onRemoveAttachment={removeAttachment}
+                      formatFileSize={formatFileSize}
+                      onSendOffer={handleSendOffer}
+                      canSendOffer={canSendOffer}
+                      hasPendingOffer={hasPendingOffer}
+                      isProposalCreator={isProposalCreator}
+                    />
+                  )
+                }
+              />
+            )}
+            {currentStep === 1 && isTechnologyPropose && (
+              <div className="h-full overflow-auto">
+                <ContractSigningStep proposal={proposal} onBothAccepted={reloadProposal} />
+              </div>
+            )}
+            {currentStep === 1 && !isTechnologyPropose && (
+              <div className="h-full overflow-auto p-4">
+                <Alert
+                  message="Ký hợp đồng"
+                  description="Chức năng ký hợp đồng hiện áp dụng cho đề xuất công nghệ."
+                  type="info"
+                  showIcon
+                />
+              </div>
+            )}
+            {currentStep === 2 && isTechnologyPropose && (
+              <div className="h-full overflow-auto">
+                <ContractLogsStep proposal={proposal} />
+              </div>
+            )}
+            {currentStep === 2 && !isTechnologyPropose && (
+              <div className="h-full overflow-auto p-4">
+                <Alert
+                  message="Nhật ký hợp đồng"
+                  description="Nhật ký hoàn thiện hợp đồng hiện áp dụng cho đề xuất công nghệ."
+                  type="info"
+                  showIcon
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

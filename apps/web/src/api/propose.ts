@@ -69,7 +69,10 @@ export async function getProposeById(id: string): Promise<Propose> {
   const response = await payloadApiClient.get<Propose>(
     `${API_ENDPOINTS.PROPOSE}/${id}?depth=2`
   );
-  return response.data as any as Propose;
+  // PayloadCMS may return the document directly (not wrapped in data)
+  const anyRes = response as any;
+  const doc = anyRes?.data ?? anyRes?.doc ?? anyRes;
+  return doc as Propose;
 }
 
 /**

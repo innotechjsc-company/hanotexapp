@@ -29,10 +29,14 @@ const { TextArea } = Input;
 
 interface ContractSigningStepProps {
   proposal: TechnologyPropose;
+  onBothAccepted?: () => void;
+  readOnly?: boolean;
 }
 
 export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
   proposal,
+  onBothAccepted,
+  readOnly = false,
 }) => {
   const currentUser = useUser();
   const [loading, setLoading] = useState(false);
@@ -298,7 +302,17 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
 
           message.success(result.message);
 
-          // Refresh contract data
+          // If both parties accepted, refresh contract and notify parent to refresh proposal
+          if ((result as any)?.bothAccepted) {
+            try {
+              await refreshContract();
+            } finally {
+              onBothAccepted?.();
+            }
+            return;
+          }
+
+          // Otherwise, just refresh local contract state
           await refreshContract();
         } catch (error) {
           console.error("Error accepting contract:", error);
@@ -499,7 +513,8 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 {/* Accept Contract Button */}
                 {getCurrentUserRole() &&
                   !hasCurrentUserAccepted() &&
-                  !bothPartiesAccepted() && (
+                  !bothPartiesAccepted() &&
+                  !readOnly && (
                     <div className="text-center pt-4">
                       <Button
                         type="primary"
@@ -533,7 +548,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               </div>
 
               {/* Contract File Upload (contract_file) - visible when contract exists and not signed */}
-              {!isContractSigned && !bothPartiesAccepted() && (
+              {!isContractSigned && !bothPartiesAccepted() && !readOnly && (
                 <div className="mt-6">
                   <Title level={5} className="mb-3">
                     <FileText size={20} className="inline mr-2" />
@@ -658,61 +673,32 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 </Upload.Dragger>
               </div>
 
-              {/* Notes */}
               <div>
-                <Title level={5} className="mb-3">
-                  Ghi chú (tuỳ chọn) Tài liệu kèm theo (tuỳ chọn)
-                </Title>
-                <Upload
-                  multiple
-                  beforeUpload={handleAttachmentUpload}
-                  showUploadList
-                  fileList={attachments.map((f) => ({
-                    uid: f.name,
-                    name: f.name,
-                    status: "done" as const,
-                  }))}
-                  onRemove={(file) => {
-                    const target = attachments.find(
-                      (f) => f.name === file.name
-                    );
-                    if (target) removeAttachment(target);
-                  }}
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
-                >
-                  <Button icon={<UploadCloud size={16} />}>
-                    Thêm tài liệu
-                  </Button>
-                </Upload>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <Title level={5} className="mb-3">
-                  Ghi chú (tuỳ chọn)
-                </Title>
+                <Title level={5} className="mb-3">Ghi chú (tuỳ chọn)</Title>
                 <TextArea
                   rows={3}
                   placeholder="Ghi chú thêm về hợp đồng..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  disabled={readOnly}
                 />
               </div>
 
-              {/* Complete Button */}
-              <div className="text-center pt-4">
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<CheckCircle size={20} />}
-                  loading={submitting}
-                  onClick={handleCompleteContract}
-                  disabled={!contractFile}
-                  className="bg-green-600 hover:bg-green-700 px-8"
-                >
-                  Hoàn tất hợp đồng
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="text-center pt-4">
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<CheckCircle size={20} />}
+                    loading={submitting}
+                    onClick={handleCompleteContract}
+                    disabled={!contractFile}
+                    className="bg-green-600 hover:bg-green-700 px-8"
+                  >
+                    Hoàn tất hợp đồng
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

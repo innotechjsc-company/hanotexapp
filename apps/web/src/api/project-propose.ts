@@ -99,6 +99,24 @@ export class ProjectProposeApi {
     });
     return res;
   }
+
+  async rejectProposal(
+    projectProposeId: string,
+    userId: string,
+    message?: string
+  ): Promise<any> {
+    return payloadApiClient.post<any>(`/project-propose/reject`, {
+      projectProposeId,
+      userId,
+      message,
+    });
+  }
+
+  async completeProposal(projectProposeId: string): Promise<any> {
+    return payloadApiClient.post<any>(`/project-propose/complete`, {
+      projectProposeId,
+    });
+  }
 }
 
 export const projectProposeApi = new ProjectProposeApi();

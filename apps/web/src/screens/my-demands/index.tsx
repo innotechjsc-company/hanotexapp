@@ -4,7 +4,6 @@ import { Alert } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import HeaderSection from "./components/Header";
-import StatsCards from "./components/StatsCards";
 import DemandsList from "./components/DemandsList";
 import ViewDemandModal from "./components/ViewDemandModal";
 import EditDemandModal from "./components/EditDemandModal";
@@ -25,7 +24,6 @@ export default function MyDemandsScreen() {
     demands,
     loading,
     error,
-    stats,
     selectedDemand,
     viewModalOpen,
     editModalOpen,
@@ -58,20 +56,15 @@ export default function MyDemandsScreen() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
-      <HeaderSection onCreateNew={() => router.push("/demands/register")}/>
+      <HeaderSection onCreateNew={() => router.push("/demands/register")} />
 
       {error && (
-        <div style={{ maxWidth: 1120, margin: "16px auto", padding: "0 16px" }}>
-          <Alert
-            type="error"
-            message={error}
-            showIcon
-            closable
-          />
+        <div style={{ maxWidth: 1200, margin: "16px auto", padding: "0 16px" }}>
+          <Alert type="error" message={error} showIcon closable />
         </div>
       )}
 
-      <StatsCards loading={loading} stats={stats} />
+      {/* Stats removed as requested */}
 
       <DemandsList
         loading={loading}
@@ -109,7 +102,9 @@ export default function MyDemandsScreen() {
         onClose={() => setEditModalOpen(false)}
         onSubmit={() => handleEditSubmit()}
         onChange={handleEditFormChange}
-        onSelectCategory={(value) => setEditFormData((prev) => ({ ...prev, category: value }))}
+        onSelectCategory={(value) =>
+          setEditFormData((prev) => ({ ...prev, category: value }))
+        }
         onSelectFiles={(files) => handleFileSelection(files)}
         onRemoveExistingDocument={(id) => handleRemoveExistingDocument(id)}
         onRestoreOriginalDocuments={handleRestoreOriginalDocuments}
@@ -118,7 +113,9 @@ export default function MyDemandsScreen() {
       <DeleteDemandModal
         open={deleteModalOpen}
         demand={selectedDemand}
-        confirmLoading={selectedDemand?.id ? deletingIds.has(selectedDemand.id) : false}
+        confirmLoading={
+          selectedDemand?.id ? deletingIds.has(selectedDemand.id) : false
+        }
         onCancel={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
       />

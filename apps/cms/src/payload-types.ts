@@ -567,30 +567,71 @@ export interface IntellectualProperty {
  */
 export interface Auction {
   id: string;
-  /**
-   * Công nghệ được đấu giá
-   */
-  technology: string | Technology;
-  auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
-  /**
-   * Giá ban đầu cho phiên đấu giá
-   */
-  start_price?: number | null;
-  /**
-   * Giá tối thiểu chấp nhận được
-   */
-  reserve_price?: number | null;
-  /**
-   * Lượt đặt giá cao nhất hiện tại
-   */
-  current_price?: number | null;
-  start_time?: string | null;
-  end_time?: string | null;
-  status: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
-  /**
-   * Tất cả các lượt đặt giá cho phiên đấu giá này
-   */
-  bids?: (string | Bid)[] | null;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  category: 'it' | 'biotech' | 'energy' | 'materials' | 'medical' | 'agriculture';
+  startingPrice: number;
+  currentBid?: number | null;
+  minBid?: number | null;
+  bidIncrement?: number | null;
+  startTime: string;
+  endTime: string;
+  location?: string | null;
+  image?: (string | null) | Media;
+  organizer: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  documents?:
+    | {
+        name: string;
+        file: string | Media;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  terms?:
+    | {
+        term: string;
+        id?: string | null;
+      }[]
+    | null;
+  bids?:
+    | {
+        amount: number;
+        bidder: string;
+        timestamp: string;
+        isWinning?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  autoBids?:
+    | {
+        maxAmount: number;
+        bidder: string;
+        createdAt: string;
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('upcoming' | 'active' | 'ended' | 'cancelled') | null;
+  viewers?: number | null;
+  bidCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1503,15 +1544,59 @@ export interface IntellectualPropertySelect<T extends boolean = true> {
  * via the `definition` "auctions_select".
  */
 export interface AuctionsSelect<T extends boolean = true> {
-  technology?: T;
-  auction_type?: T;
-  start_price?: T;
-  reserve_price?: T;
-  current_price?: T;
-  start_time?: T;
-  end_time?: T;
+  title?: T;
+  description?: T;
+  category?: T;
+  startingPrice?: T;
+  currentBid?: T;
+  minBid?: T;
+  bidIncrement?: T;
+  startTime?: T;
+  endTime?: T;
+  location?: T;
+  image?: T;
+  organizer?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        phone?: T;
+      };
+  documents?:
+    | T
+    | {
+        name?: T;
+        file?: T;
+        description?: T;
+        id?: T;
+      };
+  terms?:
+    | T
+    | {
+        term?: T;
+        id?: T;
+      };
+  bids?:
+    | T
+    | {
+        amount?: T;
+        bidder?: T;
+        timestamp?: T;
+        isWinning?: T;
+        id?: T;
+      };
+  autoBids?:
+    | T
+    | {
+        maxAmount?: T;
+        bidder?: T;
+        createdAt?: T;
+        isActive?: T;
+        id?: T;
+      };
   status?: T;
-  bids?: T;
+  viewers?: T;
+  bidCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }

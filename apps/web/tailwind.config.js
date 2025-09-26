@@ -88,6 +88,10 @@ module.exports = {
         "slide-down": "slideDown 0.3s ease-out",
         "bounce-in": "bounceIn 0.6s ease-out",
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "float": "float 3s ease-in-out infinite",
+        "spin-slow": "spin 8s linear infinite",
+        "wiggle": "wiggle 1s ease-in-out infinite",
+        "shake": "shake 0.5s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -107,6 +111,19 @@ module.exports = {
           "50%": { transform: "scale(1.05)" },
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-3deg)" },
+          "50%": { transform: "rotate(3deg)" },
+        },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-2px)" },
+          "20%, 40%, 60%, 80%": { transform: "translateX(2px)" },
         },
       },
       boxShadow: {

@@ -143,7 +143,7 @@ export default function EventDetailPage({
       registration_required: true,
       organizer: "Ban tổ chức",
       contact_email: "contact@hanotex.vn",
-      contact_phone: "024 3825 1234",
+      contact_phone: "0848567193",
       image_url:
         typeof apiEvent.image === "object"
           ? apiEvent.image?.url || undefined
