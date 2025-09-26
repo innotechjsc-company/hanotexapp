@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { User } from '@/payload-types'
 
 // CORS headers
 const corsHeaders = {
@@ -41,17 +42,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the contract with full details
-    const contract = await payload.findByID({
-      collection: 'contract',
-      id: contractId,
-      depth: 2,
-    })
-
-    if (!contract) {
-      return NextResponse.json(
-        { error: 'Contract not found' },
-        { status: 404, headers: corsHeaders },
-      )
+    let contract: any
+    try {
+      contract = await payload.findByID({
+        collection: 'contract',
+        id: contractId,
+        depth: 2,
+      })
+    } catch (err: any) {
+      // Return a proper 404 if the contract does not exist
+      if (err && (err.status === 404 || /not found/i.test(String(err.message)))) {
+        return NextResponse.json(
+          { error: 'Contract not found' },
+          { status: 404, headers: corsHeaders },
+        )
+      }
+      throw err
     }
 
     // Determine which party the user is
@@ -69,7 +75,7 @@ export async function POST(request: NextRequest) {
     let confirmedUsers: string[] = []
     if (contract.users_confirm) {
       if (Array.isArray(contract.users_confirm)) {
-        confirmedUsers = contract.users_confirm.map((user) =>
+        confirmedUsers = contract.users_confirm.map((user: User) =>
           typeof user === 'object' ? user.id : user,
         )
       }
