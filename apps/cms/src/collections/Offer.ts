@@ -10,11 +10,22 @@ export const Offer: CollectionConfig = {
   },
   fields: [
     {
+      name: 'propose',
+      label: 'Đề xuất',
+      type: 'relationship',
+      relationTo: 'propose',
+    },
+    {
+      name: 'project_propose',
+      label: 'Đề xuất dự án',
+      type: 'relationship',
+      relationTo: 'project-propose',
+    },
+    {
       name: 'technology_propose',
       label: 'Đề xuất công nghệ',
       type: 'relationship',
       relationTo: 'technology-propose',
-      required: true,
     },
     {
       name: 'negotiating_messages',

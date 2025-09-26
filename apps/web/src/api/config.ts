@@ -5,9 +5,7 @@
 
 // Base URL của PayloadCMS API
 export const PAYLOAD_API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.NEXT_PUBLIC_PAYLOAD_API_URL
-    : "http://localhost:4000/api";
+  process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api";
 
 // API endpoints cho các collections
 export const API_ENDPOINTS = {

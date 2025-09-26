@@ -2,16 +2,23 @@
 
 import { Alert } from "antd";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import HeaderSection from "./components/Header";
 import StatsCards from "./components/StatsCards";
 import DemandsList from "./components/DemandsList";
 import ViewDemandModal from "./components/ViewDemandModal";
 import EditDemandModal from "./components/EditDemandModal";
 import DeleteDemandModal from "./components/DeleteDemandModal";
+import ProposalsModal from "./components/ProposalsModal";
 import { useMyDemands } from "./hooks/useMyDemands";
 
 export default function MyDemandsScreen() {
   const router = useRouter();
+  const [proposalsModalOpen, setProposalsModalOpen] = useState(false);
+  const [proposalsDemand, setProposalsDemand] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const {
     // state
@@ -71,6 +78,14 @@ export default function MyDemandsScreen() {
         demands={demands}
         deletingIds={deletingIds}
         onView={handleViewDemand}
+        onViewProposals={(demand) => {
+          const id = (demand as any)?.id || (demand as any)?._id;
+          const title = (demand as any)?.title || "";
+          if (id) {
+            setProposalsDemand({ id: String(id), title: String(title) });
+            setProposalsModalOpen(true);
+          }
+        }}
         onEdit={handleEditDemand}
         onDelete={handleDeleteClick}
       />
@@ -106,6 +121,13 @@ export default function MyDemandsScreen() {
         confirmLoading={selectedDemand?.id ? deletingIds.has(selectedDemand.id) : false}
         onCancel={() => setDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <ProposalsModal
+        isOpen={proposalsModalOpen}
+        onOpenChange={(open) => setProposalsModalOpen(open)}
+        demandId={proposalsDemand?.id || null}
+        demandTitle={proposalsDemand?.title}
       />
     </div>
   );
