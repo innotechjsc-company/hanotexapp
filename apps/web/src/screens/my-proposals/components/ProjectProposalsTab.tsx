@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/auth";
 import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye } from "lucide-react";
+import { Eye, MessageSquare, X } from "lucide-react";
 import { projectProposeApi } from "@/api/project-propose";
 import type {
   ProjectPropose,
@@ -101,6 +101,22 @@ export default function ProjectProposalsTab() {
     window.open(`/funds/fundraising/${project.id}`, "_blank");
   };
 
+  const handleViewNegotiation = (proposal: ProjectPropose) => {
+    router.push(`/projects/negotiations/${proposal.id}`);
+  };
+
+  const handleCancelProposal = async (proposal: ProjectPropose) => {
+    if (!proposal.id) return;
+
+    try {
+      await projectProposeApi.setStatus(proposal.id, "cancelled" as any);
+      await fetchProposals();
+      console.log("Proposal cancelled successfully");
+    } catch (err) {
+      console.error("Failed to cancel proposal:", err);
+    }
+  };
+
   const columns: ColumnsType<ProjectPropose> = [
     {
       title: "Dự án",
@@ -178,6 +194,27 @@ export default function ProjectProposalsTab() {
                 size="small"
                 icon={<Eye className="h-4 w-4" />}
                 onClick={() => handleViewProject(project)}
+              />
+            </Tooltip>
+            {(record.status === "negotiating" ||
+              record.status === "contact_signing" ||
+              record.status === "contract_signed") && (
+              <Tooltip title="Xem đàm phán" color="blue">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<MessageSquare className="h-4 w-4" />}
+                  onClick={() => handleViewNegotiation(record)}
+                />
+              </Tooltip>
+            )}
+            <Tooltip title="Hủy đề xuất" color="red">
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<X className="h-4 w-4" />}
+                onClick={() => handleCancelProposal(record)}
               />
             </Tooltip>
           </Space>

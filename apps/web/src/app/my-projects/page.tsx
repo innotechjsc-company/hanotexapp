@@ -55,6 +55,10 @@ import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { getInvestmentFunds } from "@/api/investment-fund";
 import type { InvestmentFund } from "@/types/investment_fund";
+import { projectProposeApi } from "@/api/project-propose";
+import { ProjectProposeStatus } from "@/types/project-propose";
+import type { ProjectPropose } from "@/types/project-propose";
+import { CheckCircle, ExternalLink, X } from "lucide-react";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -470,7 +474,7 @@ function AddProjectModal({
             </Form.Item>
           </Col>
         </Row>
-        <Row gutter={16}>
+        {/* <Row gutter={16}>
           <Col span={24}>
             <Form.Item
               name="open_investment_fund"
@@ -479,7 +483,7 @@ function AddProjectModal({
               <Checkbox>Mở kêu gọi đầu tư</Checkbox>
             </Form.Item>
           </Col>
-        </Row>
+        </Row> */}
         </Form>
       </div>
     </Modal>
@@ -832,7 +836,7 @@ function EditProjectModal({
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        {/* <Row gutter={16}>
           <Col span={24}>
             <Form.Item
               name="open_investment_fund"
@@ -841,7 +845,7 @@ function EditProjectModal({
               <Checkbox>Mở kêu gọi đầu tư</Checkbox>
             </Form.Item>
           </Col>
-        </Row>
+        </Row> */}
         </Form>
       </div>
     </Modal>
@@ -982,6 +986,306 @@ function ViewProjectModal({
   );
 }
 
+// Project Proposals Modal Component
+function ProjectProposalsModal({
+  open,
+  onCancel,
+  project,
+}: {
+  open: boolean;
+  onCancel: () => void;
+  project: EditableProject | null;
+}) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [proposals, setProposals] = useState<ProjectPropose[]>([]);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const currentUser = useAuthStore((state) => state.user);
+  useEffect(() => {
+    const pid = String((project as any)?.id || (project as any)?._id || "");
+    if (open && pid) {
+      fetchProposals(pid);
+    }
+  }, [open, project]);
+
+  const fetchProposals = async (projectId: string) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await projectProposeApi.list({ project: projectId }, { limit: 100, sort: "-createdAt" });
+      const list = ((res as any).docs || (res as any).data || []) as ProjectPropose[];
+      setProposals(list);
+    } catch (e) {
+      console.error(e);
+      setError("Không thể tải danh sách đề xuất");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: ProjectProposeStatus) => {
+    switch (status) {
+      case ProjectProposeStatus.Pending:
+        return "orange";
+      case ProjectProposeStatus.Negotiating:
+      case ProjectProposeStatus.ContactSigning:
+      case ProjectProposeStatus.ContractSigned:
+        return "cyan";
+      case ProjectProposeStatus.Completed:
+        return "green";
+      case ProjectProposeStatus.Cancelled:
+        return "red";
+      default:
+        return "default";
+    }
+  };
+
+  const getStatusLabel = (status: ProjectProposeStatus) => {
+    switch (status) {
+      case ProjectProposeStatus.Pending:
+        return "Chờ xác nhận";
+      case ProjectProposeStatus.Negotiating:
+        return "Đang đàm phán";
+      case ProjectProposeStatus.ContactSigning:
+        return "Đang ký hợp đồng";
+      case ProjectProposeStatus.ContractSigned:
+        return "Đã ký hợp đồng";
+      case ProjectProposeStatus.Completed:
+        return "Hoàn thành";
+      case ProjectProposeStatus.Cancelled:
+        return "Đã hủy";
+      default:
+        return String(status);
+    }
+  };
+
+  const handleConfirm = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      if (!currentUser?.id) {
+        message.error("Vui lòng đăng nhập để xác nhận đề xuất");
+        return;
+      }
+      await projectProposeApi.acceptProposal(proposalId, "self", "Đã chấp nhận đề xuất");
+      const pid = String((project as any)?.id || (project as any)?._id || "");
+      if (pid) await fetchProposals(pid);
+      message.success("Đã xác nhận đề xuất");
+    } catch (e) {
+      console.error(e);
+      message.error("Không thể xác nhận đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (proposalId: string) => {
+    setActionLoading(proposalId);
+    try {
+      if (!currentUser?.id) {
+        message.error("Vui lòng đăng nhập để từ chối đề xuất");
+        return;
+      }
+      await projectProposeApi.setStatus(proposalId, ProjectProposeStatus.Cancelled);
+      const pid = String((project as any)?.id || (project as any)?._id || "");
+      if (pid) await fetchProposals(pid);
+      message.success("Đã từ chối đề xuất");
+    } catch (e) {
+      console.error(e);
+      message.error("Không thể cập nhật trạng thái đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+    // Handle opening negotiation details
+    const handleViewNegotiationDetails = (proposalId: string) => {
+      const url = `/projects/negotiations/${proposalId}`;
+      router.push(url);
+    };
+
+  const columns: ColumnsType<ProjectPropose> = [
+    {
+      title: 'Người đề xuất',
+      dataIndex: 'user',
+      key: 'user',
+      width: 180,
+      render: (user: any) => <Text strong>{(user && (user.full_name || user.email)) || 'Không xác định'}</Text>,
+    },
+    {
+      title: 'Số tiền đầu tư',
+      dataIndex: 'investment_amount',
+      key: 'investment_amount',
+      width: 160,
+      render: (amount: number) => <Text>{amount ? formatCurrency(amount) : 'Không có'}</Text>,
+    },
+    {
+      title: 'Tỷ lệ (%)',
+      dataIndex: 'investment_ratio',
+      key: 'investment_ratio',
+      width: 120,
+      render: (ratio: number) => <Text>{ratio != null ? `${ratio}%` : 'Không có'}</Text>,
+    },
+    {
+      title: 'Lợi ích',
+      dataIndex: 'investment_benefits',
+      key: 'investment_benefits',
+      width: 240,
+      render: (benefits: string) => <Text ellipsis style={{ maxWidth: 220 }}>{benefits || 'Không có'}</Text>,
+    },
+    {
+      title: 'Tài liệu',
+      dataIndex: 'documents',
+      key: 'documents',
+      width: 140,
+      render: (docs: any[]) => (
+        <Space>
+          {Array.isArray(docs) && docs.length > 0 ? (
+            docs.slice(0, 2).map((d: any, idx: number) => (
+              <Button key={idx} type="link" size="small" onClick={() => d?.url && window.open(d.url, '_blank')}>Tài liệu {idx + 1}</Button>
+            ))
+          ) : (
+            <Text type="secondary">Không có</Text>
+          )}
+        </Space>
+      ),
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: 140,
+      render: (status: ProjectProposeStatus) => (
+        <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
+      ),
+    },
+    {
+      title: 'Cập nhật',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      width: 160,
+      render: (date: string) => <Text>{date ? formatDate(date) : 'Không xác định'}</Text>,
+    },
+    {
+      title: 'Thao tác',
+      key: 'actions',
+      fixed: 'right',
+      width: 140,
+      render: (_, record: any) => {
+        const id = String((record as any).id || (record as any)._id);
+        const pending = (record as any).status === ProjectProposeStatus.Pending;
+        const loadingKey = actionLoading === id;
+        const canViewNegotiation =
+        record.status === "negotiating" ||
+        record.status === "contact_signing" ||
+        record.status === "contract_signed";
+
+        return (
+          <Space>
+            {pending && (
+              <>
+                <Popconfirm
+                  title="Xác nhận đề xuất"
+                  description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
+                  onConfirm={() => handleConfirm(id)}
+                  okText="Xác nhận"
+                  cancelText="Hủy"
+                >
+                  <Tooltip title="Xác nhận" color="#1677ff">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<CheckCircle size={16} />}
+                      loading={loadingKey}
+                      className="hover:bg-green-50 hover:text-green-600"
+                    />
+                  </Tooltip>
+                </Popconfirm>
+                <Popconfirm
+                  title="Từ chối đề xuất"
+                  description="Bạn có chắc chắn muốn từ chối đề xuất này?"
+                  onConfirm={() => handleReject(id)}
+                  okText="Từ chối"
+                  cancelText="Hủy"
+                  okType="danger"
+                >
+                  <Tooltip title="Từ chối" color="#ff4d4f">
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<X size={16} color="red" />}
+                      loading={loadingKey}
+                    />
+                  </Tooltip>
+                </Popconfirm>
+              </>
+            )}
+             {canViewNegotiation && (
+              <Tooltip title="Xem chi tiết" color="#1677ff">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ExternalLink size={16} />}
+                  onClick={() => handleViewNegotiationDetails(id)}
+                  className="hover:bg-gray-50 hover:text-gray-600"
+                />
+              </Tooltip>
+            )}
+          </Space>
+        );
+      }
+    },
+  ];
+
+  return (
+    <Modal
+      title={
+        <div>
+          <Title level={4} style={{ margin: 0 }}>Danh sách đề xuất</Title>
+          <Text type="secondary">Dự án: {(project as any)?.name || ''}</Text>
+        </div>
+      }
+      open={open}
+      onCancel={onCancel}
+      footer={[
+        <Button key="close" type="primary" onClick={onCancel}>Đóng</Button>
+      ]}
+      width={1200}
+      styles={{ body: { paddingTop: 16 } }}
+    >
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>Đang tải...</div>
+      ) : error ? (
+        <Card>
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <Text type="danger">{error}</Text>
+            <div style={{ marginTop: 16 }}>
+              <Button type="primary" onClick={() => {
+                const pid = String((project as any)?.id || (project as any)?._id || "");
+                if (pid) fetchProposals(pid);
+              }}>Thử lại</Button>
+            </div>
+          </div>
+        </Card>
+      ) : proposals.length === 0 ? (
+        <Card>
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <Text type="secondary">Chưa có đề xuất nào cho dự án này</Text>
+          </div>
+        </Card>
+      ) : (
+        <Table
+          columns={columns as any}
+          dataSource={proposals}
+          rowKey={(record) => String((record as any).id || (record as any)._id)}
+          pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}
+          scroll={{ x: 1000 }}
+        />
+      )}
+    </Modal>
+  );
+}
+
 // Main Component
 export default function MyProjectsPage() {
   const router = useRouter();
@@ -1000,9 +1304,15 @@ export default function MyProjectsPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [proposalsModalOpen, setProposalsModalOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState<EditableProject | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  
+  const handleViewProposals = (project: Project) => {
+    setCurrentProject(project);
+    setProposalsModalOpen(true);
+  };
 
   const filteredItems = useMemo(() => {
     let filtered = items;
@@ -1263,10 +1573,7 @@ export default function MyProjectsPage() {
               type="text"
               size="small"
               icon={<FileTextOutlined />}
-              onClick={() => {
-                const id = String((record as any).id || (record as any)._id);
-                router.push(`/my-proposals?projectId=${id}`);
-              }}
+              onClick={() => handleViewProposals(record)}
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa" color="#52c41a" overlayInnerStyle={{ color: 'white' }}>
@@ -1491,6 +1798,14 @@ export default function MyProjectsPage() {
           project={currentProject}
           technologies={technologies}
           funds={funds}
+        />
+
+        <ProjectProposalsModal
+          open={proposalsModalOpen}
+          onCancel={() => {
+            setProposalsModalOpen(false);
+          }}
+          project={currentProject}
         />
 
         <Toaster />

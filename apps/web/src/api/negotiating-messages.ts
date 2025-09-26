@@ -15,8 +15,9 @@ export interface ApiNegotiatingMessage extends NegotiatingMessage {
 }
 
 export interface SendMessageData {
-  propose: string;
-  technology_propose: string;
+  propose?: string;
+  technology_propose?: string;
+  project_propose?: string;
   user: string;
   message: string;
   documents?: string[]; // Array of Media IDs
@@ -25,7 +26,8 @@ export interface SendMessageData {
 }
 
 export interface SendOfferData {
-  technology_propose: string;
+  technology_propose?: string;
+  project_propose?: string;
   message?: string;
   price: number;
   content?: string;
@@ -43,6 +45,7 @@ export interface AcceptOfferResponse {
 export interface GetMessagesParams {
   propose?: string;
   technology_propose?: string;
+  project_propose?: string;
   limit?: number;
   page?: number;
 }
@@ -66,6 +69,8 @@ export class NegotiatingMessageApi {
     if (params.technology_propose)
       queryParams["where[technology_propose][equals]"] =
         params.technology_propose;
+    if (params.project_propose)
+      queryParams["where[project_propose][equals]"] = params.project_propose;
 
     return payloadApiClient.get<ApiNegotiatingMessage[]>(
       API_ENDPOINTS.NEGOTIATING_MESSAGES,
