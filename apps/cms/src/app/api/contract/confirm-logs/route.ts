@@ -91,42 +91,77 @@ export async function POST(req: NextRequest) {
       overrideAccess: true,
     })
 
-    // 3) If contract is marked done, set related TechnologyPropose to completed
+    // 3) If contract is marked done, set related proposal to completed
     if (body.is_done_contract === true) {
       try {
-        const technologyProposeId = (updatedLog as any)?.technology_propose?.id
+        const techPropId = (updatedLog as any)?.technology_propose?.id
           ? (updatedLog as any).technology_propose.id
           : (updatedLog as any).technology_propose
+        const projPropId = (updatedLog as any)?.project_propose?.id
+          ? (updatedLog as any).project_propose.id
+          : (updatedLog as any).project_propose
+        const propId = (updatedLog as any)?.propose?.id
+          ? (updatedLog as any).propose.id
+          : (updatedLog as any).propose
 
-        if (!technologyProposeId) {
+        if (techPropId) {
+          const updatedTechnologyPropose = await payload.update({
+            collection: 'technology-propose',
+            id: String(techPropId),
+            data: { status: 'completed' },
+            overrideAccess: true,
+          })
+
           return Response.json(
             {
-              success: false,
-              error: 'Missing technology_propose relation on contract log',
+              success: true,
+              contract_log: updatedLog,
+              technology_propose: updatedTechnologyPropose,
             },
-            { status: 400, headers: corsHeaders },
+            { status: 200, headers: corsHeaders },
           )
         }
 
-        const updatedTechnologyPropose = await payload.update({
-          collection: 'technology-propose',
-          id: String(technologyProposeId),
-          data: { status: 'completed' },
-          overrideAccess: true,
-        })
+        if (projPropId) {
+          const updatedProjectPropose = await payload.update({
+            collection: 'project-propose',
+            id: String(projPropId),
+            data: { status: 'completed' },
+            overrideAccess: true,
+          })
+
+          return Response.json(
+            {
+              success: true,
+              contract_log: updatedLog,
+              project_propose: updatedProjectPropose,
+            },
+            { status: 200, headers: corsHeaders },
+          )
+        }
+
+        if (propId) {
+          const updatedPropose = await payload.update({
+            collection: 'propose',
+            id: String(propId),
+            data: { status: 'completed' },
+            overrideAccess: true,
+          })
+
+          return Response.json(
+            { success: true, contract_log: updatedLog, propose: updatedPropose },
+            { status: 200, headers: corsHeaders },
+          )
+        }
 
         return Response.json(
-          {
-            success: true,
-            contract_log: updatedLog,
-            technology_propose: updatedTechnologyPropose,
-          },
-          { status: 200, headers: corsHeaders },
+          { success: false, error: 'Missing related proposal on contract log' },
+          { status: 400, headers: corsHeaders },
         )
       } catch (err: any) {
-        // If updating technology propose fails, return error
+        // If updating proposal fails, return error
         return Response.json(
-          { success: false, error: err?.message || 'Failed to update technology-propose' },
+          { success: false, error: err?.message || 'Failed to update proposal' },
           { status: 500, headers: corsHeaders },
         )
       }

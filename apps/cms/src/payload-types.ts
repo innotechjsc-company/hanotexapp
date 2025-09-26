@@ -828,7 +828,7 @@ export interface Propose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -951,6 +951,10 @@ export interface NegotiatingMessage {
    */
   propose?: (string | null) | Propose;
   /**
+   * Đề xuất dự án
+   */
+  project_propose?: (string | null) | ProjectPropose;
+  /**
    * Đề xuất công nghệ
    */
   technology_propose?: (string | null) | TechnologyPropose;
@@ -976,11 +980,34 @@ export interface NegotiatingMessage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-propose".
+ */
+export interface ProjectPropose {
+  id: string;
+  project: string | Project;
+  user: string | User;
+  investor_capacity?: string | null;
+  investment_amount?: number | null;
+  investment_ratio?: number | null;
+  investment_type?: string | null;
+  investment_benefits?: string | null;
+  documents?: (string | null) | Media;
+  /**
+   * Trạng thái
+   */
+  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "offer".
  */
 export interface Offer {
   id: string;
-  technology_propose: string | TechnologyPropose;
+  propose?: (string | null) | Propose;
+  project_propose?: (string | null) | ProjectPropose;
+  technology_propose?: (string | null) | TechnologyPropose;
   negotiating_messages: string | NegotiatingMessage;
   content: string;
   price: number;
@@ -1031,7 +1058,9 @@ export interface Contract {
   user_a: string | User;
   user_b: string | User;
   technologies: (string | Technology)[];
-  technology_propose: string | TechnologyPropose;
+  technology_propose?: (string | null) | TechnologyPropose;
+  propose?: (string | null) | Propose;
+  project_propose?: (string | null) | ProjectPropose;
   offer: string | Offer;
   price: number;
   contract_file?: (string | null) | Media;
@@ -1047,7 +1076,9 @@ export interface Contract {
  */
 export interface ContractLog {
   id: string;
-  technology_propose: string | TechnologyPropose;
+  technology_propose?: (string | null) | TechnologyPropose;
+  propose?: (string | null) | Propose;
+  project_propose?: (string | null) | ProjectPropose;
   contract: string | Contract;
   user: string | User;
   content: string;
@@ -1055,27 +1086,6 @@ export interface ContractLog {
   reason?: string | null;
   status?: ('pending' | 'completed' | 'cancelled') | null;
   is_done_contract?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-propose".
- */
-export interface ProjectPropose {
-  id: string;
-  project: string | Project;
-  user: string | User;
-  investor_capacity?: string | null;
-  investment_amount?: number | null;
-  investment_ratio?: number | null;
-  investment_type?: string | null;
-  investment_benefits?: string | null;
-  documents?: (string | null) | Media;
-  /**
-   * Trạng thái
-   */
-  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -1765,6 +1775,7 @@ export interface NewsLikeSelect<T extends boolean = true> {
  */
 export interface NegotiatingMessagesSelect<T extends boolean = true> {
   propose?: T;
+  project_propose?: T;
   technology_propose?: T;
   user?: T;
   message?: T;
@@ -1810,6 +1821,8 @@ export interface RoomUserSelect<T extends boolean = true> {
  * via the `definition` "offer_select".
  */
 export interface OfferSelect<T extends boolean = true> {
+  propose?: T;
+  project_propose?: T;
   technology_propose?: T;
   negotiating_messages?: T;
   content?: T;
@@ -1827,6 +1840,8 @@ export interface ContractSelect<T extends boolean = true> {
   user_b?: T;
   technologies?: T;
   technology_propose?: T;
+  propose?: T;
+  project_propose?: T;
   offer?: T;
   price?: T;
   contract_file?: T;
@@ -1842,6 +1857,8 @@ export interface ContractSelect<T extends boolean = true> {
  */
 export interface ContractLogsSelect<T extends boolean = true> {
   technology_propose?: T;
+  propose?: T;
+  project_propose?: T;
   contract?: T;
   user?: T;
   content?: T;
