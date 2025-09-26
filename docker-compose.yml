@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: hanotex-postgres
+    environment:
+      POSTGRES_DB: hanotex
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./database/seed_data.sql:/docker-entrypoint-initdb.d/seed_data.sql
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     container_name: hanotex-redis
@@ -8,34 +23,16 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
-  web:
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile
-    container_name: hanotex-web
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hanotex-pgadmin
     environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
-      - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_PUBLIC_WS_URL=http://localhost:3001
-      # - NEXT_PUBLIC_PAYLOAD_API_URL=http://localhost:4000/api
-      - NEXT_PUBLIC_PAYLOAD_API_URL=https://api.hanotex.vn/api
+      PGADMIN_DEFAULT_EMAIL: admin@hanotex.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
-      - "3000:3000"
-    restart: unless-stopped
-
-  cms:
-    build:
-      context: ./apps/cms
-      dockerfile: Dockerfile
-    container_name: hanotex-cms
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URI=mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test
-      - PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
-      - PORT=4000
-    ports:
-      - "4000:4000"
+      - "5050:80"
+    depends_on:
+      - postgres
     restart: unless-stopped
 
 volumes:

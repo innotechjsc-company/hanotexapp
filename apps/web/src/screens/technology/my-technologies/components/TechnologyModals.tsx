@@ -38,6 +38,7 @@ import {
 import { useRouter } from "next/navigation";
 import MediaApi from "@/api/media";
 import { createTechnology, updateTechnology } from "@/api/technologies";
+import { createNotification } from "@/api/noti";
 import toast from "react-hot-toast";
 import { MediaType } from "@/types/media1";
 
@@ -96,7 +97,9 @@ export function AddTechnologyModal({
         // 2. Upload files using MediaApi
         const mediaApi = new MediaApi();
         const techMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
+          ? await mediaApi.uploadMulti(basic!.documents, {
+              type: MediaType.DOCUMENT,
+            })
           : [];
         const legalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
@@ -130,8 +133,30 @@ export function AddTechnologyModal({
             ipDetails && ipDetails.length ? ipDetails : undefined,
           visibility_mode: visibility?.visibility_mode,
         };
-        const created = await createTechnology(payload as any);
-        console.log("Created technology:", created);
+        const created: any = await createTechnology(payload as any);
+
+        // Create notification after successful technology creation
+        try {
+          const technologyData = created?.doc;
+          const submitterId =
+            technologyData?.submitter?.id || technologyData?.submitter;
+
+          if (technologyData?.id && submitterId) {
+            await createNotification({
+              user: submitterId,
+              type: "system",
+              message: `Công nghệ "${technologyData.title}" đã được đăng ký thành công và đang chờ duyệt.`,
+              link: `/technologies/${technologyData.id}`,
+              is_read: false,
+            });
+          } else {
+            console.warn(
+              "Skipping notification due to missing tech/submitter ID."
+            );
+          }
+        } catch (notificationError) {
+          console.error("Failed to create notification:", notificationError);
+        }
 
         // Show success toast and navigate to technologies page
         toast.success("Đăng ký công nghệ thành công!");
@@ -277,7 +302,9 @@ export function EditTechnologyModal({
 
         const mediaApi = new MediaApi();
         const newTechMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, { type: MediaType.DOCUMENT })
+          ? await mediaApi.uploadMulti(basic!.documents, {
+              type: MediaType.DOCUMENT,
+            })
           : [];
         const existingDocIds = (current?.documents || []).map((m: any) => m.id);
         const documents = [...existingDocIds, ...newTechMedia.map((m) => m.id)];

@@ -86,7 +86,7 @@ export default function SmartChatbot({
       case "invest":
         return "Chào nhà đầu tư! Tôi sẽ hỗ trợ bạn tìm cơ hội đầu tư và kết nối với các dự án tiềm năng.";
       default:
-        return "Xin chào! Tôi là trợ lý thông minh của HANOTEX. Tôi có thể giúp bạn:\n• Đăng công nghệ\n• Tìm nhu cầu\n• Tham gia đầu tư\n• Môi giới công nghệ\n• Hỗ trợ pháp lý";
+        return "Xin chào! Tôi là trợ lý thông minh của HANOTEX. Tôi có thể giúp bạn:\n• Đăng công nghệ\n• Tìm kiếm công nghệ\n• Quản lý nhu cầu\n• Hỗ trợ pháp lý\n• Định giá công nghệ\n\nHoặc trò chuyện với tôi về bất kỳ chủ đề nào!";
     }
   };
 
@@ -99,21 +99,22 @@ export default function SmartChatbot({
         href: "/technologies/register",
       },
       {
-        label: "Tìm nhu cầu",
-        action: "search_demand",
+        label: "Tìm kiếm công nghệ",
+        action: "search_technology",
         icon: <Search className="h-4 w-4" />,
+        href: "/technologies",
+      },
+      {
+        label: "Quản lý nhu cầu",
+        action: "manage_demand",
+        icon: <Target className="h-4 w-4" />,
         href: "/demands",
       },
       {
-        label: "Đầu tư",
-        action: "investment",
-        icon: <DollarSign className="h-4 w-4" />,
-        href: "/services/investment",
-      },
-      {
-        label: "Môi giới",
-        action: "brokerage",
-        icon: <Users className="h-4 w-4" />,
+        label: "Hỗ trợ pháp lý",
+        action: "legal_support",
+        icon: <FileText className="h-4 w-4" />,
+        href: "/services/legal",
       },
     ];
   };
@@ -121,23 +122,21 @@ export default function SmartChatbot({
   const recognizeIntent = (message: string): string => {
     const lowerMessage = message.toLowerCase();
 
+    // HANOTEX specific intents
     if (
       lowerMessage.includes("đăng") &&
       (lowerMessage.includes("công nghệ") || lowerMessage.includes("sản phẩm"))
     ) {
       return "register_technology";
     }
+    if (lowerMessage.includes("tìm") && lowerMessage.includes("công nghệ")) {
+      return "search_technology";
+    }
     if (lowerMessage.includes("tìm") && lowerMessage.includes("nhu cầu")) {
       return "search_demand";
     }
-    if (lowerMessage.includes("đầu tư") || lowerMessage.includes("đầu tư")) {
-      return "investment";
-    }
-    if (
-      lowerMessage.includes("môi giới") ||
-      lowerMessage.includes("môi giới")
-    ) {
-      return "brokerage";
+    if (lowerMessage.includes("quản lý") && lowerMessage.includes("nhu cầu")) {
+      return "manage_demand";
     }
     if (lowerMessage.includes("pháp lý") || lowerMessage.includes("hợp đồng")) {
       return "legal_support";
@@ -152,13 +151,48 @@ export default function SmartChatbot({
       return "auction";
     }
 
-    return "general_inquiry";
+    // General conversation - ChatGPT-like responses
+    return "general_chat";
   };
 
-  const getResponseForIntent = (
+  const getGeneralChatResponse = async (message: string): Promise<string> => {
+    try {
+      // Call ChatGPT API for general conversation
+      const response = await fetch('/api/chatgpt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          context: "Bạn là trợ lý thông minh của HANOTEX. Khi người dùng hỏi về giao dịch công nghệ, hãy hướng dẫn họ về các dịch vụ của HANOTEX. Khi họ hỏi về chủ đề khác, hãy trò chuyện thân thiện và hữu ích."
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.reply || "Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Bạn có thể hỏi tôi về các dịch vụ của HANOTEX không?";
+      }
+    } catch (error) {
+      console.error('ChatGPT API error:', error);
+    }
+
+    // Fallback response if API fails
+    const lowerMessage = message.toLowerCase();
+    
+    // Greeting responses
+    if (lowerMessage.includes("xin chào") || lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
+      return "Xin chào! Tôi rất vui được trò chuyện với bạn. Bạn có câu hỏi gì về HANOTEX hoặc bất kỳ chủ đề nào khác không?";
+    }
+    
+    // Default response for general conversation
+    return "Cảm ơn bạn đã chia sẻ! Tôi là trợ lý thông minh của HANOTEX, chuyên hỗ trợ về giao dịch công nghệ. Tôi có thể giúp bạn:\n\n• Đăng công nghệ lên sàn\n• Tìm kiếm công nghệ phù hợp\n• Quản lý nhu cầu công nghệ\n• Hỗ trợ pháp lý\n• Định giá công nghệ\n\nHoặc chúng ta có thể trò chuyện về bất kỳ chủ đề nào khác! Bạn có câu hỏi gì cụ thể không?";
+  };
+
+  const getResponseForIntent = async (
     intent: string,
     message: string
-  ): { content: string; steps?: string[]; quickActions?: QuickAction[] } => {
+  ): Promise<{ content: string; steps?: string[]; quickActions?: QuickAction[] }> => {
     switch (intent) {
       case "register_technology":
         return {
@@ -182,6 +216,32 @@ export default function SmartChatbot({
               label: "Tải mẫu mô tả",
               action: "download_template",
               icon: <FileText className="h-4 w-4" />,
+            },
+          ],
+        };
+
+      case "search_technology":
+        return {
+          content: "Tôi sẽ giúp bạn tìm kiếm công nghệ phù hợp:",
+          steps: [
+            "Xác định lĩnh vực/ngành công nghệ",
+            "Định nghĩa yêu cầu kỹ thuật cụ thể",
+            "Thiết lập ngân sách và thời hạn",
+            "Sử dụng bộ lọc thông minh",
+            "Kết nối với nhà cung cấp tiềm năng",
+          ],
+          quickActions: [
+            {
+              label: "Tìm kiếm công nghệ",
+              action: "browse_technologies",
+              icon: <Search className="h-4 w-4" />,
+              href: "/technologies",
+            },
+            {
+              label: "Bộ lọc nâng cao",
+              action: "advanced_search",
+              icon: <Target className="h-4 w-4" />,
+              href: "/technologies?advanced=true",
             },
           ],
         };
@@ -212,59 +272,32 @@ export default function SmartChatbot({
           ],
         };
 
-      case "investment":
+      case "manage_demand":
         return {
-          content: "Hướng dẫn tham gia đầu tư công nghệ:",
+          content: "Tôi sẽ giúp bạn quản lý nhu cầu công nghệ:",
           steps: [
-            "Xác định lĩnh vực quan tâm và mức độ rủi ro",
-            "Tìm kiếm dự án theo TRL và giai đoạn phát triển",
-            "Đánh giá tiềm năng thương mại và thị trường",
-            "Yêu cầu tài liệu chi tiết và thẩm định",
-            "Đàm phán điều kiện đầu tư",
-            "Ký kết hợp đồng và giải ngân",
+            "Xem danh sách nhu cầu đã đăng",
+            "Cập nhật thông tin nhu cầu",
+            "Theo dõi phản hồi từ nhà cung cấp",
+            "Quản lý đàm phán và kết nối",
+            "Đánh giá và phản hồi",
           ],
           quickActions: [
             {
-              label: "Xem dự án đầu tư",
-              action: "browse_investments",
-              icon: <DollarSign className="h-4 w-4" />,
-              href: "/services/investment",
+              label: "Xem nhu cầu của tôi",
+              action: "my_demands",
+              icon: <Target className="h-4 w-4" />,
+              href: "/my-demands",
             },
             {
-              label: "Yêu cầu định giá",
-              action: "request_valuation",
-              icon: <FileText className="h-4 w-4" />,
-              href: "/services/valuation",
+              label: "Đăng nhu cầu mới",
+              action: "post_demand",
+              icon: <Plus className="h-4 w-4" />,
+              href: "/demands/register",
             },
           ],
         };
 
-      case "brokerage":
-        return {
-          content: "Hướng dẫn hoạt động môi giới công nghệ:",
-          steps: [
-            "Đăng ký làm môi giới và xác thực danh tính",
-            "Chọn lĩnh vực chuyên môn",
-            "Tìm kiếm cơ hội môi giới phù hợp",
-            "Kết nối người mua và người bán",
-            "Hỗ trợ đàm phán và ký kết",
-            "Theo dõi giao dịch và nhận hoa hồng",
-          ],
-          quickActions: [
-            {
-              label: "Đăng ký môi giới",
-              action: "register_broker",
-              icon: <Users className="h-4 w-4" />,
-              href: "/services/legal",
-            },
-            {
-              label: "Xem cơ hội môi giới",
-              action: "browse_opportunities",
-              icon: <Search className="h-4 w-4" />,
-              href: "/technologies",
-            },
-          ],
-        };
 
       case "legal_support":
         return {
@@ -312,10 +345,16 @@ export default function SmartChatbot({
           ],
         };
 
+      case "general_chat":
+        return {
+          content: await getGeneralChatResponse(message),
+          quickActions: getQuickActions(),
+        };
+
       default:
         return {
           content:
-            "Tôi hiểu bạn cần hỗ trợ. Hãy cho tôi biết cụ thể hơn về:\n• Bạn muốn đăng công nghệ?\n• Tìm kiếm nhu cầu?\n• Tham gia đầu tư?\n• Hỗ trợ pháp lý?\n• Hay điều gì khác?",
+            "Tôi hiểu bạn cần hỗ trợ. Hãy cho tôi biết cụ thể hơn về:\n• Bạn muốn đăng công nghệ?\n• Tìm kiếm công nghệ?\n• Quản lý nhu cầu?\n• Hỗ trợ pháp lý?\n• Hay điều gì khác?",
           quickActions: getQuickActions(),
         };
     }
@@ -336,9 +375,9 @@ export default function SmartChatbot({
     setIsTyping(true);
 
     // Simulate bot thinking
-    setTimeout(() => {
+    setTimeout(async () => {
       const intent = recognizeIntent(inputValue);
-      const response = getResponseForIntent(intent, inputValue);
+      const response = await getResponseForIntent(intent, inputValue);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),

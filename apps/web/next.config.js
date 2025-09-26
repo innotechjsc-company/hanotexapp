@@ -9,7 +9,15 @@ const nextConfig = {
     missingSuspenseWithCSRBailout: false,
   },
   images: {
-    domains: ["localhost", "hanotex.com", "127.0.0.1"],
+    domains: [
+      "localhost", 
+      "hanotex.com", 
+      "127.0.0.1", 
+      "images.unsplash.com",
+      "commondatastorage.googleapis.com",
+      "cdnjs.cloudflare.com",
+      "images.pexels.com"
+    ],
     formats: ["image/webp", "image/avif"],
     remotePatterns: [
       {
@@ -23,6 +31,31 @@ const nextConfig = {
         hostname: "*.hanotex.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "commondatastorage.googleapis.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdnjs.cloudflare.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.tile.openstreetmap.org",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+        pathname: "/**",
+      },
     ],
   },
   transpilePackages: ["@heroui/react", "@heroui/theme", "@heroui/system"],
@@ -31,6 +64,8 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    NEXT_PUBLIC_PAYLOAD_API_URL:
+      process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api",
   },
   async rewrites() {
     // Only proxy non-auth API routes to backend

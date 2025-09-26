@@ -96,10 +96,6 @@ export interface Config {
     'room-chat': RoomChat;
     'room-message': RoomMessage;
     'room-user': RoomUser;
-    offer: Offer;
-    contract: Contract;
-    'contract-logs': ContractLog;
-    'project-propose': ProjectPropose;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -135,10 +131,6 @@ export interface Config {
     'room-chat': RoomChatSelect<false> | RoomChatSelect<true>;
     'room-message': RoomMessageSelect<false> | RoomMessageSelect<true>;
     'room-user': RoomUserSelect<false> | RoomUserSelect<true>;
-    offer: OfferSelect<false> | OfferSelect<true>;
-    contract: ContractSelect<false> | ContractSelect<true>;
-    'contract-logs': ContractLogsSelect<false> | ContractLogsSelect<true>;
-    'project-propose': ProjectProposeSelect<false> | ProjectProposeSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -567,30 +559,71 @@ export interface IntellectualProperty {
  */
 export interface Auction {
   id: string;
-  /**
-   * Công nghệ được đấu giá
-   */
-  technology: string | Technology;
-  auction_type: 'ENGLISH' | 'DUTCH' | 'SEALED_BID';
-  /**
-   * Giá ban đầu cho phiên đấu giá
-   */
-  start_price?: number | null;
-  /**
-   * Giá tối thiểu chấp nhận được
-   */
-  reserve_price?: number | null;
-  /**
-   * Lượt đặt giá cao nhất hiện tại
-   */
-  current_price?: number | null;
-  start_time?: string | null;
-  end_time?: string | null;
-  status: 'SCHEDULED' | 'ACTIVE' | 'ENDED' | 'CANCELLED';
-  /**
-   * Tất cả các lượt đặt giá cho phiên đấu giá này
-   */
-  bids?: (string | Bid)[] | null;
+  title: string;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  category: 'it' | 'biotech' | 'energy' | 'materials' | 'medical' | 'agriculture';
+  startingPrice: number;
+  currentBid?: number | null;
+  minBid?: number | null;
+  bidIncrement?: number | null;
+  startTime: string;
+  endTime: string;
+  location?: string | null;
+  image?: (string | null) | Media;
+  organizer: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  documents?:
+    | {
+        name: string;
+        file: string | Media;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  terms?:
+    | {
+        term: string;
+        id?: string | null;
+      }[]
+    | null;
+  bids?:
+    | {
+        amount: number;
+        bidder: string;
+        timestamp: string;
+        isWinning?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  autoBids?:
+    | {
+        maxAmount: number;
+        bidder: string;
+        createdAt: string;
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('upcoming' | 'active' | 'ended' | 'cancelled') | null;
+  viewers?: number | null;
+  bidCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -723,25 +756,13 @@ export interface Project {
   id: string;
   name: string;
   description: string;
-  business_model?: string | null;
-  market_data?: string | null;
   user: string | User;
-  technologies: (string | Technology)[];
-  investment_fund?: (string | InvestmentFund)[] | null;
-  revenue?: number | null;
-  profit?: number | null;
-  assets?: number | null;
-  documents_finance?: (string | Media)[] | null;
-  team_profile?: string | null;
+  technology?: (string | null) | Technology;
+  investment_fund?: (string | null) | InvestmentFund;
+  status?: ('pending' | 'in_progress' | 'completed' | 'cancelled') | null;
   goal_money?: number | null;
-  share_percentage?: number | null;
-  goal_money_purpose?: string | null;
-  /**
-   * Trạng thái
-   */
-  status: 'pending' | 'active' | 'rejected';
-  open_investment_fund?: boolean | null;
-  end_date: string;
+  end_date?: string | null;
+  documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -786,8 +807,6 @@ export interface Demand {
   from_price?: number | null;
   to_price?: number | null;
   cooperation?: string | null;
-  start_date?: string | null;
-  end_date?: string | null;
   documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -828,7 +847,7 @@ export interface Propose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -852,7 +871,7 @@ export interface TechnologyPropose {
   /**
    * Trạng thái
    */
-  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
+  status: 'pending' | 'negotiating' | 'contract_signed' | 'completed' | 'cancelled';
   updatedAt: string;
   createdAt: string;
 }
@@ -951,10 +970,6 @@ export interface NegotiatingMessage {
    */
   propose?: (string | null) | Propose;
   /**
-   * Đề xuất dự án
-   */
-  project_propose?: (string | null) | ProjectPropose;
-  /**
    * Đề xuất công nghệ
    */
   technology_propose?: (string | null) | TechnologyPropose;
@@ -970,48 +985,6 @@ export interface NegotiatingMessage {
    * Tài liệu đính kèm
    */
   documents?: (string | Media)[] | null;
-  is_offer?: boolean | null;
-  /**
-   * Offer
-   */
-  offer?: (string | null) | Offer;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-propose".
- */
-export interface ProjectPropose {
-  id: string;
-  project: string | Project;
-  user: string | User;
-  investor_capacity?: string | null;
-  investment_amount?: number | null;
-  investment_ratio?: number | null;
-  investment_type?: string | null;
-  investment_benefits?: string | null;
-  documents?: (string | null) | Media;
-  /**
-   * Trạng thái
-   */
-  status: 'pending' | 'negotiating' | 'contact_signing' | 'contract_signed' | 'completed' | 'cancelled';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "offer".
- */
-export interface Offer {
-  id: string;
-  propose?: (string | null) | Propose;
-  project_propose?: (string | null) | ProjectPropose;
-  technology_propose?: (string | null) | TechnologyPropose;
-  negotiating_messages: string | NegotiatingMessage;
-  content: string;
-  price: number;
-  status?: ('pending' | 'accepted' | 'rejected') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1046,46 +1019,6 @@ export interface RoomUser {
   id: string;
   room: string | RoomChat;
   user: string | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract".
- */
-export interface Contract {
-  id: string;
-  user_a: string | User;
-  user_b: string | User;
-  technologies: (string | Technology)[];
-  technology_propose?: (string | null) | TechnologyPropose;
-  propose?: (string | null) | Propose;
-  project_propose?: (string | null) | ProjectPropose;
-  offer: string | Offer;
-  price: number;
-  contract_file?: (string | null) | Media;
-  documents?: (string | Media)[] | null;
-  status: 'signed' | 'in_progress' | 'completed' | 'cancelled';
-  users_confirm?: (string | User)[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract-logs".
- */
-export interface ContractLog {
-  id: string;
-  technology_propose?: (string | null) | TechnologyPropose;
-  propose?: (string | null) | Propose;
-  project_propose?: (string | null) | ProjectPropose;
-  contract: string | Contract;
-  user: string | User;
-  content: string;
-  documents?: (string | null) | Media;
-  reason?: string | null;
-  status?: ('pending' | 'completed' | 'cancelled') | null;
-  is_done_contract?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1211,22 +1144,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'room-user';
         value: string | RoomUser;
-      } | null)
-    | ({
-        relationTo: 'offer';
-        value: string | Offer;
-      } | null)
-    | ({
-        relationTo: 'contract';
-        value: string | Contract;
-      } | null)
-    | ({
-        relationTo: 'contract-logs';
-        value: string | ContractLog;
-      } | null)
-    | ({
-        relationTo: 'project-propose';
-        value: string | ProjectPropose;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1503,15 +1420,59 @@ export interface IntellectualPropertySelect<T extends boolean = true> {
  * via the `definition` "auctions_select".
  */
 export interface AuctionsSelect<T extends boolean = true> {
-  technology?: T;
-  auction_type?: T;
-  start_price?: T;
-  reserve_price?: T;
-  current_price?: T;
-  start_time?: T;
-  end_time?: T;
+  title?: T;
+  description?: T;
+  category?: T;
+  startingPrice?: T;
+  currentBid?: T;
+  minBid?: T;
+  bidIncrement?: T;
+  startTime?: T;
+  endTime?: T;
+  location?: T;
+  image?: T;
+  organizer?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+        phone?: T;
+      };
+  documents?:
+    | T
+    | {
+        name?: T;
+        file?: T;
+        description?: T;
+        id?: T;
+      };
+  terms?:
+    | T
+    | {
+        term?: T;
+        id?: T;
+      };
+  bids?:
+    | T
+    | {
+        amount?: T;
+        bidder?: T;
+        timestamp?: T;
+        isWinning?: T;
+        id?: T;
+      };
+  autoBids?:
+    | T
+    | {
+        maxAmount?: T;
+        bidder?: T;
+        createdAt?: T;
+        isActive?: T;
+        id?: T;
+      };
   status?: T;
-  bids?: T;
+  viewers?: T;
+  bidCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1616,8 +1577,6 @@ export interface DemandSelect<T extends boolean = true> {
   from_price?: T;
   to_price?: T;
   cooperation?: T;
-  start_date?: T;
-  end_date?: T;
   documents?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1640,22 +1599,13 @@ export interface InvestmentFundSelect<T extends boolean = true> {
 export interface ProjectSelect<T extends boolean = true> {
   name?: T;
   description?: T;
-  business_model?: T;
-  market_data?: T;
   user?: T;
-  technologies?: T;
+  technology?: T;
   investment_fund?: T;
-  revenue?: T;
-  profit?: T;
-  assets?: T;
-  documents_finance?: T;
-  team_profile?: T;
-  goal_money?: T;
-  share_percentage?: T;
-  goal_money_purpose?: T;
   status?: T;
-  open_investment_fund?: T;
+  goal_money?: T;
   end_date?: T;
+  documents?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1775,13 +1725,10 @@ export interface NewsLikeSelect<T extends boolean = true> {
  */
 export interface NegotiatingMessagesSelect<T extends boolean = true> {
   propose?: T;
-  project_propose?: T;
   technology_propose?: T;
   user?: T;
   message?: T;
   documents?: T;
-  is_offer?: T;
-  offer?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1813,76 +1760,6 @@ export interface RoomMessageSelect<T extends boolean = true> {
 export interface RoomUserSelect<T extends boolean = true> {
   room?: T;
   user?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "offer_select".
- */
-export interface OfferSelect<T extends boolean = true> {
-  propose?: T;
-  project_propose?: T;
-  technology_propose?: T;
-  negotiating_messages?: T;
-  content?: T;
-  price?: T;
-  status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract_select".
- */
-export interface ContractSelect<T extends boolean = true> {
-  user_a?: T;
-  user_b?: T;
-  technologies?: T;
-  technology_propose?: T;
-  propose?: T;
-  project_propose?: T;
-  offer?: T;
-  price?: T;
-  contract_file?: T;
-  documents?: T;
-  status?: T;
-  users_confirm?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "contract-logs_select".
- */
-export interface ContractLogsSelect<T extends boolean = true> {
-  technology_propose?: T;
-  propose?: T;
-  project_propose?: T;
-  contract?: T;
-  user?: T;
-  content?: T;
-  documents?: T;
-  reason?: T;
-  status?: T;
-  is_done_contract?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-propose_select".
- */
-export interface ProjectProposeSelect<T extends boolean = true> {
-  project?: T;
-  user?: T;
-  investor_capacity?: T;
-  investment_amount?: T;
-  investment_ratio?: T;
-  investment_type?: T;
-  investment_benefits?: T;
-  documents?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

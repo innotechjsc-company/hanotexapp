@@ -320,7 +320,7 @@ export default function AboutPage() {
                 <h3 className="text-lg font-semibold mb-2">
                   Điện thoại
                 </h3>
-                <p className="text-primary-100">024 3825 1234</p>
+                <p className="text-primary-100">0848567193</p>
               </CardBody>
             </Card>
 
