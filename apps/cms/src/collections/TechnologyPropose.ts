@@ -83,12 +83,20 @@ export const TechnologyPropose: CollectionConfig = {
         description: 'Tài liệu',
       },
     },
+    // thêm trạng thái đang kí hợp đồng, đang hoàn thiện hợp đồng
     {
       name: 'status',
       type: 'select',
       required: true,
       label: 'Trạng thái',
-      options: ['pending', 'negotiating', 'contract_signed', 'completed', 'cancelled'],
+      options: [
+        'pending',
+        'negotiating',
+        'contact_signing',
+        'contract_signed',
+        'completed',
+        'cancelled',
+      ],
       defaultValue: 'pending',
       admin: {
         description: 'Trạng thái',

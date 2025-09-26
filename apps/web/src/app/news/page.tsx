@@ -142,7 +142,7 @@ export default function NewsPage() {
       const pagination: PaginationParams = {
         page: isLoadMore ? currentPage + 1 : 1,
         limit: 10,
-        sort: sortBy === "published_at" ? "-createdAt" : sortBy,
+        sort: sortBy === "published_at" ? "-createdAt" : "-views", // Adjusted sorting logic
       };
 
       // Add search filter
@@ -408,7 +408,6 @@ export default function NewsPage() {
             >
               <option value="published_at">Mới nhất</option>
               <option value="views">Xem nhiều nhất</option>
-              <option value="title">Theo tên</option>
             </select>
           </div>
         </div>

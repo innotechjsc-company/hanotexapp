@@ -17,6 +17,8 @@ import {
   Info,
   MessageCircle,
   Send,
+  Mail,
+  Phone,
 } from "lucide-react";
 import Link from "next/link";
 import Map from "@/components/ui/Map";
@@ -35,6 +37,7 @@ import {
 } from "@/api/eventComments";
 import { Event as ApiEvent } from "@/types/event";
 import { useAuth } from "@/store/auth";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
 
 interface EventDisplay extends ApiEvent {
   // Additional UI-specific fields
@@ -250,7 +253,6 @@ export default function EventDetailPage({
         // Fetch event from API
         const apiEvent = await getEventById(params.id);
         const displayEvent = transformEventForDisplay(apiEvent);
-
         setEvent(displayEvent);
 
         // Fetch comments for the event
@@ -274,18 +276,18 @@ export default function EventDetailPage({
     fetchEvent();
   }, [params.id, user?.id]);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Sắp diễn ra";
-      case "in_progress":
-        return "Đang diễn ra";
-      case "completed":
-        return "Đã kết thúc";
-      case "cancelled":
-        return "Đã huỷ";
-      default:
-        return status;
+  const getStatusText = (event: any) => {
+    // Calculate status based on dates instead of database status
+    const now = new Date();
+    const startDate = new Date(event.start_date);
+    const endDate = new Date(event.end_date);
+
+    if (now < startDate) {
+      return "Chưa diễn ra";
+    } else if (now >= startDate && now <= endDate) {
+      return "Đang diễn ra";
+    } else {
+      return "Đã kết thúc";
     }
   };
 
@@ -293,13 +295,16 @@ export default function EventDetailPage({
     console.log("event", event);
   }, [event]);
 
-  const formatDate = (dateString: string) => {
+  const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
-      month: "long",
-      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false, // Use 24-hour format
     });
   };
 
@@ -382,16 +387,15 @@ export default function EventDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with gradient background */}
-      <div className="relative bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 text-white">
-        {/* Background pattern */}
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        ></div>
+      {/* Header with event image background */}
+      <div
+        className="relative bg-cover bg-center text-white py-12 md:py-24 lg:py-32"
+        style={{
+          backgroundImage: `url(${PAYLOAD_API_BASE_URL?.replace("/api", "")}${event.image_url})`,
+        }}
+      >
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-8">
@@ -407,7 +411,7 @@ export default function EventDetailPage({
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
               <span className="px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
-                {getStatusText(event.status)}
+                {getStatusText(event)}
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
@@ -441,17 +445,30 @@ export default function EventDetailPage({
                     {event.location || "Địa điểm"}
                   </h3>
 
-                  {event.location_details?.googleMapsUrl && (
-                    <a
-                      href={event.location_details.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Xem trên Google Maps
-                    </a>
-                  )}
+                  <div className="flex items-center gap-4 mt-3">
+                    {/* {event.location && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-primary-600 hover:text-primary-800 text-sm font-medium transition-colors duration-200"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Xem trên Google Maps
+                      </a>
+                    )} */}
+                    {event.location_details?.googleMapsUrl && (
+                      <a
+                        href={event.location_details.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Chỉ đường
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -469,10 +486,37 @@ export default function EventDetailPage({
                     Thời gian bắt đầu
                   </h3>
                   <p className="text-primary-900 font-medium text-lg">
-                    {event.date && formatDate(event.date)}{" "}
-                    {event.time && `• ${event.time}`}
+                    {event.start_date && formatDateTime(event.start_date)}
                   </p>
                 </div>
+
+                <div className="bg-primary-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-primary-700 mb-2 flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    Thời gian kết thúc
+                  </h3>
+                  <p className="text-primary-900 font-medium text-lg">
+                    {event.end_date && formatDateTime(event.end_date)}
+                  </p>
+                </div>
+
+                {event.url && (
+                  <div className="bg-primary-50 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-primary-700 mb-2 flex items-center">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Link tham gia
+                    </h3>
+                    <a
+                      href={event.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 hover:text-primary-800 font-medium text-lg underline break-all"
+                    >
+                      {event.url}
+                    </a>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
                     Mô tả sự kiện
@@ -600,7 +644,8 @@ export default function EventDetailPage({
                     <div className="flex items-center">
                       <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
                       <p className="text-sm text-yellow-800">
-                        Hạn đăng ký: {formatDate(event.registration_deadline)}
+                        Hạn đăng ký:{" "}
+                        {formatDateTime(event.registration_deadline)}
                       </p>
                     </div>
                   </div>

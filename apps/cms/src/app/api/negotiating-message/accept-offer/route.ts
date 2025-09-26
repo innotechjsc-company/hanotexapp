@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       overrideAccess: true,
     })
 
-    // 3) Update TechnologyPropose status -> contract_signed
+    // 3) Update TechnologyPropose status -> contact_signing
     const technologyProposeId = (offer as any).technology_propose.id
     if (!technologyProposeId) {
       return Response.json(
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     const technologyPropose = await payload.update({
       collection: 'technology-propose',
       id: technologyProposeId,
-      data: { status: 'contract_signed' },
+      data: { status: 'contact_signing' },
       overrideAccess: true,
     })
 

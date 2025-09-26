@@ -4,8 +4,10 @@
  */
 
 const { createServer } = require('http')
-const { Server } = require('socket.io')
 const next = require('next')
+
+// Dynamic import for ES modules
+let ChatWebSocketServer
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = 'localhost'
@@ -15,45 +17,34 @@ const port = process.env.PORT || 4000
 const app = next({ dev, hostname, port })
 const handler = app.getRequestHandler()
 
-app.prepare().then(() => {
-  const httpServer = createServer(handler)
-  
-  // Initialize Socket.IO
-  const io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-      credentials: true
-    }
-  })
+async function startServer() {
+  try {
+    // Dynamic import for ES modules
+    const webSocketModule = await import('./src/websocket/server.js')
+    ChatWebSocketServer = webSocketModule.ChatWebSocketServer
 
-  // Socket.IO connection handling
-  io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id)
-    
-    // Handle custom events here
-    socket.on('message', (data) => {
-      console.log('Received message:', data)
-      // Broadcast to all clients or handle as needed
-      io.emit('message', data)
-    })
-    
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id)
-    })
-  })
+    await app.prepare()
 
-  // Start server
-  httpServer
-    .once('error', (err) => {
-      console.error('Server error:', err)
-      process.exit(1)
-    })
-    .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`)
-      console.log(`> Socket.IO server running`)
-    })
-}).catch((err) => {
-  console.error('Error starting server:', err)
-  process.exit(1)
-})
+    const httpServer = createServer(handler)
+
+    // Initialize our custom WebSocket server
+    const webSocketServer = new ChatWebSocketServer(httpServer)
+    console.log('🚀 Chat WebSocket server initialized')
+
+    // Start server
+    httpServer
+      .once('error', (err) => {
+        console.error('❌ Server error:', err)
+        process.exit(1)
+      })
+      .listen(port, () => {
+        console.log(`🚀 Server ready on http://${hostname}:${port}`)
+        console.log(`🔌 WebSocket server ready on ws://${hostname}:${port}/socket.io/`)
+      })
+  } catch (err) {
+    console.error('❌ Error starting server:', err)
+    process.exit(1)
+  }
+}
+
+startServer()

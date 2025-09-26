@@ -33,6 +33,8 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
     switch (proposal.status) {
       case "negotiating":
         return { label: "Đang đàm phán", color: "blue" };
+      case "contact_signing":
+        return { label: "Đang ký hợp đồng", color: "cyan" };
       case "contract_signed":
         return { label: "Đã ký hợp đồng", color: "green" };
       case "pending":
@@ -89,13 +91,15 @@ export const NegotiationHeader: React.FC<NegotiationHeaderProps> = ({
               Bước{" "}
               {proposal?.status === "negotiating"
                 ? "1"
-                : proposal?.status === "contract_signed"
+                : proposal?.status === "contact_signing" ||
+                    proposal?.status === "contract_signed"
                   ? "2"
                   : "1"}
               :{" "}
               {proposal?.status === "negotiating"
                 ? "Đàm phán"
-                : proposal?.status === "contract_signed"
+                : proposal?.status === "contact_signing" ||
+                    proposal?.status === "contract_signed"
                   ? "Ký hợp đồng"
                   : "Đàm phán"}
             </Text>

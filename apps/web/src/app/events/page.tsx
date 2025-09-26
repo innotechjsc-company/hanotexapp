@@ -11,6 +11,8 @@ import {
   ArrowRight,
   Plus,
   ExternalLink,
+  Navigation,
+  X, // Added X icon for clearing search
 } from "lucide-react";
 import {
   Card,
@@ -41,6 +43,7 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<
     "pending" | "in_progress" | "completed" | "cancelled" | "all"
@@ -49,36 +52,6 @@ export default function EventsPage() {
   const [totalDocs, setTotalDocs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Comments state
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: "Phạm Minh D",
-      avatar: "P",
-      avatarColor: "purple",
-      time: "09:44 24 thg 9",
-      content:
-        "Sự kiện này có hấp dẫn quá! Mình đã đăng ký rồi, mong chờ được tham gia.",
-    },
-    {
-      id: 2,
-      author: "Hoàng Thị E",
-      avatar: "H",
-      avatarColor: "blue",
-      time: "08:44 24 thg 9",
-      content:
-        "Có workshop thực hành không ạ? Mình muốn tìm hiểu thêm về phần này.",
-    },
-  ]);
-  const [newComment, setNewComment] = useState("");
-
-  const eventTypes = [
-    "Tất cả",
-    "Hội thảo",
-    "Workshop",
-    "Triển lãm",
-    "Hội nghị",
-  ];
   const eventStatuses = [
     { value: "all", label: "Tất cả" },
     { value: "pending", label: "Chờ duyệt" },
@@ -88,7 +61,10 @@ export default function EventsPage() {
   ];
 
   // Fetch events from API
-  const fetchEvents = async (isLoadMore = false) => {
+  const fetchEvents = async (
+    isLoadMore = false,
+    customSearchQuery?: string
+  ) => {
     try {
       if (!isLoadMore) {
         setLoading(true);
@@ -97,39 +73,26 @@ export default function EventsPage() {
 
       let response;
 
-      // Fetch based on selected status
-      if (selectedStatus === "all") {
-        // Fetch all events without status filter
-        response = await getEvents(
-          {}, // No filters
-          {
-            page: isLoadMore ? currentPage + 1 : 1,
-            limit: 10,
-            sort: sortBy === "start_date" ? "start_date" : "-createdAt",
-          }
-        );
-      } else if (selectedStatus === "in_progress") {
-        response = await getOngoingEvents({
-          page: isLoadMore ? currentPage + 1 : 1,
-          limit: 10,
-          sort: sortBy === "start_date" ? "start_date" : "-createdAt",
-        });
-      } else if (selectedStatus === "completed") {
-        response = await getPastEvents({
-          page: isLoadMore ? currentPage + 1 : 1,
-          limit: 10,
-          sort: sortBy === "start_date" ? "-end_date" : "-createdAt",
-        });
-      } else {
-        response = await getEvents(
-          { status: selectedStatus as any },
-          {
-            page: isLoadMore ? currentPage + 1 : 1,
-            limit: 10,
-            sort: sortBy === "start_date" ? "start_date" : "-createdAt",
-          }
-        );
+      const currentSearchQuery =
+        customSearchQuery !== undefined ? customSearchQuery : activeSearchQuery;
+
+      const filters: any = {}; // Explicitly type filters
+      if (currentSearchQuery.trim()) {
+        filters.search = currentSearchQuery.trim();
       }
+
+      if (selectedStatus !== "all") {
+        filters.status = selectedStatus;
+      }
+
+      const paginationParams = {
+        page: isLoadMore ? currentPage + 1 : 1,
+        limit: 10,
+        sort: sortBy === "start_date" ? "start_date" : "-createdAt",
+      };
+
+      // Fetch all events without status filter
+      response = await getEvents(filters, paginationParams);
 
       const newEvents = Array.isArray(response.docs) ? response.docs : [];
 
@@ -152,79 +115,30 @@ export default function EventsPage() {
 
   useEffect(() => {
     fetchEvents();
-  }, [selectedStatus, sortBy]);
+  }, [selectedStatus, sortBy, activeSearchQuery]); // Added activeSearchQuery to dependencies
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
-      fetchEvents();
+
+    if (activeSearchQuery) {
+      // If there's an active search, clear it
+      setSearchQuery("");
+      setActiveSearchQuery("");
+      setCurrentPage(1);
+      fetchEvents(false, ""); // Fetch all events again
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await searchEvents(
-        searchQuery,
-        { status: selectedStatus },
-        {
-          page: 1,
-          limit: 10,
-          sort: sortBy === "start_date" ? "start_date" : "-createdAt",
-        }
-      );
-
-      const searchResults = Array.isArray(response.docs) ? response.docs : [];
-      setEvents(searchResults as any);
-      setTotalDocs(response.totalDocs || 0);
+    // If no active search, perform a new search
+    const newSearchQuery = searchQuery.trim();
+    if (newSearchQuery) {
+      setActiveSearchQuery(newSearchQuery);
       setCurrentPage(1);
-    } catch (err) {
-      console.error("Error searching events:", err);
-      setError("Không thể tìm kiếm sự kiện. Vui lòng thử lại sau.");
-    } finally {
-      setLoading(false);
+      fetchEvents(false, newSearchQuery);
+    } else {
+      // If search query is empty, just refetch without search
+      fetchEvents(false, "");
     }
-  };
-
-  // Helper function to get image URL
-  const getImageUrl = (image: any): string => {
-    // Multiple fallback images for variety
-    const fallbackImages = [
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop", // Conference
-      "https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=400&fit=crop", // Business meeting
-      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=400&fit=crop", // Tech event
-      "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=400&fit=crop", // Workshop
-    ];
-
-    // Use a random fallback image based on image id or title
-    const fallbackIndex = image?.id
-      ? parseInt(image.id.slice(-1), 16) % fallbackImages.length
-      : Math.floor(Math.random() * fallbackImages.length);
-    const fallbackImage = fallbackImages[fallbackIndex];
-
-    if (!image) return fallbackImage;
-
-    // Check if it's a string URL
-    if (typeof image === "string") {
-      if (image.startsWith("http")) return image;
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image}`;
-    }
-
-    // Check if it's an image object from PayloadCMS
-    if (image && typeof image === "object") {
-      // Only use the image if it's actually an image file
-      if (image.mimeType && image.mimeType.startsWith("image/")) {
-        if (image.url) {
-          if (image.url.startsWith("http")) return image.url;
-          return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${image.url}`;
-        }
-      }
-      // If it's not an image file (like PDF), use fallback
-      return fallbackImage;
-    }
-
-    return fallbackImage;
   };
 
   const formatDate = (dateString: string) => {
@@ -236,34 +150,20 @@ export default function EventsPage() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "warning";
-      case "in_progress":
-        return "primary";
-      case "completed":
-        return "success";
-      case "cancelled":
-        return "danger";
-      default:
-        return "default";
+  // Helper function to generate Google Maps URL from address
+  const getGoogleMapsUrl = (address: string): string => {
+    if (!address || address.trim() === "") {
+      return "";
     }
+
+    // Encode the address for URL
+    const encodedAddress = encodeURIComponent(address.trim());
+    return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "Chờ duyệt";
-      case "in_progress":
-        return "Đang diễn ra";
-      case "completed":
-        return "Đã kết thúc";
-      case "cancelled":
-        return "Đã hủy";
-      default:
-        return status;
-    }
+  // Helper function to check if address has Google Maps URL
+  const hasValidAddress = (address: string): boolean => {
+    return !!(address && address.trim() !== "");
   };
 
   if (loading) {
@@ -319,34 +219,21 @@ export default function EventsPage() {
                 />
                 <Button
                   type="submit"
-                  color="primary"
-                  className="px-6 bg-blue-600 text-white hover:bg-blue-700 shadow-md min-w-[120px] visible opacity-100 z-10 relative flex-shrink-0"
+                  color={activeSearchQuery ? "danger" : "primary"} // Change button color when activeSearchQuery is present
+                  className={`px-6 shadow-md min-w-[120px] visible opacity-100 z-10 relative flex-shrink-0 ${
+                    activeSearchQuery
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
                   size="md"
                 >
-                  Tìm kiếm
+                  {activeSearchQuery ? (
+                    <X className="h-5 w-5 mr-2" />
+                  ) : (
+                    <Search className="h-5 w-5 mr-2" />
+                  )}
+                  {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
                 </Button>
-              </div>
-
-              {/* Filters */}
-              <div className="flex gap-4 items-center flex-wrap">
-                <Select
-                  label="Trạng thái"
-                  variant="bordered"
-                  selectedKeys={[selectedStatus]}
-                  onSelectionChange={(keys) => {
-                    const selected = Array.from(keys)[0] as
-                      | "pending"
-                      | "in_progress"
-                      | "completed"
-                      | "cancelled"
-                      | "all";
-                    setSelectedStatus(selected);
-                  }}
-                >
-                  {eventStatuses.map((status) => (
-                    <SelectItem key={status.value}>{status.label}</SelectItem>
-                  ))}
-                </Select>
               </div>
             </form>
           </CardBody>
@@ -355,10 +242,20 @@ export default function EventsPage() {
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <p className="text-gray-600">
-              Tìm thấy <span className="font-semibold">{totalDocs}</span> sự
-              kiện
-            </p>
+            {activeSearchQuery ? (
+              <p className="text-gray-600">
+                Tìm thấy <span className="font-semibold">{totalDocs}</span> sự
+                kiện
+                <span className="ml-1 text-gray-500">
+                  cho "{activeSearchQuery}"
+                </span>
+              </p>
+            ) : (
+              <p className="text-gray-600">
+                Tổng cộng <span className="font-semibold">{totalDocs}</span> sự
+                kiện
+              </p>
+            )}
           </div>
         </div>
         {/* Events List */}
@@ -382,7 +279,7 @@ export default function EventsPage() {
                       : event.content}
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
                     <div className="flex items-center text-gray-500">
                       <Calendar className="h-4 w-4 mr-2" />
                       <span>{formatDate(event.start_date)}</span>
@@ -391,10 +288,34 @@ export default function EventsPage() {
                       <Clock className="h-4 w-4 mr-2" />
                       <span>{formatDate(event.end_date)}</span>
                     </div>
-                    {event.location && (
-                      <div className="flex items-center text-gray-500">
+                    {event.location && hasValidAddress(event.location) ? (
+                      <div className="flex flex-col sm:flex-row sm:items-center text-gray-500 gap-2 sm:gap-0">
+                        <div className="flex items-start flex-1 min-w-0">
+                          <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-1">{event.location}</span>
+                        </div>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-8 w-8 min-w-0 visible opacity-100 z-10 relative flex-shrink-0"
+                            onPress={() =>
+                              window.open(
+                                getGoogleMapsUrl(event.location),
+                                "_blank"
+                              )
+                            }
+                            title="Xem vị trí trên Google Maps"
+                            aria-label={`Xem địa điểm "${event.location}" trên Google Maps`}
+                          >
+                            <Navigation className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-gray-400">
                         <MapPin className="h-4 w-4 mr-2" />
-                        <span className="line-clamp-1">{event.location}</span>
+                        <span>Chưa cập nhật địa điểm</span>
                       </div>
                     )}
                   </div>
@@ -451,7 +372,9 @@ export default function EventsPage() {
               Không tìm thấy sự kiện nào
             </h3>
             <p className="text-gray-600">
-              Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc
+              {activeSearchQuery
+                ? `Không tìm thấy sự kiện nào với từ khóa "${activeSearchQuery}". Hãy thử từ khóa khác.`
+                : "Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc"}
             </p>
           </div>
         )}

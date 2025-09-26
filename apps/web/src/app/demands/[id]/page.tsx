@@ -57,12 +57,12 @@ export default function DemandDetailPage() {
         return doc.url;
       }
       // If URL is relative, prepend CMS base URL
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}${doc.url}`;
+      return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}${doc.url}`;
     }
 
     // If doc has an ID, construct media URL
     if (doc.id) {
-      return `${PAYLOAD_API_BASE_URL.replace("/api", "")}/api/media/${doc.id}`;
+      return `${PAYLOAD_API_BASE_URL?.replace("/api", "")}/api/media/${doc.id}`;
     }
 
     return null;
