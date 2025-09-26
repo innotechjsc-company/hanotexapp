@@ -10,8 +10,10 @@ const next = require('next')
 let ChatWebSocketServer
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
 const port = process.env.PORT || 4000
+const hostname = dev ? 'localhost' : '0.0.0.0' // Listen on all interfaces in production
+
+const domain = dev ? `http://localhost:${port}` : 'https://api.hanotex.vn'
 
 // Create Next.js app
 const app = next({ dev, hostname, port })
@@ -38,8 +40,8 @@ async function startServer() {
         process.exit(1)
       })
       .listen(port, () => {
-        console.log(`🚀 Server ready on http://${hostname}:${port}`)
-        console.log(`🔌 WebSocket server ready on ws://${hostname}:${port}/socket.io/`)
+        console.log(`🚀 Server ready on ${domain}`)
+        console.log(`🔌 WebSocket server ready on ${domain.replace('http', 'ws')}/socket.io/`)
       })
   } catch (err) {
     console.error('❌ Error starting server:', err)

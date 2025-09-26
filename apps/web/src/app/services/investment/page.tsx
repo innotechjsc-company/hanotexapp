@@ -207,11 +207,11 @@ export default function InvestmentPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="tel:02438251234"
+              href="tel:0848567193"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
             >
               <Phone className="h-5 w-5 mr-2" />
-              024 3825 1234
+              0848567193
             </a>
             <a 
               href="mailto:contact@hanotex.vn"

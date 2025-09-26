@@ -1,115 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Mock auction data
-const mockAuctions = [
-  {
-    id: "1",
-    technology_id: "1",
-    technology_title: "Hệ thống nhận dạng hình ảnh AI",
-    auction_type: "ENGLISH",
-    start_price: 1000000000,
-    reserve_price: 1500000000,
-    current_price: 1200000000,
-    currency: "VND",
-    start_time: "2024-12-01T09:00:00Z",
-    end_time: "2024-12-15T17:00:00Z",
-    status: "ACTIVE",
-    bid_count: 5,
-    highest_bidder: "user@hanotex.com",
-    created_at: "2024-11-01T00:00:00Z",
-    updated_at: "2024-11-15T00:00:00Z",
-  },
-  {
-    id: "2",
-    technology_id: "2",
-    technology_title: "Công nghệ xử lý nước thải tiên tiến",
-    auction_type: "DUTCH",
-    start_price: 2000000000,
-    reserve_price: 1000000000,
-    current_price: 1800000000,
-    currency: "VND",
-    start_time: "2024-12-05T10:00:00Z",
-    end_time: "2024-12-20T16:00:00Z",
-    status: "ACTIVE",
-    bid_count: 3,
-    highest_bidder: "company@hanotex.com",
-    created_at: "2024-11-05T00:00:00Z",
-    updated_at: "2024-11-20T00:00:00Z",
-  },
-  {
-    id: "3",
-    technology_id: "3",
-    technology_title: "Phần mềm quản lý tài nguyên doanh nghiệp",
-    auction_type: "SEALED",
-    start_price: 500000000,
-    reserve_price: 300000000,
-    current_price: 450000000,
-    currency: "VND",
-    start_time: "2024-11-20T09:00:00Z",
-    end_time: "2024-12-10T17:00:00Z",
-    status: "COMPLETED",
-    bid_count: 8,
-    highest_bidder: "user@hanotex.com",
-    created_at: "2024-10-20T00:00:00Z",
-    updated_at: "2024-12-10T00:00:00Z",
-  },
-];
-
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const status = searchParams.get("status");
-    const auction_type = searchParams.get("auction_type");
-    const sort = searchParams.get("sort") || "created_at";
-    const order = searchParams.get("order") || "DESC";
-
-    let filteredAuctions = [...mockAuctions];
-
-    // Apply filters
-    if (status) {
-      filteredAuctions = filteredAuctions.filter(
-        (auction) => auction.status === status
-      );
-    }
-    if (auction_type) {
-      filteredAuctions = filteredAuctions.filter(
-        (auction) => auction.auction_type === auction_type
-      );
-    }
-
-    // Sort
-    filteredAuctions.sort((a, b) => {
-      const aValue = a[sort as keyof typeof a];
-      const bValue = b[sort as keyof typeof b];
-
-      if (order === "ASC") {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
+    // Fetch from CMS API
+    const cmsApiUrl = `http://localhost:4000/api/auctions`;
+    console.log('Fetching auctions from CMS API URL:', cmsApiUrl);
+    console.log('Environment NEXT_PUBLIC_PAYLOAD_API_URL:', process.env.NEXT_PUBLIC_PAYLOAD_API_URL);
+    
+    const cmsResponse = await fetch(cmsApiUrl,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedAuctions = filteredAuctions.slice(startIndex, endIndex);
+    if (!cmsResponse.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch auctions" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({
-      success: true,
-      data: paginatedAuctions,
-      pagination: {
-        page,
-        limit,
-        total: filteredAuctions.length,
-        totalPages: Math.ceil(filteredAuctions.length / limit),
-      },
-    });
+    const data = await cmsResponse.json();
+    const auctions = data.docs || [];
+    
+    console.log('CMS API URL:', `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL}/auctions`);
+    console.log('Raw auction data from CMS:', JSON.stringify(auctions[0], null, 2));
+
+    // Category mapping from CMS codes to display names
+    const categoryMap: { [key: string]: string } = {
+      'it': 'Công nghệ thông tin',
+      'biotech': 'Công nghệ sinh học',
+      'energy': 'Công nghệ năng lượng',
+      'materials': 'Công nghệ vật liệu',
+      'medical': 'Công nghệ y tế',
+      'agriculture': 'Công nghệ nông nghiệp',
+    };
+
+    // Transform data for frontend
+    const transformedAuctions = auctions.map((auction: any) => ({
+      id: auction.id || '',
+      title: auction.title || 'Đấu giá không có tiêu đề',
+      currentBid: auction.currentBid || auction.startingPrice || 0,
+      bidCount: auction.bids?.length || 0,
+      timeLeft: auction.endTime ? calculateTimeLeft(new Date(auction.endTime)) : 'Không xác định',
+      viewers: auction.viewers || Math.floor(Math.random() * 50) + 10,
+      isActive: auction.endTime ? new Date() < new Date(auction.endTime) : false,
+      image: auction.image?.url || null,
+      category: categoryMap[auction.category] || auction.category || "Công nghệ thông tin",
+      endTime: auction.endTime ? new Date(auction.endTime) : new Date(),
+    }));
+
+    return NextResponse.json(transformedAuctions);
   } catch (error) {
-    console.error("Auctions API error:", error);
+    console.error("Error fetching auctions:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch auctions" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
@@ -118,47 +65,103 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      technology_id,
-      technology_title,
-      auction_type,
-      start_price,
-      reserve_price,
-      start_time,
-      end_time,
-    } = body;
-
-    // Mock auction creation
-    const newAuction = {
-      id: Date.now().toString(),
-      technology_id,
-      technology_title,
-      auction_type,
-      start_price,
-      reserve_price,
-      current_price: start_price,
-      currency: "VND",
-      start_time,
-      end_time,
-      status: "SCHEDULED",
-      bid_count: 0,
-      highest_bidder: "",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+    
+    console.log("Creating auction with data:", body);
+    
+    // Transform data for CMS
+    const cmsData = {
+      title: body.title,
+      description: {
+        root: {
+          type: "root",
+          children: [
+            {
+              type: "paragraph",
+              children: [
+                {
+                  type: "text",
+                  text: body.description,
+                },
+              ],
+            },
+          ],
+        },
+      },
+      category: body.category,
+      startingPrice: Number(body.startingPrice),
+      bidIncrement: Number(body.bidIncrement),
+      startTime: new Date(body.startTime).toISOString(),
+      endTime: new Date(body.endTime).toISOString(),
+      location: body.location,
+      organizer: body.organizer,
+      terms: Array.isArray(body.terms) ? body.terms.map((term: string) => ({ term })) : [{ term: "Thanh toán theo quy định" }],
+      status: "upcoming",
+      viewers: 0,
+      bidCount: 0,
+      currentBid: Number(body.startingPrice),
+      minBid: Number(body.startingPrice) + Number(body.bidIncrement),
     };
+    
+    console.log("Sending to CMS:", cmsData);
+    
+    // Create auction in CMS
+    const cmsResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL}/auctions?depth=1`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(cmsData),
+      }
+    );
 
-    mockAuctions.push(newAuction);
+    console.log("CMS Response status:", cmsResponse.status);
+    
+    if (!cmsResponse.ok) {
+      const errorData = await cmsResponse.json();
+      console.error("CMS Error:", errorData);
+      return NextResponse.json(
+        { error: errorData.message || "Failed to create auction" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({
+    const auction = await cmsResponse.json();
+    console.log("Auction created:", auction);
+    
+    return NextResponse.json({ 
       success: true,
-      data: newAuction,
-      message: "Auction created successfully",
+      id: auction.id,
+      message: "Auction created successfully"
     });
   } catch (error) {
-    console.error("Auction creation error:", error);
+    console.error("Error creating auction:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to create auction" },
+      { error: "Internal server error" },
       { status: 500 }
     );
+  }
+}
+
+function calculateTimeLeft(endTime: Date): string {
+  const now = new Date();
+  const diff = endTime.getTime() - now.getTime();
+  
+  if (diff <= 0) {
+    return "Đã kết thúc";
+  }
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (days > 0) {
+    return `${days} ngày ${hours} giờ`;
+  } else if (hours > 0) {
+    return `${hours} giờ ${minutes} phút`;
+  } else {
+    return `${minutes} phút`;
   }
 }

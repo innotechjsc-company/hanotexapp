@@ -65,7 +65,7 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: "Điện thoại",
-      details: ["024 3825 1234", "Hotline: 1900 1234"],
+      details: ["0848567193", "Hotline: 1900 1234"],
     },
     {
       icon: Mail,
@@ -120,7 +120,7 @@ export default function ContactPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <Phone className="h-4 w-4 mr-2" />
-                <span className="text-sm">024 3825 1234</span>
+                <span className="text-sm">0848567193</span>
               </div>
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <Mail className="h-4 w-4 mr-2" />

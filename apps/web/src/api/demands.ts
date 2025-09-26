@@ -60,7 +60,7 @@ export async function createDemand(data: Partial<Demand>): Promise<Demand> {
     API_ENDPOINTS.DEMANDS,
     data
   );
-  return response.data!;
+  return response as any as Demand;
 }
 
 /**

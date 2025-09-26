@@ -1,6 +1,7 @@
 'use client';
 
 import { Building2, Target, Users, Lightbulb } from 'lucide-react';
+import AnimatedIcon from '@/components/ui/AnimatedIcon';
 
 export default function IntroSection() {
   const features = [
@@ -42,10 +43,12 @@ export default function IntroSection() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors duration-300"
+              className="text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all duration-300 group"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4">
-                <feature.icon className="h-8 w-8" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4 group-hover:shadow-lg transition-shadow duration-300">
+                <AnimatedIcon animation="bounce" delay={index * 200} size="lg">
+                  <feature.icon className="h-8 w-8" />
+                </AnimatedIcon>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 {feature.title}
