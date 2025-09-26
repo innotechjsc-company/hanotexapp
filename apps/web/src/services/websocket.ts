@@ -123,7 +123,7 @@ class WebSocketService {
     if (!this.socket) return;
 
     this.socket.on("connect", () => {
-      console.log("🔌 Connected to WebSocket server");
+      console.log("🔌 Connected to WebSocket server ");
       this.isConnected = true;
 
       // Re-authenticate if we have user info
