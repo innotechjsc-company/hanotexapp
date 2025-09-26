@@ -35,13 +35,17 @@ import {
 } from "@heroui/react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getDemands } from "@/api/demands";
+import { getAllCategories } from "@/api/categories";
 import { Demand } from "@/types/demand";
+import { Category } from "@/types/categories";
 
 export default function DemandsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [demands, setDemands] = useState<Demand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
@@ -60,6 +64,28 @@ export default function DemandsPage() {
     totalDocs: 0,
   });
 
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const response = await getAllCategories({ limit: 100 }); // Get all categories
+      if (response.docs && Array.isArray(response.docs)) {
+        // Flatten the array if it's nested
+        const flattenedCategories = response.docs.flat();
+        setCategories(flattenedCategories);
+      } else if (response.data && Array.isArray(response.data)) {
+        setCategories(response.data);
+      } else {
+        setCategories([]);
+      }
+    } catch (err: any) {
+      console.error("Error fetching categories:", err);
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   // Fetch demands from API
   const fetchDemands = async () => {
     try {
@@ -73,7 +99,8 @@ export default function DemandsPage() {
         apiFilters["where[title][like]"] = activeSearchQuery;
       }
       if (filters.category) {
-        apiFilters.category = filters.category;
+        // Use the category ID for filtering
+        apiFilters["where[category][equals]"] = filters.category;
       }
       if (filters.status) {
         apiFilters.status = filters.status;
@@ -93,7 +120,6 @@ export default function DemandsPage() {
       );
 
       const response = await getDemands(apiFilters, paginationParams);
-      console.log("Demands API response:", response);
       if (response.docs && response.docs.length > 0) {
         // response.docs is Demand[][], so we need to flatten it
         const flattenedDemands = response.docs.flat();
@@ -121,6 +147,11 @@ export default function DemandsPage() {
       setLoading(false);
     }
   };
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     fetchDemands();
@@ -320,13 +351,13 @@ export default function DemandsPage() {
                   classNames={{
                     label: "text-sm font-medium text-foreground",
                   }}
+                  isLoading={categoriesLoading}
                 >
-                  <SelectItem key="Y tế">Y tế</SelectItem>
-                  <SelectItem key="Môi trường">Môi trường</SelectItem>
-                  <SelectItem key="Nông nghiệp">Nông nghiệp</SelectItem>
-                  <SelectItem key="Công nghệ thông tin">
-                    Công nghệ thông tin
-                  </SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id || category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </Select>
 
                 <Select
