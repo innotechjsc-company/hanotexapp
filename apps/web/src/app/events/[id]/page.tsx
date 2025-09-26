@@ -37,6 +37,7 @@ import {
 } from "@/api/eventComments";
 import { Event as ApiEvent } from "@/types/event";
 import { useAuth } from "@/store/auth";
+import { PAYLOAD_API_BASE_URL } from "@/api/config";
 
 interface EventDisplay extends ApiEvent {
   // Additional UI-specific fields
@@ -252,7 +253,6 @@ export default function EventDetailPage({
         // Fetch event from API
         const apiEvent = await getEventById(params.id);
         const displayEvent = transformEventForDisplay(apiEvent);
-
         setEvent(displayEvent);
 
         // Fetch comments for the event
@@ -295,13 +295,16 @@ export default function EventDetailPage({
     console.log("event", event);
   }, [event]);
 
-  const formatDate = (dateString: string) => {
+  const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
+    return date.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
-      month: "long",
-      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false, // Use 24-hour format
     });
   };
 
@@ -384,16 +387,15 @@ export default function EventDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with gradient background */}
-      <div className="relative bg-gradient-to-r from-primary-900 via-primary-800 to-primary-700 text-white">
-        {/* Background pattern */}
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        ></div>
+      {/* Header with event image background */}
+      <div
+        className="relative bg-cover bg-center text-white py-12 md:py-24 lg:py-32"
+        style={{
+          backgroundImage: `url(${PAYLOAD_API_BASE_URL?.replace("/api", "")}${event.image_url})`,
+        }}
+      >
+        {/* Overlay for text readability */}
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-8">
@@ -444,7 +446,7 @@ export default function EventDetailPage({
                   </h3>
 
                   <div className="flex items-center gap-4 mt-3">
-                    {event.location && (
+                    {/* {event.location && (
                       <a
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
                         target="_blank"
@@ -454,7 +456,7 @@ export default function EventDetailPage({
                         <ExternalLink className="h-4 w-4 mr-1" />
                         Xem trên Google Maps
                       </a>
-                    )}
+                    )} */}
                     {event.location_details?.googleMapsUrl && (
                       <a
                         href={event.location_details.googleMapsUrl}
@@ -484,48 +486,36 @@ export default function EventDetailPage({
                     Thời gian bắt đầu
                   </h3>
                   <p className="text-primary-900 font-medium text-lg">
-                    {event.date && formatDate(event.date)}{" "}
-                    {event.time && `• ${event.time}`}
+                    {event.start_date && formatDateTime(event.start_date)}
                   </p>
                 </div>
 
-                {/* Links hữu ích */}
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-sm font-medium text-gray-500 mb-3">
-                    Links hữu ích
+                <div className="bg-primary-50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-primary-700 mb-2 flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    Thời gian kết thúc
                   </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {event.location && (
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200 text-sm font-medium"
-                      >
-                        <MapPin className="h-4 w-4 mr-2" />
-                        Xem bản đồ
-                      </a>
-                    )}
-                    {event.contact_email && (
-                      <a
-                        href={`mailto:${event.contact_email}`}
-                        className="inline-flex items-center px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors duration-200 text-sm font-medium"
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Liên hệ email
-                      </a>
-                    )}
-                    {event.contact_phone && (
-                      <a
-                        href={`tel:${event.contact_phone}`}
-                        className="inline-flex items-center px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors duration-200 text-sm font-medium"
-                      >
-                        <Phone className="h-4 w-4 mr-2" />
-                        Gọi điện
-                      </a>
-                    )}
-                  </div>
+                  <p className="text-primary-900 font-medium text-lg">
+                    {event.end_date && formatDateTime(event.end_date)}
+                  </p>
                 </div>
+
+                {event.url && (
+                  <div className="bg-primary-50 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-primary-700 mb-2 flex items-center">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Link tham gia
+                    </h3>
+                    <a
+                      href={event.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 hover:text-primary-800 font-medium text-lg underline break-all"
+                    >
+                      {event.url}
+                    </a>
+                  </div>
+                )}
 
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
@@ -654,7 +644,8 @@ export default function EventDetailPage({
                     <div className="flex items-center">
                       <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
                       <p className="text-sm text-yellow-800">
-                        Hạn đăng ký: {formatDate(event.registration_deadline)}
+                        Hạn đăng ký:{" "}
+                        {formatDateTime(event.registration_deadline)}
                       </p>
                     </div>
                   </div>
@@ -696,62 +687,6 @@ export default function EventDetailPage({
                     {registering ? "Đang đăng ký..." : "Đăng ký ngay"}
                   </button>
                 )}
-              </div>
-            )}
-
-            {/* Contact Info Card */}
-            {(event.contact_email || event.contact_phone) && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <Phone className="h-5 w-5 mr-2 text-primary-600" />
-                  Thông tin liên hệ
-                </h3>
-                <div className="space-y-3">
-                  {event.contact_email && (
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-3 text-gray-500" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            Email
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {event.contact_email}
-                          </p>
-                        </div>
-                      </div>
-                      <a
-                        href={`mailto:${event.contact_email}`}
-                        className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200 text-sm font-medium"
-                      >
-                        <Mail className="h-3 w-3 mr-1" />
-                        Gửi email
-                      </a>
-                    </div>
-                  )}
-                  {event.contact_phone && (
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center">
-                        <Phone className="h-4 w-4 mr-3 text-gray-500" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            Điện thoại
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {event.contact_phone}
-                          </p>
-                        </div>
-                      </div>
-                      <a
-                        href={`tel:${event.contact_phone}`}
-                        className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200 text-sm font-medium"
-                      >
-                        <Phone className="h-3 w-3 mr-1" />
-                        Gọi ngay
-                      </a>
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
