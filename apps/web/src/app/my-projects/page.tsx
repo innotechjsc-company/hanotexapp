@@ -38,6 +38,7 @@ import {
   UploadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { FileTextOutlined } from "@ant-design/icons";
 import {
   getProjectsByUser,
   createProject,
@@ -1243,12 +1244,13 @@ export default function MyProjectsPage() {
       title: 'Hành động',
       key: 'actions',
       fixed: 'right',
-      width: 150,
+      width: 200,
       render: (_, record: Project) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
+          <Tooltip title="Xem chi tiết" color="#1677ff" overlayInnerStyle={{ color: 'white' }}>
             <Button
               type="text"
+              size="small"
               icon={<EyeOutlined />}
               onClick={() => {
                 setCurrentProject(record);
@@ -1256,9 +1258,21 @@ export default function MyProjectsPage() {
               }}
             />
           </Tooltip>
-          <Tooltip title="Chỉnh sửa">
+          <Tooltip title="Xem đề xuất" color="#1677ff" overlayInnerStyle={{ color: 'white' }}>
             <Button
               type="text"
+              size="small"
+              icon={<FileTextOutlined />}
+              onClick={() => {
+                const id = String((record as any).id || (record as any)._id);
+                router.push(`/my-proposals?projectId=${id}`);
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa" color="#52c41a" overlayInnerStyle={{ color: 'white' }}>
+            <Button
+              type="text"
+              size="small"
               icon={<EditOutlined />}
               onClick={() => {
                 if (!checkUserAuth(user, router)) return;
@@ -1267,7 +1281,11 @@ export default function MyProjectsPage() {
               }}
             />
           </Tooltip>
-          <Tooltip title="Xóa">
+          <Tooltip
+            title={<span style={{ color: '#ff4d4f' }}>Xóa</span>}
+            color="#fff"
+            overlayInnerStyle={{ color: '#ff4d4f', border: '1px solid #ff4d4f', backgroundColor: 'white' }}
+          >
             <Popconfirm
               title="Xác nhận xóa"
               description={`Bạn có chắc chắn muốn xóa dự án "${record.name}"?`}
@@ -1275,11 +1293,7 @@ export default function MyProjectsPage() {
               okText="Xóa"
               cancelText="Hủy"
             >
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-              />
+              <Button type="text" size="small" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           </Tooltip>
         </Space>
