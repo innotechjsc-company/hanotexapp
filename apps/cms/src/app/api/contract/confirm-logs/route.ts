@@ -8,6 +8,7 @@ type ConfirmContractLogBody = {
   status?: 'completed' | 'cancelled'
   reason?: string
   is_done_contract?: boolean
+  contract_id?: string
 }
 
 const buildCorsHeaders = async (req: Request) => {
@@ -75,12 +76,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 2) Update the log status / reason / is_done_contract
+    // 2) Update the log status / reason / is_done_contract / contract
     const updateData: Record<string, any> = {}
     if (body.status) updateData.status = body.status
     if (typeof body.is_done_contract === 'boolean')
       updateData.is_done_contract = body.is_done_contract
     if (body.status === 'cancelled' && body.reason) updateData.reason = body.reason
+    if (body.contract_id) updateData.contract = body.contract_id
 
     const updatedLog = await payload.update({
       collection: 'contract-logs',
