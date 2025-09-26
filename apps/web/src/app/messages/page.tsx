@@ -1378,42 +1378,59 @@ export default function MessagesPage() {
                             {messageReactions[message.id] &&
                               messageReactions[message.id].length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                  {messageReactions[message.id].map(
-                                    (reaction, index) => (
+                                  {Object.entries(
+                                    messageReactions[message.id].reduce(
+                                      (acc, reaction) => {
+                                        acc[reaction.emoji] =
+                                          (acc[reaction.emoji] || 0) + 1;
+                                        return acc;
+                                      },
+                                      {} as Record<string, number>
+                                    )
+                                  ).map(([emoji, count]) => {
+                                    const userHasReacted = messageReactions[
+                                      message.id
+                                    ].some(
+                                      (r) =>
+                                        r.userId === user?.id &&
+                                        r.emoji === emoji
+                                    );
+
+                                    return (
                                       <button
-                                        key={`${reaction.userId}-${reaction.emoji}-${index}`}
+                                        key={emoji}
                                         onClick={() => {
-                                          if (reaction.userId === user?.id) {
-                                            // Remove own reaction
+                                          const roomId =
+                                            typeof message.room === "string"
+                                              ? message.room
+                                              : message.room.id;
+
+                                          if (userHasReacted) {
                                             webSocketService.removeMessageReaction(
                                               message.id,
-                                              typeof message.room === "string"
-                                                ? message.room
-                                                : message.room.id,
-                                              reaction.emoji
+                                              roomId,
+                                              emoji
+                                            );
+                                          } else {
+                                            webSocketService.addMessageReaction(
+                                              message.id,
+                                              roomId,
+                                              emoji
                                             );
                                           }
                                         }}
                                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                                          reaction.userId === user?.id
+                                          userHasReacted
                                             ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                         } transition-colors`}
-                                        title={`${reaction.userName} reacted with ${reaction.emoji}`}
+                                        title={`Reacted with ${emoji}`}
                                       >
-                                        <span className="mr-1">
-                                          {reaction.emoji}
-                                        </span>
-                                        <span className="text-xs">
-                                          {
-                                            messageReactions[message.id].filter(
-                                              (r) => r.emoji === reaction.emoji
-                                            ).length
-                                          }
-                                        </span>
+                                        <span className="mr-1">{emoji}</span>
+                                        <span className="text-xs">{count}</span>
                                       </button>
-                                    )
-                                  )}
+                                    );
+                                  })}
                                 </div>
                               )}
 
