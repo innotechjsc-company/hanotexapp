@@ -12,9 +12,6 @@ services:
       - PORT=4000
     ports:
       - "4000:4000"
-    depends_on:
-      - postgres
-      - redis
     restart: unless-stopped
 
   # Web (Next.js) - Port 3000
