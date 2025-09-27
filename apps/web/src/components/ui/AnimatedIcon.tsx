@@ -1,47 +1,50 @@
 "use client";
-import React from "react";
-import { cn } from "@/lib/utils";
 
-export type AnimatedType = "bounce" | "pulse" | "rotate" | "float";
+import { ReactNode } from "react";
 
-export interface AnimatedIconProps {
-  children: React.ReactNode;
-  animation?: AnimatedType;
+interface AnimatedIconProps {
+  children: ReactNode;
+  animation?: 'bounce' | 'pulse' | 'rotate' | 'float' | 'spin' | 'shake' | 'heartbeat';
   delay?: number;
-  size?: "sm" | "md" | "lg";
   className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 function AnimatedIcon({
   children,
-  animation = "pulse",
+  animation = 'bounce',
   delay = 0,
-  size = "md",
-  className,
+  className = "",
+  size = 'md'
 }: AnimatedIconProps) {
-  const animateClass =
-    animation === "bounce"
-      ? "animate-bounce"
-      : animation === "rotate"
-      ? "animate-spin"
-      : animation === "float"
-      ? "animate-pulse"
-      : "animate-pulse";
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-6 h-6",
+    lg: "w-8 h-8",
+    xl: "w-12 h-12",
+  };
 
-  const scale = size === "sm" ? 0.9 : size === "lg" ? 1.1 : 1;
+  const animationClasses = {
+    bounce: "animate-bounce",
+    pulse: "animate-pulse",
+    rotate: "animate-spin",
+    float: "animate-bounce",
+    spin: "animate-spin",
+    shake: "animate-bounce",
+    heartbeat: "animate-pulse",
+  };
+
+  const delayStyle = delay ? { animationDelay: `${delay}ms` } : {};
 
   return (
-    <span
-      className={cn("inline-flex", animateClass, className)}
-      style={{ animationDelay: `${delay}ms`, transform: `scale(${scale})` }}
-      role="presentation"
+    <div 
+      className={`${sizeClasses[size]} ${animationClasses[animation]} ${className} inline-flex items-center justify-center`}
+      style={delayStyle}
     >
       {children}
-    </span>
+    </div>
   );
 }
 
-// Support both default and named export for compatibility across files
 export { AnimatedIcon };
 export default AnimatedIcon;
-

@@ -55,7 +55,7 @@ export const getStatusColor = (status: TechnologyStatus) => {
       return "success";
     case "rejected":
     case "inactive":
-      return "danger";
+      return "default";
     default:
       return "default";
   }

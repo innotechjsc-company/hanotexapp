@@ -7,10 +7,11 @@ import { technologyProposeApi } from "@/api/technology-propose";
 import { uploadFile } from "@/api/media";
 import toastService from "@/services/toastService";
 import type { Technology, TechnologyStatus } from "@/types";
+import type { FileUploadItem } from "@/components/input";
 
 export interface ContactFormState {
   description: string;
-  document: File | null;
+  documents: FileUploadItem[];
   budget: number | string;
 }
 
@@ -24,7 +25,7 @@ export function useTechnologyDetail(id?: string) {
   const [showContactForm, setShowContactForm] = useState<boolean>(false);
   const [contactForm, setContactForm] = useState<ContactFormState>({
     description: "",
-    document: null,
+    documents: [],
     budget: "",
   });
   const [contactSubmitting, setContactSubmitting] = useState<boolean>(false);
@@ -140,7 +141,7 @@ export function useTechnologyDetail(id?: string) {
       draft: "bg-gray-100 text-gray-800",
       pending: "bg-yellow-100 text-yellow-800",
       approved: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
+      rejected: "bg-gray-100 text-gray-800",
       active: "bg-blue-100 text-blue-800",
       inactive: "bg-gray-100 text-gray-800",
     };
@@ -154,15 +155,12 @@ export function useTechnologyDetail(id?: string) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name } = e.target as HTMLInputElement;
-    if (name === "document") {
-      const input = e.target as HTMLInputElement;
-      const file =
-        input.files && input.files.length > 0 ? input.files[0] : null;
-      setContactForm((prev) => ({ ...prev, document: file }));
-      return;
-    }
     const value = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
     setContactForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onDocumentsChange = (documents: FileUploadItem[]) => {
+    setContactForm((prev) => ({ ...prev, documents }));
   };
 
   const onSubmitContact = async (e: React.FormEvent) => {
@@ -171,17 +169,26 @@ export function useTechnologyDetail(id?: string) {
     try {
       if (!id) throw new Error("Thiếu ID công nghệ");
 
-      let documentId: number | string | undefined;
-      if (contactForm.document) {
-        const uploaded = await uploadFile(contactForm.document);
-        documentId = (uploaded as any)?.id ?? (uploaded as any)?._id;
+      // Handle multiple documents
+      let documentIds: (number | string)[] = [];
+      if (contactForm.documents && contactForm.documents.length > 0) {
+        // Only upload documents that are successfully uploaded (have uploadStatus 'done')
+        const uploadedDocs = contactForm.documents.filter(
+          (doc) => doc.uploadStatus === "done" && doc.id
+        );
+        documentIds = uploadedDocs.map((doc) => doc.id);
       }
+
+      // For now, we'll send the first document ID to maintain API compatibility
+      // In the future, the API should be updated to support multiple documents
+      const primaryDocumentId =
+        documentIds.length > 0 ? documentIds[0] : undefined;
 
       await technologyProposeApi.create({
         technology: id as any,
         user: (user as any)?.id,
         description: contactForm.description,
-        document: documentId as any,
+        document: primaryDocumentId as any,
         budget: Number(contactForm.budget) || 0,
       } as any);
 
@@ -195,7 +202,7 @@ export function useTechnologyDetail(id?: string) {
       setShowContactForm(false);
       setContactForm({
         description: "",
-        document: null,
+        documents: [],
         budget: "",
       });
     } catch (err) {
@@ -245,6 +252,7 @@ export function useTechnologyDetail(id?: string) {
     onOpenContact,
     onCloseContact,
     onContactChange,
+    onDocumentsChange,
     onSubmitContact,
   } as const;
 }

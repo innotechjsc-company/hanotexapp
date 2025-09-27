@@ -23,8 +23,7 @@ export const Bids: CollectionConfig = {
     },
     {
       name: 'bidder',
-      type: 'relationship',
-      relationTo: 'users',
+      type: 'text',
       required: true,
       label: 'Người đặt giá',
     },

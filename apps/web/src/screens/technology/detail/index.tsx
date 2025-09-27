@@ -35,6 +35,7 @@ export default function TechnologyDetailScreen({
     onOpenContact,
     onCloseContact,
     onContactChange,
+    onDocumentsChange,
     onSubmitContact,
   } = useTechnologyDetail(id);
 
@@ -50,7 +51,7 @@ export default function TechnologyDetailScreen({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">
+          <div className="text-gray-600 text-xl mb-4">
             {error || "Không tìm thấy công nghệ"}
           </div>
         </div>
@@ -109,6 +110,7 @@ export default function TechnologyDetailScreen({
         onClose={onCloseContact}
         onSubmit={onSubmitContact}
         onChange={onContactChange}
+        onDocumentsChange={onDocumentsChange}
         value={contactForm}
         loading={contactSubmitting}
       />

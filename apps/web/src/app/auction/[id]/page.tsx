@@ -9,6 +9,8 @@ import AuctionDetails from "@/components/auction/AuctionDetails";
 import { Clock, AlertCircle, CheckCircle, Gavel, TrendingUp, Eye } from "lucide-react";
 import { SectionBanner } from "@/components/ui/SectionBanner";
 import { AnimatedIcon } from "@/components/ui/AnimatedIcon";
+import Toast, { useToast } from "@/components/ui/Toast";
+import { useAuctionWebSocket } from "@/hooks/useWebSocket";
 
 interface Auction {
   id: string;
@@ -24,6 +26,7 @@ interface Auction {
   viewers: number;
   isActive: boolean;
   isWatching: boolean;
+  status: 'upcoming' | 'active' | 'ended' | 'unknown';
   location: string;
   organizer: {
     name: string;
@@ -54,10 +57,100 @@ export default function AuctionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isWatching, setIsWatching] = useState(false);
+  const { toast, showToast, hideToast } = useToast();
+  
+  // WebSocket for real-time updates
+  const { 
+    bids: wsBids, 
+    currentPrice: wsCurrentPrice, 
+    auctionStatus: wsAuctionStatus,
+    placeBid: wsPlaceBid,
+    isConnected: wsConnected 
+  } = useAuctionWebSocket(auctionId);
 
   useEffect(() => {
     fetchAuction();
   }, [auctionId]);
+  
+  // Sync WebSocket bid updates with auction state
+  useEffect(() => {
+    if (wsBids.length > 0 && auction) {
+      // Update auction with real-time bid data
+      setAuction(prev => prev ? {
+        ...prev,
+        currentBid: wsCurrentPrice || prev.currentBid,
+        bidCount: wsBids.length,
+        bids: wsBids.map(bid => ({
+          id: bid.id || `ws_${Date.now()}`,
+          amount: bid.bidAmount || bid.amount,
+          bidder: bid.bidder || 'Anonymous',
+          timestamp: new Date(bid.timestamp || Date.now()),
+          isWinning: bid.isWinning || false
+        }))
+      } : null);
+      
+      // Save to localStorage for persistence
+      if (wsBids.length > 0) {
+        localStorage.setItem(`auction_bids_${auctionId}`, JSON.stringify(wsBids));
+      }
+      
+      // Show notification for new bids (not your own)
+      const latestBid = wsBids[0];
+      if (latestBid && latestBid.bidder !== 'Current User') {
+        showToast(
+          `Có người đấu giá mới: ${(latestBid.bidAmount || latestBid.amount).toLocaleString()} VNĐ`,
+          "info"
+        );
+      }
+    }
+  }, [wsBids, wsCurrentPrice, auctionId]);
+  
+  // Check auction status and winner
+  useEffect(() => {
+    if (!auction) return;
+    
+    const checkAuctionStatus = () => {
+      const now = new Date();
+      const endTime = new Date(auction.endTime);
+      
+      if (now > endTime && auction.isActive) {
+        // Auction has ended, determine winner
+        const winner = determineWinner();
+        if (winner) {
+          showToast(
+            `Đấu giá đã kết thúc! Người thắng: ${winner.bidder} với giá ${winner.amount.toLocaleString()} VNĐ`,
+            "success"
+          );
+        } else {
+          showToast("Đấu giá đã kết thúc! Không có người đấu giá.", "info");
+        }
+        
+        // Update auction status
+        setAuction(prev => prev ? { ...prev, isActive: false } : null);
+      }
+    };
+    
+    // Check immediately
+    checkAuctionStatus();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkAuctionStatus, 30000);
+    
+    return () => clearInterval(interval);
+  }, [auction]);
+  
+  const determineWinner = () => {
+    if (!auction || !auction.bids || auction.bids.length === 0) {
+      return null;
+    }
+    
+    // Get highest bid
+    const highestBid = auction.bids.reduce((highest, current) => {
+      return current.amount > highest.amount ? current : highest;
+    }, auction.bids[0]);
+    
+    return highestBid;
+  };
 
   const fetchAuction = async () => {
     try {
@@ -68,6 +161,28 @@ export default function AuctionPage() {
         throw new Error("Không thể tải thông tin đấu giá");
       }
       const data = await response.json();
+      
+      // Load bid history from localStorage
+      const storedBids = localStorage.getItem(`auction_bids_${auctionId}`);
+      if (storedBids) {
+        try {
+          const parsedBids = JSON.parse(storedBids);
+          data.bids = parsedBids.map((bid: any) => ({
+            ...bid,
+            timestamp: new Date(bid.timestamp)
+          }));
+          data.bidCount = parsedBids.length;
+          
+          // Update currentBid from latest bid
+          if (parsedBids.length > 0) {
+            const latestBid = parsedBids[parsedBids.length - 1];
+            data.currentBid = latestBid.amount;
+          }
+        } catch (e) {
+          console.warn('Failed to parse stored bids:', e);
+        }
+      }
+      
       setAuction(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
@@ -87,13 +202,80 @@ export default function AuctionPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Không thể thực hiện đấu giá");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Không thể thực hiện đấu giá");
       }
 
       const result = await response.json();
-      setAuction(result.auction);
+      
+      if (result.success) {
+        // Update auction data
+        const updatedAuction = result.auction;
+        setAuction(updatedAuction);
+        
+        // Save bid to localStorage for persistence
+        const newBid = {
+          id: `bid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          amount: amount,
+          bidder: 'Current User', // TODO: Get from authentication
+          timestamp: new Date().toISOString(),
+          isWinning: true
+        };
+        
+        // Get existing bids from localStorage
+        const storedBids = localStorage.getItem(`auction_bids_${auctionId}`);
+        let allBids = [];
+        
+        if (storedBids) {
+          try {
+            allBids = JSON.parse(storedBids);
+            // Mark all previous bids as not winning
+            allBids = allBids.map((bid: any) => ({ ...bid, isWinning: false }));
+          } catch (e) {
+            console.warn('Failed to parse stored bids:', e);
+            allBids = [];
+          }
+        }
+        
+        // Add new bid
+        allBids.push(newBid);
+        
+        // Save updated bids to localStorage
+        localStorage.setItem(`auction_bids_${auctionId}`, JSON.stringify(allBids));
+        
+        console.log('Bid history updated:', {
+          totalBids: allBids.length,
+          latestBid: newBid,
+          allBids: allBids
+        });
+        
+        // Update auction state with bid history
+        setAuction(prev => prev ? {
+          ...prev,
+          currentBid: amount,
+          bidCount: allBids.length,
+          bids: allBids.map(bid => ({
+            ...bid,
+            timestamp: new Date(bid.timestamp)
+          }))
+        } : null);
+        
+        // Show success notification
+        showToast(
+          `Đấu giá thành công! Giá hiện tại: ${amount.toLocaleString()} VNĐ`,
+          "success"
+        );
+        
+        // Dispatch custom event to notify other pages
+        window.dispatchEvent(new CustomEvent('bidPlaced', { 
+          detail: { auctionId, amount, bidCount: allBids.length } 
+        }));
+      } else {
+        throw new Error(result.message || "Đấu giá không thành công");
+      }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      showToast(errorMessage, "error");
     }
   };
 
@@ -190,10 +372,11 @@ export default function AuctionPage() {
           <div className="lg:col-span-2 space-y-6">
             <BiddingSection
               currentBid={auction.currentBid || 0}
-              minBid={auction.minBid || 0}
+              minBid={(auction.currentBid || 0) + (auction.bidIncrement || 100000)}
               bidIncrement={auction.bidIncrement || 100000}
               timeLeft={auction.timeLeft || 'Không xác định'}
               isActive={auction.isActive || false}
+              status={auction.status}
               onBid={handleBid}
               onAutoBid={handleAutoBid}
             />
@@ -293,6 +476,14 @@ export default function AuctionPage() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 }

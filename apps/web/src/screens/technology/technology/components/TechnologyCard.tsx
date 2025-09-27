@@ -1,6 +1,13 @@
 "use client";
 
-import { Button, Card, Tag, Tooltip } from "antd";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Chip,
+} from "@heroui/react";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
@@ -8,7 +15,7 @@ import { Technology } from "@/types";
 interface TechnologyCardProps {
   item: Technology;
   viewMode: ViewMode;
-  trlChipColor: (level?: number) => "danger" | "warning" | "success";
+  trlChipColor: (level?: number) => "default" | "warning" | "success";
   statusChipColor: (status?: string) => "success" | "warning" | "default";
 }
 
@@ -26,6 +33,28 @@ function getOwnerName(item: any): string | undefined {
   if (item?.owner?.name) return item.owner.name;
   if (Array.isArray(item?.owners) && item.owners[0]?.owner_name)
     return item.owners[0].owner_name;
+  return undefined;
+}
+
+function getTerritoryInfo(item: any): string | undefined {
+  // Try to get territory/scope information
+  const protectionScope = item?.legal_certification?.protection_scope;
+  if (Array.isArray(protectionScope) && protectionScope.length > 0) {
+    return protectionScope.map((scope: any) => scope.scope).join(", ");
+  }
+  return undefined;
+}
+
+function getOwnerType(item: any): string | undefined {
+  if (Array.isArray(item?.owners) && item.owners[0]?.owner_type) {
+    const ownerType = item.owners[0].owner_type;
+    const typeMap: Record<string, string> = {
+      'individual': 'Cá nhân',
+      'company': 'Doanh nghiệp',
+      'research_institution': 'Viện/Trường'
+    };
+    return typeMap[ownerType] || ownerType;
+  }
   return undefined;
 }
 
@@ -67,6 +96,9 @@ export default function TechnologyCard({
 }: TechnologyCardProps) {
   const normalizedStatus = String(item?.status ?? "").toUpperCase();
   const categoryName = getCategoryName(item);
+  const ownerName = getOwnerName(item);
+  const ownerType = getOwnerType(item);
+  const territoryInfo = getTerritoryInfo(item);
   const { price, currency } = getPricing(item);
   const thumb = getThumb(item);
   const href = item?.id ? `/technologies/${item.id}` : "#";
@@ -85,95 +117,93 @@ export default function TechnologyCard({
   if (viewMode === "list") {
     return (
       <Card
-        hoverable
-        className="w-full overflow-hidden transition-all"
-        style={{ height: 180, display: "flex", flexDirection: "column" }}
-        bodyStyle={{ padding: 12, display: "flex", flexDirection: "column", height: "100%" }}
+        shadow="sm"
+        className="w-full overflow-hidden hover:shadow-lg transition-all"
       >
-        <div className="flex h-full flex-col sm:flex-row">
-          <div className="flex h-full flex-1 flex-col">
-            <div className="mb-1 flex items-start justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row">
+          {/* Content */}
+          <div className="p-4 flex flex-col flex-1">
+            {/* Header with chips - improved layout */}
+            <div className="flex flex-col gap-2 mb-3">
+              {/* First row: Category only */}
+              <div className="flex justify-start">
                 {categoryName && (
-                  <Tooltip title={categoryName}>
-                    <Tag
-                      color="blue"
-                      style={{
-                        maxWidth: 160,
-                        display: "inline-block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "0 6px",
-                        fontSize: 12,
-                      }}
-                    >
-                      {categoryName}
-                    </Tag>
-                  </Tooltip>
-                )}
-                {item.trl_level && (
-                  <Tag
-                    color={
-                      trlChipColor(Number(item.trl_level)) === "danger"
-                        ? "red"
-                        : trlChipColor(Number(item.trl_level)) === "warning"
-                          ? "orange"
-                          : "green"
-                    }
-                    style={{ padding: "0 6px", fontSize: 12 }}
+                  <Chip 
+                    size="sm" 
+                    variant="flat" 
+                    color="primary"
+                    className="max-w-full"
                   >
-                    TRL {item.trl_level}
-                  </Tag>
+                    <span className="truncate block" title={categoryName}>
+                      {categoryName}
+                    </span>
+                  </Chip>
                 )}
               </div>
-              <Tag
-                color={
-                  statusChipColor(item.status) === "success"
-                    ? "green"
-                    : statusChipColor(item.status) === "warning"
-                      ? "orange"
-                      : "default"
-                }
-                className="shrink-0"
-                style={{ padding: "0 6px", fontSize: 12 }}
-              >
-                {StatusLabel}
-              </Tag>
+              
+              {/* Second row: Status, TRL and Owner info */}
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    color={statusChipColor(item.status)}
+                    className="whitespace-nowrap"
+                  >
+                    {StatusLabel}
+                  </Chip>
+                  {item.trl_level && (
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color={trlChipColor(Number(item.trl_level))}
+                    >
+                      TRL {item.trl_level}
+                    </Chip>
+                  )}
+                  {ownerType && (
+                    <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
+                      {ownerType}
+                    </span>
+                  )}
+                </div>
+                {ownerName && (
+                  <span className="text-xs text-default-600 truncate max-w-[150px]" title={ownerName}>
+                    {ownerName}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <h3
-              className="mb-1 font-semibold text-foreground"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              } as any}
-            >
-              <Link href={href} className="transition-colors hover:text-primary">
+            <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+              <Link
+                href={href}
+                className="hover:text-primary transition-colors"
+              >
                 {item.title}
               </Link>
             </h3>
 
             {item.description && (
-              <p
-                className="mb-3 text-sm text-default-600"
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                } as any}
-              >
+              <p className="text-sm text-default-600 mb-3 line-clamp-2">
                 {item.description}
               </p>
             )}
 
-            <div className="mt-auto flex items-end justify-between">
+            {/* Territory information */}
+            {territoryInfo && (
+              <div className="mb-3">
+                <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
+                <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
+                  {territoryInfo}
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-end justify-between mt-auto">
               <div className="min-w-0">
                 {formattedPrice ? (
-                  <p className="truncate font-bold text-primary">
+                  <p className="font-bold text-primary truncate">
                     {formattedPrice} {currency}
                   </p>
                 ) : (
@@ -182,11 +212,9 @@ export default function TechnologyCard({
                   </p>
                 )}
               </div>
-              <Link href={href}>
-                <Button type="primary" size="small">
-                  Xem chi tiết
-                </Button>
-              </Link>
+              <Button as={Link} href={href} color="primary" size="sm">
+                Xem chi tiết
+              </Button>
             </div>
           </div>
         </div>
@@ -197,92 +225,104 @@ export default function TechnologyCard({
   // Grid mode
   return (
     <Card
-      hoverable
-      className="flex flex-col overflow-hidden transition-all"
-      style={{ height: 240 }}
-      bodyStyle={{ padding: 12, display: "flex", flexDirection: "column", flex: "1 1 auto" }}
+      shadow="sm"
+      className="h-full overflow-hidden hover:shadow-lg transition-all flex flex-col"
     >
-      <div className="flex-1">
-        <div className="mb-1 flex items-center justify-between gap-2">
-          {categoryName && (
-            <Tooltip title={categoryName}>
-              <Tag
-                color="blue"
-                className="max-w-max"
-                style={{
-                  maxWidth: 160,
-                  display: "inline-block",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  padding: "0 6px",
-                  fontSize: 12,
-                }}
+      <CardBody className="p-4 flex-1">
+        {/* Header with chips - improved layout */}
+        <div className="flex flex-col gap-2 mb-3">
+          {/* First row: Category and Status */}
+          <div className="flex justify-between items-start gap-3">
+            <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 90px)' }}>
+              {categoryName && (
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  color="primary"
+                  className="w-full"
+                >
+                  <span className="truncate block" title={categoryName}>
+                    {categoryName}
+                  </span>
+                </Chip>
+              )}
+            </div>
+            <div className="flex-shrink-0" style={{ minWidth: '70px' }}>
+              <Chip
+                size="sm"
+                variant="flat"
+                color={statusChipColor(item.status)}
+                className="whitespace-nowrap w-full"
               >
-                {categoryName}
-              </Tag>
-            </Tooltip>
-          )}
-          {item.trl_level && (
-            <Tag
-              color={
-                trlChipColor(Number(item.trl_level)) === "danger"
-                  ? "red"
-                  : trlChipColor(Number(item.trl_level)) === "warning"
-                    ? "orange"
-                    : "green"
-              }
-              style={{ padding: "0 6px", fontSize: 12 }}
-            >
-              TRL {item.trl_level}
-            </Tag>
-          )}
+                {StatusLabel}
+              </Chip>
+            </div>
+          </div>
+          
+          {/* Second row: TRL and Owner info */}
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex items-center gap-2">
+              {item.trl_level && (
+                <Chip size="sm" variant="flat" color={trlChipColor(item.trl_level)}>
+                  TRL {item.trl_level}
+                </Chip>
+              )}
+              {ownerType && (
+                <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
+                  {ownerType}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        <h3
-          className="mb-1 min-h-[2.5rem] font-semibold text-foreground"
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          } as any}
-        >
-          <Link href={href} className="transition-colors hover:text-primary">
+        <h3 className="font-semibold text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
+          <Link href={href} className="hover:text-primary transition-colors">
             {item.title}
           </Link>
         </h3>
 
         {item.description && (
-          <p
-            className="min-h-[4.5rem] text-sm text-default-600"
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            } as any}
-          >
+          <p className="text-sm text-default-600 mb-3 line-clamp-2">
             {item.description}
           </p>
         )}
-      </div>
-      <div className="flex items-center justify-between bg-gray-50 p-3">
+
+        {/* Additional info */}
+        <div className="space-y-2 mb-3">
+          {ownerName && (
+            <div>
+              <p className="text-xs text-default-500 mb-1">Đơn vị sở hữu:</p>
+              <p className="text-xs text-default-600 truncate" title={ownerName}>
+                {ownerName}
+              </p>
+            </div>
+          )}
+          
+          {territoryInfo && (
+            <div>
+              <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
+              <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
+                {territoryInfo}
+              </p>
+            </div>
+          )}
+        </div>
+      </CardBody>
+      <CardFooter className="p-4 flex items-center justify-between bg-content2">
         <div className="min-w-0">
           {formattedPrice ? (
-            <p className="truncate font-bold text-primary">
+            <p className="font-bold text-primary truncate">
               {formattedPrice} {currency}
             </p>
           ) : (
             <p className="text-sm font-medium text-default-600">Thương lượng</p>
           )}
         </div>
-        <Link href={href}>
-          <Button type="primary" size="small">
-            Chi tiết
-          </Button>
-        </Link>
-      </div>
+        <Button as={Link} href={href} color="primary" size="sm">
+          Chi tiết
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
