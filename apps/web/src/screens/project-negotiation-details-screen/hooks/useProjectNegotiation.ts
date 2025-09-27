@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { message } from "antd";
 import { projectProposeApi } from "@/api/project-propose";
 import {
@@ -151,25 +151,14 @@ export const useProjectNegotiation = ({
     message: string;
     attachments: File[];
   }>({ message: "", attachments: [] });
+  const offerCacheRef = useRef<Map<string, ApiOffer>>(new Map());
 
-  useEffect(() => {
-    if (projectProposeId && currentUser) {
-      fetchProjectProposalDetails();
-    }
-  }, [projectProposeId, currentUser]);
-
-  // Fetch messages and latest offer after proposal is loaded
-  useEffect(() => {
-    if (projectProposeId && currentUser && projectProposal) {
-      fetchNegotiationMessages();
-      fetchLatestOffer();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectProposeId, currentUser, projectProposal]);
-
-  const fetchProjectProposalDetails = async () => {
+  const fetchProjectProposalDetails = useCallback(async (options: { silent?: boolean } = {}) => {
+    const { silent = false } = options;
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError("");
       const data = await projectProposeApi.getById(projectProposeId);
       setProjectProposal(data);
@@ -177,11 +166,54 @@ export const useProjectNegotiation = ({
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(`Không thể tải thông tin đề xuất dự án: ${errorMessage}`);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
-  };
+  }, [projectProposeId]);
 
-  const fetchNegotiationMessages = async () => {
+  const ensureOfferDetails = useCallback(
+    async (message: ApiNegotiatingMessage): Promise<ApiNegotiatingMessage> => {
+      if (message.is_offer && message.offer) {
+        if (typeof message.offer === "object" && message.offer.id) {
+          offerCacheRef.current.set(message.offer.id, message.offer as ApiOffer);
+          return message;
+        }
+
+        if (typeof message.offer === "string") {
+          const cached = offerCacheRef.current.get(message.offer);
+          if (cached) {
+            return { ...message, offer: cached };
+          }
+
+          try {
+            const resolvedOffer = await offerApi.getById(message.offer);
+            offerCacheRef.current.set(resolvedOffer.id, resolvedOffer);
+            return { ...message, offer: resolvedOffer };
+          } catch (offerError) {
+            console.error("Failed to load offer for negotiation message:", offerError);
+          }
+        }
+      }
+
+      return message;
+    },
+    []
+  );
+
+  const enrichMessagesWithOffers = useCallback(
+    async (items: ApiNegotiatingMessage[]): Promise<ApiNegotiatingMessage[]> => {
+      if (items.length === 0) {
+        return items;
+      }
+
+      const enriched = await Promise.all(items.map(ensureOfferDetails));
+      return enriched;
+    },
+    [ensureOfferDetails]
+  );
+
+  const fetchNegotiationMessages = useCallback(async () => {
     try {
       // Fetch negotiation data using the API for project proposals
       const params: any = { 
@@ -192,19 +224,20 @@ export const useProjectNegotiation = ({
       const response = await negotiatingMessageApi.getMessages(params);
 
       // Use the messages directly from API without transformation
-      const messages =
+      const rawMessages =
         (response.docs as unknown as ApiNegotiatingMessage[]) || [];
 
-      console.log("Fetched project negotiation messages:", messages);
-      setMessages(messages);
+      console.log("Fetched project negotiation messages:", rawMessages);
+      const normalizedMessages = await enrichMessagesWithOffers(rawMessages);
+      setMessages(normalizedMessages);
     } catch (err) {
       console.error("Failed to fetch project negotiation data:", err);
       // Fallback to empty array on error
       setMessages([]);
     }
-  };
+  }, [projectProposeId, enrichMessagesWithOffers]);
 
-  const fetchLatestOffer = async () => {
+  const fetchLatestOffer = useCallback(async () => {
     try {
       // Project proposals may also have offers
       const offer = await offerApi.getLatestForProjectProposal(projectProposeId);
@@ -213,7 +246,47 @@ export const useProjectNegotiation = ({
       console.error("Failed to fetch latest offer for project:", err);
       setLatestOffer(null);
     }
-  };
+  }, [projectProposeId]);
+
+  useEffect(() => {
+    if (projectProposeId && currentUser) {
+      fetchProjectProposalDetails();
+    }
+  }, [projectProposeId, currentUser, fetchProjectProposalDetails]);
+
+  // Fetch messages and latest offer after proposal is loaded
+  useEffect(() => {
+    if (projectProposeId && currentUser && projectProposal) {
+      fetchNegotiationMessages();
+      fetchLatestOffer();
+    }
+  }, [
+    projectProposeId,
+    currentUser,
+    projectProposal,
+    fetchNegotiationMessages,
+    fetchLatestOffer,
+  ]);
+
+  useEffect(() => {
+    if (!projectProposeId || !currentUser) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      fetchNegotiationMessages();
+      fetchLatestOffer();
+      fetchProjectProposalDetails({ silent: true });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [
+    projectProposeId,
+    currentUser,
+    fetchNegotiationMessages,
+    fetchLatestOffer,
+    fetchProjectProposalDetails,
+  ]);
 
   const handleSendMessage = async (values: { message: string }) => {
     if (!values.message.trim() && attachments.length === 0) {

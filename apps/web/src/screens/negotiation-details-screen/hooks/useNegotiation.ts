@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { message } from "antd";
 import { technologyProposeApi } from "@/api/technology-propose";
 import { getProposeById } from "@/api/propose";
@@ -168,6 +168,7 @@ export const useNegotiation = ({
     attachments: File[];
   }>({ message: "", attachments: [] });
   const [isTechnologyPropose, setIsTechnologyPropose] = useState<boolean>(true);
+  const offerCacheRef = useRef<Map<string, ApiOffer>>(new Map());
 
   const negotiationContext = useMemo(() => {
     if (forceType === 'technology' || forceType === 'propose') {
@@ -181,9 +182,12 @@ export const useNegotiation = ({
     return `negotiation:${negotiationContext}:${proposalId}`;
   }, [negotiationContext, proposalId]);
 
-  const fetchProposalDetails = useCallback(async () => {
+  const fetchProposalDetails = useCallback(async (options: { silent?: boolean } = {}) => {
+    const { silent = false } = options;
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       setError("");
       // Respect forced type if provided
       if (forceType === 'technology') {
@@ -211,9 +215,52 @@ export const useNegotiation = ({
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError(`Không thể tải thông tin đề xuất: ${errorMessage}`);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [forceType, proposalId]);
+
+  const ensureOfferDetails = useCallback(
+    async (message: ApiNegotiatingMessage): Promise<ApiNegotiatingMessage> => {
+      if (message.is_offer && message.offer) {
+        if (typeof message.offer === "object" && message.offer.id) {
+          offerCacheRef.current.set(message.offer.id, message.offer as ApiOffer);
+          return message;
+        }
+
+        if (typeof message.offer === "string") {
+          const cached = offerCacheRef.current.get(message.offer);
+          if (cached) {
+            return { ...message, offer: cached };
+          }
+
+          try {
+            const resolvedOffer = await offerApi.getById(message.offer);
+            offerCacheRef.current.set(resolvedOffer.id, resolvedOffer);
+            return { ...message, offer: resolvedOffer };
+          } catch (offerError) {
+            console.error("Failed to load offer for negotiation message:", offerError);
+          }
+        }
+      }
+
+      return message;
+    },
+    []
+  );
+
+  const enrichMessagesWithOffers = useCallback(
+    async (items: ApiNegotiatingMessage[]): Promise<ApiNegotiatingMessage[]> => {
+      if (items.length === 0) {
+        return items;
+      }
+
+      const enriched = await Promise.all(items.map(ensureOfferDetails));
+      return enriched;
+    },
+    [ensureOfferDetails]
+  );
 
   const fetchNegotiationMessages = useCallback(async () => {
     try {
@@ -224,17 +271,18 @@ export const useNegotiation = ({
       const response = await negotiatingMessageApi.getMessages(params);
 
       // Use the messages directly from API without transformation
-      const messages =
+      const rawMessages =
         (response.docs as unknown as ApiNegotiatingMessage[]) || [];
 
-      console.log("Fetched messages:", messages);
-      setMessages(messages);
+      console.log("Fetched messages:", rawMessages);
+      const normalizedMessages = await enrichMessagesWithOffers(rawMessages);
+      setMessages(normalizedMessages);
     } catch (err) {
       console.error("Failed to fetch negotiation data:", err);
       // Fallback to empty array on error
       setMessages([]);
     }
-  }, [isTechnologyPropose, proposalId]);
+  }, [isTechnologyPropose, proposalId, enrichMessagesWithOffers]);
 
   const fetchLatestOffer = useCallback(async () => {
     try {
@@ -263,6 +311,26 @@ export const useNegotiation = ({
       fetchLatestOffer();
     }
   }, [proposalId, currentUser, isTechnologyPropose, fetchNegotiationMessages, fetchLatestOffer]);
+
+  useEffect(() => {
+    if (!proposalId || !currentUser) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      fetchNegotiationMessages();
+      fetchLatestOffer();
+      fetchProposalDetails({ silent: true });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [
+    proposalId,
+    currentUser,
+    fetchNegotiationMessages,
+    fetchLatestOffer,
+    fetchProposalDetails,
+  ]);
 
   useEffect(() => {
     if (!negotiationRoomId || !currentUser?.id) {
@@ -305,20 +373,23 @@ export const useNegotiation = ({
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
 
-    const upsertMessage = (incoming: ApiNegotiatingMessage) => {
+    const upsertMessage = async (incoming: ApiNegotiatingMessage) => {
+      const normalized = await ensureOfferDetails(incoming);
+
       setMessages((prev) => {
-        const existingIndex = prev.findIndex((item) => item.id === incoming.id);
+        const existingIndex = prev.findIndex((item) => item.id === normalized.id);
         if (existingIndex !== -1) {
           const updated = [...prev];
-          updated[existingIndex] = incoming;
+          updated[existingIndex] = normalized;
           return sortMessages(updated);
         }
-        return sortMessages([...prev, incoming]);
+        return sortMessages([...prev, normalized]);
       });
 
-      if (incoming.is_offer) {
-        if (incoming.offer && typeof incoming.offer === "object") {
-          setLatestOffer(incoming.offer as ApiOffer);
+      if (normalized.is_offer) {
+        if (normalized.offer && typeof normalized.offer === "object") {
+          offerCacheRef.current.set(normalized.offer.id, normalized.offer as ApiOffer);
+          setLatestOffer(normalized.offer as ApiOffer);
         } else {
           fetchLatestOffer();
         }
@@ -327,14 +398,14 @@ export const useNegotiation = ({
 
     const handleNewMessage = (payload: NegotiationSocketMessagePayload) => {
       if (!payload?.message || payload.roomId !== negotiationRoomId) return;
-      upsertMessage(payload.message);
+      void upsertMessage(payload.message);
     };
 
     const handleUpdatedMessage = (
       payload: NegotiationSocketMessagePayload
     ) => {
       if (!payload?.message || payload.roomId !== negotiationRoomId) return;
-      upsertMessage(payload.message);
+      void upsertMessage(payload.message);
     };
 
     const handleDeletedMessage = (
@@ -377,6 +448,7 @@ export const useNegotiation = ({
     currentUser?.email,
     currentUser?.full_name,
     fetchLatestOffer,
+    ensureOfferDetails,
   ]);
 
   const handleSendMessage = async (values: { message: string }) => {
