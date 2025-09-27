@@ -18,14 +18,8 @@ export const getFullMediaUrl = (url: string): string => {
     return url;
   }
 
-  // Get base URL without /api suffix
-  let baseUrl =
-    process.env.NODE_ENV === "production"
-      ? "https://api.hanotex.vn"
-      : "http://localhost:4000";
-
-  // Remove /api suffix if present
-  baseUrl = baseUrl.replace(/\/api$/, "");
+  // Base URL derived from env-configured API, removing /api suffix
+  const baseUrl = (PAYLOAD_API_BASE_URL || "").replace(/\/api$/, "");
 
   // Ensure URL starts with /
   const cleanUrl = url.startsWith("/") ? url : `/${url}`;

@@ -35,6 +35,7 @@ export default function TechnologyDetailScreen({
     onOpenContact,
     onCloseContact,
     onContactChange,
+    onDocumentsChange,
     onSubmitContact,
   } = useTechnologyDetail(id);
 
@@ -109,6 +110,7 @@ export default function TechnologyDetailScreen({
         onClose={onCloseContact}
         onSubmit={onSubmitContact}
         onChange={onContactChange}
+        onDocumentsChange={onDocumentsChange}
         value={contactForm}
         loading={contactSubmitting}
       />
