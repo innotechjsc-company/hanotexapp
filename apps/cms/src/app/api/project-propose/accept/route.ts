@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { ProjectPropose as ProjectProposeType } from '@/payload-types'
 
 // CORS headers
 const corsHeaders = {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       collection: 'project-propose',
       id: projectProposeId,
       depth: 1,
-    })
+    }) as ProjectProposeType | null
 
     if (!projectPropose) {
       return NextResponse.json(
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!projectPropose.user || typeof (projectPropose as any).user === 'string') {
+    if (!projectPropose.user || typeof projectPropose.user === 'string') {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404, headers: corsHeaders },
@@ -55,9 +56,9 @@ export async function POST(request: NextRequest) {
 
     // Check if status is already negotiating or further
     if (
-      (projectPropose as any).status === 'negotiating' ||
-      (projectPropose as any).status === 'contract_signed' ||
-      (projectPropose as any).status === 'completed'
+      projectPropose.status === 'negotiating' ||
+      projectPropose.status === 'contract_signed' ||
+      projectPropose.status === 'completed'
     ) {
       return NextResponse.json(
         { error: 'Proposal is already in negotiation or completed' },
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       collection: 'negotiating-messages',
       data: {
         project_propose: projectProposeId,
-        user: (projectPropose as any).user?.id || (projectPropose as any).user,
+        user: typeof projectPropose.user === 'object' ? projectPropose.user.id : projectPropose.user,
         message: message || 'Đã chấp nhận đề xuất và sẵn sàng đàm phán.',
         is_offer: true,
       },
@@ -87,14 +88,14 @@ export async function POST(request: NextRequest) {
 
     // Create an offer linked to the negotiating message
     // Use proposal's investment_amount as initial price and the message as content
-    const initialPrice = (projectPropose as any).investment_amount || 0
+    const initialPrice = (projectPropose as unknown as { investment_amount?: number }).investment_amount || 0
     const offerContent = message || 'Đề xuất ban đầu được tạo khi chấp nhận đề xuất.'
 
     const offer = await payload.create({
       collection: 'offer',
       data: {
         project_propose: projectProposeId,
-        negotiating_messages: (negotiatingMessage as any).id,
+        negotiating_messages: (negotiatingMessage as { id: string }).id,
         content: offerContent,
         price: initialPrice,
       },
@@ -103,8 +104,8 @@ export async function POST(request: NextRequest) {
     // Link the created offer back to the negotiating message
     await payload.update({
       collection: 'negotiating-messages',
-      id: (negotiatingMessage as any).id,
-      data: { offer: (offer as any).id },
+      id: (negotiatingMessage as { id: string }).id,
+      data: { offer: (offer as { id: string }).id },
     })
 
     return NextResponse.json(
@@ -125,4 +126,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
