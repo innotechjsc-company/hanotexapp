@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { getPayload, type CollectionSlug } from 'payload'
 import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'
+import type { Offer, TechnologyPropose, ProjectPropose, Propose, Technology } from '@/payload-types'
 
 type AcceptOfferBody = {
   offer_id: string
@@ -10,7 +11,9 @@ type AcceptOfferBody = {
 const buildCorsHeaders = async (req: Request) => {
   const config = await configPromise
   const origin = req.headers.get('origin') || ''
-  const allowedOrigins = (config as any)?.cors || []
+  const allowedOrigins = Array.isArray((config as { cors?: string[] } | undefined)?.cors)
+    ? ((config as { cors?: string[] }).cors as string[])
+    : []
   const isAllowed = Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)
 
   const headers: Record<string, string> = {
@@ -46,19 +49,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user is authenticated
-    await authenticateUser(req as any, corsHeaders)
+    await authenticateUser(req, corsHeaders)
 
     const payload = await getPayload({ config: configPromise })
 
     // 1) Load the offer
-    const offer = await payload.findByID({ collection: 'offer', id: body.offer_id, depth: 1 })
+    const offer = await payload.findByID({ collection: 'offer', id: body.offer_id, depth: 1 }) as Offer | null
     if (!offer) {
       return Response.json(
         { success: false, error: 'Offer not found' },
         { status: 404, headers: corsHeaders },
       )
     }
-    if ((offer as any).status === 'accepted') {
+    if (offer.status === 'accepted') {
       return Response.json(
         { success: false, error: 'Offer already accepted' },
         { status: 400, headers: corsHeaders },
@@ -71,13 +74,15 @@ export async function POST(req: NextRequest) {
       id: body.offer_id,
       data: { status: 'accepted' },
       overrideAccess: true,
-    })
+    }) as Offer
 
     // Detect which propose type the offer belongs to
-    const offerAny: any = offer
-    const techPropId = offerAny?.technology_propose?.id || offerAny?.technology_propose
-    const projPropId = offerAny?.project_propose?.id || offerAny?.project_propose
-    const propId = offerAny?.propose?.id || offerAny?.propose
+    const techPropRel = offer.technology_propose
+    const projPropRel = offer.project_propose
+    const propRel = offer.propose
+    const techPropId = typeof techPropRel === 'object' && techPropRel !== null ? techPropRel.id : techPropRel ?? undefined
+    const projPropId = typeof projPropRel === 'object' && projPropRel !== null ? projPropRel.id : projPropRel ?? undefined
+    const propId = typeof propRel === 'object' && propRel !== null ? propRel.id : propRel ?? undefined
 
     // Branch: technology-propose
     if (techPropId) {
@@ -86,13 +91,16 @@ export async function POST(req: NextRequest) {
         id: String(techPropId),
         data: { status: 'contact_signing' },
         overrideAccess: true,
-      })
+      }) as TechnologyPropose
 
-      const technologyId = (technologyPropose as any).technology?.id || (technologyPropose as any).technology
-      const proposeUserId = (technologyPropose as any).user?.id || (technologyPropose as any).user
+      const techRel = technologyPropose.technology
+      const userRel = technologyPropose.user
+      const technologyId = typeof techRel === 'object' && techRel !== null ? techRel.id : techRel
+      const proposeUserId = typeof userRel === 'object' && userRel !== null ? userRel.id : userRel
 
-      const technology = await payload.findByID({ collection: 'technologies', id: String(technologyId) })
-      const submitterId = (technology as any)?.submitter?.id || (technology as any)?.submitter
+      const technology = await payload.findByID({ collection: 'technologies', id: String(technologyId) }) as Technology | null
+      const submitterRel = technology?.submitter
+      const submitterId = submitterRel && (typeof submitterRel === 'object' ? submitterRel.id : submitterRel)
 
       if (!submitterId || !proposeUserId) {
         return Response.json(
@@ -108,9 +116,10 @@ export async function POST(req: NextRequest) {
           user_b: String(proposeUserId),
           technologies: [String(technologyId)],
           technology_propose: String(techPropId),
-          offer: (updatedOffer as any).id,
-          price: (updatedOffer as any).price,
-        } as any,
+          offer: updatedOffer.id,
+          price: updatedOffer.price,
+          status: 'in_progress',
+        },
         overrideAccess: true,
       })
 
@@ -127,15 +136,18 @@ export async function POST(req: NextRequest) {
         id: String(projPropId),
         data: { status: 'contact_signing' },
         overrideAccess: true,
-      })
+      }) as ProjectPropose
 
-      const projectId = (projectPropose as any).project?.id || (projectPropose as any).project
-      const proposeUserId = (projectPropose as any).user?.id || (projectPropose as any).user
+      const projectRel = projectPropose.project
+      const proposeUserRel = projectPropose.user
+      const projectId = typeof projectRel === 'object' && projectRel !== null ? projectRel.id : projectRel
+      const proposeUserId = typeof proposeUserRel === 'object' && proposeUserRel !== null ? proposeUserRel.id : proposeUserRel
 
-      const project = await payload.findByID({ collection: 'project', id: String(projectId), depth: 0 })
-      const projectOwnerId = (project as any)?.user?.id || (project as any)?.user
-      const projectTechs = Array.isArray((project as any)?.technologies)
-        ? (project as any).technologies.map((t: any) => (typeof t === 'object' ? t.id : t))
+      const project = await payload.findByID({ collection: 'project', id: String(projectId), depth: 0 }) as { user?: string | { id: string }; technologies?: Array<string | { id: string }> } | null
+      const projectOwnerRel = project?.user
+      const projectOwnerId = projectOwnerRel && (typeof projectOwnerRel === 'object' ? projectOwnerRel.id : projectOwnerRel)
+      const projectTechs = Array.isArray(project?.technologies)
+        ? (project?.technologies as Array<string | { id: string }>).map((t) => (typeof t === 'object' ? t.id : t))
         : []
 
       if (!projectOwnerId || !proposeUserId || projectTechs.length === 0) {
@@ -152,9 +164,10 @@ export async function POST(req: NextRequest) {
           user_b: String(proposeUserId),
           technologies: projectTechs.map(String),
           project_propose: String(projPropId),
-          offer: (updatedOffer as any).id,
-          price: (updatedOffer as any).price,
-        } as any,
+          offer: updatedOffer.id,
+          price: updatedOffer.price,
+          status: 'in_progress',
+        },
         overrideAccess: true,
       })
 
@@ -171,16 +184,20 @@ export async function POST(req: NextRequest) {
         id: String(propId),
         data: { status: 'contact_signing' },
         overrideAccess: true,
-      })
+      }) as Propose
 
-      const technologyId = (propose as any).technology?.id || (propose as any).technology
-      const demandId = (propose as any).demand?.id || (propose as any).demand
+      const technologyRel = propose.technology
+      const demandRel = propose.demand
+      const technologyId = typeof technologyRel === 'object' && technologyRel !== null ? technologyRel.id : technologyRel
+      const demandId = typeof demandRel === 'object' && demandRel !== null ? demandRel.id : demandRel
 
       // Parties: technology.submitter and demand.user
-      const technology = await payload.findByID({ collection: 'technologies', id: String(technologyId) })
-      const demand = await payload.findByID({ collection: 'demand', id: String(demandId) })
-      const submitterId = (technology as any)?.submitter?.id || (technology as any)?.submitter
-      const demandOwnerId = (demand as any)?.user?.id || (demand as any)?.user
+      const technology = await payload.findByID({ collection: 'technologies', id: String(technologyId) }) as Technology | null
+      const demand = await payload.findByID({ collection: 'demand', id: String(demandId) }) as { user?: string | { id: string } } | null
+      const submitterRel = technology?.submitter
+      const submitterId = submitterRel && (typeof submitterRel === 'object' ? submitterRel.id : submitterRel)
+      const demandOwnerRel = demand?.user
+      const demandOwnerId = demandOwnerRel && (typeof demandOwnerRel === 'object' ? demandOwnerRel.id : demandOwnerRel)
 
       if (!submitterId || !demandOwnerId) {
         return Response.json(
@@ -196,9 +213,10 @@ export async function POST(req: NextRequest) {
           user_b: String(demandOwnerId),
           technologies: [String(technologyId)],
           propose: String(propId),
-          offer: (updatedOffer as any).id,
-          price: (updatedOffer as any).price,
-        } as any,
+          offer: updatedOffer.id,
+          price: updatedOffer.price,
+          status: 'in_progress',
+        },
         overrideAccess: true,
       })
 
@@ -212,8 +230,8 @@ export async function POST(req: NextRequest) {
       { success: false, error: 'Offer has no related proposal' },
       { status: 400, headers: corsHeaders },
     )
-  } catch (e: any) {
-    const message = e?.message || 'Unknown error'
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Unknown error'
     if (e instanceof Response) return e
     const corsHeaders = await buildCorsHeaders(req)
     return Response.json({ success: false, error: message }, { status: 500, headers: corsHeaders })

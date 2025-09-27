@@ -9,10 +9,14 @@ export type TechnologyProposeStatus =
   | 'cancelled'
 
 export interface TechnologyPropose {
+  id: string
   technology: Technology
   user: User
+  receiver: User
   description: string
-  document: Media
+  document?: Media
   budget: number
   status: TechnologyProposeStatus
+  createdAt: string
+  updatedAt: string
 }

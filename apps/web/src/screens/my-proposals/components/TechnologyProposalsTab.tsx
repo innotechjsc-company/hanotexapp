@@ -2,9 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Tooltip,
+  Space,
+  Select,
+  Tabs as AntTabs,
+  Popconfirm,
+  message,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Search, ExternalLink, X, Edit } from "lucide-react";
+import { ExternalLink, X, Edit, CheckCircle } from "lucide-react";
 import { technologyProposeApi } from "@/api/technology-propose";
 import type {
   TechnologyPropose,
@@ -38,7 +48,6 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
   const [error, setError] = useState<string>("");
 
   // Filters and pagination
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     TechnologyProposeStatus | "all"
   >("all");
@@ -47,6 +56,8 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] =
     useState<TechnologyPropose | null>(null);
+  const [viewMode, setViewMode] = useState<"sent" | "received">("sent");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const pageSize = 10;
 
@@ -58,17 +69,14 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
     setError("");
 
     try {
-      const filters: any = {
-        user: userId,
-      };
+      const filters: any =
+        viewMode === "sent" ? { user: userId } : { receiver: userId };
 
       if (statusFilter !== "all") {
         filters.status = statusFilter;
       }
 
-      if (searchTerm.trim()) {
-        filters.search = searchTerm.trim();
-      }
+      // no title search
 
       const response = await technologyProposeApi.list(filters, {
         page: currentPage,
@@ -96,12 +104,7 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchProposals();
-  }, [userId, currentPage, statusFilter, searchTerm]);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
+  }, [userId, currentPage, statusFilter, viewMode]);
 
   const handleStatusFilter = (value: string | undefined) => {
     setStatusFilter((value as TechnologyProposeStatus) || "all");
@@ -132,6 +135,46 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
     } catch (error) {
       console.error("Failed to cancel proposal:", error);
       // TODO: Show error message
+    }
+  };
+
+  const handleConfirmReceivedProposal = async (
+    proposal: TechnologyPropose
+  ) => {
+    if (!proposal.id || !userId) return;
+
+    setActionLoading(proposal.id);
+    try {
+      await technologyProposeApi.acceptProposal(
+        proposal.id,
+        userId,
+        "Đã chấp nhận đề xuất và sẵn sàng đàm phán giá."
+      );
+      message.success("Đã xác nhận đề xuất");
+      await fetchProposals();
+    } catch (error) {
+      console.error("Failed to confirm proposal:", error);
+      message.error("Không thể xác nhận đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectReceivedProposal = async (
+    proposal: TechnologyPropose
+  ) => {
+    if (!proposal.id) return;
+
+    setActionLoading(proposal.id);
+    try {
+      await technologyProposeApi.setStatus(proposal.id, "cancelled");
+      message.success("Đã từ chối đề xuất");
+      await fetchProposals();
+    } catch (error) {
+      console.error("Failed to reject proposal:", error);
+      message.error("Không thể từ chối đề xuất");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -224,13 +267,75 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
       key: "actions",
       align: "right" as const,
       render: (_, record: TechnologyPropose) => {
-        const technology = record.technology;
-        const technologyId =
-          typeof technology === "string" ? technology : technology?.id;
+        const proposalId = record.id || "";
+        const isPending = record.status === "pending";
+        const isCancelled = record.status === "cancelled";
+        const canViewNegotiation =
+          record.status === "negotiating" ||
+          record.status === "contact_signing" ||
+          record.status === "contract_signed";
+        const loading = actionLoading === proposalId;
+        const isReceivedView = viewMode === "received";
+
+        if (isReceivedView) {
+          return (
+            <Space>
+              {isPending && (
+                <>
+                  <Popconfirm
+                    title="Xác nhận đề xuất"
+                    description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
+                    okText="Xác nhận"
+                    cancelText="Hủy"
+                    onConfirm={() => handleConfirmReceivedProposal(record)}
+                  >
+                    <Tooltip title="Xác nhận" color="green">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CheckCircle className="h-4 w-4" />}
+                        loading={loading}
+                        className="hover:text-green-600"
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                  <Popconfirm
+                    title="Từ chối đề xuất"
+                    description="Bạn có chắc chắn muốn từ chối đề xuất này?"
+                    okText="Từ chối"
+                    cancelText="Hủy"
+                    okType="danger"
+                    onConfirm={() => handleRejectReceivedProposal(record)}
+                  >
+                    <Tooltip title="Từ chối" color="red">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<X className="h-4 w-4" />}
+                        loading={loading}
+                        danger
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                </>
+              )}
+              {canViewNegotiation && (
+                <Tooltip title="Xem đàm phán" color="blue">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ExternalLink className="h-4 w-4" />}
+                    onClick={() => handleViewNegotiation(record)}
+                  />
+                </Tooltip>
+              )}
+            </Space>
+          );
+        }
 
         return (
           <Space>
-            {record.status === "pending" && (
+            {isPending && (
               <Tooltip title="Sửa đề xuất" color="green">
                 <Button
                   type="text"
@@ -240,7 +345,7 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-            {record.status !== "pending" && record.status !== "cancelled" && (
+            {!isPending && !isCancelled && (
               <Tooltip title="Xem đàm phán" color="blue">
                 <Button
                   type="text"
@@ -250,7 +355,7 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-           {(record.status === "pending" || record.status === "cancelled") && (
+            {(isPending || isCancelled) && (
               <Tooltip title="Hủy đề xuất" color="red">
                 <Button
                   type="text"
@@ -269,21 +374,28 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Tìm kiếm theo tên công nghệ..."
-          value={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
-          prefix={<Search className="h-4 w-4 text-gray-400" />}
-          className="flex-1"
+      {/* View Mode Tabs */}
+      <div className="mb-4">
+        <AntTabs
+          activeKey={viewMode}
+          onChange={(k) => {
+            setViewMode((k as any) || "sent");
+            setCurrentPage(1);
+          }}
+          items={[
+            { key: "sent", label: "Đã gửi" },
+            { key: "received", label: "Nhận được" },
+          ]}
         />
+      </div>
 
+      {/* Filters (no search) */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch">
         <Select
           placeholder="Lọc theo trạng thái"
           value={statusFilter !== "all" ? statusFilter : undefined}
           onChange={handleStatusFilter}
-          className="w-full sm:w-48"
+          className="w-full sm:w-60"
           allowClear
         >
           <Select.Option value="all">Tất cả trạng thái</Select.Option>
@@ -293,6 +405,16 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
             </Select.Option>
           ))}
         </Select>
+
+        <Button
+          onClick={() => {
+            setStatusFilter("all");
+            setCurrentPage(1);
+          }}
+          className="w-full sm:w-auto"
+        >
+          Đặt lại bộ lọc
+        </Button>
       </div>
 
       {/* Error State */}
@@ -320,7 +442,9 @@ export default function TechnologyProposalsTab({ userId }: { userId: string }) {
           locale={{
             emptyText: loading
               ? "Đang tải..."
-              : "Chưa có đề xuất chuyển giao công nghệ nào",
+              : viewMode === "sent"
+                ? "Chưa có đề xuất chuyển giao công nghệ đã gửi"
+                : "Chưa có đề xuất chuyển giao công nghệ nhận được",
           }}
           pagination={{
             current: currentPage,

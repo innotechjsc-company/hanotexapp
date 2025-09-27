@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPayloadApiUrl } from "@/lib/api-config";
 
 export async function GET() {
   try {
     // Fetch from CMS API
-    const cmsApiUrl = `http://localhost:4000/api/auctions`;
+    const cmsApiUrl = getPayloadApiUrl('/auctions');
     console.log('Fetching auctions from CMS API URL:', cmsApiUrl);
     console.log('Environment NEXT_PUBLIC_PAYLOAD_API_URL:', process.env.NEXT_PUBLIC_PAYLOAD_API_URL);
     
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
     
     // Create auction in CMS
     const cmsResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL}/auctions?depth=1`,
+      `${getPayloadApiUrl('/auctions')}?depth=1`,
       {
         method: "POST",
         headers: {

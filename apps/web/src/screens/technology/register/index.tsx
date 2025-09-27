@@ -24,7 +24,10 @@ import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection
 import { IPSectionRef } from "./components/IPSection";
 import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
 import MediaApi from "@/api/media";
-import { createTechnology } from "@/api/technologies";
+import {
+  createTechnologyWithServices,
+  type CreateTechnologyPayload,
+} from "@/api/technologies";
 import { MediaType } from "@/types/media1";
 import { ServiceTicket } from "@/types";
 import { createServiceTicket } from "@/api/service-ticket";
@@ -73,34 +76,92 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
             })
           : [];
 
-        // 3. Aggregate payload aligned with Technology type
-        const payload = {
-          title: basic?.title || "",
-          category: basic?.category, // ID string
-          trl_level: Number(basic?.trl_level) || 0,
-          description: basic?.description,
-          confidential_detail: basic?.confidential_detail,
+        // 3. Validate and prepare payload
+        const trlLevelNum = basic?.trl_level ? Number(basic.trl_level) : 0;
+        const trlLevel = trlLevelNum === 0 ? 1 : trlLevelNum; // Default to 1 if 0 or invalid
+        if (trlLevel < 1 || trlLevel > 9) {
+          throw new Error("Mức TRL phải từ 1 đến 9");
+        }
+
+        if (!basic?.title || basic.title.trim() === "") {
+          throw new Error("Tiêu đề công nghệ là bắt buộc");
+        }
+
+        if (!basic?.category) {
+          throw new Error("Lĩnh vực công nghệ là bắt buộc");
+        }
+
+        if (!basic?.description || basic.description.trim() === "") {
+          throw new Error("Mô tả công nghệ là bắt buộc");
+        }
+
+        if (
+          !basic?.confidential_detail ||
+          basic.confidential_detail.trim() === ""
+        ) {
+          throw new Error("Chi tiết bảo mật là bắt buộc");
+        }
+
+        if (!owners || owners.length === 0) {
+          throw new Error("Thông tin chủ sở hữu công nghệ là bắt buộc");
+        }
+
+        if (
+          !investmentTransfer?.investment_desire ||
+          investmentTransfer.investment_desire.length === 0
+        ) {
+          throw new Error("Mong muốn đầu tư là bắt buộc");
+        }
+
+        if (
+          !investmentTransfer?.transfer_type ||
+          investmentTransfer.transfer_type.length === 0
+        ) {
+          throw new Error("Hình thức chuyển giao là bắt buộc");
+        }
+
+        if (
+          !pricingDesired ||
+          !pricingDesired.pricing_type ||
+          typeof pricingDesired.price_from !== "number" ||
+          typeof pricingDesired.price_to !== "number"
+        ) {
+          throw new Error("Thông tin định giá là bắt buộc");
+        }
+
+        // Aggregate payload for our custom API endpoint
+        const payload: CreateTechnologyPayload = {
+          title: basic.title.trim(),
+          category: basic.category, // ID string
+          trl_level: trlLevel,
+          description: basic.description.trim(),
+          confidential_detail: basic.confidential_detail.trim(),
           // Relationship fields in Payload expect IDs
-          documents: techMedia.map((m) => m.id),
+          documents: techMedia.map((m) => m.id.toString()),
           owners,
           legal_certification: legalDetails
             ? {
-                protection_scope: legalDetails.protection_scope,
-                standard_certifications: legalDetails.standard_certifications,
-                files: legalMedia.map((m) => m.id),
+                protection_scope: legalDetails.protection_scope || [],
+                standard_certifications:
+                  legalDetails.standard_certifications || [],
+                files: legalMedia.map((m) => m.id.toString()),
               }
-            : undefined,
-          investment_desire: investmentTransfer?.investment_desire,
-          transfer_type: investmentTransfer?.transfer_type,
+            : {
+                protection_scope: [],
+                standard_certifications: [],
+                files: [],
+              },
+          investment_desire: investmentTransfer.investment_desire,
+          transfer_type: investmentTransfer.transfer_type,
           pricing: pricingDesired,
           // Server route will create related IP docs if provided
           intellectual_property:
             ipDetails && ipDetails.length ? ipDetails : undefined,
-          visibility_mode: visibility?.visibility_mode,
+          visibility_mode: visibility?.visibility_mode || "public",
         };
 
-        const created = await createTechnology(payload as any);
-        console.log("Created technology:", created);
+        const result = await createTechnologyWithServices(payload);
+        console.log("Created technology:", result);
 
         // create service tickets
         if (services.length > 0) {
@@ -108,8 +169,37 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           // DUY
           // CHIEN
         }
-        // Show success toast and navigate to technologies page
-        toast.success("Đăng ký công nghệ thành công!");
+        // Log additional information about created records
+        if (
+          result.intellectual_property_records &&
+          result.intellectual_property_records.length > 0
+        ) {
+          console.log(
+            `Created ${result.intellectual_property_records.length} intellectual property records`
+          );
+        }
+
+        if (result.service_tickets && result.service_tickets.length > 0) {
+          console.log(
+            `Created ${result.service_tickets.length} service tickets`
+          );
+        }
+
+        // Show success toast with details and navigate to technologies page
+        let successMessage = "Đăng ký công nghệ thành công!";
+
+        if (
+          result.intellectual_property_records &&
+          result.intellectual_property_records.length > 0
+        ) {
+          successMessage += ` Đã tạo ${result.intellectual_property_records.length} bản ghi sở hữu trí tuệ.`;
+        }
+
+        if (result.service_tickets && result.service_tickets.length > 0) {
+          successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ.`;
+        }
+
+        toast.success(successMessage);
         router.push("/technologies");
       } catch (err: any) {
         console.error("Submit error:", err);

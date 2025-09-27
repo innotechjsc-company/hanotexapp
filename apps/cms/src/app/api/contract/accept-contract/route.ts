@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { User } from '@/payload-types'
+import type { User, Contract } from '@/payload-types'
 
 // CORS headers
 const corsHeaders = {
@@ -23,10 +23,9 @@ export async function POST(request: NextRequest) {
     const payload = await getPayload({ config })
     // Accept both raw body and nested { body: {...} }
     const raw = await request.json()
-    const body = (raw && typeof raw === 'object' && 'body' in raw ? (raw as any).body : raw) as {
-      contractId?: string
-      userId?: string
-    }
+    const hasBodyField = (v: unknown): v is { body: unknown } => typeof v === 'object' && v !== null && 'body' in v
+    const bodyRaw = hasBodyField(raw) ? raw.body : raw
+    const body = (typeof bodyRaw === 'object' && bodyRaw !== null ? bodyRaw : {}) as { contractId?: string; userId?: string }
 
     const { contractId, userId } = body || {}
     console.log('body', body)
@@ -42,16 +41,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the contract with full details
-    let contract: any
+    let contract: Contract
     try {
       contract = await payload.findByID({
         collection: 'contract',
         id: contractId,
         depth: 2,
-      })
-    } catch (err: any) {
+      }) as Contract
+    } catch (err: unknown) {
       // Return a proper 404 if the contract does not exist
-      if (err && (err.status === 404 || /not found/i.test(String(err.message)))) {
+      if (
+        (typeof err === 'object' && err !== null && 'status' in err && (err as { status?: number }).status === 404) ||
+        (err instanceof Error && /not found/i.test(err.message))
+      ) {
         return NextResponse.json(
           { error: 'Contract not found' },
           { status: 404, headers: corsHeaders },
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
     let confirmedUsers: string[] = []
     if (contract.users_confirm) {
       if (Array.isArray(contract.users_confirm)) {
-        confirmedUsers = contract.users_confirm.map((user: User) =>
+        confirmedUsers = contract.users_confirm.map((user) =>
           typeof user === 'object' ? user.id : user,
         )
       }
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
       updatedConfirmedUsers.includes(String(userBId))
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: Partial<Pick<Contract, 'users_confirm' | 'status'>> = {
       users_confirm: updatedConfirmedUsers,
     }
 
@@ -112,23 +114,17 @@ export async function POST(request: NextRequest) {
       collection: 'contract',
       id: contractId,
       data: updateData,
-    })
+    }) as Contract
 
     // If both parties have accepted, also update the related proposal status
     if (bothAccepted) {
       try {
-        const techPropId =
-          typeof (contract as any).technology_propose === 'object'
-            ? (contract as any).technology_propose?.id
-            : (contract as any).technology_propose
-        const projPropId =
-          typeof (contract as any).project_propose === 'object'
-            ? (contract as any).project_propose?.id
-            : (contract as any).project_propose
-        const propId =
-          typeof (contract as any).propose === 'object'
-            ? (contract as any).propose?.id
-            : (contract as any).propose
+        const contractTechProp = contract.technology_propose
+        const techPropId = typeof contractTechProp === 'object' && contractTechProp !== null ? contractTechProp.id : contractTechProp ?? undefined
+        const contractProjProp = contract.project_propose
+        const projPropId = typeof contractProjProp === 'object' && contractProjProp !== null ? contractProjProp.id : contractProjProp ?? undefined
+        const contractProp = contract.propose
+        const propId = typeof contractProp === 'object' && contractProp !== null ? contractProp.id : contractProp ?? undefined
 
         if (techPropId) {
           await payload.update({

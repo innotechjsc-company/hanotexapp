@@ -13,6 +13,7 @@ import type {
 export interface TechnologyProposeFilters {
   technology?: string;
   user?: string;
+  receiver?: string;
   status?: TechnologyProposeStatus;
   search?: string;
 }
@@ -37,8 +38,10 @@ export class TechnologyProposeApi {
     if (filters.technology)
       params["where[technology][equals]"] = filters.technology;
     if (filters.user) params["where[user][equals]"] = filters.user;
+    if (filters.receiver) params["where[receiver][equals]"] = filters.receiver;
     if (filters.status) params["where[status][equals]"] = filters.status;
-    if (filters.search) params["search"] = filters.search;
+    if (filters.search)
+      params["where[technology][title][contains]"] = filters.search;
 
     return payloadApiClient.get<TechnologyPropose[]>(
       API_ENDPOINTS.TECHNOLOGY_PROPOSE,

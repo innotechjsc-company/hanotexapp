@@ -100,6 +100,7 @@ export interface Config {
     contract: Contract;
     'contract-logs': ContractLog;
     'project-propose': ProjectPropose;
+    organizations: Organization;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -139,6 +140,7 @@ export interface Config {
     contract: ContractSelect<false> | ContractSelect<true>;
     'contract-logs': ContractLogsSelect<false> | ContractLogsSelect<true>;
     'project-propose': ProjectProposeSelect<false> | ProjectProposeSelect<true>;
+    organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -829,6 +831,7 @@ export interface Demand {
   cooperation?: string | null;
   start_date?: string | null;
   end_date?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'active' | 'inactive') | null;
   documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -848,6 +851,7 @@ export interface Propose {
    */
   demand: string | Demand;
   user: string | User;
+  receiver: string | User;
   technology: string | Technology;
   description: string;
   /**
@@ -884,6 +888,7 @@ export interface TechnologyPropose {
    */
   technology: string | Technology;
   user: string | User;
+  receiver: string | User;
   description: string;
   budget: number;
   /**
@@ -1027,6 +1032,7 @@ export interface ProjectPropose {
   id: string;
   project: string | Project;
   user: string | User;
+  receiver: string | User;
   investor_capacity?: string | null;
   investment_amount?: number | null;
   investment_ratio?: number | null;
@@ -1127,6 +1133,63 @@ export interface ContractLog {
   reason?: string | null;
   status?: ('pending' | 'completed' | 'cancelled') | null;
   is_done_contract?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organizations".
+ */
+export interface Organization {
+  id: string;
+  name: string;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  type: 'enterprise' | 'research_institute' | 'university' | 'nonprofit' | 'government' | 'international';
+  logo?: (string | null) | Media;
+  website?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  location?: {
+    address?: string | null;
+    city?: string | null;
+    province?: string | null;
+    country?: string | null;
+  };
+  specializations?:
+    | {
+        field: string;
+        id?: string | null;
+      }[]
+    | null;
+  size?: ('small' | 'medium' | 'large' | 'enterprise') | null;
+  founded?: string | null;
+  contact_person?: {
+    name?: string | null;
+    position?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  };
+  social_media?: {
+    facebook?: string | null;
+    linkedin?: string | null;
+    twitter?: string | null;
+  };
+  is_verified?: boolean | null;
+  is_active?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1268,6 +1331,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'project-propose';
         value: string | ProjectPropose;
+      } | null)
+    | ({
+        relationTo: 'organizations';
+        value: string | Organization;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1703,6 +1770,7 @@ export interface DemandSelect<T extends boolean = true> {
   cooperation?: T;
   start_date?: T;
   end_date?: T;
+  status?: T;
   documents?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1752,6 +1820,7 @@ export interface ProposeSelect<T extends boolean = true> {
   title?: T;
   demand?: T;
   user?: T;
+  receiver?: T;
   technology?: T;
   description?: T;
   execution_time?: T;
@@ -1769,6 +1838,7 @@ export interface ProposeSelect<T extends boolean = true> {
 export interface TechnologyProposeSelect<T extends boolean = true> {
   technology?: T;
   user?: T;
+  receiver?: T;
   description?: T;
   budget?: T;
   document?: T;
@@ -1961,6 +2031,7 @@ export interface ContractLogsSelect<T extends boolean = true> {
 export interface ProjectProposeSelect<T extends boolean = true> {
   project?: T;
   user?: T;
+  receiver?: T;
   investor_capacity?: T;
   investment_amount?: T;
   investment_ratio?: T;
@@ -1968,6 +2039,54 @@ export interface ProjectProposeSelect<T extends boolean = true> {
   investment_benefits?: T;
   documents?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organizations_select".
+ */
+export interface OrganizationsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  type?: T;
+  logo?: T;
+  website?: T;
+  email?: T;
+  phone?: T;
+  location?:
+    | T
+    | {
+        address?: T;
+        city?: T;
+        province?: T;
+        country?: T;
+      };
+  specializations?:
+    | T
+    | {
+        field?: T;
+        id?: T;
+      };
+  size?: T;
+  founded?: T;
+  contact_person?:
+    | T
+    | {
+        name?: T;
+        position?: T;
+        email?: T;
+        phone?: T;
+      };
+  social_media?:
+    | T
+    | {
+        facebook?: T;
+        linkedin?: T;
+        twitter?: T;
+      };
+  is_verified?: T;
+  is_active?: T;
   updatedAt?: T;
   createdAt?: T;
 }

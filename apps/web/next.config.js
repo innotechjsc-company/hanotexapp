@@ -1,6 +1,5 @@
 // Load environment variables from .env files
 require("dotenv").config({ path: ".env.local" });
-require("dotenv").config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,13 +9,13 @@ const nextConfig = {
   },
   images: {
     domains: [
-      "localhost", 
-      "hanotex.com", 
-      "127.0.0.1", 
+      "localhost",
+      "hanotex.com",
+      "127.0.0.1",
       "images.unsplash.com",
       "commondatastorage.googleapis.com",
       "cdnjs.cloudflare.com",
-      "images.pexels.com"
+      "images.pexels.com",
     ],
     formats: ["image/webp", "image/avif"],
     remotePatterns: [

@@ -13,6 +13,7 @@ import type {
 export interface ProjectProposeFilters {
   project?: string;
   user?: string;
+  receiver?: string;
   status?: ProjectProposeStatus;
   search?: string;
 }
@@ -36,8 +37,9 @@ export class ProjectProposeApi {
 
     if (filters.project) params["where[project][equals]"] = filters.project;
     if (filters.user) params["where[user][equals]"] = filters.user;
+    if (filters.receiver) params["where[receiver][equals]"] = filters.receiver;
     if (filters.status) params["where[status][equals]"] = filters.status;
-    if (filters.search) params["search"] = filters.search;
+    if (filters.search) params["where[project][name][contains]"] = filters.search;
 
     return payloadApiClient.get<ProjectPropose[]>(
       API_ENDPOINTS.PROJECT_PROPOSE,
@@ -120,5 +122,3 @@ export class ProjectProposeApi {
 }
 
 export const projectProposeApi = new ProjectProposeApi();
-
-

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPayloadApiUrl } from "@/lib/api-config";
 
 export async function POST(
   request: NextRequest,
@@ -25,7 +26,7 @@ export async function POST(
     // Use CMS collection APIs directly instead of custom route
     
     // First get auction to validate bid
-    const auctionApiUrl = `http://localhost:4000/api/auctions/${auctionId}`;
+    const auctionApiUrl = getPayloadApiUrl(`/auctions/${auctionId}`);
     console.log('Fetching auction from CMS:', auctionApiUrl);
     
     const auctionResponse = await fetch(auctionApiUrl, {
@@ -71,7 +72,7 @@ export async function POST(
     }
 
     // Update auction currentBid using CMS collection API
-    const updateAuctionApiUrl = `http://localhost:4000/api/auctions/${auctionId}`;
+    const updateAuctionApiUrl = getPayloadApiUrl(`/auctions/${auctionId}`);
     console.log('Updating auction currentBid via CMS:', updateAuctionApiUrl);
     
     const cmsResponse = await fetch(updateAuctionApiUrl, {

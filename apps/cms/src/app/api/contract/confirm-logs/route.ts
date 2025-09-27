@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'
+import type { ContractLog } from '@/payload-types'
 
 type ConfirmContractLogBody = {
   contract_log_id: string
@@ -14,7 +15,9 @@ type ConfirmContractLogBody = {
 const buildCorsHeaders = async (req: Request) => {
   const config = await configPromise
   const origin = req.headers.get('origin') || ''
-  const allowedOrigins = (config as any)?.cors || []
+  const allowedOrigins = Array.isArray((config as { cors?: string[] } | undefined)?.cors)
+    ? ((config as { cors?: string[] }).cors as string[])
+    : []
   const isAllowed = Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)
 
   const headers: Record<string, string> = {
@@ -63,12 +66,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user is authenticated
-    await authenticateUser(req as any, corsHeaders)
+    await authenticateUser(req, corsHeaders)
 
     const payload = await getPayload({ config: configPromise })
 
     // 1) Load the contract log
-    const log = await payload.findByID({ collection: 'contract-logs', id: body.contract_log_id })
+    const log = await payload.findByID({ collection: 'contract-logs', id: body.contract_log_id }) as ContractLog | null
     if (!log) {
       return Response.json(
         { success: false, error: 'Contract log not found' },
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2) Update the log status / reason / is_done_contract / contract
-    const updateData: Record<string, any> = {}
+    const updateData: Partial<Pick<ContractLog, 'status' | 'is_done_contract' | 'reason' | 'contract'>> = {}
     if (body.status) updateData.status = body.status
     if (typeof body.is_done_contract === 'boolean')
       updateData.is_done_contract = body.is_done_contract
@@ -89,20 +92,17 @@ export async function POST(req: NextRequest) {
       id: body.contract_log_id,
       data: updateData,
       overrideAccess: true,
-    })
+    }) as ContractLog
 
     // 3) If contract is marked done, set related proposal to completed
     if (body.is_done_contract === true) {
       try {
-        const techPropId = (updatedLog as any)?.technology_propose?.id
-          ? (updatedLog as any).technology_propose.id
-          : (updatedLog as any).technology_propose
-        const projPropId = (updatedLog as any)?.project_propose?.id
-          ? (updatedLog as any).project_propose.id
-          : (updatedLog as any).project_propose
-        const propId = (updatedLog as any)?.propose?.id
-          ? (updatedLog as any).propose.id
-          : (updatedLog as any).propose
+        const techRel = updatedLog.technology_propose
+        const projRel = updatedLog.project_propose
+        const propRel = updatedLog.propose
+        const techPropId = typeof techRel === 'object' && techRel !== null ? techRel.id : techRel ?? undefined
+        const projPropId = typeof projRel === 'object' && projRel !== null ? projRel.id : projRel ?? undefined
+        const propId = typeof propRel === 'object' && propRel !== null ? propRel.id : propRel ?? undefined
 
         if (techPropId) {
           const updatedTechnologyPropose = await payload.update({
@@ -158,10 +158,10 @@ export async function POST(req: NextRequest) {
           { success: false, error: 'Missing related proposal on contract log' },
           { status: 400, headers: corsHeaders },
         )
-      } catch (err: any) {
+      } catch (err: unknown) {
         // If updating proposal fails, return error
         return Response.json(
-          { success: false, error: err?.message || 'Failed to update proposal' },
+          { success: false, error: err instanceof Error ? err.message : 'Failed to update proposal' },
           { status: 500, headers: corsHeaders },
         )
       }
@@ -172,11 +172,11 @@ export async function POST(req: NextRequest) {
       { success: true, contract_log: updatedLog },
       { status: 200, headers: corsHeaders },
     )
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof Response) return e
     const corsHeaders = await buildCorsHeaders(req)
     return Response.json(
-      { success: false, error: e?.message || 'Unknown error' },
+      { success: false, error: e instanceof Error ? e.message : 'Unknown error' },
       { status: 500, headers: corsHeaders },
     )
   }

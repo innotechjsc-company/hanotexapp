@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Typography,
@@ -247,6 +247,15 @@ const MessageBubble: React.FC<{
     typeof message.offer === "object" &&
     offerStatus === OfferStatus.PENDING &&
     !isRightSide; // only show actions to the receiver, not the sender
+
+  useEffect(() => {
+    if (!hasOffer || typeof message.offer !== "object") {
+      setOfferStatus(undefined);
+      return;
+    }
+
+    setOfferStatus(message.offer.status as OfferStatus | undefined);
+  }, [hasOffer, message.offer]);
 
   const handleAcceptOffer = async () => {
     try {

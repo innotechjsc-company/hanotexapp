@@ -1,14 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request) {
   try {
     const payload = await getPayload({ config })
-    const auctionId = params.id
+    const url = new URL(request.url)
+    // Extract dynamic id from pathname: /api/auctions/{id}/bid
+    const segments = url.pathname.split('/').filter(Boolean)
+    const auctionId = segments[segments.indexOf('auctions') + 1]
+    if (!auctionId) {
+      return NextResponse.json(
+        { success: false, error: 'Missing auction id in path' },
+        { status: 400 }
+      )
+    }
     const body = await request.json()
     const { amount, bidder = 'anonymous' } = body
 
@@ -141,4 +147,3 @@ export async function POST(
     )
   }
 }
-

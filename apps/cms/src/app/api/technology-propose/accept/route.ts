@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { TechnologyPropose as TechnologyProposeType } from '@/payload-types'
 
 // CORS headers
 const corsHeaders = {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       collection: 'technology-propose',
       id: technologyProposeId,
       depth: 1,
-    })
+    }) as TechnologyProposeType | null
 
     if (!technologyPropose) {
       return NextResponse.json(
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       collection: 'negotiating-messages',
       data: {
         technology_propose: technologyProposeId,
-        user: (technologyPropose as any).user?.id || (technologyPropose as any).user,
+        user: typeof technologyPropose.user === 'object' ? technologyPropose.user.id : technologyPropose.user,
         message: message || 'Đã chấp nhận đề xuất và sẵn sàng đàm phán giá.',
         is_offer: true,
       },
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Also create an offer and link it to this negotiating message
     // Use proposal's budget as initial price and the message as content
-    const initialPrice = (technologyPropose as any).budget || 0
+    const initialPrice = (technologyPropose as unknown as { budget?: number }).budget || 0
     const offerContent =
       message || 'Đề xuất giá ban đầu được tạo khi chấp nhận đề xuất.'
 
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
       collection: 'offer',
       data: {
         technology_propose: technologyProposeId,
-        negotiating_messages: (negotiatingMessage as any).id,
+        negotiating_messages: (negotiatingMessage as { id: string }).id,
         content: offerContent,
         price: initialPrice,
         // status defaults to 'pending'
@@ -102,8 +103,8 @@ export async function POST(request: NextRequest) {
     // Link the created offer back to the negotiating message
     await payload.update({
       collection: 'negotiating-messages',
-      id: (negotiatingMessage as any).id,
-      data: { offer: (offer as any).id },
+      id: (negotiatingMessage as { id: string }).id,
+      data: { offer: (offer as { id: string }).id },
     })
 
     return NextResponse.json(
