@@ -65,11 +65,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
     let targetUrl: string;
     if (isProduction) {
-      // Production: use https://hanotex.vn/
-      targetUrl = `https://hanotex.vn/${cleanActionUrl}`;
+      // Production: use env variable
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      targetUrl = `${baseUrl}/${cleanActionUrl}`;
     } else {
-      // Development: use localhost:3000
-      targetUrl = `http://localhost:3000/${cleanActionUrl}`;
+      // Development: use env variable
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 
     return {
@@ -86,14 +88,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
       // Mark as read if not already read
       if (!notification.is_read && notification.id) {
-        debugger;
         console.log("Marking notification as read:", notification.id);
         await markAsRead(notification.id);
       }
 
       // Call the parent callback if provided
       if (onNotificationClick) {
-        debugger;
         onNotificationClick(notification);
       }
 

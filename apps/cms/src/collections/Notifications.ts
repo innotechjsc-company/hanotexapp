@@ -8,10 +8,10 @@ export const Notifications: CollectionConfig = {
     defaultColumns: ['title', 'user_id', 'type', 'is_read', 'createdAt'],
   },
   access: {
-    read: ({ req: { user } }) => !!user,
-    create: ({ req: { user } }) => !!user,
-    update: ({ req: { user } }) => !!user,
-    delete: ({ req: { user } }) => !!user,
+    read: () => true,
+    create: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPayloadApiUrl } from "@/lib/api-config";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Call CMS search API
-    const cmsSearchUrl = `http://localhost:4000/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}&limit=${limit}`;
+    const cmsSearchUrl = `${getPayloadApiUrl('/search')}?q=${encodeURIComponent(query)}&type=${type}&page=${page}&limit=${limit}`;
     
     console.log('Calling CMS search API:', cmsSearchUrl);
     

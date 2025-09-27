@@ -831,6 +831,7 @@ export interface Demand {
   cooperation?: string | null;
   start_date?: string | null;
   end_date?: string | null;
+  status?: ('pending' | 'approved' | 'rejected' | 'active' | 'inactive') | null;
   documents?: (string | Media)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1769,6 +1770,7 @@ export interface DemandSelect<T extends boolean = true> {
   cooperation?: T;
   start_date?: T;
   end_date?: T;
+  status?: T;
   documents?: T;
   updatedAt?: T;
   createdAt?: T;
