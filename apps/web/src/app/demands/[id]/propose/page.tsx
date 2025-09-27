@@ -181,7 +181,6 @@ function ProposeSolutionPage() {
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
 
       const createdProposeResponse = await createPropose(proposeData);
-      console.log("Created propose response:", createdProposeResponse);
     } catch (error: any) {
       console.error("Error submitting proposal:", error);
       setError(
