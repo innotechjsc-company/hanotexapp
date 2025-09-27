@@ -6,11 +6,19 @@ import AuctionHeader from "@/components/auction/AuctionHeader";
 import BiddingSection from "@/components/auction/BiddingSection";
 import BidHistory from "@/components/auction/BidHistory";
 import AuctionDetails from "@/components/auction/AuctionDetails";
-import { Clock, AlertCircle, CheckCircle, Gavel, TrendingUp, Eye } from "lucide-react";
+import {
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  Gavel,
+  TrendingUp,
+  Eye,
+} from "lucide-react";
 import { SectionBanner } from "@/components/ui/SectionBanner";
 import { AnimatedIcon } from "@/components/ui/AnimatedIcon";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { useAuctionWebSocket } from "@/hooks/useWebSocket";
+import AuctionImagePlaceholder from "@/components/auction/AuctionImagePlaceholder";
 
 interface Auction {
   id: string;
@@ -26,7 +34,7 @@ interface Auction {
   viewers: number;
   isActive: boolean;
   isWatching: boolean;
-  status: 'upcoming' | 'active' | 'ended' | 'unknown';
+  status: "upcoming" | "active" | "ended" | "unknown";
   location: string;
   organizer: {
     name: string;
@@ -52,51 +60,58 @@ interface Auction {
 export default function AuctionPage() {
   const params = useParams();
   const auctionId = params.id as string;
-  
+
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isWatching, setIsWatching] = useState(false);
   const { toast, showToast, hideToast } = useToast();
-  
+
   // WebSocket for real-time updates
-  const { 
-    bids: wsBids, 
-    currentPrice: wsCurrentPrice, 
+  const {
+    bids: wsBids,
+    currentPrice: wsCurrentPrice,
     auctionStatus: wsAuctionStatus,
     placeBid: wsPlaceBid,
-    isConnected: wsConnected 
+    isConnected: wsConnected,
   } = useAuctionWebSocket(auctionId);
 
   useEffect(() => {
     fetchAuction();
   }, [auctionId]);
-  
+
   // Sync WebSocket bid updates with auction state
   useEffect(() => {
     if (wsBids.length > 0 && auction) {
       // Update auction with real-time bid data
-      setAuction(prev => prev ? {
-        ...prev,
-        currentBid: wsCurrentPrice || prev.currentBid,
-        bidCount: wsBids.length,
-        bids: wsBids.map(bid => ({
-          id: bid.id || `ws_${Date.now()}`,
-          amount: bid.bidAmount || bid.amount,
-          bidder: bid.bidder || 'Anonymous',
-          timestamp: new Date(bid.timestamp || Date.now()),
-          isWinning: bid.isWinning || false
-        }))
-      } : null);
-      
+      setAuction((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentBid: wsCurrentPrice || prev.currentBid,
+              bidCount: wsBids.length,
+              bids: wsBids.map((bid) => ({
+                id: bid.id || `ws_${Date.now()}`,
+                amount: bid.bidAmount || bid.amount,
+                bidder: bid.bidder || "Anonymous",
+                timestamp: new Date(bid.timestamp || Date.now()),
+                isWinning: bid.isWinning || false,
+              })),
+            }
+          : null
+      );
+
       // Save to localStorage for persistence
       if (wsBids.length > 0) {
-        localStorage.setItem(`auction_bids_${auctionId}`, JSON.stringify(wsBids));
+        localStorage.setItem(
+          `auction_bids_${auctionId}`,
+          JSON.stringify(wsBids)
+        );
       }
-      
+
       // Show notification for new bids (not your own)
       const latestBid = wsBids[0];
-      if (latestBid && latestBid.bidder !== 'Current User') {
+      if (latestBid && latestBid.bidder !== "Current User") {
         showToast(
           `Có người đấu giá mới: ${(latestBid.bidAmount || latestBid.amount).toLocaleString()} VNĐ`,
           "info"
@@ -104,15 +119,15 @@ export default function AuctionPage() {
       }
     }
   }, [wsBids, wsCurrentPrice, auctionId]);
-  
+
   // Check auction status and winner
   useEffect(() => {
     if (!auction) return;
-    
+
     const checkAuctionStatus = () => {
       const now = new Date();
       const endTime = new Date(auction.endTime);
-      
+
       if (now > endTime && auction.isActive) {
         // Auction has ended, determine winner
         const winner = determineWinner();
@@ -124,31 +139,31 @@ export default function AuctionPage() {
         } else {
           showToast("Đấu giá đã kết thúc! Không có người đấu giá.", "info");
         }
-        
+
         // Update auction status
-        setAuction(prev => prev ? { ...prev, isActive: false } : null);
+        setAuction((prev) => (prev ? { ...prev, isActive: false } : null));
       }
     };
-    
+
     // Check immediately
     checkAuctionStatus();
-    
+
     // Check every 30 seconds
     const interval = setInterval(checkAuctionStatus, 30000);
-    
+
     return () => clearInterval(interval);
   }, [auction]);
-  
+
   const determineWinner = () => {
     if (!auction || !auction.bids || auction.bids.length === 0) {
       return null;
     }
-    
+
     // Get highest bid
     const highestBid = auction.bids.reduce((highest, current) => {
       return current.amount > highest.amount ? current : highest;
     }, auction.bids[0]);
-    
+
     return highestBid;
   };
 
@@ -161,7 +176,7 @@ export default function AuctionPage() {
         throw new Error("Không thể tải thông tin đấu giá");
       }
       const data = await response.json();
-      
+
       // Load bid history from localStorage
       const storedBids = localStorage.getItem(`auction_bids_${auctionId}`);
       if (storedBids) {
@@ -169,20 +184,27 @@ export default function AuctionPage() {
           const parsedBids = JSON.parse(storedBids);
           data.bids = parsedBids.map((bid: any) => ({
             ...bid,
-            timestamp: new Date(bid.timestamp)
+            timestamp: new Date(bid.timestamp),
           }));
           data.bidCount = parsedBids.length;
-          
+
           // Update currentBid from latest bid
           if (parsedBids.length > 0) {
             const latestBid = parsedBids[parsedBids.length - 1];
             data.currentBid = latestBid.amount;
           }
         } catch (e) {
-          console.warn('Failed to parse stored bids:', e);
+          console.warn("Failed to parse stored bids:", e);
         }
       }
       
+      console.log('Auction data received:', {
+        id: data.id,
+        title: data.title,
+        status: data.status,
+        isActive: data.isActive,
+        timeLeft: data.timeLeft
+      });
       setAuction(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
@@ -207,69 +229,77 @@ export default function AuctionPage() {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Update auction data
         const updatedAuction = result.auction;
         setAuction(updatedAuction);
-        
+
         // Save bid to localStorage for persistence
         const newBid = {
           id: `bid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           amount: amount,
-          bidder: 'Current User', // TODO: Get from authentication
+          bidder: "Current User", // TODO: Get from authentication
           timestamp: new Date().toISOString(),
-          isWinning: true
+          isWinning: true,
         };
-        
+
         // Get existing bids from localStorage
         const storedBids = localStorage.getItem(`auction_bids_${auctionId}`);
         let allBids = [];
-        
+
         if (storedBids) {
           try {
             allBids = JSON.parse(storedBids);
             // Mark all previous bids as not winning
             allBids = allBids.map((bid: any) => ({ ...bid, isWinning: false }));
           } catch (e) {
-            console.warn('Failed to parse stored bids:', e);
+            console.warn("Failed to parse stored bids:", e);
             allBids = [];
           }
         }
-        
+
         // Add new bid
         allBids.push(newBid);
-        
+
         // Save updated bids to localStorage
-        localStorage.setItem(`auction_bids_${auctionId}`, JSON.stringify(allBids));
-        
-        console.log('Bid history updated:', {
+        localStorage.setItem(
+          `auction_bids_${auctionId}`,
+          JSON.stringify(allBids)
+        );
+
+        console.log("Bid history updated:", {
           totalBids: allBids.length,
           latestBid: newBid,
-          allBids: allBids
+          allBids: allBids,
         });
-        
+
         // Update auction state with bid history
-        setAuction(prev => prev ? {
-          ...prev,
-          currentBid: amount,
-          bidCount: allBids.length,
-          bids: allBids.map(bid => ({
-            ...bid,
-            timestamp: new Date(bid.timestamp)
-          }))
-        } : null);
-        
+        setAuction((prev) =>
+          prev
+            ? {
+                ...prev,
+                currentBid: amount,
+                bidCount: allBids.length,
+                bids: allBids.map((bid: any) => ({
+                  ...bid,
+                  timestamp: new Date(bid.timestamp),
+                })),
+              }
+            : null
+        );
         // Show success notification
         showToast(
           `Đấu giá thành công! Giá hiện tại: ${amount.toLocaleString()} VNĐ`,
           "success"
         );
-        
+
         // Dispatch custom event to notify other pages
-        window.dispatchEvent(new CustomEvent('bidPlaced', { 
-          detail: { auctionId, amount, bidCount: allBids.length } 
-        }));
+        window.dispatchEvent(
+          new CustomEvent("bidPlaced", {
+            detail: { auctionId, amount, bidCount: allBids.length },
+          })
+        );
       } else {
         throw new Error(result.message || "Đấu giá không thành công");
       }
@@ -372,14 +402,21 @@ export default function AuctionPage() {
           <div className="lg:col-span-2 space-y-6">
             <BiddingSection
               currentBid={auction.currentBid || 0}
-              minBid={(auction.currentBid || 0) + (auction.bidIncrement || 100000)}
+              minBid={
+                (auction.currentBid || 0) + (auction.bidIncrement || 100000)
+              }
               bidIncrement={auction.bidIncrement || 100000}
-              timeLeft={auction.timeLeft || 'Không xác định'}
+              timeLeft={auction.timeLeft || "Không xác định"}
               isActive={auction.isActive || false}
               status={auction.status}
               onBid={handleBid}
               onAutoBid={handleAutoBid}
             />
+            
+            {/* Debug info */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs">
+              <strong>Debug:</strong> Status: {auction.status}, isActive: {auction.isActive ? 'true' : 'false'}, timeLeft: {auction.timeLeft}
+            </div>
 
             <AuctionDetails
               description={auction.description}
@@ -401,12 +438,19 @@ export default function AuctionPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Trạng thái đấu giá
               </h3>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Trạng thái</span>
                   <div className="flex items-center space-x-2">
-                    {auction.isActive ? (
+                    {auction.status === 'upcoming' ? (
+                      <>
+                        <Clock className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium text-blue-600">
+                          Sắp diễn ra
+                        </span>
+                      </>
+                    ) : auction.status === 'active' ? (
                       <>
                         <Clock className="h-4 w-4 text-green-500" />
                         <span className="text-sm font-medium text-green-600">
@@ -445,7 +489,7 @@ export default function AuctionPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Thao tác nhanh
               </h3>
-              
+
               <div className="space-y-3">
                 <button
                   onClick={handleWatch}
@@ -476,7 +520,7 @@ export default function AuctionPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Toast Notification */}
       <Toast
         message={toast.message}

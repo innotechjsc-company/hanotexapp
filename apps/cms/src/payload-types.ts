@@ -642,7 +642,7 @@ export interface Auction {
 export interface Bid {
   id: string;
   auction: string | Auction;
-  bidder: string | User;
+  bidder: string;
   bid_amount: number;
   bid_time: string;
   /**
