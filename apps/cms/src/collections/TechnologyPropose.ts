@@ -63,6 +63,13 @@ export const TechnologyPropose: CollectionConfig = {
       label: 'Người ra đề xuất',
     },
     {
+      name: 'receiver',
+      type: 'relationship',
+      relationTo: 'users',
+      required: true,
+      label: 'Người nhận đề xuất',
+    },
+    {
       name: 'description',
       type: 'textarea',
       required: true,

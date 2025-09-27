@@ -27,6 +27,13 @@ export const ProjectPropose: CollectionConfig = {
       label: 'Người gửi',
     },
     {
+      name: 'receiver',
+      type: 'relationship',
+      relationTo: 'users',
+      required: true,
+      label: 'Người nhận đề xuất',
+    },
+    {
       name: 'investor_capacity',
       type: 'text',
       label: 'Năng lực NĐT',

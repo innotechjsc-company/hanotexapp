@@ -642,7 +642,7 @@ export interface Auction {
 export interface Bid {
   id: string;
   auction: string | Auction;
-  bidder: string | User;
+  bidder: string;
   bid_amount: number;
   bid_time: string;
   /**
@@ -848,6 +848,7 @@ export interface Propose {
    */
   demand: string | Demand;
   user: string | User;
+  receiver: string | User;
   technology: string | Technology;
   description: string;
   /**
@@ -884,6 +885,7 @@ export interface TechnologyPropose {
    */
   technology: string | Technology;
   user: string | User;
+  receiver: string | User;
   description: string;
   budget: number;
   /**
@@ -1027,6 +1029,7 @@ export interface ProjectPropose {
   id: string;
   project: string | Project;
   user: string | User;
+  receiver: string | User;
   investor_capacity?: string | null;
   investment_amount?: number | null;
   investment_ratio?: number | null;
@@ -1752,6 +1755,7 @@ export interface ProposeSelect<T extends boolean = true> {
   title?: T;
   demand?: T;
   user?: T;
+  receiver?: T;
   technology?: T;
   description?: T;
   execution_time?: T;
@@ -1769,6 +1773,7 @@ export interface ProposeSelect<T extends boolean = true> {
 export interface TechnologyProposeSelect<T extends boolean = true> {
   technology?: T;
   user?: T;
+  receiver?: T;
   description?: T;
   budget?: T;
   document?: T;
@@ -1961,6 +1966,7 @@ export interface ContractLogsSelect<T extends boolean = true> {
 export interface ProjectProposeSelect<T extends boolean = true> {
   project?: T;
   user?: T;
+  receiver?: T;
   investor_capacity?: T;
   investment_amount?: T;
   investment_ratio?: T;

@@ -125,10 +125,17 @@ function ProposeSolutionPage() {
     formData: ProposalFormData,
     uploadedDocument: Media | null
   ): Partial<Propose> => {
+    // Determine receiver from demand owner
+    const receiverId =
+      (typeof demand?.user === "object"
+        ? (demand?.user as any)?.id || (demand?.user as any)?._id
+        : demand?.user) as string | undefined;
+
     return {
       title: formData.title,
       demand: params.id as any, // Will be converted to object reference by API
       user: user?.id as any,
+      receiver: receiverId as any,
       technology: formData.technology_id as any,
       description: formData.solution_description,
       execution_time: formData.implementation_timeline,
@@ -179,6 +186,12 @@ function ProposeSolutionPage() {
 
       // Create propose data according to Propose interface
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
+
+      // Validate receiver (required by backend)
+      if (!(proposeData as any)?.receiver) {
+        setError("Không xác định được người nhận đề xuất.");
+        return;
+      }
 
       const createdProposeResponse = await createPropose(proposeData);
 
