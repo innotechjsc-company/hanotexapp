@@ -1,43 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/auth";
 import {
   Search,
-  Filter,
   Grid,
   List,
   SortAsc,
   SortDesc,
-  MapPin,
   Calendar,
-  Eye,
   DollarSign,
-  Clock,
   Users,
   ArrowRight,
   Plus,
   Send,
 } from "lucide-react";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Input,
-  Button,
-  Select,
-  SelectItem,
-  Chip,
-  Spinner,
-  ButtonGroup,
-  Avatar,
-} from "@heroui/react";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Card, Input, Button, Select, Spin, Tag } from "antd";
 import { getDemands } from "@/api/demands";
 import { getAllCategories } from "@/api/categories";
 import { Demand } from "@/types/demand";
 import { Category } from "@/types/categories";
+import { formatPriceRange } from "@/constants/demands";
 
 export default function DemandsPage() {
   const router = useRouter();
@@ -49,14 +33,12 @@ export default function DemandsPage() {
   const [error, setError] = useState("");
   const [isFiltering, setIsFiltering] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
+  const [activeSearchQuery, setActiveSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("DESC");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filters, setFilters] = useState({
     category: "",
-    budget_range: "",
-    status: "",
   });
   const [pagination, setPagination] = useState({
     page: 1,
@@ -64,44 +46,10 @@ export default function DemandsPage() {
     totalPages: 1,
     totalDocs: 0,
   });
-  const [budgetOptions, setBudgetOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
 
-  // Fetch budget options on component mount
-  useEffect(() => {
-    const fetchBudgetOptions = async () => {
-      try {
-        // Fetch a large number of demands to get all possible budget ranges
-        const response = await getDemands({}, { limit: 1000, page: 1 });
-        if (response.docs) {
-          const demands = response.docs.flat();
-          const uniqueBudgets = new Map<string, string>();
-
-          demands.forEach((demand) => {
-            if (demand.from_price != null && demand.to_price != null) {
-              const value = `${demand.from_price}-${demand.to_price}`;
-              const label = `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`;
-              if (!uniqueBudgets.has(value)) {
-                uniqueBudgets.set(value, label);
-              }
-            }
-          });
-
-          const options = Array.from(uniqueBudgets.entries()).map(
-            ([value, label]) => ({ value, label })
-          );
-          setBudgetOptions(options);
-        }
-      } catch (error) {
-        console.error("Error fetching budget options:", error);
-      }
-    };
-
-    fetchBudgetOptions();
-  }, []);
+  // Bỏ budget options vì không yêu cầu trên màn hình này
   // Fetch categories from API
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setCategoriesLoading(true);
       const response = await getAllCategories({ limit: 100 }); // Get all categories
@@ -141,50 +89,34 @@ export default function DemandsPage() {
     } finally {
       setCategoriesLoading(false);
     }
-  };
+  }, []);
 
   // Fetch demands from API
-  const fetchDemands = async () => {
+  const fetchDemands = useCallback(async () => {
     try {
       setError("");
 
-      // Build filters object
+      // Build filters object for API using PayloadCMS where syntax
       const apiFilters: any = {};
       if (activeSearchQuery) {
-        // Use a specific filter for title search
-        apiFilters["where[title][like]"] = activeSearchQuery;
+        apiFilters["where[title][contains]"] = activeSearchQuery;
       }
       if (filters.category) {
-        // Use the category ID for filtering
         apiFilters["where[category][equals]"] = filters.category;
       }
-      if (filters.status) {
-        apiFilters.status = filters.status;
-      }
-      if (filters.budget_range) {
-        const [from_price, to_price] = filters.budget_range
-          .split("-")
-          .map(Number);
-        if (!isNaN(from_price) && !isNaN(to_price)) {
-          // Filter for exact from_price and to_price match
-          apiFilters["where[from_price][equals]"] = from_price;
-          apiFilters["where[to_price][equals]"] = to_price;
-        }
-      }
 
-      // Build pagination object
+      // Build pagination + sort
       const paginationParams = {
         page: pagination.page,
         limit: pagination.limit,
+        sort: `${sortOrder === "DESC" ? "-" : ""}${sortBy}`,
       };
 
       const response = await getDemands(apiFilters, paginationParams);
       if (response.docs && response.docs.length > 0) {
-        // response.docs is Demand[][], so we need to flatten it
         const flattenedDemands = response.docs.flat();
         setDemands(flattenedDemands);
       } else if (response.data) {
-        // Fallback if data is returned instead of docs
         setDemands(
           Array.isArray(response.data) ? response.data : [response.data]
         );
@@ -192,7 +124,6 @@ export default function DemandsPage() {
         setDemands([]);
       }
 
-      // Update pagination info
       setPagination((prev) => ({
         ...prev,
         totalPages: response.totalPages || 1,
@@ -206,7 +137,7 @@ export default function DemandsPage() {
       setLoading(false);
       setIsFiltering(false);
     }
-  };
+  }, [activeSearchQuery, filters.category, pagination.page, pagination.limit, sortBy, sortOrder]);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -216,45 +147,41 @@ export default function DemandsPage() {
   useEffect(() => {
     fetchDemands();
   }, [
-    pagination.page,
-    pagination.limit,
-    sortBy,
-    sortOrder,
-    filters,
-    activeSearchQuery,
+    fetchDemands
   ]);
 
   // Extracted search logic to be reusable
-  const performSearch = () => {
-    setIsFiltering(true);
-    const newActiveQuery = activeSearchQuery ? "" : searchQuery.trim();
-    setActiveSearchQuery(newActiveQuery);
+  const performSearch = useCallback(() => {
     if (activeSearchQuery) {
+      // Clear search
+      setActiveSearchQuery("");
       setSearchQuery("");
+    } else {
+      // Perform search
+      setActiveSearchQuery(searchQuery.trim());
     }
     setPagination((prev) => ({ ...prev, page: 1 }));
-  };
+  }, [searchQuery, activeSearchQuery]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     performSearch();
-  };
+  }, [performSearch]);
 
   // Handle filter changes
-  const handleFilterChange = (newFilters: any) => {
-    setIsFiltering(true);
+  const handleFilterChange = useCallback((newFilters: any) => {
     setFilters(newFilters);
     setPagination((prev) => ({ ...prev, page: 1 }));
-  };
+  }, []);
 
-  const handleSort = (field: string) => {
+  const handleSort = useCallback((field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
     } else {
       setSortBy(field);
       setSortOrder("DESC");
     }
-  };
+  }, [sortBy, sortOrder]);
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -271,10 +198,10 @@ export default function DemandsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background py-8">
+      <div className="min-h-screen bg-background py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Spinner size="lg" color="primary" />
+            <Spin size="large" />
             <p className="text-default-600 mt-4">
               Đang tải danh sách nhu cầu...
             </p>
@@ -286,27 +213,27 @@ export default function DemandsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background py-8 ">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
-          <Card className="text-center py-12 ">
-            <CardBody>
-              <div className="w-16 h-16 bg-danger-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="h-8 w-8 text-danger-400" />
+      <div className="min-h-screen bg-background py-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="text-center py-2">
+            <div className="p-2">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="h-8 w-8 text-red-400" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 Có lỗi xảy ra
               </h3>
               <p className="text-default-600 mb-4">{error}</p>
               <Button
-                color="primary"
-                onPress={() => {
+                type="primary"
+                onClick={() => {
                   setError("");
                   fetchDemands();
                 }}
               >
                 Thử lại
               </Button>
-            </CardBody>
+            </div>
           </Card>
         </div>
       </div>
@@ -314,10 +241,10 @@ export default function DemandsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8">
+    <div className="min-h-screen bg-background py-2">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-4">
               Nhu cầu công nghệ
@@ -326,137 +253,66 @@ export default function DemandsPage() {
               Khám phá các nhu cầu công nghệ từ doanh nghiệp và tổ chức
             </p>
           </div>
-          {/* <Button
-            color="primary"
-            size="lg"
-            startContent={<Plus className="h-5 w-5" />}
-            className="font-medium"
-            onPress={() => {
-              if (isAuthenticated) {
-                router.push("/demands/register");
-              } else {
-                router.push("/auth/login?redirect=/demands/register");
-              }
-            }}
-            style={{
-              backgroundColor: "#006FEE",
-              color: "#ffffff",
-              minHeight: "44px",
-              fontWeight: "500",
-            }}
-            title={
-              isAuthenticated
-                ? "Đăng nhu cầu KH&CN mới"
-                : "Đăng nhập để đăng nhu cầu"
-            }
-          >
-            Đăng nhu cầu
-          </Button> */}
         </div>
 
         {/* Search and Filters */}
-        <Card className="shadow-sm mb-8">
-          <CardBody className="p-6">
+        <Card className="shadow-sm mb-4">
+          <div className="p-2">
             <div className="flex flex-col gap-4">
-              <form onSubmit={handleSearch} className="flex gap-4">
+              <div className="flex gap-4">
                 <Input
-                  type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm nhu cầu công nghệ..."
-                  startContent={<Search className="h-5 w-5 text-default-400" />}
-                  variant="bordered"
+                  prefix={<Search className="h-4 w-4 text-gray-400" />}
+                  onPressEnter={(e) => {
+                    e.preventDefault();
+                    performSearch();
+                  }}
                   className="flex-1"
-                  classNames={{
-                    input: "text-sm",
-                    inputWrapper: "h-12",
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault(); // Prevent form submission
-                      performSearch();
-                    }
-                  }}
                 />
                 <Button
-                  type="submit"
-                  color={activeSearchQuery ? "danger" : "primary"}
-                  size="lg"
-                  className="px-8"
-                  onPress={() => performSearch()}
-                  style={{
-                    backgroundColor: activeSearchQuery ? "#EF4444" : "#006FEE",
-                    color: "#ffffff",
-                    minHeight: "48px",
-                    fontWeight: "500",
-                    border: "none",
-                  }}
+                  type="primary"
+                  onClick={performSearch}
+                  danger={!!activeSearchQuery}
                 >
                   {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
                 </Button>
-              </form>
+              </div>
 
               {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="Danh mục"
-                  placeholder="Tất cả danh mục"
-                  selectedKeys={filters.category ? [filters.category] : []}
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0] as string;
-                    handleFilterChange({
-                      ...filters,
-                      category: selectedKey || "",
-                    });
-                  }}
-                  variant="bordered"
-                  classNames={{
-                    label: "text-sm font-medium text-foreground",
-                  }}
-                  isLoading={categoriesLoading}
-                >
-                  {[
-                    <SelectItem key="">Tất cả danh mục</SelectItem>,
-                    ...categories.map((category) => (
-                      <SelectItem key={category.id || category.name}>
-                        {category.name}
-                      </SelectItem>
-                    )),
-                  ]}
-                </Select>
-
-                <Select
-                  label="Ngân sách"
-                  placeholder="Tất cả ngân sách"
-                  selectedKeys={
-                    filters.budget_range ? [filters.budget_range] : []
-                  }
-                  onSelectionChange={(keys) => {
-                    const selectedKey = Array.from(keys)[0] as string;
-                    handleFilterChange({
-                      ...filters,
-                      budget_range: selectedKey || "",
-                    });
-                  }}
-                  variant="bordered"
-                  classNames={{
-                    label: "text-sm font-medium text-foreground",
-                  }}
-                >
-                  {[
-                    <SelectItem key="">Tất cả ngân sách</SelectItem>,
-                    ...budgetOptions.map((option) => (
-                      <SelectItem key={option.value}>{option.label}</SelectItem>
-                    )),
-                  ]}
-                </Select>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm text-gray-600">Danh mục</label>
+                  <Select
+                    allowClear
+                    placeholder="Tất cả danh mục"
+                    value={filters.category || undefined}
+                    loading={categoriesLoading}
+                    onChange={(val) =>
+                      handleFilterChange({ ...filters, category: val || "" })
+                    }
+                    options={[
+                      ...categories.map((c) => ({
+                        label: c.name,
+                        value: c.id || c.name,
+                      })),
+                    ]}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label as string)
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                  />
+                </div>
               </div>
             </div>
-          </CardBody>
+          </div>
         </Card>
 
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4 mt-2">
           <div className="flex items-center space-x-4">
             <p className="text-default-600">
               Tìm thấy{" "}
@@ -474,65 +330,38 @@ export default function DemandsPage() {
             {/* Sort Options */}
             <div className="flex items-center space-x-2">
               <Button
-                variant={sortBy === "created_at" ? "flat" : "light"}
-                color={sortBy === "created_at" ? "primary" : "default"}
-                size="sm"
-                onPress={() => handleSort("created_at")}
-                endContent={
-                  sortBy === "created_at" &&
-                  (sortOrder === "ASC" ? (
-                    <SortAsc className="h-4 w-4" />
-                  ) : (
-                    <SortDesc className="h-4 w-4" />
-                  ))
+                type={sortBy === "createdAt" ? "primary" : "default"}
+                size="small"
+                onClick={() => handleSort("createdAt")}
+                icon={
+                  sortBy === "createdAt" ? (
+                    sortOrder === "ASC" ? (
+                      <SortAsc className="h-4 w-4" />
+                    ) : (
+                      <SortDesc className="h-4 w-4" />
+                    )
+                  ) : undefined
                 }
-                style={{
-                  backgroundColor:
-                    sortBy === "created_at" ? "#006FEE20" : "transparent",
-                  color: sortBy === "created_at" ? "#006FEE" : "#71717A",
-                  border: "1px solid #E4E4E7",
-                  minHeight: "32px",
-                }}
               >
                 Ngày tạo
               </Button>
             </div>
 
             {/* View Mode Toggle */}
-            <ButtonGroup variant="bordered" size="sm">
+            <div className="flex gap-2">
               <Button
-                isIconOnly
-                variant={viewMode === "grid" ? "solid" : "bordered"}
-                color={viewMode === "grid" ? "primary" : "default"}
-                onPress={() => setViewMode("grid")}
-                style={{
-                  backgroundColor:
-                    viewMode === "grid" ? "#006FEE" : "transparent",
-                  color: viewMode === "grid" ? "#ffffff" : "#71717A",
-                  border: "1px solid #E4E4E7",
-                  minHeight: "32px",
-                  minWidth: "32px",
-                }}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
+                type={viewMode === "grid" ? "primary" : "default"}
+                size="small"
+                onClick={() => setViewMode("grid")}
+                icon={<Grid className="h-4 w-4" />}
+              />
               <Button
-                isIconOnly
-                variant={viewMode === "list" ? "solid" : "bordered"}
-                color={viewMode === "list" ? "primary" : "default"}
-                onPress={() => setViewMode("list")}
-                style={{
-                  backgroundColor:
-                    viewMode === "list" ? "#006FEE" : "transparent",
-                  color: viewMode === "list" ? "#ffffff" : "#71717A",
-                  border: "1px solid #E4E4E7",
-                  minHeight: "32px",
-                  minWidth: "32px",
-                }}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </ButtonGroup>
+                type={viewMode === "list" ? "primary" : "default"}
+                size="small"
+                onClick={() => setViewMode("list")}
+                icon={<List className="h-4 w-4" />}
+              />
+            </div>
           </div>
         </div>
 
@@ -540,15 +369,15 @@ export default function DemandsPage() {
         <div className="relative">
           {isFiltering && (
             <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-10">
-              <Spinner size="lg" color="primary" />
+              <Spin size="large" />
             </div>
           )}
           {demands.length > 0 ? (
             <div
               className={
                 viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                  : "space-y-4"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  : "space-y-3"
               }
             >
               {demands.map((demand, index) => (
@@ -557,34 +386,23 @@ export default function DemandsPage() {
                   className={`shadow-sm hover:shadow-md transition-shadow ${
                     viewMode === "grid" ? "h-full flex flex-col" : ""
                   }`}
-                  isPressable={false}
                 >
-                  <CardBody className="p-6 flex flex-col h-full">
+                  <div className="p-2 flex flex-col h-full">
                     {viewMode === "grid" ? (
                       // Grid View
                       <>
                         <div className="flex items-start justify-between mb-4">
-                          <Chip
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            className="text-xs"
-                          >
+                          <Tag color="blue" className="text-xs">
                             {typeof demand.category === "object" &&
                             demand.category?.name
                               ? demand.category.name
                               : typeof demand.category === "string"
                                 ? demand.category
                                 : "Chưa phân loại"}
-                          </Chip>
-                          <Chip
-                            size="sm"
-                            color="success"
-                            variant="flat"
-                            className="text-xs"
-                          >
+                          </Tag>
+                          <Tag color="green" className="text-xs">
                             TRL {demand.trl_level}
-                          </Chip>
+                          </Tag>
                         </div>
 
                         <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
@@ -599,9 +417,10 @@ export default function DemandsPage() {
                           <div className="flex items-center text-sm text-default-500">
                             <DollarSign className="h-4 w-4 mr-2" />
                             <span>
-                              {demand.from_price && demand.to_price
-                                ? `${demand.from_price.toLocaleString()} - ${demand.to_price.toLocaleString()} VNĐ`
-                                : "Thỏa thuận"}
+                              {formatPriceRange(
+                                demand.from_price,
+                                demand.to_price
+                              )}
                             </span>
                           </div>
                           <div className="flex items-center text-sm text-default-500">
@@ -634,9 +453,9 @@ export default function DemandsPage() {
 
                         <div className="space-y-2 mt-auto">
                           <Button
-                            color="primary"
+                            type="primary"
                             className="w-full"
-                            onPress={() => {
+                            onClick={() => {
                               const target = `/demands/${demand.id || index}`;
                               if (isAuthenticated) {
                                 router.push(target);
@@ -646,14 +465,7 @@ export default function DemandsPage() {
                                 );
                               }
                             }}
-                            endContent={<ArrowRight className="h-4 w-4" />}
-                            style={{
-                              backgroundColor: "#006FEE",
-                              color: "#ffffff",
-                              minHeight: "40px",
-                              fontWeight: "500",
-                              border: "none",
-                            }}
+                            icon={<ArrowRight className="h-4 w-4" />}
                           >
                             Xem chi tiết
                           </Button>
@@ -668,27 +480,17 @@ export default function DemandsPage() {
                               {demand.title}
                             </h3>
                             <div className="flex items-center space-x-2">
-                              <Chip
-                                size="sm"
-                                color="primary"
-                                variant="flat"
-                                className="text-xs"
-                              >
+                              <Tag color="blue" className="text-xs">
                                 {typeof demand.category === "object" &&
                                 demand.category?.name
                                   ? demand.category.name
                                   : typeof demand.category === "string"
                                     ? demand.category
                                     : "Chưa phân loại"}
-                              </Chip>
-                              <Chip
-                                size="sm"
-                                color="success"
-                                variant="flat"
-                                className="text-xs"
-                              >
+                              </Tag>
+                              <Tag color="green" className="text-xs">
                                 TRL {demand.trl_level}
-                              </Chip>
+                              </Tag>
                             </div>
                           </div>
 
@@ -699,36 +501,20 @@ export default function DemandsPage() {
 
                         <div className="flex flex-col space-y-2">
                           <Button
-                            color="primary"
-                            size="sm"
-                            onPress={() => router.push(`/demands/${demand.id}`)}
-                            endContent={<ArrowRight className="h-4 w-4" />}
-                            style={{
-                              backgroundColor: "#006FEE",
-                              color: "#ffffff",
-                              minHeight: "32px",
-                              fontWeight: "500",
-                              border: "none",
-                            }}
+                            type="primary"
+                            size="small"
+                            onClick={() => router.push(`/demands/${demand.id}`)}
+                            icon={<ArrowRight className="h-4 w-4" />}
                           >
                             Xem chi tiết
                           </Button>
                           {isAuthenticated && (
                             <Button
-                              color="success"
-                              variant="bordered"
-                              size="sm"
-                              onPress={() =>
+                              size="small"
+                              onClick={() =>
                                 router.push(`/demands/${demand.id}/propose`)
                               }
-                              endContent={<Send className="h-4 w-4" />}
-                              style={{
-                                backgroundColor: "transparent",
-                                color: "#17C964",
-                                border: "1px solid #17C964",
-                                minHeight: "32px",
-                                fontWeight: "500",
-                              }}
+                              icon={<Send className="h-4 w-4" />}
                             >
                               Đề xuất
                             </Button>
@@ -736,20 +522,20 @@ export default function DemandsPage() {
                         </div>
                       </div>
                     )}
-                  </CardBody>
+                  </div>
                 </Card>
               ))}
             </div>
           ) : (
-            <Card className="py-12">
-              <CardBody className="flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 bg-default-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-8 w-8 text-default-400" />
+            <Card className="py-2">
+              <div className="flex flex-col items-center justify-center text-center p-2">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   Không tìm thấy nhu cầu nào
                 </h3>
-              </CardBody>
+              </div>
             </Card>
           )}
         </div>
@@ -758,30 +544,24 @@ export default function DemandsPage() {
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Button
-          color="primary"
-          size="lg"
-          isIconOnly
-          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-          onPress={() => {
+          type="primary"
+          shape="circle"
+          size="large"
+          className="w-14 h-14 shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+          onClick={() => {
             if (isAuthenticated) {
               router.push("/demands/register");
             } else {
               router.push("/auth/login?redirect=/demands/register");
             }
           }}
-          style={{
-            backgroundColor: "#006FEE",
-            color: "#ffffff",
-            border: "none",
-          }}
           title={
             isAuthenticated
               ? "Đăng nhu cầu KH&CN mới"
               : "Đăng nhập để đăng nhu cầu"
           }
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
+          icon={<Plus className="h-6 w-6" />}
+        />
       </div>
     </div>
   );

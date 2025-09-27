@@ -3,9 +3,10 @@
  * Cấu hình cơ bản để kết nối với PayloadCMS
  */
 
-// Base URL của PayloadCMS API
-export const PAYLOAD_API_BASE_URL =
-  process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api";
+// Base URL của PayloadCMS API - sử dụng helper function
+import { getPayloadApiBaseUrl } from "@/lib/api-config";
+
+export const PAYLOAD_API_BASE_URL = getPayloadApiBaseUrl();
 
 // API endpoints cho các collections
 export const API_ENDPOINTS = {
@@ -51,6 +52,7 @@ export const API_ENDPOINTS = {
   ROOM_USER: "/room-user",
   SERVICES: "/services",
   SERVICE_TICKET: "/service-ticket",
+  SERVICE_TICKET_LOG: "/service-ticket-log",
   OFFERS: "/offer",
   CONTRACT_LOGS: "/contract-logs",
 } as const;

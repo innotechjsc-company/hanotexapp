@@ -11,7 +11,7 @@ class WebSocketManager {
       return this.socket;
     }
 
-    const socketUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
+    const socketUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://localhost:3001';
     
     this.socket = io(socketUrl, {
       auth: {

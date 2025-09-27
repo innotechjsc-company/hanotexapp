@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { useState, useEffect } from "react";
 import { HeroUIProvider } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, App } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { initializeAuth } from "@/store/auth";
 import { antdTheme } from "@/lib/antd-theme";
@@ -53,7 +53,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <AntdRegistry>
         <ConfigProvider theme={antdTheme}>
-          <HeroUIWrapper>{children}</HeroUIWrapper>
+          <App>
+            <HeroUIWrapper>{children}</HeroUIWrapper>
+          </App>
         </ConfigProvider>
       </AntdRegistry>
       {process.env.NODE_ENV === "development" && (

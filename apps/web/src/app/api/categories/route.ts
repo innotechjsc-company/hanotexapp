@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getPayloadApiBaseUrl } from "@/lib/api-config";
 
-const PAYLOAD_API_URL = process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api';
+const PAYLOAD_API_URL = getPayloadApiBaseUrl();
 
 export async function GET() {
   try {

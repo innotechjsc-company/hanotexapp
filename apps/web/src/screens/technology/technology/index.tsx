@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Spinner } from "@heroui/react";
 import { Cpu, Lightbulb, Zap, TrendingUp } from "lucide-react";
 import TechnologyCard from "./components/TechnologyCard";
@@ -14,6 +14,7 @@ import AnimatedIcon from "@/components/ui/AnimatedIcon";
 
 export default function TechnologyListScreen() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
@@ -30,6 +31,48 @@ export default function TechnologyListScreen() {
   const [trlSelectedKeys, setTrlSelectedKeys] = useState<Set<string>>(
     new Set()
   );
+
+  const updateUrlParams = ({
+    query: nextQuery,
+    categoryId,
+    trlLevel,
+    page: nextPage,
+  }: {
+    query?: string;
+    categoryId?: string | null;
+    trlLevel?: string | null;
+    page?: number;
+  }) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (nextQuery !== undefined) {
+      const trimmed = nextQuery.trim();
+      if (trimmed) params.set("search", trimmed);
+      else params.delete("search");
+    }
+
+    if (categoryId !== undefined) {
+      if (categoryId) params.set("category_id", categoryId);
+      else params.delete("category_id");
+    }
+
+    if (trlLevel !== undefined) {
+      if (trlLevel) params.set("trl_level", trlLevel);
+      else params.delete("trl_level");
+    }
+
+    if (nextPage !== undefined) {
+      if (nextPage > 1) params.set("page", String(nextPage));
+      else params.delete("page");
+    }
+
+    const queryString = params.toString();
+    if (queryString === searchParams.toString()) return;
+    router.replace(
+      `/technologies${queryString ? `?${queryString}` : ""}`,
+      { scroll: false }
+    );
+  };
 
   // Simple helpers for chips
   const trlChipColor = (level?: number): "default" | "warning" | "success" => {
@@ -114,12 +157,29 @@ export default function TechnologyListScreen() {
     run();
   }, []);
 
-  // Handle URL parameters
+  // Sync state with URL parameters
   useEffect(() => {
-    const categoryId = searchParams.get("category_id");
-    if (categoryId) {
-      setCategorySelectedKeys(new Set([categoryId]));
-    }
+    const searchValue =
+      searchParams.get("search") ?? searchParams.get("q") ?? "";
+    setQuery((prev) => (prev === searchValue ? prev : searchValue));
+
+    const categoryId = searchParams.get("category_id") ?? "";
+    setCategorySelectedKeys((prev) => {
+      const current = prev.size ? Array.from(prev)[0] : "";
+      if (current === categoryId) return prev;
+      return categoryId ? new Set([categoryId]) : new Set();
+    });
+
+    const trlLevel = searchParams.get("trl_level") ?? "";
+    setTrlSelectedKeys((prev) => {
+      const current = prev.size ? Array.from(prev)[0] : "";
+      if (current === trlLevel) return prev;
+      return trlLevel ? new Set([trlLevel]) : new Set();
+    });
+
+    const pageParam = Number(searchParams.get("page") ?? "1");
+    const normalizedPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+    setPage((prev) => (prev === normalizedPage ? prev : normalizedPage));
   }, [searchParams]);
 
   // Refetch when page or filters change
@@ -130,6 +190,7 @@ export default function TechnologyListScreen() {
 
   const onSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    updateUrlParams({ query, page: 1 });
     if (page === 1) {
       fetchData();
     } else {
@@ -176,6 +237,7 @@ export default function TechnologyListScreen() {
             setCategorySelectedKeys(new Set());
             setTrlSelectedKeys(new Set());
             setPage(1);
+            updateUrlParams({ query: "", categoryId: null, trlLevel: null, page: 1 });
           }}
           showClear={Boolean(
             query || categorySelectedKeys.size || trlSelectedKeys.size
@@ -184,12 +246,26 @@ export default function TechnologyListScreen() {
           categorySelectedKeys={categorySelectedKeys}
           onCategoryChange={(keys) => {
             setCategorySelectedKeys(new Set(keys));
+            const nextCategoryId = keys && keys.size
+              ? String(Array.from(keys)[0])
+              : "";
             setPage(1);
+            updateUrlParams({
+              categoryId: nextCategoryId || null,
+              page: 1,
+            });
           }}
           trlSelectedKeys={trlSelectedKeys}
           onTrlChange={(keys) => {
             setTrlSelectedKeys(new Set(keys));
+            const nextTrlLevel = keys && keys.size
+              ? String(Array.from(keys)[0])
+              : "";
             setPage(1);
+            updateUrlParams({
+              trlLevel: nextTrlLevel || null,
+              page: 1,
+            });
           }}
         />
 
@@ -226,7 +302,12 @@ export default function TechnologyListScreen() {
                   size="sm"
                   variant="bordered"
                   isDisabled={!canPrev}
-                  onPress={() => canPrev && setPage((p) => Math.max(1, p - 1))}
+                  onPress={() => {
+                    if (!canPrev) return;
+                    const nextPage = Math.max(1, page - 1);
+                    setPage(nextPage);
+                    updateUrlParams({ page: nextPage });
+                  }}
                 >
                   Trang trước
                 </Button>
@@ -239,7 +320,12 @@ export default function TechnologyListScreen() {
                   size="sm"
                   variant="bordered"
                   isDisabled={!canNext}
-                  onPress={() => canNext && setPage((p) => p + 1)}
+                  onPress={() => {
+                    if (!canNext) return;
+                    const nextPage = page + 1;
+                    setPage(nextPage);
+                    updateUrlParams({ page: nextPage });
+                  }}
                 >
                   Trang sau
                 </Button>

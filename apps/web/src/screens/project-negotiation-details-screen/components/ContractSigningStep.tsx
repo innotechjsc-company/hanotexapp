@@ -92,19 +92,21 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     // No template download. Start from upload only.
   };
 
-  const refreshContract = async () => {
+  const refreshContract = async (options: { silent?: boolean } = {}) => {
+    const { silent = false } = options;
     try {
-      setLoading(true);
-      console.log("Refreshing contract for proposal:", proposal.id);
-      if(!proposal.id) return;
+      if (!silent) {
+        setLoading(true);
+      }
+      if (!proposal.id) return;
       const found = await contractsApi.getByProjectPropose(proposal.id, 1);
-      console.log("Found contract:", found);
-      
       setActiveContract(found);
     } catch (e) {
       console.error("Error refreshing contract:", e);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -112,6 +114,19 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     refreshContract();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposal.id]);
+
+  useEffect(() => {
+    if (!proposal?.id) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      refreshContract({ silent: true });
+    }, 5000);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposal?.id]);
 
   // File upload handlers
   const handleContractFileUpload = (file: File) => {

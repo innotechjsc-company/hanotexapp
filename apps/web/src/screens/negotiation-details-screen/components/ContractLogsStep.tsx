@@ -100,9 +100,12 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     });
   };
 
-  const fetchLogs = useCallback(async () => {
+  const fetchLogs = useCallback(async (options: { silent?: boolean } = {}) => {
+    const { silent = false } = options;
     if (!proposal?.id) return;
-    setLoading(true);
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       // Load active contract for this proposal (required by CMS schema)
       try {
@@ -133,13 +136,27 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       console.error("Failed to load contract logs", e);
       message.error("Không thể tải nhật ký hợp đồng");
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [proposal?.id]);
 
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
+
+  useEffect(() => {
+    if (!proposal?.id) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      fetchLogs({ silent: true });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [proposal?.id, fetchLogs]);
 
   const onFileUpload = (file: File) => {
     if (attachments.length >= 1) {
