@@ -417,9 +417,9 @@ export default function SmartChatbot({
     setMessages((prev) => [...prev, actionMessage]);
 
     // Generate response after a short delay
-    setTimeout(() => {
+    setTimeout(async () => {
       const intent = recognizeIntent(actionMessage.content);
-      const response = getResponseForIntent(intent, actionMessage.content);
+      const response = await getResponseForIntent(intent, actionMessage.content);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),

@@ -28,11 +28,6 @@ export const mainMenuItems: MenuItem[] = [
     name: "Đấu giá",
     href: "/auctions",
     icon: Gavel,
-    submenu: [
-      { name: "Đang diễn ra", href: "/auctions?status=active" },
-      { name: "Sắp diễn ra", href: "/auctions?status=upcoming" },
-      { name: "Tạo đấu giá", href: "/auctions/create" },
-    ],
   },
   {
     name: "Dịch vụ",

@@ -416,7 +416,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 <div className="flex justify-between">
                   <Text strong>Ngân sách:</Text>
                   <Text className="text-green-600 font-semibold">
-                    {proposal.budget?.toLocaleString("vi-VN")} VND
+                    {(proposal as any).budget?.toLocaleString("vi-VN")} VND
                   </Text>
                 </div>
                 <div className="flex justify-between">
