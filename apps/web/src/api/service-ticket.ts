@@ -11,6 +11,7 @@ export interface ServiceTicketFilters {
   status?: ServiceTicket["status"];
   userId?: string;
   serviceId?: string;
+  implementerId?: string;
   search?: string;
 }
 
@@ -41,6 +42,9 @@ export async function getServiceTickets(
   }
   if (filters.serviceId) {
     params["where[service][equals]"] = filters.serviceId;
+  }
+  if (filters.implementerId) {
+    params["where[implementers][in]"] = filters.implementerId;
   }
   if (filters.search && filters.search.trim()) {
     const q = filters.search.trim();
