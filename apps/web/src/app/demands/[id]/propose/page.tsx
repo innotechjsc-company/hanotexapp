@@ -181,9 +181,7 @@ function ProposeSolutionPage() {
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
 
       const createdProposeResponse = await createPropose(proposeData);
-
-      // Success - redirect to success page
-      router.push(`/demands/${params.id}/propose/success`);
+      console.log("Created propose response:", createdProposeResponse);
     } catch (error: any) {
       console.error("Error submitting proposal:", error);
       setError(

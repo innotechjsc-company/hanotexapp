@@ -15,28 +15,53 @@ export const Propose: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, req, operation }) => {
-        // Chỉ tạo notification khi propose được tạo mới
         if (operation === 'create') {
           try {
-            // Lấy thông tin demand để có user_id
+            // Lấy demand ID - có thể là string hoặc object
+            const demandId = typeof doc.demand === 'string' ? doc.demand : doc.demand?.id
+
+            if (!demandId) {
+              console.error('Không tìm thấy demand ID')
+              return
+            }
+
             const demand = await req.payload.findByID({
               collection: 'demand',
-              id: doc.demand,
+              id: demandId,
             })
-
             if (demand && demand.user) {
-              // Tạo notification cho user của demand
-              await req.payload.create({
-                collection: 'notifications',
-                data: {
-                  user: demand.user,
-                  title: `Có đề xuất mới cho yêu cầu của bạn ${demand.title}`,
-                  message: `Có một đề xuất mới cho yêu cầu "${demand.title}". Chi phí ước tính: ${doc.estimated_cost?.toLocaleString()} VND, thời gian thực hiện: ${doc.execution_time}.`,
-                  type: 'info',
-                  priority: 'normal',
-                  is_read: false,
-                },
-              })
+              const demandUserId = typeof demand.user === 'string' ? demand.user : demand.user?.id
+
+              const proposeUserId = typeof doc.user === 'string' ? doc.user : doc.user?.id
+              let proposeUserName = 'Người dùng'
+
+              if (proposeUserId) {
+                try {
+                  const proposeUser = await req.payload.findByID({
+                    collection: 'users',
+                    id: proposeUserId,
+                  })
+                  proposeUserName = proposeUser?.full_name || proposeUser?.email || 'Người dùng'
+                } catch (error) {
+                  console.error('Lỗi khi lấy thông tin user:', error)
+                }
+              }
+
+              if (demandUserId) {
+                // Tạo notification cho user của demand
+                await req.payload.create({
+                  collection: 'notifications',
+                  data: {
+                    user: demandUserId,
+                    title: `Có đề xuất mới cho yêu cầu của bạn`,
+                    message: `Có một đề xuất mới cho yêu cầu "${demand.title}" từ ${proposeUserName}`,
+                    type: 'technology',
+                    action_url: `my-demands`,
+                    priority: 'normal',
+                    is_read: false,
+                  },
+                })
+              }
             }
           } catch (error) {
             console.error('Lỗi khi tạo notification cho propose mới:', error)
