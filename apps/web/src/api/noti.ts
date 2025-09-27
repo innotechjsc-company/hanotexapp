@@ -106,7 +106,7 @@ export async function createNotification(
     API_ENDPOINTS.NOTIFICATIONS,
     notificationData
   );
-  return response.data!;
+  return response as any;
 }
 
 /**
@@ -114,4 +114,74 @@ export async function createNotification(
  */
 export async function deleteNotification(id: string): Promise<void> {
   await payloadApiClient.delete(`${API_ENDPOINTS.NOTIFICATIONS}/${id}`);
+}
+
+/**
+ * Update a notification
+ */
+export async function updateNotification(
+  id: string,
+  updates: Partial<Notification>
+): Promise<Notification> {
+  const response = await payloadApiClient.patch<Notification>(
+    `${API_ENDPOINTS.NOTIFICATIONS}/${id}`,
+    updates
+  );
+  return response.data!;
+}
+
+/**
+ * Mark a notification as unread
+ */
+export async function markAsUnread(id: string): Promise<Notification> {
+  return updateNotification(id, { is_read: false });
+}
+
+/**
+ * Get all notifications for a specific user
+ */
+export async function getNotificationsByUser(
+  userId: string,
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<Notification>> {
+  return getNotifications({ user: userId }, pagination);
+}
+
+/**
+ * Get all unread notifications for a user
+ */
+export async function getUnreadNotifications(
+  userId: string,
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<Notification>> {
+  return getNotifications({ user: userId, is_read: false }, pagination);
+}
+
+/**
+ * Get the count of unread notifications for a user
+ */
+export async function getUnreadNotificationCount(
+  userId: string
+): Promise<number> {
+  const response = await getNotifications(
+    { user: userId, is_read: false },
+    { limit: 0 } // We only need the totalDocs count
+  );
+  return response.totalDocs || 0;
+}
+
+/**
+ * Bulk delete notifications
+ */
+export async function bulkDeleteNotifications(ids: string[]): Promise<void> {
+  const promises = ids.map((id) => deleteNotification(id));
+  await Promise.all(promises);
+}
+
+/**
+ * Bulk mark notifications as read
+ */
+export async function bulkMarkAsRead(ids: string[]): Promise<Notification[]> {
+  const promises = ids.map((id) => markAsRead(id));
+  return Promise.all(promises);
 }

@@ -40,6 +40,18 @@ export async function getUsers(
   return payloadApiClient.get<User[]>(API_ENDPOINTS.USERS, params);
 }
 
+// get first user by role ADMIN
+export async function getUserByRoleAdmin(): Promise<User[]> {
+  const response = await payloadApiClient.get<User[]>(API_ENDPOINTS.USERS, {
+    depth: 1,
+    limit: 1,
+    page: 1,
+    sort: "-createdAt",
+    "where[role][equals]": "ADMIN",
+  });
+  return (response as any as { data: User[] }).data ?? (response as any as User[]);
+}
+
 /**
  * Get user by ID
  */
