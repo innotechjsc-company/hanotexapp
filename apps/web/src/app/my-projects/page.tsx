@@ -45,6 +45,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  createProjectWithServices,
 } from "@/api/projects";
 import { getTechnologiesByUser } from "@/api/technologies";
 import type { Project } from "@/types/project";
@@ -1812,69 +1813,51 @@ export default function MyProjectsPage() {
 
     setActionLoading(true);
     try {
+       // create service tickets
+       let serviceTickets: any[] = [];
+       if (
+        values.service_tickets &&
+        Array.isArray(values.service_tickets) &&
+        values.service_tickets.length > 0
+      ) {
+       const selectedServices = values?.service_tickets?.filter((service: any) => service.service);
+       if (selectedServices.length > 0) {
+        const userAdmin = await getUserByRoleAdmin();
+        const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
+        const userAdminId = userAdminList[0]?.id;
+        // create service tickets by API
+        serviceTickets = selectedServices.map((service: any) => ({
+        service_id: service.service,
+        description: service.description,
+        responsible_user_id: user?.id,
+        implementer_ids: [userAdminId],
+      }));
+      }}
       const obj = {
         ...values,
         end_date: values.end_date
           ? values.end_date.format("YYYY-MM-DD")
           : undefined,
         status: "pending",
-        user: user!,
+        user: user,
+        services: serviceTickets, // add service tickets to payload to create service tickets
       };
       console.log(obj);
-      return;
-      const createdProject = await createProject(obj);
+      const result = serviceTickets.length > 0 ? await createProjectWithServices(obj) : await createProject(obj) as any;
 
-      // Tạo service tickets nếu có dịch vụ được chọn
-      if (
-        values.service_tickets &&
-        Array.isArray(values.service_tickets) &&
-        values.service_tickets.length > 0
-      ) {
-        try {
-          // Lấy user admin để làm implementer
-          const userAdmin = await getUserByRoleAdmin();
-          const userAdminList =
-            (userAdmin as any)?.docs ||
-            (userAdmin as any)?.data ||
-            (Array.isArray(userAdmin) ? userAdmin : []) ||
-            [];
-          const userAdminId = userAdminList[0]?.id;
+     // Show success toast with details and navigate to technologies page
+     let successMessage = "Tạo dự án thành công!";
 
-          // Tạo service ticket cho mỗi dịch vụ được chọn
-          const serviceTicketPromises = values.service_tickets.map(
-            async (ticketData: any) => {
-              const serviceTicketData = {
-                service: ticketData.service,
-                user: user!.id,
-                description:
-                  ticketData.description ||
-                  `Yêu cầu hỗ trợ dịch vụ cho dự án: ${values.name}`,
-                responsible_user: user!.id,
-                implementers: userAdminId ? [userAdminId] : [],
-                status: "pending" as ServiceTicket["status"],
-                project: String(
-                  (createdProject as any).id || (createdProject as any)._id
-                ),
-              };
-              return createServiceTicket(serviceTicketData);
-            }
-          );
+     if (serviceTickets.length > 0 && result?.service_tickets && result?.service_tickets.length > 0) {
+       successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ trong dịch vụ của tôi.`;
+     }
 
-          await Promise.all(serviceTicketPromises);
-          message.success("Tạo dự án và phiếu dịch vụ thành công");
-        } catch (serviceError) {
-          console.error("Error creating service tickets:", serviceError);
-          message.warning(
-            "Tạo dự án thành công nhưng có lỗi khi tạo phiếu dịch vụ"
-          );
-        }
-      } else {
-        message.success("Tạo dự án thành công");
-      }
+     toast.success(successMessage);
 
       setAddModalOpen(false);
       await fetchList();
     } catch (e) {
+      console.log(e);
       message.error("Tạo dự án thất bại");
     } finally {
       setActionLoading(false);
