@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  CardBody,
-  Input,
-  Autocomplete,
-  AutocompleteItem,
-} from "@heroui/react";
+import { Button, Card, Input, Select } from "antd";
 import { trlLevels } from "@/constants/technology";
 import { Search } from "lucide-react";
 
@@ -43,74 +36,75 @@ export default function Filters(props: FiltersProps) {
     // removed status filter
   } = props;
 
+  const categoryValue = Array.from(categorySelectedKeys)[0] ?? undefined;
+  const trlValue = Array.from(trlSelectedKeys)[0] ?? undefined;
+
   return (
     <Card className="mb-8">
-      <CardBody className="space-y-5">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="flex gap-3 items-start flex-col md:flex-row">
-            <Input
-              className="flex-1"
-              value={searchQuery}
-              onValueChange={onSearchChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") onSubmit(e as any);
-              }}
-              variant="bordered"
-              placeholder="Tìm kiếm công nghệ..."
-              startContent={<Search size={16} className="text-default-400" />}
-            />
-            <div className="flex gap-2">
-              <Button color="primary" type="submit">
-                Tìm kiếm
-              </Button>
-              {showClear && (
-                <Button variant="flat" onPress={onClear}>
-                  Xóa bộ lọc
-                </Button>
-              )}
-            </div>
+      <form onSubmit={onSubmit} className="space-y-4 p-5">
+        <div className="flex gap-3 items-start flex-col md:flex-row">
+          <Input
+            className="flex-1"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Tìm kiếm công nghệ..."
+            prefix={<Search size={16} className="text-default-400" />}
+            onPressEnter={(e) => onSubmit(e as any)}
+            allowClear
+          />
+          <div className="flex gap-2">
+            <Button type="primary" htmlType="submit">
+              Tìm kiếm
+            </Button>
+            {showClear && (
+              <Button onClick={onClear}>Xóa bộ lọc</Button>
+            )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Autocomplete
-              label="Danh mục"
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-600">Danh mục</label>
+            <Select
+              allowClear
               placeholder="Tất cả danh mục"
-              selectedKey={Array.from(categorySelectedKeys)[0] ?? null}
-              onSelectionChange={(key) =>
-                onCategoryChange(key ? new Set([String(key)]) : new Set())
+              value={categoryValue}
+              onChange={(val) =>
+                onCategoryChange(val ? new Set([String(val)]) : new Set())
               }
-              isClearable
-              defaultItems={categories}
-            >
-              {(item) => (
-                <AutocompleteItem key={item.id} textValue={item.name}>
-                  {item.name}
-                </AutocompleteItem>
-              )}
-            </Autocomplete>
-
-            <Autocomplete
-              label="TRL Level"
-              placeholder="Tất cả TRL"
-              selectedKey={Array.from(trlSelectedKeys)[0] ?? null}
-              onSelectionChange={(key) =>
-                onTrlChange(key ? new Set([String(key)]) : new Set())
+              options={categories.map((c) => ({ label: c.name, value: c.id }))}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label as string)
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
               }
-              isClearable
-              defaultItems={trlLevels}
-            >
-              {(item) => (
-                <AutocompleteItem
-                  key={String(item.value)}
-                  textValue={item.label}
-                >
-                  {item.label}
-                </AutocompleteItem>
-              )}
-            </Autocomplete>
+            />
           </div>
-        </form>
-      </CardBody>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-600">TRL Level</label>
+            <Select
+              allowClear
+              placeholder="Tất cả TRL"
+              value={trlValue}
+              onChange={(val) =>
+                onTrlChange(val ? new Set([String(val)]) : new Set())
+              }
+              options={trlLevels.map((t) => ({
+                label: t.label,
+                value: String(t.value),
+              }))}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label as string)
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+            />
+          </div>
+        </div>
+      </form>
     </Card>
   );
 }

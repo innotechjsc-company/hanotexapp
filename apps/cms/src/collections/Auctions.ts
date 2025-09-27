@@ -263,28 +263,28 @@ export const Auctions: CollectionConfig = {
       ({ data }) => {
         // Auto-update currentBid if not set
         if (!data.currentBid && data.startingPrice) {
-          data.currentBid = data.startingPrice;
+          data.currentBid = data.startingPrice
         }
-        
+
         // Auto-update minBid if not set
         if (!data.minBid && data.currentBid) {
-          data.minBid = data.currentBid + (data.bidIncrement || 100000);
+          data.minBid = data.currentBid + (data.bidIncrement || 100000)
         }
-        
+
         // Auto-update status based on time
-        const now = new Date();
-        const startTime = new Date(data.startTime);
-        const endTime = new Date(data.endTime);
-        
+        const now = new Date()
+        const startTime = new Date(data.startTime)
+        const endTime = new Date(data.endTime)
+
         if (now < startTime) {
-          data.status = 'upcoming';
+          data.status = 'upcoming'
         } else if (now >= startTime && now < endTime) {
-          data.status = 'active';
+          data.status = 'active'
         } else if (now >= endTime) {
-          data.status = 'ended';
+          data.status = 'ended'
         }
-        
-        return data;
+
+        return data
       },
     ],
   },

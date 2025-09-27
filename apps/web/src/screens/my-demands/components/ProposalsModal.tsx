@@ -249,8 +249,8 @@ export default function ProposalsModal({
       render: (_: any, record: any) => {
         const proposalId = record.id || record._id;
         const isPending = record.status === "pending";
-        // Cho phép xem chi tiết ở mọi trạng thái để chuyển sang màn đàm phán đề xuất
-        const canViewDetails = true;
+        // Không cho xem chi tiết khi đang ở trạng thái 'pending'
+        const canViewDetails = !isPending;
 
         return (
           <Space>

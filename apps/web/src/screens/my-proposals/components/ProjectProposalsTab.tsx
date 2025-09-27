@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
 import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye } from "lucide-react";
+import { Eye, MessageSquare, X } from "lucide-react";
 import { projectProposeApi } from "@/api/project-propose";
 import type {
   ProjectPropose,
   ProjectProposeStatus,
 } from "@/types/project-propose";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
+import EditProjectProposalModal from "./EditProjectProposalModal";
 
 const statusColors: Record<ProjectProposeStatus, string> = {
   pending: "orange",
@@ -31,9 +31,8 @@ const statusLabels: Record<ProjectProposeStatus, string> = {
   cancelled: "Đã hủy",
 };
 
-export default function ProjectProposalsTab() {
+export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { user } = useAuth();
   const [proposals, setProposals] = useState<ProjectPropose[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -45,17 +44,19 @@ export default function ProjectProposalsTab() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProposal, setSelectedProposal] =
+    useState<ProjectPropose | null>(null);
   const pageSize = 10;
 
   const fetchProposals = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const filters: any = { user: user.id };
+      const filters: any = { user: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
       if (searchTerm.trim()) filters.search = searchTerm.trim();
 
@@ -84,21 +85,57 @@ export default function ProjectProposalsTab() {
 
   useEffect(() => {
     fetchProposals();
-  }, [user?.id, currentPage, statusFilter, searchTerm]);
+  }, [userId, currentPage, statusFilter, searchTerm]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
   };
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as ProjectProposeStatus | "all");
+  const handleStatusFilter = (value: string | undefined) => {
+    setStatusFilter((value as ProjectProposeStatus) || "all");
     setCurrentPage(1);
   };
 
   const handleViewProject = (project: any) => {
     if (!project) return;
     window.open(`/funds/fundraising/${project.id}`, "_blank");
+  };
+
+  const handleEditProposal = (proposal: ProjectPropose) => {
+    // Chỉ cho phép sửa khi trạng thái là 'pending'
+    if (proposal.status !== "pending") return;
+    setSelectedProposal(proposal);
+    setEditModalOpen(true);
+  };
+
+  const handleViewNegotiation = (proposal: ProjectPropose) => {
+    router.push(`/my-projects/negotiations/${proposal.id}`);
+  };
+
+  const handleCancelProposal = async (proposal: ProjectPropose) => {
+    if (!proposal.id) return;
+
+    try {
+      await projectProposeApi.setStatus(proposal.id, "cancelled" as any);
+      await fetchProposals();
+      console.log("Proposal cancelled successfully");
+    } catch (err) {
+      console.error("Failed to cancel proposal:", err);
+    }
+  };
+
+  const handleEditSubmit = async (updatedData: Partial<ProjectPropose>) => {
+    if (!selectedProposal?.id) return;
+
+    try {
+      await projectProposeApi.update(selectedProposal.id, updatedData);
+      await fetchProposals();
+      setEditModalOpen(false);
+      setSelectedProposal(null);
+    } catch (err) {
+      console.error("Failed to update proposal:", err);
+    }
   };
 
   const columns: ColumnsType<ProjectPropose> = [
@@ -172,14 +209,39 @@ export default function ProjectProposalsTab() {
         const project = record.project;
         return (
           <Space>
-            <Tooltip title="Xem dự án" color="blue">
+            {record.status === "pending" && (
+              <Tooltip title="Sửa đề xuất" color="blue">
               <Button
                 type="text"
                 size="small"
                 icon={<Eye className="h-4 w-4" />}
-                onClick={() => handleViewProject(project)}
-              />
-            </Tooltip>
+                  onClick={() => handleEditProposal(record)}
+                />
+              </Tooltip>
+            )}
+            {(record.status === "negotiating" ||
+              record.status === "contact_signing" ||
+              record.status === "contract_signed") && (
+              <Tooltip title="Xem đàm phán" color="blue">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<MessageSquare className="h-4 w-4" />}
+                  onClick={() => handleViewNegotiation(record)}
+                />
+              </Tooltip>
+            )}
+            {(record.status === "pending" || record.status === "cancelled") && (
+              <Tooltip title="Hủy đề xuất" color="red">
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<X className="h-4 w-4" />}
+                  onClick={() => handleCancelProposal(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         );
       },
@@ -246,8 +308,17 @@ export default function ProjectProposalsTab() {
           scroll={{ x: 900 }}
         />
       </div>
+
+      {/* Edit Modal */}
+      <EditProjectProposalModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedProposal(null);
+        }}
+        proposal={selectedProposal}
+        onSubmit={handleEditSubmit}
+      />
     </div>
   );
 }
-
-

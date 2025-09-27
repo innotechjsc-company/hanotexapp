@@ -6,6 +6,7 @@ import { User } from "./users";
 export enum ProposeStatusEnum {
   pending = "pending",
   negotiating = "negotiating",
+  contact_signing = "contact_signing",
   contract_signed = "contract_signed",
   completed = "completed",
   cancelled = "cancelled",
@@ -14,6 +15,7 @@ export enum ProposeStatusEnum {
 export type ProposeStatus =
   | "pending"
   | "negotiating"
+  | "contact_signing"
   | "contract_signed"
   | "completed"
   | "cancelled";

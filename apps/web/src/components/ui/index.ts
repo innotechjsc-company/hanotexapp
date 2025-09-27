@@ -21,3 +21,5 @@ export { default as Map } from "./Map";
 export { default as MapComponent } from "./MapComponent";
 export { default as CountdownTimer } from "./CountdownTimer";
 export { default as Card, CardHeader, CardContent, CardFooter } from "./Card";
+export { default as AnimatedIcon } from "./AnimatedIcon";
+export { default as ParticleBackground } from "./ParticleBackground";

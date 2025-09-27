@@ -36,6 +36,7 @@ import {
   Input,
   InputNumber,
   message,
+  InputNumberProps,
 } from "antd";
 import Image from "next/image";
 import {
@@ -54,6 +55,7 @@ import {
 import { projectProposeApi } from "@/api/project-propose";
 import { ProjectProposeStatus } from "@/types/project-propose";
 import { useUser } from "@/store/auth";
+import toastService from "@/services/toastService";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -202,10 +204,21 @@ export default function FundraisingProjectDetailPage() {
         if (!projectId || !currentUser?.id) return;
         const res = await projectProposeApi.list(
           { project: String(projectId), user: String(currentUser.id) },
-          { limit: 1 }
+          { limit: 10, sort: "-createdAt" }
         );
-        const count = (res.docs?.length || 0) + (Array.isArray(res.data) ? res.data.length : 0);
-        setHasExistingProposal(count > 0);
+        const proposals = (
+          Array.isArray(res.docs)
+            ? res.docs
+            : Array.isArray(res.data)
+              ? res.data
+              : []
+        ) as any[];
+        const hasRelevant = proposals.some(
+          (p) =>
+            p?.status !== ProjectProposeStatus.Negotiating &&
+            p?.status !== ProjectProposeStatus.Cancelled
+        );
+        setHasExistingProposal(hasRelevant);
       } catch (err) {
         console.warn("Could not verify existing proposal:", err);
       }
@@ -280,7 +293,11 @@ export default function FundraisingProjectDetailPage() {
         investment_benefits: values.investment_benefits,
         status: ProjectProposeStatus.Pending,
       } as any);
-      message.success("Gửi đề xuất thành công");
+      // Show success toast
+      toastService.success(
+        "Gửi đề xuất thành công!",
+        "Người đăng dự án sẽ thông báo với bạn trong thời gian sớm nhất."
+      );
       setIsProposalModalOpen(false);
       setHasExistingProposal(true);
       form.resetFields();
@@ -574,8 +591,15 @@ export default function FundraisingProjectDetailPage() {
                     hợp tác
                   </Paragraph>
                   <Space size="large">
-                    <Button type="primary" size="large" onClick={handleSendProposal} disabled={hasExistingProposal}>
-                      {hasExistingProposal ? "Đã gửi đề xuất" : "Gửi đề xuất đầu tư"}
+                    <Button
+                      type="primary"
+                      size="large"
+                      onClick={handleSendProposal}
+                      disabled={hasExistingProposal}
+                    >
+                      {hasExistingProposal
+                        ? "Đã gửi đề xuất"
+                        : "Gửi đề xuất đầu tư"}
                     </Button>
                     <Button size="large" type="primary" ghost>
                       <Link href="/funds/fundraising">Xem dự án khác</Link>
@@ -599,7 +623,10 @@ export default function FundraisingProjectDetailPage() {
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Năng lực nhà đầu tư" name="investor_capacity">
-            <Input.TextArea rows={3} placeholder="Mô tả ngắn về năng lực, kinh nghiệm" />
+            <Input.TextArea
+              rows={3}
+              placeholder="Mô tả ngắn về năng lực, kinh nghiệm"
+            />
           </Form.Item>
           <Row gutter={16} wrap={false}>
             <Col xs={24} flex={1} style={{ flex: 1 }}>
@@ -608,27 +635,62 @@ export default function FundraisingProjectDetailPage() {
                 name="investment_amount"
                 required
                 tooltip="Số vốn đề xuất không được nhỏ hơn mục tiêu gọi vốn của dự án"
-                rules={[{ required: true, message: "Vui lòng nhập số vốn đề xuất" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập số vốn đề xuất" },
+                ]}
               >
-                <InputNumber min={0} className="w-full flex-1" placeholder="Ví dụ: 5.000.000.000" />
+                <InputNumber
+                  min={0}
+                  style={{ width: 200 }}
+                  size="middle"
+                  className="w-full flex-1"
+                  placeholder="Ví dụ: 5.000.000.000"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) =>
+                    Number(value!.replace(/\$\s?|(,*)/g, "")) as any
+                  }
+                />
               </Form.Item>
             </Col>
             <Col xs={24} flex={1} style={{ flex: 1 }}>
-              <Form.Item label="Tỷ lệ sở hữu mong muốn (%)" name="investment_ratio" 
+              <Form.Item
+                label="Tỷ lệ sở hữu mong muốn (%)"
+                name="investment_ratio"
                 tooltip="Tỷ lệ sở hữu mong muốn không được lớn hơn 100%"
               >
-                <InputNumber min={0} max={100} className="w-full flex-1" placeholder="Ví dụ: 10" />
+                <InputNumber
+                  min={0}
+                  style={{ width: 100 }}
+                  size="middle"
+                  max={100}
+                  className="w-full flex-1"
+                  placeholder="Ví dụ: 10"
+                />
               </Form.Item>
             </Col>
           </Row>
           <Form.Item label="Hình thức đầu tư" name="investment_type">
-            <Input.TextArea rows={3} placeholder="Ví dụ: Góp vốn, Mua cổ phần..." />
+            <Input.TextArea
+              rows={3}
+              placeholder="Ví dụ: Góp vốn, Mua cổ phần..."
+            />
           </Form.Item>
           <Form.Item label="Lợi ích mang lại" name="investment_benefits">
-            <Input.TextArea rows={3} placeholder="Ví dụ: mạng lưới, chuyên gia, thị trường..." />
+            <Input.TextArea
+              rows={3}
+              placeholder="Ví dụ: mạng lưới, chuyên gia, thị trường..."
+            />
           </Form.Item>
         </Form>
       </Modal>
     </div>
   );
 }
+
+const formatter: InputNumberProps<number>["formatter"] = (value) => {
+  const [start, end] = `${value}`.split(".") || [];
+  const v = `${start}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `VND ${end ? `${v}.${end}` : `${v}`}`;
+};

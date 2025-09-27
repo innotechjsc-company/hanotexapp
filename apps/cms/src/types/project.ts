@@ -9,6 +9,7 @@ export enum ProjectStatusEnum {
 }
 
 export type Project = {
+  id?: string
   name: string
   description: string
   business_model?: string

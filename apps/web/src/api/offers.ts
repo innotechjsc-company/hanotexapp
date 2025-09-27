@@ -16,7 +16,9 @@ export interface ApiOffer extends Offer {
 }
 
 export interface CreateOfferData {
-  technology_propose: string;
+  technology_propose?: string;
+  project_propose?: string;
+  propose?: string;
   negotiating_messages: string;
   content: string;
   price: number;
@@ -31,6 +33,8 @@ export interface UpdateOfferData {
 
 export interface GetOffersParams {
   technology_propose?: string;
+  project_propose?: string;
+  propose?: string;
   negotiating_messages?: string;
   status?: OfferStatus;
   limit?: number;
@@ -55,6 +59,10 @@ export class OfferApi {
     if (params.technology_propose)
       queryParams["where[technology_propose][equals]"] =
         params.technology_propose;
+    if (params.project_propose)
+      queryParams["where[project_propose][equals]"] = params.project_propose;
+    if (params.propose)
+      queryParams["where[propose][equals]"] = params.propose;
     if (params.negotiating_messages)
       queryParams["where[negotiating_messages][equals]"] =
         params.negotiating_messages;
@@ -130,6 +138,29 @@ export class OfferApi {
       limit: 1,
     });
 
+    return response.docs && response.docs.length > 0 ? response.docs[0] : null;
+  }
+
+  async getLatestForProjectProposal(
+    projectProposeId: string
+  ): Promise<ApiOffer | null> {
+    const response = await this.getOffers({
+      project_propose: projectProposeId,
+      limit: 1,
+    });
+
+    return response.docs && response.docs.length > 0 ? response.docs[0] : null;
+  }
+
+
+  /**
+   * Get latest offer for a propose
+   */
+  async getLatestForPropose(proposeId: string): Promise<ApiOffer | null> {
+    const response = await this.getOffers({
+      propose: proposeId,
+      limit: 1,
+    });
     return response.docs && response.docs.length > 0 ? response.docs[0] : null;
   }
 }

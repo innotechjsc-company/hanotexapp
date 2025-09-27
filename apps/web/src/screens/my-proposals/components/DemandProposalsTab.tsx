@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/store/auth";
 import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Search, Eye, MessageSquare, Target, X, Edit } from "lucide-react";
-import { getProposesByUser, updatePropose } from "@/api/propose";
+import { Search, X, Edit, ExternalLink } from "lucide-react";
+import { getProposes, updatePropose } from "@/api/propose";
 import type { Propose, ProposeStatus } from "@/types/propose";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
 import EditDemandProposalModal from "./EditDemandProposalModal";
@@ -14,6 +13,7 @@ import EditDemandProposalModal from "./EditDemandProposalModal";
 const statusColors: Record<ProposeStatus, string> = {
   pending: "orange",
   negotiating: "blue",
+  contact_signing: "cyan",
   contract_signed: "green",
   completed: "green",
   cancelled: "red",
@@ -22,14 +22,14 @@ const statusColors: Record<ProposeStatus, string> = {
 const statusLabels: Record<ProposeStatus, string> = {
   pending: "Chờ xem xét",
   negotiating: "Đang đàm phán",
+  contact_signing: "Đang ký hợp đồng",
   contract_signed: "Đã ký hợp đồng",
   completed: "Hoàn thành",
   cancelled: "Đã hủy",
 };
 
-export default function DemandProposalsTab() {
+export default function DemandProposalsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { user } = useAuth();
   const [proposals, setProposals] = useState<Propose[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -50,45 +50,26 @@ export default function DemandProposalsTab() {
 
   // Fetch proposals
   const fetchProposals = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const response = await getProposesByUser(user.id, {
+      const filters: any = { user: userId };
+      if (statusFilter !== "all") filters.status = statusFilter;
+      if (searchTerm.trim()) filters.search = searchTerm.trim();
+
+      const response = await getProposes(filters, {
         page: currentPage,
         limit: pageSize,
         sort: "-createdAt",
       });
 
-      // Handle different response formats
       const data = (response as any).docs || (response as any).data || [];
       const total = (response as any).totalDocs || (response as any).total || 0;
 
-      // Apply client-side filtering if needed
-      let filteredData = data;
-
-      if (statusFilter !== "all") {
-        filteredData = data.filter(
-          (proposal: Propose) => proposal.status === statusFilter
-        );
-      }
-
-      if (searchTerm.trim()) {
-        const searchLower = searchTerm.toLowerCase();
-        filteredData = filteredData.filter(
-          (proposal: Propose) =>
-            (typeof proposal.technology === "object" &&
-              proposal.technology?.title
-                ?.toLowerCase()
-                .includes(searchLower)) ||
-            (typeof proposal.technology === "string" &&
-              searchLower.includes("công nghệ"))
-        );
-      }
-
-      setProposals(filteredData);
+      setProposals(data);
       setTotalItems(total);
     } catch (err) {
       console.error("Failed to fetch demand proposals:", err);
@@ -104,22 +85,16 @@ export default function DemandProposalsTab() {
 
   useEffect(() => {
     fetchProposals();
-  }, [user?.id, currentPage]);
-
-  // Re-fetch when filters change
-  useEffect(() => {
-    if (user?.id) {
-      setCurrentPage(1);
-      fetchProposals();
-    }
-  }, [statusFilter, searchTerm]);
+  }, [userId, currentPage, statusFilter, searchTerm]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
+    setCurrentPage(1);
   };
 
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value as ProposeStatus | "all");
+  const handleStatusFilter = (value: string | undefined) => {
+    setStatusFilter((value as ProposeStatus) || "all");
+    setCurrentPage(1);
   };
 
   const handleViewDemand = (demandId: string) => {
@@ -154,6 +129,8 @@ export default function DemandProposalsTab() {
   };
 
   const handleEditProposal = (proposal: Propose) => {
+    // Chỉ cho phép sửa khi trạng thái là 'pending'
+    if (proposal.status !== "pending") return;
     setSelectedProposal(proposal);
     setEditModalOpen(true);
   };
@@ -213,7 +190,16 @@ export default function DemandProposalsTab() {
           typeof technology === "string"
             ? "Công nghệ"
             : technology?.title || "Công nghệ";
-        return <span className="text-gray-600">{technologyTitle}</span>;
+        const technologyId =
+          typeof technology === "string" ? technology : technology?.id;
+        return (
+          <span
+            className="font-medium text-blue-600 hover:underline cursor-pointer"
+            onClick={() => technologyId && handleViewTechnology(technologyId)}
+          >
+            {technologyTitle}
+          </span>
+        );
       },
     },
     {
@@ -263,43 +249,35 @@ export default function DemandProposalsTab() {
 
         return (
           <Space>
-            <Tooltip title="Xem công nghệ">
-              <Button
-                type="text"
-                size="small"
-                icon={<Eye className="h-4 w-4" />}
-                onClick={() =>
-                  technologyId && handleViewTechnology(technologyId)
-                }
-              />
-            </Tooltip>
-            <Tooltip title="Sửa đề xuất" color="green">
-              <Button
-                type="text"
-                size="small"
-                icon={<Edit className="h-4 w-4" />}
-                onClick={() => handleEditProposal(record)}
-              />
-            </Tooltip>
-            {record.status === "negotiating" && (
-              <Tooltip title="Xem đàm phán" color="blue">
+            {record.status === "pending" && (
+              <Tooltip title="Sửa đề xuất" color="green">
                 <Button
                   type="text"
                   size="small"
-                  icon={<MessageSquare className="h-4 w-4" />}
-                  onClick={() => handleViewNegotiation(record)}
+                  icon={<Edit className="h-4 w-4" />}
+                  onClick={() => handleEditProposal(record)}
                 />
               </Tooltip>
             )}
-            <Tooltip title="Hủy đề xuất" color="red">
+            <Tooltip title="Xem chi tiết" color="blue">
               <Button
                 type="text"
                 size="small"
-                danger
-                icon={<X className="h-4 w-4" />}
-                onClick={() => handleCancelProposal(record)}
+                icon={<ExternalLink className="h-4 w-4" />}
+                onClick={() => handleViewNegotiation(record)}
               />
             </Tooltip>
+            {(record.status === "pending" || record.status === "cancelled") && (
+              <Tooltip title="Hủy đề xuất" color="red">
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<X className="h-4 w-4" />}
+                  onClick={() => handleCancelProposal(record)}
+                />
+              </Tooltip>
+            )}
           </Space>
         );
       },
@@ -311,7 +289,7 @@ export default function DemandProposalsTab() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
-          placeholder="Tìm kiếm theo tên công nghệ..."
+          placeholder="Tìm kiếm theo tiêu đề đề xuất..."
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           prefix={<Search className="h-4 w-4 text-gray-400" />}
