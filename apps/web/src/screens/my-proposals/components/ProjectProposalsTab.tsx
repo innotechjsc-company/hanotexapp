@@ -2,7 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Table, Tag, Tooltip, Space, Select, Tabs as AntTabs } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Tooltip,
+  Space,
+  Select,
+  Tabs as AntTabs,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye, MessageSquare, X } from "lucide-react";
 import { projectProposeApi } from "@/api/project-propose";
@@ -38,9 +46,9 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const [error, setError] = useState<string>("");
 
   // Filters and pagination
-  const [statusFilter, setStatusFilter] = useState<ProjectProposeStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    ProjectProposeStatus | "all"
+  >("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -57,7 +65,8 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
     setError("");
 
     try {
-      const filters: any = viewMode === "sent" ? { user: userId } : { receiver: userId };
+      const filters: any =
+        viewMode === "sent" ? { user: userId } : { receiver: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
       // no title search
 
@@ -176,7 +185,9 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       dataIndex: "investment_benefits",
       key: "investment_benefits",
       render: (benefits?: string) => (
-        <span className="text-gray-600 line-clamp-1 max-w-xs">{benefits || "—"}</span>
+        <span className="text-gray-600 line-clamp-1 max-w-xs">
+          {benefits || "—"}
+        </span>
       ),
     },
     {
@@ -207,10 +218,10 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
           <Space>
             {record.status === "pending" && (
               <Tooltip title="Sửa đề xuất" color="blue">
-              <Button
-                type="text"
-                size="small"
-                icon={<Eye className="h-4 w-4" />}
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Eye className="h-4 w-4" />}
                   onClick={() => handleEditProposal(record)}
                 />
               </Tooltip>
@@ -293,7 +304,12 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <p className="text-red-600">{error}</p>
-          <Button size="small" danger onClick={fetchProposals} loading={loading}>
+          <Button
+            size="small"
+            danger
+            onClick={fetchProposals}
+            loading={loading}
+          >
             Thử lại
           </Button>
         </div>

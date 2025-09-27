@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { message } from "antd";
 import { getProposeById } from "@/api/propose";
 import {
@@ -8,6 +8,8 @@ import {
 import { offerApi, type ApiOffer } from "@/api/offers";
 import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
+import webSocketManager from "@/lib/websocket";
+import { localStorageService } from "@/services/localstorage";
 import { MediaType } from "@/types/media1";
 import { OfferStatus } from "@/types/offer";
 // Local Offer form data shape (not used for propose, kept for typing)
@@ -64,6 +66,16 @@ export interface UseNegotiationReturn {
   // Refresh proposal from server
   reloadProposal: () => Promise<void>;
 }
+
+type NegotiationSocketMessagePayload = {
+  roomId?: string;
+  message?: ApiNegotiatingMessage;
+};
+
+type NegotiationSocketDeletePayload = {
+  roomId?: string;
+  messageId?: string;
+};
 
 // Helper function to detect file type based on MIME type or file extension
 const detectFileType = (file: File): MediaType => {
@@ -158,22 +170,12 @@ export const useNegotiation = ({
   }>({ message: "", attachments: [] });
   // propose-only screen: no technology propose context
 
-  useEffect(() => {
-    if (proposalId && currentUser) {
-      fetchProposalDetails();
-    }
-  }, [proposalId, currentUser]);
+  const negotiationRoomId = useMemo(() => {
+    if (!proposalId) return null;
+    return `negotiation:propose:${proposalId}`;
+  }, [proposalId]);
 
-  // Fetch messages and latest offer
-  useEffect(() => {
-    if (proposalId && currentUser) {
-      fetchNegotiationMessages();
-      fetchLatestOffer();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proposalId, currentUser]);
-
-  const fetchProposalDetails = async () => {
+  const fetchProposalDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -189,9 +191,9 @@ export const useNegotiation = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [proposalId]);
 
-  const fetchNegotiationMessages = async () => {
+  const fetchNegotiationMessages = useCallback(async () => {
     try {
       const params: any = { limit: 100, page: 1, propose: proposalId };
       const response = await negotiatingMessageApi.getMessages(params);
@@ -201,17 +203,146 @@ export const useNegotiation = ({
       // Fallback to empty array on error
       setMessages([]);
     }
-  };
+  }, [proposalId]);
 
   // Fetch latest offer for this propose
-  const fetchLatestOffer = async () => {
+  const fetchLatestOffer = useCallback(async () => {
     try {
       const offer = await offerApi.getLatestForPropose(proposalId);
       setLatestOffer(offer);
     } catch (err) {
       setLatestOffer(null);
     }
-  };
+  }, [proposalId]);
+
+  useEffect(() => {
+    if (proposalId && currentUser) {
+      fetchProposalDetails();
+    }
+  }, [proposalId, currentUser, fetchProposalDetails]);
+
+  // Fetch messages and latest offer
+  useEffect(() => {
+    if (proposalId && currentUser) {
+      fetchNegotiationMessages();
+      fetchLatestOffer();
+    }
+  }, [proposalId, currentUser, fetchNegotiationMessages, fetchLatestOffer]);
+
+  useEffect(() => {
+    if (!negotiationRoomId || !currentUser?.id) {
+      return;
+    }
+
+    const resolveToken = () => {
+      const storedToken = localStorageService.get<string | null>(
+        "auth_token",
+        null
+      );
+      if (storedToken) return storedToken;
+      if (typeof window !== "undefined") {
+        return window.localStorage.getItem("payload_token");
+      }
+      return null;
+    };
+
+    const socket = webSocketManager.connect(resolveToken() || undefined);
+
+    const userName =
+      currentUser.full_name ||
+      currentUser.email ||
+      `user:${currentUser.id.slice(0, 6)}`;
+
+    const handleConnect = () => {
+      webSocketManager.emit("authenticate", {
+        userId: currentUser.id,
+        userName,
+      });
+    };
+
+    const handleAuthenticated = () => {
+      webSocketManager.emit("join-room", negotiationRoomId);
+    };
+
+    const sortMessages = (items: ApiNegotiatingMessage[]) =>
+      [...items].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+
+    const upsertMessage = (incoming: ApiNegotiatingMessage) => {
+      setMessages((prev) => {
+        const existingIndex = prev.findIndex((item) => item.id === incoming.id);
+        if (existingIndex !== -1) {
+          const updated = [...prev];
+          updated[existingIndex] = incoming;
+          return sortMessages(updated);
+        }
+        return sortMessages([...prev, incoming]);
+      });
+
+      if (incoming.is_offer) {
+        if (incoming.offer && typeof incoming.offer === "object") {
+          setLatestOffer(incoming.offer as ApiOffer);
+        } else {
+          fetchLatestOffer();
+        }
+      }
+    };
+
+    const handleNewMessage = (payload: NegotiationSocketMessagePayload) => {
+      if (!payload?.message || payload.roomId !== negotiationRoomId) return;
+      upsertMessage(payload.message);
+    };
+
+    const handleUpdatedMessage = (
+      payload: NegotiationSocketMessagePayload
+    ) => {
+      if (!payload?.message || payload.roomId !== negotiationRoomId) return;
+      upsertMessage(payload.message);
+    };
+
+    const handleDeletedMessage = (
+      payload: NegotiationSocketDeletePayload
+    ) => {
+      if (!payload?.messageId || payload.roomId !== negotiationRoomId) return;
+      setMessages((prev) =>
+        prev.filter((message) => message.id !== payload.messageId)
+      );
+      fetchLatestOffer();
+    };
+
+    if (socket) {
+      socket.on("connect", handleConnect);
+      socket.on("authenticated", handleAuthenticated);
+
+      if (socket.connected) {
+        handleConnect();
+      }
+    }
+
+    webSocketManager.on("negotiation:new-message", handleNewMessage);
+    webSocketManager.on("negotiation:message-updated", handleUpdatedMessage);
+    webSocketManager.on("negotiation:message-deleted", handleDeletedMessage);
+
+    return () => {
+      webSocketManager.emit("leave-room", negotiationRoomId);
+      webSocketManager.off("negotiation:new-message", handleNewMessage);
+      webSocketManager.off("negotiation:message-updated", handleUpdatedMessage);
+      webSocketManager.off("negotiation:message-deleted", handleDeletedMessage);
+
+      if (socket) {
+        socket.off("connect", handleConnect);
+        socket.off("authenticated", handleAuthenticated);
+      }
+    };
+  }, [
+    negotiationRoomId,
+    currentUser?.id,
+    currentUser?.email,
+    currentUser?.full_name,
+    fetchLatestOffer,
+  ]);
 
   const handleSendMessage = async (values: { message: string }) => {
     if (!values.message.trim() && attachments.length === 0) {

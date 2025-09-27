@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Table, Tag, Tooltip, Space, Select, Tabs as AntTabs } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Tooltip,
+  Space,
+  Select,
+  Tabs as AntTabs,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { X, Edit, ExternalLink } from "lucide-react";
 import { getProposes, updatePropose } from "@/api/propose";
@@ -57,7 +65,8 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
     setError("");
 
     try {
-      const filters: any = viewMode === "sent" ? { user: userId } : { receiver: userId };
+      const filters: any =
+        viewMode === "sent" ? { user: userId } : { receiver: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
       // no title search
 
