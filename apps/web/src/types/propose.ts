@@ -25,12 +25,13 @@ export interface Propose {
   title: string;
   demand: Demand;
   user: User;
+  receiver: User;
   technology: Technology;
   description: string;
   execution_time: string;
   estimated_cost: number;
   cooperation_conditions: string;
-  document: Media;
+  document?: Media;
   status: ProposeStatus;
   createdAt?: string;
   updatedAt?: string;

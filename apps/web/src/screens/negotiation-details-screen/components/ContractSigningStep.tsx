@@ -4,7 +4,6 @@ import {
   Button,
   Typography,
   Divider,
-  Upload,
   Input,
   message,
   Modal,
@@ -13,7 +12,6 @@ import {
   FileText,
   Download,
   CheckCircle,
-  UploadCloud,
   Paperclip,
 } from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
@@ -23,6 +21,7 @@ import { contractsApi } from "@/api/contracts";
 import { useUser } from "@/store/auth";
 import { uploadFile } from "@/api/media";
 import { MediaType } from "@/types/media1";
+import { FileUpload, type FileUploadItem } from "@/components/input";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -44,11 +43,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     Contract | undefined | null
   >(null);
   const [submitting, setSubmitting] = useState(false);
-  const [savingContractFile, setSavingContractFile] = useState(false);
-
-  // Unified contract completion state
-  const [contractFile, setContractFile] = useState<File | null>(null);
-  const [attachments, setAttachments] = useState<File[]>([]);
+  // no-op state removed; uploads are instant via FileUpload
   const [notes, setNotes] = useState("");
 
   // Contract acceptance state
@@ -111,55 +106,66 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [proposal.id]);
 
-  // File upload handlers
-  const handleContractFileUpload = (file: File) => {
-    setContractFile(file);
-    message.success(`Đã chọn hợp đồng: ${file.name}`);
-    return false; // prevent auto upload
-  };
-
-  const handleAttachmentUpload = (file: File) => {
-    setAttachments((prev) => [...prev, file]);
-    message.success(`Đã thêm tài liệu: ${file.name}`);
-    return false; // prevent auto upload
-  };
-
-  const removeAttachment = (file: File) => {
-    setAttachments((prev) => prev.filter((f) => f !== file));
-  };
-
-  // Upload only the contract file into contract_file field (without completing/signing)
-  const handleUploadContractFileOnly = async () => {
+  // Auto-upload handlers using FileUpload component
+  const handleContractUploadSuccess = async (_file: File, media: any) => {
     if (!activeContract?.id) {
       message.error("Không tìm thấy hợp đồng");
       return;
     }
-    if (!contractFile) {
-      message.warning("Vui lòng chọn tệp hợp đồng để tải lên");
-      return;
-    }
-
     try {
-      setSavingContractFile(true);
-      const contractMedia = await uploadFile(contractFile, {
-        type: MediaType.DOCUMENT,
-        alt: `Hợp đồng ${activeContract.id}`,
-      });
-
       await contractsApi.update(activeContract.id, {
-        contract_file: contractMedia.id as any,
+        contract_file: media.id as any,
       });
-
-      message.success("Đã tải lên hợp đồng thành công");
-      setContractFile(null);
+      message.success("Đã tải lên tệp hợp đồng");
       await refreshContract();
-    } catch (error) {
-      console.error("Error uploading contract file:", error);
-      message.error("Không thể tải lên hợp đồng. Vui lòng thử lại.");
-    } finally {
-      setSavingContractFile(false);
+    } catch (e) {
+      message.error("Không thể cập nhật hợp đồng với tệp vừa tải lên");
     }
   };
+
+  const handleContractUploadError = (_file: File, error: string) => {
+    message.error(error || "Tải lên tệp hợp đồng thất bại");
+  };
+
+  const handleAttachmentUploadSuccess = async (_file: File, media: any) => {
+    if (!activeContract?.id) return;
+    try {
+      const existing = Array.isArray(activeContract.documents)
+        ? activeContract.documents
+        : [];
+      const existingIds = existing
+        .map((d: any) => (typeof d === "object" ? d.id : d))
+        .filter(Boolean);
+      const newIds = Array.from(new Set([...existingIds, media.id]));
+      await contractsApi.update(activeContract.id, {
+        documents: newIds as any,
+      });
+      message.success("Đã thêm tài liệu đính kèm");
+      await refreshContract();
+    } catch (e) {
+      message.error("Không thể thêm tài liệu vào hợp đồng");
+    }
+  };
+
+  const handleAttachmentRemove = async (file: FileUploadItem) => {
+    if (!activeContract?.id) return;
+    try {
+      const removeId = (file as any)?.id;
+      const existing = Array.isArray(activeContract.documents)
+        ? activeContract.documents
+        : [];
+      const nextIds = existing
+        .map((d: any) => (typeof d === "object" ? d.id : d))
+        .filter((id: any) => String(id) !== String(removeId));
+      await contractsApi.update(activeContract.id, { documents: nextIds as any });
+      message.success("Đã xóa tài liệu khỏi hợp đồng");
+      await refreshContract();
+    } catch (e) {
+      message.error("Không thể cập nhật danh sách tài liệu");
+    }
+  };
+
+  // Deprecated flow removed: auto-upload now handled by FileUpload
 
   // Helper functions for contract acceptance
   const getCurrentUserRole = () => {
@@ -216,50 +222,23 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     return userAConfirmed && userBConfirmed;
   };
 
-  // Unified contract completion function
+  // Unified contract completion function: mark as signed (file already uploaded)
   const handleCompleteContract = async () => {
     if (!activeContract?.id) {
       message.error("Không tìm thấy hợp đồng");
       return;
     }
-
-    if (!contractFile) {
-      message.error("Vui lòng tải lên tệp hợp đồng");
+    if (!activeContract?.contract_file?.id) {
+      message.error("Vui lòng tải lên tệp hợp đồng trước khi hoàn tất");
       return;
     }
-
     try {
       setSubmitting(true);
-
-      // Upload contract file
-      const contractMedia = await uploadFile(contractFile, {
-        type: MediaType.DOCUMENT,
-        alt: `Hợp đồng ${activeContract.id}`,
-      });
-
-      // Upload attachments if any
-      const attachmentMedias = await Promise.all(
-        attachments.map((file) =>
-          uploadFile(file, {
-            type: MediaType.DOCUMENT,
-            alt: `Tài liệu hợp đồng ${activeContract.id}`,
-          })
-        )
-      );
-
-      // Update contract with files and mark as signed
       await contractsApi.update(activeContract.id, {
-        contract_file: contractMedia.id as any,
-        documents: attachmentMedias.map((m) => m.id) as any,
         status: ContractStatusEnum.SIGNED,
       });
-
       message.success("Hợp đồng đã được hoàn tất thành công!");
       await refreshContract();
-
-      // Clear form
-      setContractFile(null);
-      setAttachments([]);
       setNotes("");
     } catch (error) {
       console.error("Error completing contract:", error);
@@ -580,33 +559,16 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                       </div>
                     </Card>
                   )}
-
-                  <Upload.Dragger
+                  <FileUpload
                     multiple={false}
-                    beforeUpload={handleContractFileUpload}
-                    showUploadList={!!contractFile}
                     maxCount={1}
-                    onRemove={() => setContractFile(null)}
-                    accept=".pdf,.doc,.docx"
-                    className="mb-3"
-                  >
-                    <p className="ant-upload-drag-icon">
-                      <UploadCloud />
-                    </p>
-                    <p className="ant-upload-text">
-                      Kéo thả file vào đây hoặc bấm để chọn file
-                    </p>
-                    <p className="ant-upload-hint">Hỗ trợ PDF, Word.</p>
-                  </Upload.Dragger>
-
-                  <Button
-                    type="primary"
-                    onClick={handleUploadContractFileOnly}
-                    loading={savingContractFile}
-                    disabled={!contractFile}
-                  >
-                    Lưu tệp hợp đồng
-                  </Button>
+                    allowedTypes={["document"]}
+                    title="Chọn tệp hợp đồng"
+                    description="Kéo thả hoặc bấm để chọn (PDF, Word)"
+                    mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng" }}
+                    onUploadSuccess={handleContractUploadSuccess}
+                    onUploadError={handleContractUploadError}
+                  />
                 </div>
               )}
 
@@ -614,29 +576,19 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               <div className="mt-6">
                 <Title level={5} className="mb-3">
                   <Paperclip size={20} className="inline mr-2" />
-                  Tài liệu kèm theo (tuỳ chọn)
+                  Tài liệu kèm theo (tự động tải lên)
                 </Title>
-                <Upload
+                <FileUpload
                   multiple
-                  beforeUpload={handleAttachmentUpload}
-                  showUploadList
-                  fileList={attachments.map((f) => ({
-                    uid: f.name,
-                    name: f.name,
-                    status: "done" as const,
-                  }))}
-                  onRemove={(file) => {
-                    const target = attachments.find(
-                      (f) => f.name === file.name
-                    );
-                    if (target) removeAttachment(target);
-                  }}
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
-                >
-                  <Button icon={<UploadCloud size={16} />}>
-                    Thêm tài liệu
-                  </Button>
-                </Upload>
+                  maxCount={10}
+                  allowedTypes={["document", "image"]}
+                  title="Thêm tài liệu"
+                  description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
+                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tài liệu kèm theo" }}
+                  onUploadSuccess={handleAttachmentUploadSuccess}
+                  onUploadError={(_f, err) => message.error(err || "Tải lên tài liệu thất bại")}
+                  onRemove={handleAttachmentRemove}
+                />
               </div>
             </div>
           )}
@@ -652,25 +604,16 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   <FileText size={20} className="inline mr-2" />
                   Tải lên hợp đồng đã ký
                 </Title>
-                <Upload.Dragger
+                <FileUpload
                   multiple={false}
-                  beforeUpload={handleContractFileUpload}
-                  showUploadList={!!contractFile}
                   maxCount={1}
-                  onRemove={() => setContractFile(null)}
-                  accept=".pdf,.doc,.docx"
-                  className="mb-4"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <UploadCloud />
-                  </p>
-                  <p className="ant-upload-text">
-                    Kéo thả file vào đây hoặc bấm để chọn file
-                  </p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ PDF, Word. Dung lượng tối đa 10MB.
-                  </p>
-                </Upload.Dragger>
+                  allowedTypes={["document"]}
+                  title="Chọn tệp hợp đồng đã ký"
+                  description="Kéo thả hoặc bấm để chọn (PDF, Word)"
+                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng đã ký" }}
+                  onUploadSuccess={handleContractUploadSuccess}
+                  onUploadError={handleContractUploadError}
+                />
               </div>
 
               <div>
@@ -692,7 +635,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                     icon={<CheckCircle size={20} />}
                     loading={submitting}
                     onClick={handleCompleteContract}
-                    disabled={!contractFile}
+                    disabled={!activeContract?.contract_file?.id}
                     className="bg-green-600 hover:bg-green-700 px-8"
                   >
                     Hoàn tất hợp đồng

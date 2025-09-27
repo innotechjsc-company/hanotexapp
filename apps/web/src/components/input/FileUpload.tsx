@@ -156,7 +156,7 @@ const getFileTypeFromMime = (
   mimeType: string
 ): keyof typeof FILE_TYPE_CONFIG => {
   for (const [type, config] of Object.entries(FILE_TYPE_CONFIG)) {
-    if (config.mimeTypes.includes(mimeType)) {
+    if (config.mimeTypes.includes(mimeType as never)) {
       return type as keyof typeof FILE_TYPE_CONFIG;
     }
   }
@@ -592,7 +592,7 @@ export default function FileUpload({
           : file.uploadStatus === "error"
             ? "error"
             : "done",
-      url: file.url,
+      url: file.url || undefined,
       percent: file.uploadProgress,
       response: file,
     })) || [];
@@ -636,7 +636,11 @@ export default function FileUpload({
   if (variant === "button") {
     return (
       <Upload {...uploadProps}>
-        <Button icon={<UploadOutlined />} size={size} disabled={disabled}>
+        <Button
+          icon={<UploadOutlined />}
+          size={size as any}
+          disabled={disabled}
+        >
           {buttonText || defaultTitle}
         </Button>
       </Upload>
@@ -647,7 +651,11 @@ export default function FileUpload({
   return (
     <div className={className} style={style}>
       <Upload {...uploadProps} showUploadList={false}>
-        <Button icon={<UploadOutlined />} size={size} disabled={disabled}>
+        <Button
+          icon={<UploadOutlined />}
+          size={size as any}
+          disabled={disabled}
+        >
           {buttonText || defaultTitle}
         </Button>
       </Upload>

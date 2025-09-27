@@ -1,40 +1,4 @@
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: hanotex-postgres
-    environment:
-      POSTGRES_DB: hanotex
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - ./database/seed_data.sql:/docker-entrypoint-initdb.d/seed_data.sql
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    container_name: hanotex-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: hanotex-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@hanotex.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    restart: unless-stopped
-
   # CMS (Payload) - Port 4000
   cms:
     build:
@@ -43,15 +7,11 @@ services:
     container_name: hanotex-cms
     environment:
       - NODE_ENV=production
-      - DATABASE_URI=postgresql://postgres:123456@postgres:5432/hanotex
-      - REDIS_URI=redis://redis:6379
-      - PAYLOAD_SECRET=your-secret-key-here
+      - DATABASE_URI=mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test
+      - PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
       - PORT=4000
     ports:
       - "4000:4000"
-    depends_on:
-      - postgres
-      - redis
     restart: unless-stopped
 
   # Web (Next.js) - Port 3000
@@ -62,7 +22,7 @@ services:
     container_name: hanotex-web
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_PAYLOAD_API_URL=http://cms:4000/api
+      - NEXT_PUBLIC_PAYLOAD_API_URL=https://api.hanotex.vn/api
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
     ports:
       - "3000:3000"

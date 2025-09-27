@@ -62,10 +62,13 @@ export const ContractLogs: CollectionConfig = {
       type: 'text',
       label: 'Lý do (khi từ chối)',
       admin: {
-        condition: (_: any, siblingData: any) => siblingData?.status === 'cancelled',
+        condition: (_: unknown, siblingData: unknown) => {
+          return typeof siblingData === 'object' && siblingData !== null && 'status' in siblingData && (siblingData as { status?: string }).status === 'cancelled'
+        },
       },
-      validate: (val: any, { siblingData }: any) => {
-        if (siblingData?.status === 'cancelled' && !val) {
+      validate: (val: unknown, { siblingData }: { siblingData: unknown }) => {
+        const isCancelled = typeof siblingData === 'object' && siblingData !== null && 'status' in siblingData && (siblingData as { status?: string }).status === 'cancelled'
+        if (isCancelled && (!val || (typeof val === 'string' && val.trim() === ''))) {
           return 'Vui lòng nhập lý do khi từ chối'
         }
         return true

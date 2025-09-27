@@ -1,4 +1,4 @@
-import { Media, User } from '@/payload-types'
+import { User } from '@/payload-types'
 
 export interface EventComment {
   id: string

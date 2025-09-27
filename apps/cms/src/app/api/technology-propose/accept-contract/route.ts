@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { Contract } from '@/payload-types'
 
 // CORS headers
 const corsHeaders = {
@@ -20,7 +21,8 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
-    const body = (await request.json()).body
+    const raw = await request.json()
+    const body = (raw && typeof raw === 'object' && 'body' in raw ? (raw as { body?: unknown }).body : raw) as { contractId?: string; userId?: string }
 
     const { contractId, userId } = body
     console.log('body', body)
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
       collection: 'contract',
       id: contractId,
       depth: 2,
-    })
+    }) as Contract | null
 
     if (!contract) {
       return NextResponse.json(
@@ -87,7 +89,7 @@ export async function POST(request: NextRequest) {
       updatedConfirmedUsers.includes(String(userBId))
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: Partial<Pick<Contract, 'users_confirm' | 'status'>> = {
       users_confirm: updatedConfirmedUsers,
     }
 
@@ -101,23 +103,17 @@ export async function POST(request: NextRequest) {
       collection: 'contract',
       id: contractId,
       data: updateData,
-    })
+    }) as Contract
 
     // If both parties have accepted, also update the related proposal status
     if (bothAccepted) {
       try {
-        const techPropId =
-          typeof (contract as any).technology_propose === 'object'
-            ? (contract as any).technology_propose?.id
-            : (contract as any).technology_propose
-        const projPropId =
-          typeof (contract as any).project_propose === 'object'
-            ? (contract as any).project_propose?.id
-            : (contract as any).project_propose
-        const propId =
-          typeof (contract as any).propose === 'object'
-            ? (contract as any).propose?.id
-            : (contract as any).propose
+        const techRel = contract.technology_propose
+        const projRel = contract.project_propose
+        const propRel = contract.propose
+        const techPropId = typeof techRel === 'object' && techRel !== null ? techRel.id : techRel ?? undefined
+        const projPropId = typeof projRel === 'object' && projRel !== null ? projRel.id : projRel ?? undefined
+        const propId = typeof propRel === 'object' && propRel !== null ? propRel.id : propRel ?? undefined
 
         if (techPropId) {
           await payload.update({

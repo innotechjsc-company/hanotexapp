@@ -14,6 +14,7 @@ import {
   Star,
 } from "lucide-react";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
+import AuctionImagePlaceholder from "@/components/auction/AuctionImagePlaceholder";
 
 interface Auction {
   id: string;
@@ -258,12 +259,28 @@ export default function AuctionsPage() {
                       src={auction.image}
                       alt={auction.title}
                       className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        // Hide the broken image and show placeholder
+                        e.currentTarget.style.display = 'none';
+                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (placeholder) {
+                          placeholder.style.display = 'block';
+                        }
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                      <div className="text-blue-600 text-4xl">🔬</div>
-                    </div>
-                  )}
+                  ) : null}
+                  
+                  {/* Placeholder - always rendered but hidden when image exists */}
+                  <div 
+                    className={`w-full h-48 ${auction.image ? 'hidden' : 'block'}`}
+                    style={{ display: auction.image ? 'none' : 'block' }}
+                  >
+                    <AuctionImagePlaceholder 
+                      category={auction.category} 
+                      title={auction.title}
+                      className="w-full h-48"
+                    />
+                  </div>
                 </div>
 
                 <div className="p-6">

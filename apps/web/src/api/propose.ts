@@ -11,6 +11,7 @@ export interface ProposeFilters {
   demand?: string;
   user?: string;
   technology?: string;
+  receiver?: string;
   status?: ProposeStatus;
   estimated_cost_min?: number;
   estimated_cost_max?: number;
@@ -41,6 +42,7 @@ export async function getProposes(
   // equals filters
   if (filters.demand) params["where[demand][equals]"] = filters.demand;
   if (filters.user) params["where[user][equals]"] = filters.user;
+  if (filters.receiver) params["where[receiver][equals]"] = filters.receiver;
   if (filters.technology)
     params["where[technology][equals]"] = filters.technology;
   if (filters.status) params["where[status][equals]"] = filters.status;
@@ -57,7 +59,7 @@ export async function getProposes(
     params["where[execution_time][lte]"] = filters.execution_time_max;
 
   // optional text search (backend must support)
-  if (filters.search) params["search"] = filters.search;
+  if (filters.search) params["where[title][contains]"] = filters.search;
 
   return payloadApiClient.get<Propose[]>(API_ENDPOINTS.PROPOSE, params);
 }

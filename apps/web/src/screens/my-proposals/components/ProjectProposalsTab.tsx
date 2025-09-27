@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
+import { Button, Table, Tag, Tooltip, Space, Select, Tabs as AntTabs } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Eye, MessageSquare, X } from "lucide-react";
 import { projectProposeApi } from "@/api/project-propose";
@@ -38,7 +38,6 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const [error, setError] = useState<string>("");
 
   // Filters and pagination
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectProposeStatus | "all">(
     "all"
   );
@@ -48,6 +47,8 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const [selectedProposal, setSelectedProposal] =
     useState<ProjectPropose | null>(null);
   const pageSize = 10;
+  const [viewMode, setViewMode] = useState<"sent" | "received">("sent");
+  // no title search
 
   const fetchProposals = async () => {
     if (!userId) return;
@@ -56,9 +57,9 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
     setError("");
 
     try {
-      const filters: any = { user: userId };
+      const filters: any = viewMode === "sent" ? { user: userId } : { receiver: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
-      if (searchTerm.trim()) filters.search = searchTerm.trim();
+      // no title search
 
       const response = await projectProposeApi.list(filters, {
         page: currentPage,
@@ -85,12 +86,7 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchProposals();
-  }, [userId, currentPage, statusFilter, searchTerm]);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
+  }, [userId, currentPage, statusFilter, viewMode]);
 
   const handleStatusFilter = (value: string | undefined) => {
     setStatusFilter((value as ProjectProposeStatus) || "all");
@@ -250,20 +246,28 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Tìm kiếm theo tên dự án..."
-          value={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="flex-1"
+      {/* View Mode Tabs */}
+      <div className="mb-4">
+        <AntTabs
+          activeKey={viewMode}
+          onChange={(k) => {
+            setViewMode((k as any) || "sent");
+            setCurrentPage(1);
+          }}
+          items={[
+            { key: "sent", label: "Đã gửi" },
+            { key: "received", label: "Nhận được" },
+          ]}
         />
+      </div>
 
+      {/* Filters (no search) */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch">
         <Select
           placeholder="Lọc theo trạng thái"
           value={statusFilter !== "all" ? statusFilter : undefined}
           onChange={handleStatusFilter}
-          className="w-full sm:w-48"
+          className="w-full sm:w-60"
           allowClear
         >
           <Select.Option value="all">Tất cả trạng thái</Select.Option>
@@ -273,6 +277,16 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
             </Select.Option>
           ))}
         </Select>
+
+        <Button
+          onClick={() => {
+            setStatusFilter("all");
+            setCurrentPage(1);
+          }}
+          className="w-full sm:w-auto"
+        >
+          Đặt lại bộ lọc
+        </Button>
       </div>
 
       {/* Error State */}
@@ -293,7 +307,11 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
           rowKey={(record) => record.id || Math.random().toString()}
           loading={loading}
           locale={{
-            emptyText: loading ? "Đang tải..." : "Chưa có đề xuất dự án nào",
+            emptyText: loading
+              ? "Đang tải..."
+              : viewMode === "sent"
+                ? "Chưa có đề xuất dự án đã gửi"
+                : "Chưa có đề xuất dự án nhận được",
           }}
           pagination={{
             current: currentPage,
