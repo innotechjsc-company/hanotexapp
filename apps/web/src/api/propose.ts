@@ -83,7 +83,7 @@ export async function createPropose(data: Partial<Propose>): Promise<Propose> {
     API_ENDPOINTS.PROPOSE,
     data
   );
-  return response.data!;
+  return response as any;
 }
 
 /**

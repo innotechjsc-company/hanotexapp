@@ -22,12 +22,12 @@ import {
   Calendar,
   DollarSign,
   Download,
-  Eye,
   X,
   User as UserIcon,
   ExternalLink,
   CheckCircle,
 } from "lucide-react";
+import downloadService from "@/services/downloadService";
 import { technologyProposeApi } from "@/api/technology-propose";
 import type {
   TechnologyPropose,
@@ -131,23 +131,9 @@ export function ProposalsModal({
     return user?.full_name || user?.email || "Không xác định";
   };
 
-  // Handle document viewing/downloading
-  const handleViewDocument = (document: any) => {
-    if (document?.url) {
-      window.open(document.url, "_blank");
-    } else {
-      message.warning("Không có tài liệu để xem");
-    }
-  };
-
   const handleDownloadDocument = (doc: any) => {
     if (doc?.url) {
-      const link = window.document.createElement("a");
-      link.href = doc.url;
-      link.download = doc.filename || "document";
-      window.document.body.appendChild(link);
-      link.click();
-      window.document.body.removeChild(link);
+      downloadService.downloadByUrl(doc.url, doc.filename || undefined);
     } else {
       message.warning("Không có tài liệu để tải xuống");
     }
@@ -242,25 +228,15 @@ export function ProposalsModal({
       width: 80,
       render: (document: any) => (
         <Space>
-          {document ? (
-            <>
-              <Tooltip title="Xem tài liệu" color="#1677ff">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<Eye size={16} />}
-                  onClick={() => handleViewDocument(document)}
-                />
-              </Tooltip>
-              <Tooltip title="Tải xuống" color="#1677ff">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<Download size={16} />}
-                  onClick={() => handleDownloadDocument(document)}
-                />
-              </Tooltip>
-            </>
+          {document && document.url ? (
+            <Tooltip title="Tải xuống" color="#1677ff">
+              <Button
+                type="text"
+                size="small"
+                icon={<Download size={16} />}
+                onClick={() => handleDownloadDocument(document)}
+              />
+            </Tooltip>
           ) : (
             <Text type="secondary">Không có</Text>
           )}

@@ -12,6 +12,18 @@ const nextConfig = {
 
     return webpackConfig
   },
+  async headers() {
+    // Allow cross-origin GET for media files so frontend can fetch Blob
+    return [
+      {
+        source: '/media/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, HEAD, OPTIONS' },
+        ],
+      },
+    ]
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

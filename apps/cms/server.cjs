@@ -13,7 +13,8 @@ const dev = process.env.NODE_ENV !== 'production'
 const port = process.env.PORT || 4000
 const hostname = dev ? 'localhost' : '0.0.0.0' // Listen on all interfaces in production
 
-const domain = dev ? `http://localhost:${port}` : 'https://api.hanotex.vn'
+// Public URL for logs and client hints; configurable via env
+const publicURL = process.env.PUBLIC_URL || `http://localhost:${port}`
 
 // Create Next.js app
 const app = next({ dev, hostname, port })
@@ -40,8 +41,11 @@ async function startServer() {
         process.exit(1)
       })
       .listen(port, () => {
-        console.log(`🚀 Server ready on ${domain}`)
-        console.log(`🔌 WebSocket server ready on ${domain.replace('http', 'ws')}/socket.io/`)
+        console.log(`🚀 Server ready on ${publicURL}`)
+        const wsURL = publicURL.startsWith('https')
+          ? publicURL.replace('https', 'wss')
+          : publicURL.replace('http', 'ws')
+        console.log(`🔌 WebSocket server ready on ${wsURL}/socket.io/`)
       })
   } catch (err) {
     console.error('❌ Error starting server:', err)

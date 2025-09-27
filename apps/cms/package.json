@@ -7,7 +7,7 @@
   "scripts": {
     "build": "NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
     "dev": "NODE_ENV=development NODE_OPTIONS=--no-deprecation bun server.cjs",
-    "start": "NODE_OPTIONS=--no-deprecation bun server.cjs",
+    "start": "NODE_ENV=production NODE_OPTIONS=--no-deprecation bun server.cjs",
     "dev:next": "NODE_OPTIONS=--no-deprecation next dev -p 4000",
     "devsafe": "rm -rf .next && NODE_ENV=development NODE_OPTIONS=--no-deprecation bun server.cjs",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "3.55.1",
-    "@payloadcms/db-postgres": "3.55.1",
     "@payloadcms/next": "3.55.1",
     "@payloadcms/payload-cloud": "3.55.1",
     "@payloadcms/richtext-lexical": "3.55.1",

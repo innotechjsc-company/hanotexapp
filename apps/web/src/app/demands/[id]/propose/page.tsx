@@ -31,12 +31,14 @@ import {
 } from "@heroui/react";
 import { Propose } from "@/types/propose";
 import { createPropose } from "@/api/propose";
+import { createNotification } from "@/api/noti";
 import { uploadFile } from "@/api/media";
 import { getDemandById } from "@/api/demands";
 import { getTechnologies } from "@/api/technologies";
 import { Media, MediaType } from "@/types/media1";
 import { Technology } from "@/types/technologies";
 import { Demand } from "@/types/demand";
+import { de } from "date-fns/locale";
 
 // Interface for form data (before submission)
 // This is different from Propose interface which is for API data
@@ -178,7 +180,7 @@ function ProposeSolutionPage() {
       // Create propose data according to Propose interface
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
 
-      const createdPropose = await createPropose(proposeData);
+      const createdProposeResponse = await createPropose(proposeData);
 
       // Success - redirect to success page
       router.push(`/demands/${params.id}/propose/success`);
@@ -374,7 +376,7 @@ function ProposeSolutionPage() {
                 </div>
               </CardHeader>
 
-              <CardBody className="space-y-6">
+              <CardBody className="space-y-6 ">
                 {/* Proposal Title */}
                 <Input
                   label="Tiêu đề đề xuất *"
@@ -388,6 +390,10 @@ function ProposeSolutionPage() {
                     if (error) setError("");
                   }}
                   className="w-full"
+                  classNames={{
+                    inputWrapper: "bg-white",
+                    input: "bg-white text-gray-900",
+                  }}
                   description="Tiêu đề sẽ giúp dễ dàng nhận diện đề xuất của bạn"
                 />
 

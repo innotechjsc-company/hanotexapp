@@ -17,7 +17,8 @@ import {
   Divider,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { FileText, Calendar, DollarSign, Download, Eye, User as UserIcon, CheckCircle, X, ExternalLink } from "lucide-react";
+import { FileText, Calendar, DollarSign, Download, User as UserIcon, CheckCircle, X, ExternalLink } from "lucide-react";
+import downloadService from "@/services/downloadService";
 import { getProposesByDemand, acceptPropose, rejectPropose } from "@/api/propose";
 import type { Propose, ProposeStatus } from "@/types/propose";
 import type { User } from "@/types/users";
@@ -194,26 +195,14 @@ export default function ProposalsModal({
       render: (document: any) => (
         <Space>
           {document && document.url ? (
-            <>
-              <Tooltip title="Xem tài liệu" color="#1677ff">
-                <Button type="text" size="small" icon={<Eye size={16} />} onClick={() => window.open(document.url, "_blank")} />
-              </Tooltip>
-              <Tooltip title="Tải xuống" color="#1677ff">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<Download size={16} />}
-                  onClick={() => {
-                    const link = window.document.createElement("a");
-                    link.href = document.url;
-                    link.download = document.filename || "document";
-                    window.document.body.appendChild(link);
-                    link.click();
-                    window.document.body.removeChild(link);
-                  }}
-                />
-              </Tooltip>
-            </>
+            <Tooltip title="Tải xuống" color="#1677ff">
+              <Button
+                type="text"
+                size="small"
+                icon={<Download size={16} />}
+                onClick={() => downloadService.downloadByUrl(document.url, document.filename || undefined)}
+              />
+            </Tooltip>
           ) : (
             <Text type="secondary">Không có</Text>
           )}

@@ -158,33 +158,41 @@ export default function SmartChatbot({
   const getGeneralChatResponse = async (message: string): Promise<string> => {
     try {
       // Call ChatGPT API for general conversation
-      const response = await fetch('/api/chatgpt', {
-        method: 'POST',
+      const response = await fetch("/api/chatgpt", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           message: message,
-          context: "Bạn là trợ lý thông minh của HANOTEX. Khi người dùng hỏi về giao dịch công nghệ, hãy hướng dẫn họ về các dịch vụ của HANOTEX. Khi họ hỏi về chủ đề khác, hãy trò chuyện thân thiện và hữu ích."
+          context:
+            "Bạn là trợ lý thông minh của HANOTEX. Khi người dùng hỏi về giao dịch công nghệ, hãy hướng dẫn họ về các dịch vụ của HANOTEX. Khi họ hỏi về chủ đề khác, hãy trò chuyện thân thiện và hữu ích.",
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        return data.reply || "Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Bạn có thể hỏi tôi về các dịch vụ của HANOTEX không?";
+        return (
+          data.reply ||
+          "Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Bạn có thể hỏi tôi về các dịch vụ của HANOTEX không?"
+        );
       }
     } catch (error) {
-      console.error('ChatGPT API error:', error);
+      console.error("ChatGPT API error:", error);
     }
 
     // Fallback response if API fails
     const lowerMessage = message.toLowerCase();
-    
+
     // Greeting responses
-    if (lowerMessage.includes("xin chào") || lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
+    if (
+      lowerMessage.includes("xin chào") ||
+      lowerMessage.includes("hello") ||
+      lowerMessage.includes("hi")
+    ) {
       return "Xin chào! Tôi rất vui được trò chuyện với bạn. Bạn có câu hỏi gì về HANOTEX hoặc bất kỳ chủ đề nào khác không?";
     }
-    
+
     // Default response for general conversation
     return "Cảm ơn bạn đã chia sẻ! Tôi là trợ lý thông minh của HANOTEX, chuyên hỗ trợ về giao dịch công nghệ. Tôi có thể giúp bạn:\n\n• Đăng công nghệ lên sàn\n• Tìm kiếm công nghệ phù hợp\n• Quản lý nhu cầu công nghệ\n• Hỗ trợ pháp lý\n• Định giá công nghệ\n\nHoặc chúng ta có thể trò chuyện về bất kỳ chủ đề nào khác! Bạn có câu hỏi gì cụ thể không?";
   };
@@ -192,7 +200,11 @@ export default function SmartChatbot({
   const getResponseForIntent = async (
     intent: string,
     message: string
-  ): Promise<{ content: string; steps?: string[]; quickActions?: QuickAction[] }> => {
+  ): Promise<{
+    content: string;
+    steps?: string[];
+    quickActions?: QuickAction[];
+  }> => {
     switch (intent) {
       case "register_technology":
         return {
@@ -297,7 +309,6 @@ export default function SmartChatbot({
             },
           ],
         };
-
 
       case "legal_support":
         return {
