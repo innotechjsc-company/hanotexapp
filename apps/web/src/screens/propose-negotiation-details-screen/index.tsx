@@ -65,7 +65,7 @@ export const NegotiationDetailsScreen: React.FC<
     formatFileSize,
     // Refresh
     reloadProposal,
-  } = useNegotiation({ proposalId, forceType: 'propose' });
+  } = useNegotiation({ proposalId, forceType: "propose" });
 
   const handleClose = () => {
     try {
@@ -183,7 +183,11 @@ export const NegotiationDetailsScreen: React.FC<
               messages={messages}
               formatFileSize={formatFileSize}
             />
-            <ContractSigningStep proposal={proposal} readOnly onBothAccepted={reloadProposal} />
+            <ContractSigningStep
+              proposal={proposal}
+              readOnly
+              onBothAccepted={reloadProposal}
+            />
             <ContractLogsStep proposal={proposal} />
           </div>
         ) : (
@@ -193,26 +197,35 @@ export const NegotiationDetailsScreen: React.FC<
                 messages={messages}
                 formatFileSize={formatFileSize}
                 messageInputComponent={
-                  <MessageInput
-                    form={form}
-                    attachments={attachments}
-                    sendingMessage={sendingMessage}
-                    uploadingFiles={uploadingFiles}
-                    onSendMessage={onSendMessage}
-                    onFileUpload={handleFileUpload}
-                    onRemoveAttachment={removeAttachment}
-                    formatFileSize={formatFileSize}
-                    onSendOffer={handleSendOffer}
-                    canSendOffer={canSendOffer && !hasPendingOffer}
-                    hasPendingOffer={hasPendingOffer}
-                    isProposalCreator={isProposalCreator}
-                  />
+                  isProposalCreator && hasPendingOffer ? (
+                    <div className="px-4 py-3 text-center bg-amber-50 text-amber-700">
+                      Bạn đã gửi đề xuất, vui lòng chờ xác nhận
+                    </div>
+                  ) : (
+                    <MessageInput
+                      form={form}
+                      attachments={attachments}
+                      sendingMessage={sendingMessage}
+                      uploadingFiles={uploadingFiles}
+                      onSendMessage={onSendMessage}
+                      onFileUpload={handleFileUpload}
+                      onRemoveAttachment={removeAttachment}
+                      formatFileSize={formatFileSize}
+                      onSendOffer={handleSendOffer}
+                      canSendOffer={canSendOffer}
+                      hasPendingOffer={hasPendingOffer}
+                      isProposalCreator={isProposalCreator}
+                    />
+                  )
                 }
               />
             )}
             {currentStep === 1 && (
               <div className="h-full overflow-auto">
-                <ContractSigningStep proposal={proposal} onBothAccepted={reloadProposal} />
+                <ContractSigningStep
+                  proposal={proposal}
+                  onBothAccepted={reloadProposal}
+                />
               </div>
             )}
             {currentStep === 2 && (
