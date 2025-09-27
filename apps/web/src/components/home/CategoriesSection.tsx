@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Category } from "@/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { getCategories } from "@/api/categories";
+import { getAllCategories } from "@/api/categories";
 
 const categoryIcons: Record<string, any> = {
   AI: Brain,
@@ -39,7 +39,7 @@ export default function CategoriesSection() {
     const fetchCategories = async () => {
       try {
         // Prefer server sort by custom order, limit to 6 for homepage
-        const response = await getCategories({}, { limit: 6, sort: "sort_order" });
+        const response = await getAllCategories({ limit: 6, sort: "sort_order" });
         const list = (Array.isArray((response as any).data)
           ? (response as any).data
           : Array.isArray((response as any).docs)
@@ -92,7 +92,7 @@ export default function CategoriesSection() {
               return (
                 <div key={category.id}>
                   <Link
-                    href={`/technologies?category=${category.id}`}
+                    href={`/technologies?category_id=${category.id}`}
                     className="block bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                   >
                     <div className="px-6 py-4 text-center">

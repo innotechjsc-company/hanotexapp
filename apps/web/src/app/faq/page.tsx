@@ -54,7 +54,7 @@ export default function FAQPage() {
       ],
     },
     {
-      title: "Đăng nhu cầu công nghệ",
+      title: "Đăng nhu cầu KH&CN",
       questions: [
         {
           question: "Làm thế nào để đăng nhu cầu tìm kiếm công nghệ?",

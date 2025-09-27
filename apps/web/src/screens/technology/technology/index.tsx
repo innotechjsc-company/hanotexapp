@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button, Spinner } from "@heroui/react";
 import { Cpu, Lightbulb, Zap, TrendingUp } from "lucide-react";
 import TechnologyCard from "./components/TechnologyCard";
@@ -12,6 +13,7 @@ import SectionBanner from "@/components/ui/SectionBanner";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
 
 export default function TechnologyListScreen() {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [limit] = useState(12);
@@ -30,9 +32,9 @@ export default function TechnologyListScreen() {
   );
 
   // Simple helpers for chips
-  const trlChipColor = (level?: number): "danger" | "warning" | "success" => {
+  const trlChipColor = (level?: number): "default" | "warning" | "success" => {
     const lv = level ?? 0;
-    if (lv <= 3) return "danger";
+    if (lv <= 3) return "default";
     if (lv <= 6) return "warning";
     return "success";
   };
@@ -111,6 +113,14 @@ export default function TechnologyListScreen() {
     };
     run();
   }, []);
+
+  // Handle URL parameters
+  useEffect(() => {
+    const categoryId = searchParams.get("category_id");
+    if (categoryId) {
+      setCategorySelectedKeys(new Set([categoryId]));
+    }
+  }, [searchParams]);
 
   // Refetch when page or filters change
   useEffect(() => {

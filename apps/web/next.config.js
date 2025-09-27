@@ -60,21 +60,10 @@ const nextConfig = {
   },
   transpilePackages: ["@heroui/react", "@heroui/theme", "@heroui/system"],
   env: {
-    NEXT_PUBLIC_API_URL:
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     NEXT_PUBLIC_PAYLOAD_API_URL:
       process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api",
-  },
-  async rewrites() {
-    // Only proxy non-auth API routes to backend
-    return [
-      {
-        source: "/api/backend/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1"}/:path*`,
-      },
-    ];
   },
   async headers() {
     return [

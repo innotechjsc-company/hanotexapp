@@ -89,6 +89,7 @@ export default function HeroSection() {
     }
   };
 
+
   // Intersection Observer for stats animation
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -398,80 +399,6 @@ export default function HeroSection() {
             </p>
           </div>
 
-          {/* Technology Categories Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {[
-              {
-                title: "Trí tuệ nhân tạo",
-                description: "AI, Machine Learning, Deep Learning",
-                icon: Brain,
-                color: "from-blue-500 to-cyan-500",
-                technologies: ["Computer Vision", "NLP", "Robotics", "Neural Networks"]
-              },
-              {
-                title: "Công nghệ sinh học",
-                description: "Biotech, Pharma, Medical Devices",
-                icon: Microscope,
-                color: "from-green-500 to-emerald-500",
-                technologies: ["Gene Therapy", "Biomaterials", "Drug Discovery", "Diagnostics"]
-              },
-              {
-                title: "Công nghệ số",
-                description: "Software, IoT, Blockchain",
-                icon: Code,
-                color: "from-purple-500 to-pink-500",
-                technologies: ["Web3", "IoT Solutions", "Cloud Computing", "Cybersecurity"]
-              },
-              {
-                title: "Năng lượng xanh",
-                description: "Renewable Energy, Clean Tech",
-                icon: Zap,
-                color: "from-yellow-500 to-orange-500",
-                technologies: ["Solar Tech", "Wind Energy", "Battery Tech", "Hydrogen"]
-              },
-              {
-                title: "Vật liệu tiên tiến",
-                description: "Nanomaterials, Composites",
-                icon: Atom,
-                color: "from-indigo-500 to-blue-500",
-                technologies: ["Graphene", "Smart Materials", "3D Printing", "Coatings"]
-              },
-              {
-                title: "Công nghệ vũ trụ",
-                description: "Aerospace, Satellite Tech",
-                icon: Rocket,
-                color: "from-red-500 to-pink-500",
-                technologies: ["Satellite Systems", "Space Tech", "Aerospace Materials", "Navigation"]
-              }
-            ].map((category, index) => (
-              <Link
-                key={category.title}
-                href={`/technologies?category=${encodeURIComponent(category.title)}`}
-                className="group relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105 cursor-pointer"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="flex items-center mb-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <category.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{category.title}</h3>
-                    <p className="text-white/80 text-sm">{category.description}</p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {category.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-white/10 text-white text-xs rounded-full border border-white/20"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </Link>
-            ))}
-          </div>
 
           {/* Stats with Enhanced Design */}
           <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-8">

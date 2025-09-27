@@ -9,6 +9,7 @@ interface BiddingSectionProps {
   bidIncrement: number;
   timeLeft: string;
   isActive: boolean;
+  status?: 'upcoming' | 'active' | 'ended' | 'unknown';
   onBid: (amount: number) => void;
   onAutoBid: (maxAmount: number) => void;
 }
@@ -19,6 +20,7 @@ export default function BiddingSection({
   bidIncrement,
   timeLeft,
   isActive,
+  status = 'unknown',
   onBid,
   onAutoBid,
 }: BiddingSectionProps) {
@@ -66,7 +68,35 @@ export default function BiddingSection({
         </div>
       </div>
 
-      {isActive ? (
+      {status === 'upcoming' ? (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <div>
+              <h3 className="text-sm font-medium text-yellow-800">
+                Đấu giá chưa bắt đầu
+              </h3>
+              <p className="text-sm text-yellow-700 mt-1">
+                Đấu giá sẽ bắt đầu vào {timeLeft}. Vui lòng quay lại sau.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : status === 'ended' ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">
+                Đấu giá đã kết thúc
+              </h3>
+              <p className="text-sm text-red-700 mt-1">
+                Phiên đấu giá này đã hoàn thành.
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : isActive && status === 'active' ? (
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

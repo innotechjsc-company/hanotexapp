@@ -174,18 +174,18 @@ export function getStatusColor(status: string): string {
     DRAFT: "bg-gray-100 text-gray-800",
     PENDING: "bg-yellow-100 text-yellow-800",
     APPROVED: "bg-green-100 text-green-800",
-    REJECTED: "bg-red-100 text-red-800",
+    REJECTED: "bg-gray-100 text-gray-800",
     ACTIVE: "bg-blue-100 text-blue-800",
     INACTIVE: "bg-gray-100 text-gray-800",
 
     // Auction statuses
     SCHEDULED: "bg-blue-100 text-blue-800",
     ENDED: "bg-gray-100 text-gray-800",
-    CANCELLED: "bg-red-100 text-red-800",
+    CANCELLED: "bg-gray-100 text-gray-800",
 
     // Transaction statuses
     COMPLETED: "bg-green-100 text-green-800",
-    FAILED: "bg-red-100 text-red-800",
+    FAILED: "bg-gray-100 text-gray-800",
     REFUNDED: "bg-yellow-100 text-yellow-800",
   };
 
@@ -233,7 +233,7 @@ export function getTRLLabel(level: number): string {
 }
 
 export function getTRLColor(level: number): string {
-  if (level <= 3) return "bg-red-100 text-red-800";
+  if (level <= 3) return "bg-gray-100 text-gray-800";
   if (level <= 6) return "bg-yellow-100 text-yellow-800";
   return "bg-green-100 text-green-800";
 }
