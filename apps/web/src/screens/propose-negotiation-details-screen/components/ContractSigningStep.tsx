@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Button,
-  Typography,
-  Divider,
-  Input,
-  message,
-  Modal,
-} from "antd";
-import {
-  FileText,
-  Download,
-  CheckCircle,
-  Paperclip,
-} from "lucide-react";
+import { Card, Button, Typography, Divider, Input, message, Modal } from "antd";
+import { FileText, Download, CheckCircle, Paperclip } from "lucide-react";
 import type { Propose } from "@/types/propose";
 import type { Contract } from "@/types/contract";
 import { ContractStatusEnum } from "@/types/contract";
@@ -90,7 +77,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     try {
       setLoading(true);
       console.log("Refreshing contract for proposal:", proposal.id);
-      if(!proposal.id) return;
+      if (!proposal.id) return;
       const found = await contractsApi.getByPropose(proposal.id, 1);
       console.log("Found contract:", found);
       setActiveContract(found);
@@ -157,7 +144,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
       const nextIds = existing
         .map((d: any) => (typeof d === "object" ? d.id : d))
         .filter((id: any) => String(id) !== String(removeId));
-      await contractsApi.update(activeContract.id, { documents: nextIds as any });
+      await contractsApi.update(activeContract.id, {
+        documents: nextIds as any,
+      });
       message.success("Đã xóa tài liệu khỏi hợp đồng");
       await refreshContract();
     } catch (e) {
@@ -272,7 +261,8 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             activeContract.id,
             currentUser.id
           );
-          const msg = (result as any)?.message || "Đã ghi nhận xác nhận hợp đồng";
+          const msg =
+            (result as any)?.message || "Đã ghi nhận xác nhận hợp đồng";
           message.success(msg);
           if ((result as any)?.bothAccepted) {
             try {
@@ -286,7 +276,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
         } catch (error) {
           console.error("Error accepting contract:", error);
           message.error(
-            error instanceof Error ? error.message : "Không thể xác nhận hợp đồng"
+            error instanceof Error
+              ? error.message
+              : "Không thể xác nhận hợp đồng"
           );
         } finally {
           setAcceptingContract(false);
@@ -390,12 +382,6 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                     {typeof proposal.user === "object"
                       ? proposal.user.full_name || proposal.user.email
                       : proposal.user}
-                  </Text>
-                </div>
-                <div className="flex justify-between">
-                  <Text strong>Ngân sách:</Text>
-                  <Text className="text-green-600 font-semibold">
-                    {proposal.budget?.toLocaleString("vi-VN")} VND
                   </Text>
                 </div>
                 <div className="flex justify-between">
@@ -526,18 +512,23 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                           <FileText size={20} className="text-gray-500" />
                           <div>
                             <Text strong>
-                              {activeContract.contract_file.filename || 'Hợp đồng hiện tại'}
+                              {activeContract.contract_file.filename ||
+                                "Hợp đồng hiện tại"}
                             </Text>
                             <br />
                             <Text type="secondary" className="text-xs">
                               {activeContract.contract_file.filesize
                                 ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
-                                : ''}
+                                : ""}
                             </Text>
                           </div>
                         </div>
                         {activeContract.contract_file.url && (
-                          <Button icon={<Download size={14} />} type="text" onClick={handleDownload}>
+                          <Button
+                            icon={<Download size={14} />}
+                            type="text"
+                            onClick={handleDownload}
+                          >
                             Tải xuống
                           </Button>
                         )}
@@ -551,7 +542,10 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                     allowedTypes={["document"]}
                     title="Chọn tệp hợp đồng"
                     description="Kéo thả hoặc bấm để chọn (PDF, Word)"
-                    mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng" }}
+                    mediaFields={{
+                      type: MediaType.DOCUMENT,
+                      caption: "Tệp hợp đồng",
+                    }}
                     onUploadSuccess={handleContractUploadSuccess}
                     onUploadError={handleContractUploadError}
                   />
@@ -570,9 +564,14 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   allowedTypes={["document", "image"]}
                   title="Thêm tài liệu"
                   description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
-                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tài liệu kèm theo" }}
+                  mediaFields={{
+                    type: MediaType.DOCUMENT,
+                    caption: "Tài liệu kèm theo",
+                  }}
                   onUploadSuccess={handleAttachmentUploadSuccess}
-                  onUploadError={(_f, err) => message.error(err || "Tải lên tài liệu thất bại")}
+                  onUploadError={(_f, err) =>
+                    message.error(err || "Tải lên tài liệu thất bại")
+                  }
                   onRemove={handleAttachmentRemove}
                 />
               </div>
@@ -596,14 +595,19 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   allowedTypes={["document"]}
                   title="Chọn tệp hợp đồng đã ký"
                   description="Kéo thả hoặc bấm để chọn (PDF, Word)"
-                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng đã ký" }}
+                  mediaFields={{
+                    type: MediaType.DOCUMENT,
+                    caption: "Tệp hợp đồng đã ký",
+                  }}
                   onUploadSuccess={handleContractUploadSuccess}
                   onUploadError={handleContractUploadError}
                 />
               </div>
 
               <div>
-                <Title level={5} className="mb-3">Ghi chú (tuỳ chọn)</Title>
+                <Title level={5} className="mb-3">
+                  Ghi chú (tuỳ chọn)
+                </Title>
                 <TextArea
                   rows={3}
                   placeholder="Ghi chú thêm về hợp đồng..."
@@ -715,9 +719,14 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 allowedTypes={["document", "image"]}
                 title="Thêm tài liệu kèm theo"
                 description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
-                mediaFields={{ type: MediaType.DOCUMENT, caption: "Tài liệu kèm theo" }}
+                mediaFields={{
+                  type: MediaType.DOCUMENT,
+                  caption: "Tài liệu kèm theo",
+                }}
                 onUploadSuccess={handleAttachmentUploadSuccess}
-                onUploadError={(_f, err) => message.error(err || "Tải lên tài liệu thất bại")}
+                onUploadError={(_f, err) =>
+                  message.error(err || "Tải lên tài liệu thất bại")
+                }
                 onRemove={handleAttachmentRemove}
               />
             </div>
