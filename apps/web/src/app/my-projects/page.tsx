@@ -25,6 +25,7 @@ import {
   InputNumber,
   Layout,
   Checkbox,
+  Divider,
 } from "antd";
 import {
   PlusOutlined,
@@ -58,7 +59,12 @@ import type { InvestmentFund } from "@/types/investment_fund";
 import { projectProposeApi } from "@/api/project-propose";
 import { ProjectProposeStatus } from "@/types/project-propose";
 import type { ProjectPropose } from "@/types/project-propose";
+import { getServices } from "@/api/services";
+import type { Service } from "@/types/services";
 import { CheckCircle, ExternalLink, X } from "lucide-react";
+import { createServiceTicket } from "@/api/service-ticket";
+import { getUserByRoleAdmin } from "@/api/user";
+import type { ServiceTicket } from "@/types/service-ticket";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -66,6 +72,12 @@ const { Search } = Input;
 const { Content } = Layout;
 
 type EditableProject = Partial<Project> & { id?: string };
+
+// Type definition cho Service Ticket data structure
+interface ServiceTicketFormData {
+  service: string;
+  description: string;
+}
 
 // Helper functions
 const checkUserAuth = (user: any, router: any) => {
@@ -152,6 +164,138 @@ const getInvestmentFundTitlesFromValues = (
     .join(", ");
 };
 
+// Service Ticket Form Component
+// Trả về data structure: ServiceTicketFormData[]
+// [
+//   { service: "service_id_1", description: "mô tả yêu cầu 1" },
+//   { service: "service_id_2", description: "mô tả yêu cầu 2" },
+//   ...
+// ]
+function ServiceTicketForm({ 
+  services, 
+  form, 
+  fieldName 
+}: { 
+  services: Service[]; 
+  form: any; 
+  fieldName: string; 
+}) {
+  const getSelectedServices = () => {
+    const serviceTickets = form.getFieldValue('service_tickets') || [];
+    return serviceTickets.map((ticket: any) => ticket?.service).filter(Boolean);
+  };
+
+  const getAvailableServices = (currentIndex: number) => {
+    const selectedServices = getSelectedServices();
+    return services.filter(service => {
+      const serviceId = String((service as any).id || (service as any)._id);
+      // Không hiển thị dịch vụ đã được chọn ở các vị trí khác
+      return !selectedServices.some((selectedId: string, index: number) => 
+        index !== currentIndex && selectedId === serviceId
+      );
+    });
+  };
+
+  // Helper function để đảm bảo data structure đúng
+  const getServiceTicketData = (): ServiceTicketFormData[] => {
+    const serviceTickets = form.getFieldValue('service_tickets') || [];
+    return serviceTickets.map((ticket: any) => ({
+      service: ticket?.service || '',
+      description: ticket?.description || ''
+    })).filter((ticket: ServiceTicketFormData) => ticket.service && ticket.description);
+  };
+
+  // Debug: Log data structure khi có thay đổi
+  useEffect(() => {
+    const serviceTickets = form.getFieldValue('service_tickets') || [];
+    if (serviceTickets.length > 0) {
+      console.log('ServiceTicketForm raw data:', serviceTickets);
+      console.log('ServiceTicketForm formatted data:', getServiceTicketData());
+      console.log('Data structure example:', [
+        { service: "service_id_1", description: "mô tả yêu cầu 1" },
+        { service: "service_id_2", description: "mô tả yêu cầu 2" }
+      ]);
+    }
+  }, [form.getFieldValue('service_tickets')]);
+
+  return (
+    <Form.List name="service_tickets">
+      {(fields, { add, remove }) => (
+        <>
+          {fields.map(({ key, name, ...restField }) => (
+            <div key={key} style={{ marginBottom: 16, padding: 16, border: '1px solid #d9d9d9', borderRadius: 6 }}>
+              <Row gutter={16} align="middle">
+                <Col span={20}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'service']}
+                    label="Dịch vụ"
+                    rules={[{ required: true, message: 'Vui lòng chọn dịch vụ!' }]}
+                  >
+                    <Select
+                      placeholder="Chọn dịch vụ"
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                      }
+                    >
+                      {getAvailableServices(name).map((service) => (
+                        <Option
+                          key={String((service as any).id || (service as any)._id)}
+                          value={String((service as any).id || (service as any)._id)}
+                        >
+                          {service.name}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col span={4}>
+                  <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: 8 }}>
+                    <Button
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => remove(name)}
+                    >
+                      Xóa
+                    </Button>
+                  </div>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    {...restField}
+                    name={[name, 'description']}
+                    label="Mô tả yêu cầu"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả yêu cầu!' }]}
+                  >
+                    <Input.TextArea
+                      rows={3}
+                      placeholder="Mô tả chi tiết yêu cầu dịch vụ"
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            </div>
+          ))}
+          <Form.Item>
+            <Button
+              type="dashed"
+              onClick={() => add()}
+              block
+              icon={<PlusOutlined />}
+            >
+              Thêm dịch vụ
+            </Button>
+          </Form.Item>
+        </>
+      )}
+    </Form.List>
+  );
+}
+
 // Add Project Modal Component
 function AddProjectModal({
   open,
@@ -160,6 +304,7 @@ function AddProjectModal({
   loading,
   technologies,
   funds,
+  services,
 }: {
   open: boolean;
   onCancel: () => void;
@@ -167,6 +312,7 @@ function AddProjectModal({
   loading?: boolean;
   technologies: Technology[];
   funds: InvestmentFund[];
+  services: Service[];
 }) {
   const [form] = Form.useForm();
   const [docsUploading, setDocsUploading] = useState(false);
@@ -484,6 +630,13 @@ function AddProjectModal({
             </Form.Item>
           </Col>
         </Row> */}
+        <Row gutter={16}>
+          <Col span={24}>
+            <Text strong>Phiếu dịch vụ (Tùy chọn)</Text>
+          </Col>
+        </Row>
+
+        <ServiceTicketForm services={services} form={form} fieldName="service_tickets" />
         </Form>
       </div>
     </Modal>
@@ -498,6 +651,7 @@ function EditProjectModal({
   loading,
   technologies,
   funds,
+  services,
   project,
 }: {
   open: boolean;
@@ -506,6 +660,7 @@ function EditProjectModal({
   loading?: boolean;
   technologies: Technology[];
   funds: InvestmentFund[];
+  services: Service[];
   project: EditableProject | null;
 }) {
   const [form] = Form.useForm();
@@ -524,6 +679,9 @@ function EditProjectModal({
           ? ((project as any).investment_fund as any[]).map((f: any) =>
               String((f as any).id || (f as any)._id || f)
             )
+          : [],
+        service_tickets: Array.isArray((project as any).service_tickets)
+          ? (project as any).service_tickets
           : [],
         end_date: project.end_date ? dayjs(project.end_date) : null,
       };
@@ -836,6 +994,12 @@ function EditProjectModal({
           </Col>
         </Row>
 
+        <Row gutter={16}>
+          <Col span={24}>
+            <Text strong>Phiếu dịch vụ (Tùy chọn)</Text>
+          </Col>
+        </Row>
+
         {/* <Row gutter={16}>
           <Col span={24}>
             <Form.Item
@@ -859,17 +1023,25 @@ function ViewProjectModal({
   project,
   technologies,
   funds,
+  services,
 }: {
   open: boolean;
   onCancel: () => void;
   project: EditableProject | null;
   technologies: Technology[];
   funds: InvestmentFund[];
+  services: Service[];
 }) {
   const getTechnologyNames = (values: string[] | Technology[] | undefined) =>
     getTechnologyTitlesFromValues(values, technologies);
   const getFundNames = (values: string[] | any[] | undefined) =>
     getInvestmentFundTitlesFromValues(values, funds);
+  const getServiceName = (serviceId: string) => {
+    const found = services.find(
+      (s) => String((s as any).id || (s as any)._id) === serviceId
+    );
+    return found?.name || "Không xác định";
+  };
 
   return (
     <Modal
@@ -978,6 +1150,26 @@ function ViewProjectModal({
         {(project as any)?.team_profile && (
           <Descriptions.Item label="Hồ sơ đội ngũ" span={2}>
             <Text>{(project as any).team_profile}</Text>
+          </Descriptions.Item>
+        )}
+        {(project as any)?.service_tickets && Array.isArray((project as any).service_tickets) && (project as any).service_tickets.length > 0 && (
+          <Descriptions.Item label="Phiếu dịch vụ" span={2}>
+            <div>
+              {(project as any).service_tickets.map((ticket: any, index: number) => (
+                <div key={index} style={{ marginBottom: 12, padding: 12, border: '1px solid #f0f0f0', borderRadius: 6 }}>
+                  <div style={{ marginBottom: 8 }}>
+                    <Text strong>Dịch vụ: </Text>
+                    <Text>{getServiceName(ticket.service)}</Text>
+                  </div>
+                  {ticket.description && (
+                    <div>
+                      <Text strong>Mô tả: </Text>
+                      <Text>{ticket.description}</Text>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </Descriptions.Item>
         )}
         </Descriptions>
@@ -1293,6 +1485,7 @@ export default function MyProjectsPage() {
   const [items, setItems] = useState<Project[]>([]);
   const [technologies, setTechnologies] = useState<Technology[]>([]);
   const [funds, setFunds] = useState<InvestmentFund[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -1376,11 +1569,22 @@ export default function MyProjectsPage() {
     }
   };
 
+  const fetchServices = async () => {
+    try {
+      const res = await getServices({ search: "" }, { limit: 100, page: 1, sort: "-createdAt" });
+      const list = (res as any)?.docs || (res as any)?.data || (Array.isArray(res) ? res : []) || [];
+      setServices(list as Service[]);
+    } catch (e) {
+      console.error("Failed to fetch services:", e);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchList();
       fetchTechnologies();
       fetchFunds();
+      fetchServices();
     }
   }, [page, limit, user]);
 
@@ -1396,8 +1600,40 @@ export default function MyProjectsPage() {
         user: user!,
       };
       console.log(obj);
-      await createProject(obj);
-      message.success("Tạo dự án thành công");
+      const createdProject = await createProject(obj);
+      
+      // Tạo service tickets nếu có dịch vụ được chọn
+      if (values.service_tickets && Array.isArray(values.service_tickets) && values.service_tickets.length > 0) {
+        try {
+          // Lấy user admin để làm implementer
+          const userAdmin = await getUserByRoleAdmin();
+          const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
+          const userAdminId = userAdminList[0]?.id;
+
+          // Tạo service ticket cho mỗi dịch vụ được chọn
+          const serviceTicketPromises = values.service_tickets.map(async (ticketData: any) => {
+            const serviceTicketData = {
+              service: ticketData.service,
+              user: user!.id,
+              description: ticketData.description || `Yêu cầu hỗ trợ dịch vụ cho dự án: ${values.name}`,
+              responsible_user: user!.id,
+              implementers: userAdminId ? [userAdminId] : [],
+              status: "pending" as ServiceTicket["status"],
+              project: String((createdProject as any).id || (createdProject as any)._id),
+            };
+            return createServiceTicket(serviceTicketData);
+          });
+
+          await Promise.all(serviceTicketPromises);
+          message.success("Tạo dự án và phiếu dịch vụ thành công");
+        } catch (serviceError) {
+          console.error("Error creating service tickets:", serviceError);
+          message.warning("Tạo dự án thành công nhưng có lỗi khi tạo phiếu dịch vụ");
+        }
+      } else {
+        message.success("Tạo dự án thành công");
+      }
+      
       setAddModalOpen(false);
       await fetchList();
     } catch (e) {
@@ -1419,7 +1655,14 @@ export default function MyProjectsPage() {
         end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : undefined,
         user: user!,
       });
-      message.success("Cập nhật dự án thành công");
+      
+      // Thông báo về service tickets nếu có thay đổi
+      if (values.service_tickets && Array.isArray(values.service_tickets) && values.service_tickets.length > 0) {
+        message.success("Cập nhật dự án thành công. Lưu ý: Để thay đổi phiếu dịch vụ, vui lòng tạo phiếu dịch vụ mới từ trang 'Phiếu dịch vụ'");
+      } else {
+        message.success("Cập nhật dự án thành công");
+      }
+      
       setEditModalOpen(false);
       setCurrentProject(null);
       await fetchList();
@@ -1774,6 +2017,7 @@ export default function MyProjectsPage() {
           loading={actionLoading}
           technologies={technologies}
           funds={funds}
+          services={services}
         />
 
         <EditProjectModal
@@ -1786,6 +2030,7 @@ export default function MyProjectsPage() {
           loading={actionLoading}
           technologies={technologies}
           funds={funds}
+          services={services}
           project={currentProject}
         />
 
@@ -1798,6 +2043,7 @@ export default function MyProjectsPage() {
           project={currentProject}
           technologies={technologies}
           funds={funds}
+          services={services}
         />
 
         <ProjectProposalsModal

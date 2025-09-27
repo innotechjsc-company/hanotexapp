@@ -11,3 +11,5 @@ export { PricingDesiredSection } from './PricingDesiredSection';
 export type { PricingDesiredSectionRef } from './PricingDesiredSection';
 export { VisibilityNDASection } from './VisibilityNDASection';
 export type { VisibilityNDASectionRef } from './VisibilityNDASection';
+export { default as ServiceCreationSection } from './ServiceCreationSection';
+export type { ServiceCreationSectionRef } from './ServiceCreationSection';

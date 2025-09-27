@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Service Creation Form - Ant Design Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/reset.css">
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .ant-form-item-label > label {
+            font-weight: 500;
+            color: #374151;
+        }
+        .ant-input, .ant-select-selector, .ant-input-number {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-md mx-auto">
+        <h1 class="text-2xl font-bold mb-6 text-center">Demo Service Creation Form</h1>
+        
+        <!-- Service Creation Card -->
+        <div class="bg-white rounded-lg shadow-md sticky top-4 z-10">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <div class="flex items-center space-x-3">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                Tạo dịch vụ mới
+                            </h3>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                2
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600">
+                            Tạo dịch vụ mới cho công nghệ này
+                        </p>
+                    </div>
+                </div>
+                <button class="p-2 hover:bg-gray-100 rounded-lg">
+                    <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Created Services List -->
+            <div class="px-6 py-4 border-b">
+                <div class="space-y-3">
+                    <h4 class="text-sm font-medium text-gray-700">Dịch vụ đã tạo:</h4>
+                    
+                    <!-- Service Item 1 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <h5 class="text-sm font-medium text-gray-900">Tư vấn chuyển giao công nghệ</h5>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">Dịch vụ tư vấn chuyển giao công nghệ chuyên nghiệp, hỗ trợ quá trình chuyển giao từ nghiên cứu đến thương mại hóa</p>
+                        </div>
+                        <button class="ml-2 p-1 hover:bg-red-100 rounded text-red-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Service Item 2 -->
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <h5 class="text-sm font-medium text-gray-900">Phát triển sản phẩm</h5>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">Dịch vụ phát triển sản phẩm từ ý tưởng đến sản xuất, bao gồm thiết kế, prototyping và sản xuất thử nghiệm</p>
+                        </div>
+                        <button class="ml-2 p-1 hover:bg-red-100 rounded text-red-600">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form - Ant Design Style -->
+            <div class="px-6 py-4">
+                <form class="space-y-4">
+                    <!-- Tên dịch vụ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Tên dịch vụ <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="Nhập tên dịch vụ"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- Mô tả dịch vụ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Mô tả dịch vụ <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            placeholder="Nhập mô tả chi tiết về dịch vụ"
+                            rows="4"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <!-- Công nghệ liên quan -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Công nghệ liên quan
+                        </label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Chọn công nghệ (tùy chọn)</option>
+                            <option value="tech1">Công nghệ AI/ML</option>
+                            <option value="tech2">Blockchain</option>
+                            <option value="tech3">IoT</option>
+                        </select>
+                    </div>
+
+                    <!-- Dự án liên quan -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Dự án liên quan
+                        </label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Chọn dự án (tùy chọn)</option>
+                            <option value="proj1">Dự án Smart City</option>
+                            <option value="proj2">Dự án Fintech</option>
+                            <option value="proj3">Dự án Healthcare</option>
+                        </select>
+                    </div>
+
+                    <!-- Danh mục dịch vụ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Danh mục dịch vụ
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="VD: Tư vấn, Phát triển, Hỗ trợ"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- Giá dịch vụ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Giá dịch vụ (VNĐ)
+                        </label>
+                        <input
+                            type="number"
+                            placeholder="Nhập giá dịch vụ"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- Thời gian thực hiện -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Thời gian thực hiện
+                        </label>
+                        <input
+                            type="text"
+                            placeholder="VD: 1 tuần, 2 tháng, 6 tháng"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- Yêu cầu đặc biệt -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Yêu cầu đặc biệt
+                        </label>
+                        <textarea
+                            placeholder="Mô tả các yêu cầu đặc biệt hoặc điều kiện cần thiết"
+                            rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        ></textarea>
+                    </div>
+
+                    <!-- Tài liệu đính kèm -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Tài liệu đính kèm
+                        </label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-600">Chọn tài liệu</p>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end space-x-3 pt-2">
+                        <button class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            Hủy
+                        </button>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Tạo dịch vụ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Comparison -->
+        <div class="mt-8 p-4 bg-green-50 rounded-lg">
+            <h3 class="text-sm font-medium text-green-900 mb-2">✅ Đã cập nhật theo yêu cầu:</h3>
+            <ul class="text-sm text-green-800 space-y-1">
+                <li>• Sử dụng Ant Design Form components</li>
+                <li>• Layout vertical giống form service ticket</li>
+                <li>• Thêm fields: Công nghệ liên quan, Dự án liên quan</li>
+                <li>• FileUpload component giống hệt</li>
+                <li>• Validation rules và error handling</li>
+                <li>• Form submission với onFinish</li>
+                <li>• Fetch user technologies và projects</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+

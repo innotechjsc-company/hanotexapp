@@ -104,5 +104,58 @@ export async function deleteServiceTicket(id: string): Promise<void> {
   await payloadApiClient.delete(`${API_ENDPOINTS.SERVICE_TICKET}/${id}`);
 }
 
+/**
+ * Service Ticket Log API functions
+ */
+
+import type { ServiceTicketLog } from "@/types/service_ticket_logs";
+
+/**
+ * Lấy danh sách logs của service ticket
+ */
+export async function getServiceTicketLogs(
+  ticketId: string,
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<ServiceTicketLog[]>> {
+  const params: Record<string, any> = {
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    "where[service_ticket][equals]": ticketId,
+  };
+
+  return payloadApiClient.get<ServiceTicketLog[]>(
+    API_ENDPOINTS.SERVICE_TICKET_LOG,
+    params
+  );
+}
+
+/**
+ * Tạo service ticket log mới
+ */
+export async function createServiceTicketLog(
+  data: Partial<ServiceTicketLog>
+): Promise<ServiceTicketLog> {
+  const response = await payloadApiClient.post<ServiceTicketLog>(
+    API_ENDPOINTS.SERVICE_TICKET_LOG,
+    data
+  );
+  return (response as any).data ?? (response as any);
+}
+
+/**
+ * Cập nhật service ticket log
+ */
+export async function updateServiceTicketLog(
+  id: string,
+  data: Partial<ServiceTicketLog>
+): Promise<ServiceTicketLog> {
+  const response = await payloadApiClient.patch<ServiceTicketLog>(
+    `${API_ENDPOINTS.SERVICE_TICKET_LOG}/${id}`,
+    data
+  );
+  return (response as any).data ?? (response as any);
+}
+
 
 
