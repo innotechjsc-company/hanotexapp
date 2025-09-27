@@ -282,10 +282,24 @@ export default function FundraisingProjectDetailPage() {
         message.error("Bạn cần đăng nhập để tiếp tục");
         return;
       }
+      // Determine receiver: owner of the project
+      const receiverId = (
+        (project as any)?.user?.id ||
+        (project as any)?.user?._id ||
+        (typeof (project as any)?.user === "string"
+          ? ((project as any)?.user as string)
+          : undefined)
+      ) as string | undefined;
+
+      if (!receiverId) {
+        message.error("Không xác định được người nhận đề xuất");
+        return;
+      }
       setIsSubmittingProposal(true);
       await projectProposeApi.create({
         project: (project as any).id || projectId,
         user: currentUser.id,
+        receiver: receiverId,
         investor_capacity: values.investor_capacity,
         investment_amount: values.investment_amount ?? project.goal_money,
         investment_ratio: values.investment_ratio ?? project.share_percentage,

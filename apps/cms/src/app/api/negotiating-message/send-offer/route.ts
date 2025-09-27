@@ -16,7 +16,9 @@ type SendOfferBody = {
 const buildCorsHeaders = async (req: Request) => {
   const config = await configPromise
   const origin = req.headers.get('origin') || ''
-  const allowedOrigins = (config as any)?.cors || []
+  const allowedOrigins = Array.isArray((config as { cors?: string[] } | undefined)?.cors)
+    ? ((config as { cors?: string[] }).cors as string[])
+    : []
   const isAllowed = Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)
 
   const headers: Record<string, string> = {
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     // Determine which relation is provided (exactly one)
     const providedRelations = ['technology_propose', 'project_propose', 'propose'] as const
-    const relationKey = providedRelations.find((k) => (body as any)[k])
+    const relationKey = providedRelations.find((k) => (body as Record<string, unknown>)[k])
 
     if (!relationKey) {
       return Response.json(
@@ -55,7 +57,7 @@ export async function POST(req: NextRequest) {
       )
     }
     // Ensure only one is provided
-    const providedCount = providedRelations.filter((k) => (body as any)[k]).length
+    const providedCount = providedRelations.filter((k) => (body as Record<string, unknown>)[k]).length
     if (providedCount !== 1) {
       return Response.json(
         { error: 'Provide exactly one of technology_propose, project_propose, propose' },
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: 'Missing content' }, { status: 400, headers: corsHeaders })
     }
 
-    const user = await authenticateUser(req as any, corsHeaders)
+    const user = await authenticateUser(req, corsHeaders)
 
     const payload = await getPayload({ config: configPromise })
 
@@ -83,7 +85,7 @@ export async function POST(req: NextRequest) {
     const negotiatingMessage = await payload.create({
       collection: 'negotiating-messages',
       data: {
-        [relationKey]: (body as any)[relationKey],
+        [relationKey]: (body as Record<string, unknown>)[relationKey],
         message: body.message,
         is_offer: true,
         user: user.id,
@@ -95,8 +97,8 @@ export async function POST(req: NextRequest) {
     const offer = await payload.create({
       collection: 'offer',
       data: {
-        [relationKey]: (body as any)[relationKey],
-        negotiating_messages: (negotiatingMessage as any).id,
+        [relationKey]: (body as Record<string, unknown>)[relationKey],
+        negotiating_messages: (negotiatingMessage as { id: string }).id,
         content: body.content,
         price: body.price,
         // status defaults to 'pending'
@@ -107,8 +109,8 @@ export async function POST(req: NextRequest) {
     // 3) Link offer back to negotiating message
     await payload.update({
       collection: 'negotiating-messages',
-      id: (negotiatingMessage as any).id,
-      data: { offer: (offer as any).id },
+      id: (negotiatingMessage as { id: string }).id,
+      data: { offer: (offer as { id: string }).id },
       overrideAccess: true,
     })
 
@@ -120,8 +122,8 @@ export async function POST(req: NextRequest) {
       },
       { status: 201, headers: corsHeaders },
     )
-  } catch (e: any) {
-    const message = e?.message || 'Unknown error'
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Unknown error'
     // If authenticateUser threw a Response with CORS headers, forward it
     if (e instanceof Response) return e
     const corsHeaders = await buildCorsHeaders(req)

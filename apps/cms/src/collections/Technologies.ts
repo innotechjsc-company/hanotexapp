@@ -22,30 +22,30 @@ export const Technologies: CollectionConfig = {
         if (operation !== 'create') return data
 
         // Skip authentication check for seed operations (when submitter is already provided)
-        if ((data as any)?.submitter) {
+        if (data && typeof data === 'object' && 'submitter' in data && (data as { submitter?: unknown }).submitter) {
           // Store IP data in req context for later use
-          const ipInput =
-            (data as any)?.intellectual_property ?? (data as any)?.intellectualProperty
+          const ipObj = data as { intellectual_property?: unknown; intellectualProperty?: unknown }
+          const ipInput = ipObj?.intellectual_property ?? ipObj?.intellectualProperty
           if (ipInput) {
-            ;(req as any).ipData = ipInput
+            ;(req as unknown as { ipData?: unknown }).ipData = ipInput
             // Remove from main data to avoid validation issues
-            const { intellectual_property, intellectualProperty, ...cleanData } = data as any
-            data = cleanData
+            const { intellectual_property: _intellectual_property, intellectualProperty: _intellectualProperty, ...cleanData } = (data as Record<string, unknown>)
+            data = cleanData as typeof data
           }
           return data
         }
 
         // Get authenticated user from PayloadCMS context
-        let user: any
+        let user: { id: string } | undefined
         try {
           if (req.user) {
-            user = req.user
+            user = req.user as { id: string }
           } else {
             const payload = await getPayload({ config: configPromise })
             const authResult = await payload.auth({ headers: req.headers })
-            user = authResult.user
+            user = authResult.user as { id: string } | undefined
           }
-        } catch (e) {
+        } catch (_error) {
           throw new Error('Authentication failed')
         }
 
@@ -55,12 +55,15 @@ export const Technologies: CollectionConfig = {
         }
 
         // Store IP data in req context for later use
-        const ipInput = (data as any)?.intellectual_property ?? (data as any)?.intellectualProperty
+        const ipInput = (data && typeof data === 'object'
+          ? (data as { intellectual_property?: unknown; intellectualProperty?: unknown }).intellectual_property ??
+            (data as { intellectual_property?: unknown; intellectualProperty?: unknown }).intellectualProperty
+          : undefined)
         if (ipInput) {
-          ;(req as any).ipData = ipInput
+          ;(req as unknown as { ipData?: unknown }).ipData = ipInput
           // Remove from main data to avoid validation issues
-          const { intellectual_property, intellectualProperty, ...cleanData } = data as any
-          data = cleanData
+          const { intellectual_property: _intellectual_property2, intellectualProperty: _intellectualProperty2, ...cleanData } = (data as Record<string, unknown>)
+          data = cleanData as typeof data
         }
 
         // Add authenticated user as submitter
@@ -78,22 +81,27 @@ export const Technologies: CollectionConfig = {
         const payload = await getPayload({ config: configPromise })
 
         // Get IP data stored from beforeValidate hook
-        const ipInput = (req as any).ipData
+        const ipInput = (req as unknown as { ipData?: unknown }).ipData
 
         if (Array.isArray(ipInput) && ipInput.length > 0) {
-          const ipPromises = ipInput.map(async (item: any) => {
+          const ipPromises = ipInput.map(async (item: unknown) => {
             try {
+              const code = (item as { code?: string | null })?.code
+              if (typeof code !== 'string' || code.trim() === '') return null
+              const type = (item as { type?: string | null })?.type as import('@/payload-types').IntellectualProperty['type']
+              const status = (item as { status?: string | null })?.status as import('@/payload-types').IntellectualProperty['status']
+
               return await payload.create({
                 collection: 'intellectual_property',
                 data: {
                   technology: doc.id,
-                  code: item?.code,
-                  type: item?.type,
-                  status: item?.status,
+                  code,
+                  type: type ?? null,
+                  status: status ?? null,
                 },
               })
-            } catch (err: any) {
-              console.error(`Failed to create IP record: ${err?.message ?? String(err)}`)
+            } catch (err: unknown) {
+              console.error(`Failed to create IP record: ${err instanceof Error ? err.message : String(err)}`)
               return null
             }
           })

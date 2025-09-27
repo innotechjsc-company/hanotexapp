@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Avatar,
   Button,
@@ -22,6 +22,8 @@ import type { Propose } from "@/types/propose";
 import { contractLogsApi } from "@/api/contract-logs";
 import { contractsApi } from "@/api/contracts";
 import { useUser } from "@/store/auth";
+import webSocketManager from "@/lib/websocket";
+import { localStorageService } from "@/services/localstorage";
 import { uploadFile } from "@/api/media";
 import { MediaType } from "@/types/media1";
 import type { ContractLog } from "@/types/contract-log";
@@ -56,6 +58,16 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  type ContractLogSocketPayload = {
+    roomId?: string;
+    log?: ContractLog;
+  };
+
+  type ContractLogSocketDeletePayload = {
+    roomId?: string;
+    logId?: string;
+  };
+
   const formatFileSize = (bytes: number) => {
     if (!bytes && bytes !== 0) return "";
     if (bytes === 0) return "0 B";
@@ -88,7 +100,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     });
   };
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     if (!proposal?.id) return;
     setLoading(true);
     try {
@@ -120,12 +132,11 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [proposal?.id]);
 
   useEffect(() => {
     fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [proposal?.id]);
+  }, [fetchLogs]);
 
   const onFileUpload = (file: File) => {
     if (attachments.length >= 1) {
@@ -303,6 +314,134 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       message.error("Không thể từ chối");
     }
   };
+
+  const negotiationRoomId = useMemo(() => {
+    if (!proposal?.id) return null;
+    return `negotiation:propose:${proposal.id}`;
+  }, [proposal?.id]);
+
+  useEffect(() => {
+    if (!negotiationRoomId || !currentUser?.id) {
+      return;
+    }
+
+    const resolveToken = () => {
+      const storedToken = localStorageService.get<string | null>(
+        "auth_token",
+        null
+      );
+      if (storedToken) return storedToken;
+      if (typeof window !== "undefined") {
+        return window.localStorage.getItem("payload_token");
+      }
+      return null;
+    };
+
+    const socket = webSocketManager.connect(resolveToken() || undefined);
+
+    const userName =
+      currentUser.full_name ||
+      currentUser.email ||
+      `user:${currentUser.id.slice(0, 6)}`;
+
+    const handleConnect = () => {
+      webSocketManager.emit("authenticate", {
+        userId: currentUser.id,
+        userName,
+      });
+    };
+
+    const handleAuthenticated = () => {
+      webSocketManager.emit("join-room", negotiationRoomId);
+    };
+
+    const scrollToLatest = () => {
+      setTimeout(() => {
+        try {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        } catch {}
+      }, 80);
+    };
+
+    const sortLogs = (items: ContractLog[]) =>
+      [...items].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+
+    const upsertLog = (incoming: ContractLog) => {
+      if (!incoming) return;
+      setLogs((prev) => {
+        const index = prev.findIndex((log) => log.id === incoming.id);
+        if (index !== -1) {
+          const updated = [...prev];
+          updated[index] = incoming;
+          return sortLogs(updated);
+        }
+        return sortLogs([...prev, incoming]);
+      });
+
+      if (!activeContractId) {
+        const contract = incoming.contract as any;
+        if (contract) {
+          const contractId =
+            typeof contract === "string" ? contract : contract.id || null;
+          if (contractId) {
+            setActiveContractId(contractId);
+          }
+        }
+      }
+
+      scrollToLatest();
+    };
+
+    const handleNewLog = (payload: ContractLogSocketPayload) => {
+      if (!payload?.log || payload.roomId !== negotiationRoomId) return;
+      upsertLog(payload.log);
+    };
+
+    const handleUpdatedLog = (payload: ContractLogSocketPayload) => {
+      if (!payload?.log || payload.roomId !== negotiationRoomId) return;
+      upsertLog(payload.log);
+    };
+
+    const handleDeletedLog = (payload: ContractLogSocketDeletePayload) => {
+      if (!payload?.logId || payload.roomId !== negotiationRoomId) return;
+      setLogs((prev) => prev.filter((log) => log.id !== payload.logId));
+      scrollToLatest();
+    };
+
+    if (socket) {
+      socket.on("connect", handleConnect);
+      socket.on("authenticated", handleAuthenticated);
+
+      if (socket.connected) {
+        handleConnect();
+      }
+    }
+
+    webSocketManager.on("contract-log:new", handleNewLog);
+    webSocketManager.on("contract-log:updated", handleUpdatedLog);
+    webSocketManager.on("contract-log:deleted", handleDeletedLog);
+
+    return () => {
+      webSocketManager.emit("leave-room", negotiationRoomId);
+      webSocketManager.off("contract-log:new", handleNewLog);
+      webSocketManager.off("contract-log:updated", handleUpdatedLog);
+      webSocketManager.off("contract-log:deleted", handleDeletedLog);
+
+      if (socket) {
+        socket.off("connect", handleConnect);
+        socket.off("authenticated", handleAuthenticated);
+      }
+    };
+  }, [
+    negotiationRoomId,
+    currentUser?.id,
+    currentUser?.email,
+    currentUser?.full_name,
+    activeContractId,
+  ]);
 
   return (
     <div className="h-full p-4 bg-gray-50">

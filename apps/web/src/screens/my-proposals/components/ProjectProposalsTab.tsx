@@ -2,9 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Table, Tag, Tooltip, Space, Input, Select } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Tooltip,
+  Space,
+  Select,
+  Tabs as AntTabs,
+  Popconfirm,
+  message,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { Eye, MessageSquare, X } from "lucide-react";
+import { Eye, MessageSquare, X, CheckCircle } from "lucide-react";
 import { projectProposeApi } from "@/api/project-propose";
 import type {
   ProjectPropose,
@@ -38,16 +48,18 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
   const [error, setError] = useState<string>("");
 
   // Filters and pagination
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProjectProposeStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    ProjectProposeStatus | "all"
+  >("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] =
     useState<ProjectPropose | null>(null);
   const pageSize = 10;
+  const [viewMode, setViewMode] = useState<"sent" | "received">("sent");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  // no title search
 
   const fetchProposals = async () => {
     if (!userId) return;
@@ -56,9 +68,10 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
     setError("");
 
     try {
-      const filters: any = { user: userId };
+      const filters: any =
+        viewMode === "sent" ? { user: userId } : { receiver: userId };
       if (statusFilter !== "all") filters.status = statusFilter;
-      if (searchTerm.trim()) filters.search = searchTerm.trim();
+      // no title search
 
       const response = await projectProposeApi.list(filters, {
         page: currentPage,
@@ -85,12 +98,7 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchProposals();
-  }, [userId, currentPage, statusFilter, searchTerm]);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
+  }, [userId, currentPage, statusFilter, viewMode]);
 
   const handleStatusFilter = (value: string | undefined) => {
     setStatusFilter((value as ProjectProposeStatus) || "all");
@@ -122,6 +130,46 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       console.log("Proposal cancelled successfully");
     } catch (err) {
       console.error("Failed to cancel proposal:", err);
+    }
+  };
+
+  const handleConfirmReceivedProposal = async (proposal: ProjectPropose) => {
+    if (!proposal.id || !userId) return;
+
+    setActionLoading(proposal.id);
+    try {
+      await projectProposeApi.acceptProposal(
+        proposal.id,
+        userId,
+        "Đã chấp nhận đề xuất đầu tư."
+      );
+      message.success("Đã xác nhận đề xuất");
+      await fetchProposals();
+    } catch (error) {
+      console.error("Failed to confirm project proposal:", error);
+      message.error("Không thể xác nhận đề xuất");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRejectReceivedProposal = async (proposal: ProjectPropose) => {
+    if (!proposal.id || !userId) return;
+
+    setActionLoading(proposal.id);
+    try {
+      await projectProposeApi.rejectProposal(
+        proposal.id,
+        userId,
+        "Đã từ chối đề xuất đầu tư."
+      );
+      message.success("Đã từ chối đề xuất");
+      await fetchProposals();
+    } catch (error) {
+      console.error("Failed to reject project proposal:", error);
+      message.error("Không thể từ chối đề xuất");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -180,7 +228,9 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       dataIndex: "investment_benefits",
       key: "investment_benefits",
       render: (benefits?: string) => (
-        <span className="text-gray-600 line-clamp-1 max-w-xs">{benefits || "—"}</span>
+        <span className="text-gray-600 line-clamp-1 max-w-xs">
+          {benefits || "—"}
+        </span>
       ),
     },
     {
@@ -207,21 +257,85 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
       align: "right" as const,
       render: (_, record: ProjectPropose) => {
         const project = record.project;
+        const proposalId = record.id || "";
+        const isPending = record.status === "pending";
+        const isCancelled = record.status === "cancelled";
+        const loading = actionLoading === proposalId;
+        const isReceivedView = viewMode === "received";
+        const canViewNegotiation =
+          record.status === "negotiating" ||
+          record.status === "contact_signing" ||
+          record.status === "contract_signed";
+
+        if (isReceivedView) {
+          return (
+            <Space>
+              {isPending && (
+                <>
+                  <Popconfirm
+                    title="Xác nhận đề xuất"
+                    description="Bạn có chắc chắn muốn xác nhận đề xuất này?"
+                    okText="Xác nhận"
+                    cancelText="Hủy"
+                    onConfirm={() => handleConfirmReceivedProposal(record)}
+                  >
+                    <Tooltip title="Xác nhận" color="green">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CheckCircle className="h-4 w-4" />}
+                        loading={loading}
+                        className="hover:text-green-600"
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                  <Popconfirm
+                    title="Từ chối đề xuất"
+                    description="Bạn có chắc chắn muốn từ chối đề xuất này?"
+                    okText="Từ chối"
+                    cancelText="Hủy"
+                    okType="danger"
+                    onConfirm={() => handleRejectReceivedProposal(record)}
+                  >
+                    <Tooltip title="Từ chối" color="red">
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<X className="h-4 w-4" />}
+                        loading={loading}
+                        danger
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                </>
+              )}
+              {canViewNegotiation && (
+                <Tooltip title="Xem đàm phán" color="blue">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<MessageSquare className="h-4 w-4" />}
+                    onClick={() => handleViewNegotiation(record)}
+                  />
+                </Tooltip>
+              )}
+            </Space>
+          );
+        }
+
         return (
           <Space>
-            {record.status === "pending" && (
+            {isPending && (
               <Tooltip title="Sửa đề xuất" color="blue">
-              <Button
-                type="text"
-                size="small"
-                icon={<Eye className="h-4 w-4" />}
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Eye className="h-4 w-4" />}
                   onClick={() => handleEditProposal(record)}
                 />
               </Tooltip>
             )}
-            {(record.status === "negotiating" ||
-              record.status === "contact_signing" ||
-              record.status === "contract_signed") && (
+            {canViewNegotiation && (
               <Tooltip title="Xem đàm phán" color="blue">
                 <Button
                   type="text"
@@ -231,7 +345,7 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-            {(record.status === "pending" || record.status === "cancelled") && (
+            {(isPending || isCancelled) && (
               <Tooltip title="Hủy đề xuất" color="red">
                 <Button
                   type="text"
@@ -250,20 +364,28 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Input
-          placeholder="Tìm kiếm theo tên dự án..."
-          value={searchTerm}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="flex-1"
+      {/* View Mode Tabs */}
+      <div className="mb-4">
+        <AntTabs
+          activeKey={viewMode}
+          onChange={(k) => {
+            setViewMode((k as any) || "sent");
+            setCurrentPage(1);
+          }}
+          items={[
+            { key: "sent", label: "Đã gửi" },
+            { key: "received", label: "Nhận được" },
+          ]}
         />
+      </div>
 
+      {/* Filters (no search) */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch">
         <Select
           placeholder="Lọc theo trạng thái"
           value={statusFilter !== "all" ? statusFilter : undefined}
           onChange={handleStatusFilter}
-          className="w-full sm:w-48"
+          className="w-full sm:w-60"
           allowClear
         >
           <Select.Option value="all">Tất cả trạng thái</Select.Option>
@@ -273,13 +395,28 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
             </Select.Option>
           ))}
         </Select>
+
+        <Button
+          onClick={() => {
+            setStatusFilter("all");
+            setCurrentPage(1);
+          }}
+          className="w-full sm:w-auto"
+        >
+          Đặt lại bộ lọc
+        </Button>
       </div>
 
       {/* Error State */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
           <p className="text-red-600">{error}</p>
-          <Button size="small" danger onClick={fetchProposals} loading={loading}>
+          <Button
+            size="small"
+            danger
+            onClick={fetchProposals}
+            loading={loading}
+          >
             Thử lại
           </Button>
         </div>
@@ -293,7 +430,11 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
           rowKey={(record) => record.id || Math.random().toString()}
           loading={loading}
           locale={{
-            emptyText: loading ? "Đang tải..." : "Chưa có đề xuất dự án nào",
+            emptyText: loading
+              ? "Đang tải..."
+              : viewMode === "sent"
+                ? "Chưa có đề xuất dự án đã gửi"
+                : "Chưa có đề xuất dự án nhận được",
           }}
           pagination={{
             current: currentPage,

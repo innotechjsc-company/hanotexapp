@@ -184,9 +184,18 @@ export function useTechnologyDetail(id?: string) {
       const primaryDocumentId =
         documentIds.length > 0 ? documentIds[0] : undefined;
 
+      // Determine receiver: prefer explicit owner, fallback to submitter
+      const receiverId =
+        (technology as any)?.submitter?.id || (technology as any)?.submitter;
+
+      if (!receiverId) {
+        throw new Error("Không xác định được người nhận đề xuất");
+      }
+
       await technologyProposeApi.create({
         technology: id as any,
         user: (user as any)?.id,
+        receiver: receiverId as any,
         description: contactForm.description,
         document: primaryDocumentId as any,
         budget: Number(contactForm.budget) || 0,

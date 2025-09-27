@@ -88,14 +88,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
       // Mark as read if not already read
       if (!notification.is_read && notification.id) {
-        debugger;
         console.log("Marking notification as read:", notification.id);
         await markAsRead(notification.id);
       }
 
       // Call the parent callback if provided
       if (onNotificationClick) {
-        debugger;
         onNotificationClick(notification);
       }
 

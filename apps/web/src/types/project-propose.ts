@@ -15,12 +15,13 @@ export interface ProjectPropose {
   id: string;
   project: Project;
   user: User;
+  receiver: User;
   investor_capacity?: string;
   investment_amount?: number;
   investment_ratio?: number;
   investment_type?: string;
   investment_benefits?: string;
-  documents?: Media[];
+  documents?: Media;
   status: ProjectProposeStatus;
   createdAt: string;
   updatedAt: string;

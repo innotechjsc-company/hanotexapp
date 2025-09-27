@@ -1,16 +1,13 @@
-import { getPayload } from 'payload';
+import { getPayload, type CollectionSlug, type Where } from 'payload';
 import config from '../payload.config';
 
-type SearchableCollections = 'technologies' | 'demand' | 'organizations' | 'experts' | 'funds' | 'project' | 'news' | 'events';
+type SearchableCollections = 'technologies' | 'demand' | 'project' | 'news' | 'events';
 
 // Helper function to convert collection names to singular types
 function getSingularType(collectionName: SearchableCollections): string {
   const mapping: { [key in SearchableCollections]: string } = {
     'technologies': 'technology',
     'demand': 'demand',
-    'organizations': 'organization', 
-    'experts': 'expert',
-    'funds': 'fund',
     'project': 'project',
     'news': 'news',
     'events': 'event'
@@ -23,9 +20,6 @@ function getUrlPath(collectionName: SearchableCollections): string {
   const urlMapping: { [key in SearchableCollections]: string } = {
     'technologies': 'technologies',
     'demand': 'demands', // Note: demand -> demands for URL
-    'organizations': 'organizations', 
-    'experts': 'experts',
-    'funds': 'funds',
     'project': 'projects', // Note: project -> projects for URL
     'news': 'news',
     'events': 'events'
@@ -33,7 +27,10 @@ function getUrlPath(collectionName: SearchableCollections): string {
   return urlMapping[collectionName] || collectionName;
 }
 
-export const searchRoute = async (req: any, res: any) => {
+type ReqWithQuery = { query: Record<string, unknown> };
+type ResLike = { status: (code: number) => ResLike; json: (body: unknown) => void };
+
+export const searchRoute = async (req: ReqWithQuery, res: ResLike) => {
   try {
     const payload = await getPayload({ config });
     const { q: query, type = 'all', page = 1, limit = 10 } = req.query;
@@ -49,8 +46,30 @@ export const searchRoute = async (req: any, res: any) => {
     const pageNum = Number(page) || 1;
     const limitNum = Number(limit) || 10;
 
-    const results: any[] = [];
-    const searchTypes: SearchableCollections[] = ['technologies', 'demand', 'organizations', 'experts', 'funds', 'project', 'news', 'events'];
+    type SearchResult = {
+      id: string;
+      type: string;
+      title: string;
+      description: string;
+      image?: string;
+      url: string;
+      metadata?: Record<string, unknown>;
+    };
+
+    type MediaWithUrl = { url?: string } | null | undefined;
+    type GenericDoc = {
+      id: string;
+      title?: string;
+      name?: string;
+      description?: string;
+      image?: MediaWithUrl;
+      logo?: MediaWithUrl;
+      avatar?: MediaWithUrl;
+      [key: string]: unknown;
+    };
+
+    const results: SearchResult[] = [];
+    const searchTypes: SearchableCollections[] = ['technologies', 'demand', 'project', 'news', 'events'];
 
     // Search in each collection
     for (const collectionName of searchTypes) {
@@ -61,7 +80,7 @@ export const searchRoute = async (req: any, res: any) => {
       }
 
       try {
-        let whereClause: any = {
+        let whereClause: Where = {
           or: [
             { title: { contains: searchQuery } },
             { name: { contains: searchQuery } },
@@ -78,7 +97,7 @@ export const searchRoute = async (req: any, res: any) => {
               { description: { contains: searchQuery } },
               { category: { contains: searchQuery } }
             ]
-          };
+          } as Where;
         } else if (collectionName === 'demand') {
           whereClause = {
             or: [
@@ -86,31 +105,7 @@ export const searchRoute = async (req: any, res: any) => {
               { description: { contains: searchQuery } },
               { category: { contains: searchQuery } }
             ]
-          };
-        } else if (collectionName === 'organizations') {
-          whereClause = {
-            or: [
-              { name: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { 'location.city': { contains: searchQuery } }
-            ]
-          };
-        } else if (collectionName === 'experts') {
-          whereClause = {
-            or: [
-              { name: { contains: searchQuery } },
-              { specialization: { contains: searchQuery } },
-              { field: { contains: searchQuery } }
-            ]
-          };
-        } else if (collectionName === 'funds') {
-          whereClause = {
-            or: [
-              { name: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { type: { contains: searchQuery } }
-            ]
-          };
+          } as Where;
         } else if (collectionName === 'project') {
           whereClause = {
             or: [
@@ -119,7 +114,7 @@ export const searchRoute = async (req: any, res: any) => {
               { type: { contains: searchQuery } },
               { organization: { contains: searchQuery } }
             ]
-          };
+          } as Where;
         } else if (collectionName === 'news') {
           whereClause = {
             or: [
@@ -127,7 +122,7 @@ export const searchRoute = async (req: any, res: any) => {
               { content: { contains: searchQuery } },
               { category: { contains: searchQuery } }
             ]
-          };
+          } as Where;
         } else if (collectionName === 'events') {
           whereClause = {
             or: [
@@ -136,11 +131,11 @@ export const searchRoute = async (req: any, res: any) => {
               { location: { contains: searchQuery } },
               { type: { contains: searchQuery } }
             ]
-          };
+          } as Where;
         }
 
         const searchResults = await payload.find({
-          collection: collectionName,
+          collection: collectionName as CollectionSlug,
           where: whereClause,
           limit: limitNum,
           page: pageNum,
@@ -148,15 +143,17 @@ export const searchRoute = async (req: any, res: any) => {
         });
 
         // Transform results based on collection type
-        const transformedResults = searchResults.docs.map((doc: any) => {
+        const docs = searchResults.docs as unknown as GenericDoc[];
+        const transformedResults = docs.map((doc) => {
           const singularType = getSingularType(collectionName);
           const urlPath = getUrlPath(collectionName);
-          const baseResult = {
+          const getMediaUrl = (m: MediaWithUrl): string | undefined => (m && typeof m === 'object' && 'url' in m && typeof m.url === 'string') ? m.url : undefined;
+          const baseResult: SearchResult = {
             id: doc.id,
             type: singularType,
-            title: doc.title || doc.name,
+            title: doc.title || doc.name || '',
             description: doc.description || '',
-            image: doc.image?.url || doc.logo?.url || doc.avatar?.url,
+            image: getMediaUrl(doc.image) || getMediaUrl(doc.logo) || getMediaUrl(doc.avatar),
             url: `/${urlPath}/${doc.id}`,
             metadata: {}
           };
@@ -175,27 +172,6 @@ export const searchRoute = async (req: any, res: any) => {
               budget: doc.budget,
               deadline: doc.deadline,
               user: doc.user
-            };
-          } else if (collectionName === 'organizations') {
-            baseResult.metadata = {
-              type: doc.type,
-              website: doc.website,
-              location: doc.location?.city,
-              size: doc.size
-            };
-          } else if (collectionName === 'experts') {
-            baseResult.metadata = {
-              field: doc.field,
-              experience: doc.experience,
-              organization: doc.organization,
-              availability: doc.availability
-            };
-          } else if (collectionName === 'funds') {
-            baseResult.metadata = {
-              type: doc.type,
-              size: doc.size,
-              focus: doc.focus,
-              status: doc.status
             };
           } else if (collectionName === 'project') {
             baseResult.metadata = {
@@ -227,8 +203,8 @@ export const searchRoute = async (req: any, res: any) => {
         });
 
         results.push(...transformedResults);
-      } catch (error) {
-        console.error(`Error searching ${collectionName}:`, error);
+      } catch (_error) {
+        console.error(`Error searching ${collectionName}:`, _error);
         // Continue with other collections even if one fails
       }
     }
@@ -241,22 +217,22 @@ export const searchRoute = async (req: any, res: any) => {
     });
 
     // Get total counts for each type
-    const typeCounts: any = {};
+    const typeCounts: Record<string, number> = {};
     for (const collectionName of searchTypes) {
       try {
         const countResult = await payload.count({
-          collection: collectionName,
+          collection: collectionName as CollectionSlug,
           where: {
             or: [
               { title: { contains: searchQuery } },
               { name: { contains: searchQuery } },
               { description: { contains: searchQuery } }
             ]
-          }
+          } as Where,
         });
         const singularType = getSingularType(collectionName);
         typeCounts[singularType] = countResult.totalDocs;
-      } catch (error) {
+      } catch (_error) {
         const singularType = getSingularType(collectionName);
         typeCounts[singularType] = 0;
       }
@@ -275,8 +251,8 @@ export const searchRoute = async (req: any, res: any) => {
       }
     });
 
-  } catch (error) {
-    console.error('Search route error:', error);
+  } catch (_error) {
+    console.error('Search route error:', _error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'
@@ -284,7 +260,7 @@ export const searchRoute = async (req: any, res: any) => {
   }
 };
 
-function calculateRelevanceScore(result: any, query: string): number {
+function calculateRelevanceScore(result: { title: string; description: string; metadata?: Record<string, unknown> }, query: string): number {
   const queryLower = query.toLowerCase();
   const titleLower = (result.title || '').toLowerCase();
   const descLower = (result.description || '').toLowerCase();
@@ -302,8 +278,10 @@ function calculateRelevanceScore(result: any, query: string): number {
   }
   
   // Category/field match gets lower score
-  if (result.metadata?.category?.toLowerCase().includes(queryLower) ||
-      result.metadata?.field?.toLowerCase().includes(queryLower)) {
+  const category = result.metadata?.category;
+  const field = result.metadata?.field;
+  if ((typeof category === 'string' && category.toLowerCase().includes(queryLower)) ||
+      (typeof field === 'string' && field.toLowerCase().includes(queryLower))) {
     score += 25;
   }
   

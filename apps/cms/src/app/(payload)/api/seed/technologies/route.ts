@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import path from 'path'
 import { promises as fs } from 'fs'
+import type { Technology } from '@/payload-types'
 
 type SeedItem = {
   title: string
@@ -60,14 +61,22 @@ export async function POST(req: NextRequest) {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) throw new Error('Invalid JSON format')
     items = parsed
-  } catch (e: any) {
+  } catch (e: unknown) {
     return Response.json(
-      { success: false, error: `Failed to read seed JSON: ${e?.message || String(e)}` },
+      { success: false, error: `Failed to read seed JSON: ${e instanceof Error ? e.message : String(e)}` },
       { status: 500 },
     )
   }
 
-  const results: { created: number; skipped: number; errors: number; details: any[] } = {
+  type ResultDetail = {
+    title: string
+    action: 'skipped' | 'dry-run' | 'created' | 'error'
+    reason?: string
+    id?: string
+    error?: string
+  }
+
+  const results: { created: number; skipped: number; errors: number; details: ResultDetail[] } = {
     created: 0,
     skipped: 0,
     errors: 0,
@@ -118,10 +127,10 @@ export async function POST(req: NextRequest) {
       })
 
       results.created += 1
-      results.details.push({ title: item.title, action: 'created', id: (created as any).id })
-    } catch (e: any) {
+      results.details.push({ title: item.title, action: 'created', id: (created as Technology).id })
+    } catch (e: unknown) {
       results.errors += 1
-      results.details.push({ title: item.title, action: 'error', error: e?.message || String(e) })
+      results.details.push({ title: item.title, action: 'error', error: e instanceof Error ? e.message : String(e) })
     }
   }
 

@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { Bid } from '@/payload-types'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  ctx: { params: Promise<{ id: string }> }
 ) {
   try {
     const payload = await getPayload({ config })
-    const auctionId = params.id
+    const { id: auctionId } = await ctx.params
 
     console.log('CMS Get Bids API called for auction:', auctionId)
 
@@ -38,10 +39,11 @@ export async function GET(
     })
 
     // Transform bids for frontend
-    const transformedBids = bids.docs.map((bid: any) => ({
+    const transformedBids = bids.docs.map((bid: Bid) => ({
       id: bid.id,
       amount: bid.bid_amount,
-      bidder: bid.bidder?.name || bid.bidder || 'Ẩn danh',
+      // "bidder" is stored as string in Bid type
+      bidder: bid.bidder || 'Ẩn danh',
       timestamp: new Date(bid.bid_time),
       isWinning: bid.is_winning || false,
       createdAt: bid.createdAt,
@@ -68,7 +70,3 @@ export async function GET(
     )
   }
 }
-
-
-
-
