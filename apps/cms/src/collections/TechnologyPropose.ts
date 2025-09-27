@@ -14,31 +14,61 @@ export const TechnologyPropose: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, req, operation }) => {
-        // Chỉ tạo notification khi propose được tạo mới
         if (operation === 'create') {
           try {
-            // Lấy thông tin technology để có user_id
+            // Lấy technology ID - có thể là string hoặc object
+            const technologyId =
+              typeof doc.technology === 'string' ? doc.technology : doc.technology?.id
+
+            if (!technologyId) {
+              console.error('Không tìm thấy technology ID')
+              return
+            }
+
             const technology = await req.payload.findByID({
               collection: 'technologies',
-              id: doc.technology,
+              id: technologyId,
             })
 
             if (technology && technology.submitter) {
-              // Tạo notification cho user của technology
-              await req.payload.create({
-                collection: 'notifications',
-                data: {
-                  user: technology.submitter,
-                  title: `Có đề xuất mới cho công nghệ ${technology.title}`,
-                  message: `Có một đề xuất mới cho công nghệ "${technology.title}".`,
-                  type: 'info',
-                  priority: 'normal',
-                  is_read: false,
-                },
-              })
+              const technologyUserId =
+                typeof technology.submitter === 'string'
+                  ? technology.submitter
+                  : technology.submitter?.id
+
+              const proposeUserId = typeof doc.user === 'string' ? doc.user : doc.user?.id
+              let proposeUserName = 'Người dùng'
+
+              if (proposeUserId) {
+                try {
+                  const proposeUser = await req.payload.findByID({
+                    collection: 'users',
+                    id: proposeUserId,
+                  })
+                  proposeUserName = proposeUser?.full_name || proposeUser?.email || 'Người dùng'
+                } catch (error) {
+                  console.error('Lỗi khi lấy thông tin user:', error)
+                }
+              }
+
+              if (technologyUserId) {
+                // Tạo notification cho user của technology
+                await req.payload.create({
+                  collection: 'notifications',
+                  data: {
+                    user: technologyUserId,
+                    title: `Có đề xuất đầu tư mới cho công nghệ của bạn`,
+                    message: `Có một đề xuất đầu tư mới cho công nghệ "${technology.title}" từ ${proposeUserName}`,
+                    type: 'technology',
+                    action_url: `my-proposals`,
+                    priority: 'normal',
+                    is_read: false,
+                  },
+                })
+              }
             }
           } catch (error) {
-            console.error('Lỗi khi tạo notification cho propose mới:', error)
+            console.error('Lỗi khi tạo notification cho technology propose mới:', error)
           }
         }
       },
