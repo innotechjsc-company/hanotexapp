@@ -222,7 +222,11 @@ export const useNegotiation = ({
   }, [forceType, proposalId]);
 
   const ensureOfferDetails = useCallback(
-    async (message: ApiNegotiatingMessage): Promise<ApiNegotiatingMessage> => {
+    async (
+      message: ApiNegotiatingMessage,
+      options: { forceRefresh?: boolean } = {}
+    ): Promise<ApiNegotiatingMessage> => {
+      const { forceRefresh = false } = options;
       if (message.is_offer && message.offer) {
         if (typeof message.offer === "object" && message.offer.id) {
           offerCacheRef.current.set(message.offer.id, message.offer as ApiOffer);
@@ -230,9 +234,11 @@ export const useNegotiation = ({
         }
 
         if (typeof message.offer === "string") {
-          const cached = offerCacheRef.current.get(message.offer);
-          if (cached) {
-            return { ...message, offer: cached };
+          if (!forceRefresh) {
+            const cached = offerCacheRef.current.get(message.offer);
+            if (cached) {
+              return { ...message, offer: cached };
+            }
           }
 
           try {
@@ -251,12 +257,17 @@ export const useNegotiation = ({
   );
 
   const enrichMessagesWithOffers = useCallback(
-    async (items: ApiNegotiatingMessage[]): Promise<ApiNegotiatingMessage[]> => {
+    async (
+      items: ApiNegotiatingMessage[],
+      options: { forceRefresh?: boolean } = {}
+    ): Promise<ApiNegotiatingMessage[]> => {
       if (items.length === 0) {
         return items;
       }
 
-      const enriched = await Promise.all(items.map(ensureOfferDetails));
+      const enriched = await Promise.all(
+        items.map((item) => ensureOfferDetails(item, options))
+      );
       return enriched;
     },
     [ensureOfferDetails]
@@ -275,7 +286,9 @@ export const useNegotiation = ({
         (response.docs as unknown as ApiNegotiatingMessage[]) || [];
 
       console.log("Fetched messages:", rawMessages);
-      const normalizedMessages = await enrichMessagesWithOffers(rawMessages);
+      const normalizedMessages = await enrichMessagesWithOffers(rawMessages, {
+        forceRefresh: true,
+      });
       setMessages(normalizedMessages);
     } catch (err) {
       console.error("Failed to fetch negotiation data:", err);
