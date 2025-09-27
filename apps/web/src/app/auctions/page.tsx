@@ -3,8 +3,16 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Clock, Users, Eye, Filter, Search, Gavel, Zap, Star } from "lucide-react";
-import SectionBanner from "@/components/ui/SectionBanner";
+import {
+  Clock,
+  Users,
+  Eye,
+  Filter,
+  Search,
+  Gavel,
+  Zap,
+  Star,
+} from "lucide-react";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
 
 interface Auction {
@@ -30,14 +38,14 @@ export default function AuctionsPage() {
 
   useEffect(() => {
     // Read URL parameters
-    const status = searchParams.get('status');
+    const status = searchParams.get("status");
     if (status) {
-      if (status === 'upcoming') {
-        setStatusFilter('upcoming');
-      } else if (status === 'active') {
-        setStatusFilter('active');
-      } else if (status === 'ended') {
-        setStatusFilter('ended');
+      if (status === "upcoming") {
+        setStatusFilter("upcoming");
+      } else if (status === "active") {
+        setStatusFilter("active");
+      } else if (status === "ended") {
+        setStatusFilter("ended");
       }
     }
     fetchAuctions();
@@ -61,14 +69,15 @@ export default function AuctionsPage() {
 
   const filteredAuctions = auctions.filter((auction) => {
     // Safe check for title before calling toLowerCase
-    const matchesSearch = auction.title 
+    const matchesSearch = auction.title
       ? auction.title.toLowerCase().includes(searchTerm.toLowerCase())
       : true; // If no title, include in search (or you could exclude with false)
-    
+
     // Safe check for category
     const matchesCategory =
-      categoryFilter === "all" || (auction.category && auction.category === categoryFilter);
-    
+      categoryFilter === "all" ||
+      (auction.category && auction.category === categoryFilter);
+
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "active" && auction.isActive) ||
@@ -99,15 +108,6 @@ export default function AuctionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Banner */}
-      <SectionBanner
-        title="Đấu giá công nghệ"
-        subtitle="Khám phá và tham gia đấu giá các công nghệ tiên tiến, cơ hội sở hữu công nghệ chất lượng cao với giá cạnh tranh"
-        icon={<AnimatedIcon animation="pulse"><Gavel className="h-12 w-12 text-white" /></AnimatedIcon>}
-        variant="hero"
-        className="mb-8"
-      />
-
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
@@ -130,7 +130,10 @@ export default function AuctionsPage() {
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
               <div className="relative group">
-                <AnimatedIcon animation="pulse" className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors">
+                <AnimatedIcon
+                  animation="pulse"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors"
+                >
                   <Search className="h-4 w-4" />
                 </AnimatedIcon>
                 <input
@@ -232,7 +235,9 @@ export default function AuctionsPage() {
 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Giá hiện tại</span>
+                      <span className="text-sm text-gray-600">
+                        Giá hiện tại
+                      </span>
                       <span className="font-semibold text-green-600">
                         {auction.currentBid.toLocaleString()} VNĐ
                       </span>
@@ -246,7 +251,10 @@ export default function AuctionsPage() {
                         <span>{auction.bidCount} lượt đấu giá</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <AnimatedIcon animation="pulse" delay={index * 200 + 100}>
+                        <AnimatedIcon
+                          animation="pulse"
+                          delay={index * 200 + 100}
+                        >
                           <Eye className="h-4 w-4" />
                         </AnimatedIcon>
                         <span>{auction.viewers} người xem</span>
@@ -256,7 +264,10 @@ export default function AuctionsPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-1 text-sm text-gray-600">
-                      <AnimatedIcon animation="rotate" delay={index * 200 + 200}>
+                      <AnimatedIcon
+                        animation="rotate"
+                        delay={index * 200 + 200}
+                      >
                         <Clock className="h-4 w-4" />
                       </AnimatedIcon>
                       <span>{auction.timeLeft}</span>
