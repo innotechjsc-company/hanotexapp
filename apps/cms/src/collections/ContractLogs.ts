@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { getChatWebSocketServer } from '../websocket/server.js'
+import { notificationManager, type NotificationData } from '../app/api/createNotification'
 
 type ContractLogDoc = {
   id?: string
@@ -51,32 +52,102 @@ export const ContractLogs: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, operation, req }) => {
-        const roomIds = getContractLogRoomIds(doc)
-        if (roomIds.length === 0) return
-
-        const webSocketServer = getChatWebSocketServer()
-        if (!webSocketServer) return
-
-        let populatedDoc = doc
-
-        if (doc?.id && req?.payload) {
+        // Chỉ tạo notification khi contract log được tạo mới
+        if (operation === 'create') {
           try {
-            populatedDoc = await req.payload.findByID({
-              collection: 'contract-logs',
-              id: doc.id,
+            console.log('🎯 Creating notifications for contract log:', doc.id)
+
+            // Lấy thông tin contract với depth để populate user data
+            const contract = await req.payload.findByID({
+              collection: 'contract',
+              id: typeof doc.contract === 'string' ? doc.contract : doc.contract?.id,
               depth: 2,
             })
-          } catch (error) {
-            console.error('Không thể tải đầy đủ dữ liệu contract log để phát realtime:', error)
-          }
-        }
 
-        for (const roomId of roomIds) {
-          const payload = { roomId, log: populatedDoc }
-          if (operation === 'create') {
-            webSocketServer.broadcastToRoom(roomId, 'contract-log:new', payload)
-          } else if (operation === 'update') {
-            webSocketServer.broadcastToRoom(roomId, 'contract-log:updated', payload)
+            if (!contract) {
+              console.log('Contract not found, skipping notification')
+              return
+            }
+
+            // Lấy thông tin người gửi contract log
+            const logSender = await req.payload.findByID({
+              collection: 'users',
+              id: typeof doc.user === 'string' ? doc.user : doc.user?.id,
+            })
+
+            if (!logSender) {
+              console.log('Log sender not found, skipping notification')
+              return
+            }
+
+            const senderName = logSender.full_name || logSender.email || 'Người dùng'
+            const contractTitle = `Hợp đồng #${contract.id}`
+            const logContent =
+              doc.content?.substring(0, 100) +
+              (doc.content && doc.content.length > 100 ? '...' : '')
+
+            // Xác định các bên liên quan trong contract
+            const userAId =
+              typeof contract.user_a === 'string' ? contract.user_a : contract.user_a?.id
+            const userBId =
+              typeof contract.user_b === 'string' ? contract.user_b : contract.user_b?.id
+
+            // Tạo notifications cho các bên liên quan (trừ người gửi log)
+            const notifications: NotificationData[] = []
+
+            // Notification cho user A (nếu khác người gửi)
+            if (userAId && userAId !== (typeof doc.user === 'string' ? doc.user : doc.user?.id)) {
+              notifications.push({
+                user: userAId,
+                title: `Cập nhật tiến độ hợp đồng`,
+                message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
+                type: 'contract',
+                action_url: `contracts/${contract.id}`,
+                priority: 'normal',
+              })
+            }
+
+            // Notification cho user B (nếu khác người gửi)
+            if (userBId && userBId !== (typeof doc.user === 'string' ? doc.user : doc.user?.id)) {
+              notifications.push({
+                user: userBId,
+                title: `Cập nhật tiến độ hợp đồng`,
+                message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
+                type: 'contract',
+                action_url: `contracts/${contract.id}`,
+                priority: 'normal',
+              })
+            }
+
+            // Tạo notifications
+            if (notifications.length > 0) {
+              const result = await notificationManager.createBatchNotifications(notifications)
+              console.log(`✅ Created ${result.created} contract log notifications`)
+            } else {
+              console.log('No notifications to create (user is the only party in contract)')
+            }
+
+            // WebSocket broadcast cho real-time updates
+            const roomIds = getContractLogRoomIds(doc)
+            if (roomIds.length > 0) {
+              const webSocketServer = getChatWebSocketServer()
+              if (webSocketServer) {
+                for (const roomId of roomIds) {
+                  webSocketServer.broadcastToRoom(roomId, 'contract-log:created', {
+                    roomId,
+                    logId: doc.id,
+                    content: doc.content,
+                    sender: senderName,
+                    status: doc.status,
+                    timestamp: new Date().toISOString(),
+                  })
+                }
+                console.log(`📡 Broadcasted contract log to ${roomIds.length} room(s)`)
+              }
+            }
+          } catch (error) {
+            console.error('❌ Error creating contract log notifications:', error)
+            // Không throw error để không ảnh hưởng đến việc tạo contract log
           }
         }
       },
@@ -149,11 +220,20 @@ export const ContractLogs: CollectionConfig = {
       label: 'Lý do (khi từ chối)',
       admin: {
         condition: (_: unknown, siblingData: unknown) => {
-          return typeof siblingData === 'object' && siblingData !== null && 'status' in siblingData && (siblingData as { status?: string }).status === 'cancelled'
+          return (
+            typeof siblingData === 'object' &&
+            siblingData !== null &&
+            'status' in siblingData &&
+            (siblingData as { status?: string }).status === 'cancelled'
+          )
         },
       },
       validate: (val: unknown, { siblingData }: { siblingData: unknown }) => {
-        const isCancelled = typeof siblingData === 'object' && siblingData !== null && 'status' in siblingData && (siblingData as { status?: string }).status === 'cancelled'
+        const isCancelled =
+          typeof siblingData === 'object' &&
+          siblingData !== null &&
+          'status' in siblingData &&
+          (siblingData as { status?: string }).status === 'cancelled'
         if (isCancelled && (!val || (typeof val === 'string' && val.trim() === ''))) {
           return 'Vui lòng nhập lý do khi từ chối'
         }

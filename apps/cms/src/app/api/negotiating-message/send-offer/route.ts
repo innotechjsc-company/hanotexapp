@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
       )
     }
     // Ensure only one is provided
-    const providedCount = providedRelations.filter((k) => (body as Record<string, unknown>)[k]).length
+    const providedCount = providedRelations.filter(
+      (k) => (body as Record<string, unknown>)[k],
+    ).length
     if (providedCount !== 1) {
       return Response.json(
         { error: 'Provide exactly one of technology_propose, project_propose, propose' },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Contract } from '@/payload-types'
+import { notificationManager } from '@/app/api/createNotification'
 
 // CORS headers
 const corsHeaders = {
@@ -22,7 +23,9 @@ export async function POST(request: NextRequest) {
   try {
     const payload = await getPayload({ config })
     const raw = await request.json()
-    const body = (raw && typeof raw === 'object' && 'body' in raw ? (raw as { body?: unknown }).body : raw) as { contractId?: string; userId?: string }
+    const body = (
+      raw && typeof raw === 'object' && 'body' in raw ? (raw as { body?: unknown }).body : raw
+    ) as { contractId?: string; userId?: string }
 
     const { contractId, userId } = body
     console.log('body', body)
@@ -38,11 +41,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the contract with full details
-    const contract = await payload.findByID({
+    const contract = (await payload.findByID({
       collection: 'contract',
       id: contractId,
       depth: 2,
-    }) as Contract | null
+    })) as Contract | null
 
     if (!contract) {
       return NextResponse.json(
@@ -99,11 +102,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the contract
-    const updatedContract = await payload.update({
+    const updatedContract = (await payload.update({
       collection: 'contract',
       id: contractId,
       data: updateData,
-    }) as Contract
+    })) as Contract
 
     // If both parties have accepted, also update the related proposal status
     if (bothAccepted) {
@@ -111,9 +114,12 @@ export async function POST(request: NextRequest) {
         const techRel = contract.technology_propose
         const projRel = contract.project_propose
         const propRel = contract.propose
-        const techPropId = typeof techRel === 'object' && techRel !== null ? techRel.id : techRel ?? undefined
-        const projPropId = typeof projRel === 'object' && projRel !== null ? projRel.id : projRel ?? undefined
-        const propId = typeof propRel === 'object' && propRel !== null ? propRel.id : propRel ?? undefined
+        const techPropId =
+          typeof techRel === 'object' && techRel !== null ? techRel.id : (techRel ?? undefined)
+        const projPropId =
+          typeof projRel === 'object' && projRel !== null ? projRel.id : (projRel ?? undefined)
+        const propId =
+          typeof propRel === 'object' && propRel !== null ? propRel.id : (propRel ?? undefined)
 
         if (techPropId) {
           await payload.update({
@@ -138,6 +144,75 @@ export async function POST(request: NextRequest) {
         console.error('Failed to update related proposal status:', error)
         // Don't fail the contract acceptance if proposal update fails
       }
+    }
+
+    // Tạo notifications sau khi accept contract thành công
+    try {
+      console.log('🎯 Creating notifications for accept contract...')
+
+      // Lấy thông tin user hiện tại
+      const currentUser = await payload.findByID({
+        collection: 'users',
+        id: String(userId),
+      })
+
+      const currentUserName = currentUser?.full_name || currentUser?.email || 'Người dùng'
+
+      // Notification cho user hiện tại (người vừa accept)
+      const currentUserNotification = await notificationManager.createNotification({
+        user: String(userId),
+        title: bothAccepted ? `Hợp đồng đã hoàn thành!` : `Bạn đã chấp nhận hợp đồng`,
+        message: bothAccepted
+          ? `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`
+          : `Bạn đã chấp nhận hợp đồng. Đang chờ bên còn lại chấp nhận.`,
+        type: bothAccepted ? 'success' : 'info',
+        action_url: `contracts/${contractId}`,
+        priority: bothAccepted ? 'high' : 'normal',
+      })
+
+      // Notification cho bên còn lại (nếu chưa accept)
+      if (!bothAccepted) {
+        const otherPartyId = String(userAId) === String(userId) ? String(userBId) : String(userAId)
+
+        const otherPartyNotification = await notificationManager.createNotification({
+          user: otherPartyId,
+          title: `Có người đã chấp nhận hợp đồng`,
+          message: `${currentUserName} đã chấp nhận hợp đồng. Bạn cần chấp nhận để hoàn tất hợp đồng.`,
+          type: 'info',
+          action_url: `contracts/${contractId}`,
+          priority: 'normal',
+        })
+
+        console.log(
+          `✅ Created notifications: currentUser=${currentUserNotification.success}, otherParty=${otherPartyNotification.success}`,
+        )
+      } else {
+        // Nếu cả hai bên đã accept, tạo notification cho cả hai
+        const userANotification = await notificationManager.createNotification({
+          user: String(userAId),
+          title: `Hợp đồng đã hoàn thành!`,
+          message: `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`,
+          type: 'success',
+          action_url: `contracts/${contractId}`,
+          priority: 'high',
+        })
+
+        const userBNotification = await notificationManager.createNotification({
+          user: String(userBId),
+          title: `Hợp đồng đã hoàn thành!`,
+          message: `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`,
+          type: 'success',
+          action_url: `contracts/${contractId}`,
+          priority: 'high',
+        })
+
+        console.log(
+          `✅ Created notifications for completed contract: userA=${userANotification.success}, userB=${userBNotification.success}`,
+        )
+      }
+    } catch (notificationError) {
+      console.error('❌ Error creating notifications for accept contract:', notificationError)
+      // Không throw error để không ảnh hưởng đến response chính
     }
 
     return NextResponse.json(
