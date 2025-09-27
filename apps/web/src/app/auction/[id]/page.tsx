@@ -18,6 +18,7 @@ import { SectionBanner } from "@/components/ui/SectionBanner";
 import { AnimatedIcon } from "@/components/ui/AnimatedIcon";
 import Toast, { useToast } from "@/components/ui/Toast";
 import { useAuctionWebSocket } from "@/hooks/useWebSocket";
+import AuctionImagePlaceholder from "@/components/auction/AuctionImagePlaceholder";
 
 interface Auction {
   id: string;
@@ -196,7 +197,14 @@ export default function AuctionPage() {
           console.warn("Failed to parse stored bids:", e);
         }
       }
-
+      
+      console.log('Auction data received:', {
+        id: data.id,
+        title: data.title,
+        status: data.status,
+        isActive: data.isActive,
+        timeLeft: data.timeLeft
+      });
       setAuction(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
@@ -280,7 +288,6 @@ export default function AuctionPage() {
               }
             : null
         );
-
         // Show success notification
         showToast(
           `Đấu giá thành công! Giá hiện tại: ${amount.toLocaleString()} VNĐ`,
@@ -405,6 +412,11 @@ export default function AuctionPage() {
               onBid={handleBid}
               onAutoBid={handleAutoBid}
             />
+            
+            {/* Debug info */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-xs">
+              <strong>Debug:</strong> Status: {auction.status}, isActive: {auction.isActive ? 'true' : 'false'}, timeLeft: {auction.timeLeft}
+            </div>
 
             <AuctionDetails
               description={auction.description}
@@ -431,7 +443,14 @@ export default function AuctionPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Trạng thái</span>
                   <div className="flex items-center space-x-2">
-                    {auction.isActive ? (
+                    {auction.status === 'upcoming' ? (
+                      <>
+                        <Clock className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium text-blue-600">
+                          Sắp diễn ra
+                        </span>
+                      </>
+                    ) : auction.status === 'active' ? (
                       <>
                         <Clock className="h-4 w-4 text-green-500" />
                         <span className="text-sm font-medium text-green-600">

@@ -385,6 +385,12 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   </Text>
                 </div>
                 <div className="flex justify-between">
+                  <Text strong>Ngân sách:</Text>
+                  <Text className="text-green-600 font-semibold">
+                    {(proposal as any).budget?.toLocaleString("vi-VN")} VND
+                  </Text>
+                </div>
+                <div className="flex justify-between">
                   <Text strong>Trạng thái:</Text>
                   <Text className="text-blue-600">
                     {proposal.status === "contract_signed"
