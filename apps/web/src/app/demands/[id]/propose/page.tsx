@@ -179,45 +179,8 @@ function ProposeSolutionPage() {
 
       // Create propose data according to Propose interface
       const proposeData = convertFormDataToPropose(proposal, uploadedDocument);
-      debugger;
+
       const createdProposeResponse = await createPropose(proposeData);
-
-      // The response from createPropose contains the created document in a 'doc' property
-      const newProposal = (createdProposeResponse as any)?.doc as Propose;
-
-      // Create notification for the demand owner
-      debugger;
-      if (newProposal && newProposal.id && newProposal?.demand?.user) {
-        debugger;
-        try {
-          console.log("Creating notification for user:", demand);
-          const proposalId = newProposal.id;
-          const demandOwnerId =
-            typeof newProposal?.demand.user === "string"
-              ? newProposal?.demand?.user
-              : newProposal?.demand?.user.id;
-          debugger;
-          if (demandOwnerId) {
-            debugger;
-            let notification = await createNotification({
-              user: demandOwnerId,
-              type: "system",
-              title: `Đề xuất mới cho nhu cầu của bạn`,
-              message: `Bạn đã nhận được một đề xuất mới từ "${
-                user?.full_name || user?.email
-              }" cho nhu cầu "${newProposal?.demand?.title}".`,
-              action_url: `/proposes/${proposalId}`,
-              is_read: false,
-            });
-            console.log("Notification created for user:", notification);
-            debugger;
-            console.log("Notification created for user:", demandOwnerId);
-          }
-        } catch (notificationError) {
-          console.error("Failed to create notification:", notificationError);
-          // Do not block the user flow, just log the error
-        }
-      }
 
       // Success - redirect to success page
       router.push(`/demands/${params.id}/propose/success`);

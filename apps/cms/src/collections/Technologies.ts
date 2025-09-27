@@ -101,6 +101,52 @@ export const Technologies: CollectionConfig = {
           await Promise.allSettled(ipPromises)
         }
       },
+      // Hook to send notification on status change
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation === 'update' && doc.status !== previousDoc.status) {
+          const payload = req.payload
+
+          const userId = doc.submitter?.id || doc.submitter
+
+          if (!userId) {
+            console.error('Submitter user ID not found for technology:', doc.id)
+            return
+          }
+
+          let statusMessage = ''
+          switch (doc.status) {
+            case 'approved':
+              statusMessage = 'đã được duyệt'
+              break
+            case 'rejected':
+              statusMessage = 'đã bị từ chối'
+              break
+            case 'active':
+              statusMessage = 'đã được kích hoạt'
+              break
+            case 'inactive':
+              statusMessage = 'đã bị vô hiệu hóa'
+              break
+            default:
+              return // Don't send notifications for other statuses
+          }
+
+          try {
+            await payload.create({
+              collection: 'notifications',
+              data: {
+                user: userId,
+                title: `Cập nhật trạng thái công nghệ`,
+                message: `Công nghệ "${doc.title}" của bạn ${statusMessage}.`,
+                type: 'technology',
+                action_url: `technologies/${doc.id}`,
+              },
+            })
+          } catch (error) {
+            console.error('Failed to create notification:', error)
+          }
+        }
+      },
     ],
   },
   fields: [
