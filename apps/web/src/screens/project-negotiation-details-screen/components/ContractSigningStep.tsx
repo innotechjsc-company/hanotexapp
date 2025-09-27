@@ -180,7 +180,6 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
 
   // Helper functions for contract acceptance
   const getCurrentUserRole = () => {
-    
     if (!activeContract || !currentUser?.id) return null;
 
     const userAId =
@@ -191,7 +190,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
       typeof activeContract.user_b === "object"
         ? activeContract.user_b.id
         : activeContract.user_b;
-    
+
     if (String(userAId) === String(currentUser.id)) return "A";
     if (String(userBId) === String(currentUser.id)) return "B";
     return null;
@@ -327,7 +326,10 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             } finally {
               onBothAccepted?.();
               // chỉnh sửa dự án thành không kêu gọi đầu tư nữa
-              await updateProject(activeContract.project_propose?.project?.id as string, { open_investment_fund: false });
+              await updateProject(
+                activeContract.project_propose?.project?.id as string,
+                { open_investment_fund: false }
+              );
             }
             return;
           }
@@ -404,9 +406,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Dự án:</Text>
-                  <Text>
-                    {proposal.project?.name || "-"}
-                  </Text>
+                  <Text>{proposal.project?.name || "-"}</Text>
                 </div>
                 <div className="flex justify-between">
                   <Text strong>Giá trị đề xuất:</Text>
@@ -563,96 +563,107 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               </div>
 
               {/* Contract File Upload (contract_file) - visible when contract exists and not signed */}
-              {!isContractSigned && !bothPartiesAccepted() && !readOnly && (
+              {!isContractSigned &&
+                !bothPartiesAccepted() &&
+                !readOnly &&
+                proposal.status !== "completed" &&
+                activeContract?.status !== ContractStatusEnum.COMPLETED && (
+                  <div className="mt-6">
+                    <Title level={5} className="mb-3">
+                      <FileText size={20} className="inline mr-2" />
+                      Tệp hợp đồng (tải lên vào contract_file)
+                    </Title>
+                    {/* Existing contract file preview */}
+                    {activeContract.contract_file && (
+                      <Card size="small" className="mb-3 border-dashed">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <FileText size={20} className="text-gray-500" />
+                            <div>
+                              <Text strong>
+                                {activeContract.contract_file.filename ||
+                                  "Hợp đồng hiện tại"}
+                              </Text>
+                              <br />
+                              <Text type="secondary" className="text-xs">
+                                {activeContract.contract_file.filesize
+                                  ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
+                                  : ""}
+                              </Text>
+                            </div>
+                          </div>
+                          {activeContract.contract_file.url && (
+                            <Button
+                              icon={<Download size={14} />}
+                              type="text"
+                              onClick={handleDownload}
+                            >
+                              Tải xuống
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    )}
+
+                    <Upload.Dragger
+                      multiple={false}
+                      beforeUpload={handleContractFileUpload}
+                      showUploadList={!!contractFile}
+                      maxCount={1}
+                      onRemove={() => setContractFile(null)}
+                      accept=".pdf,.doc,.docx"
+                      className="mb-3"
+                    >
+                      <p className="ant-upload-drag-icon">
+                        <UploadCloud />
+                      </p>
+                      <p className="ant-upload-text">
+                        Kéo thả file vào đây hoặc bấm để chọn file
+                      </p>
+                      <p className="ant-upload-hint">Hỗ trợ PDF, Word.</p>
+                    </Upload.Dragger>
+
+                    <Button
+                      type="primary"
+                      onClick={handleUploadContractFileOnly}
+                      loading={savingContractFile}
+                      disabled={!contractFile}
+                    >
+                      Lưu tệp hợp đồng
+                    </Button>
+                  </div>
+                )}
+
+              {/* Attachments Upload - Available when contract exists and not completed */}
+              {proposal.status !== "completed" && (
                 <div className="mt-6">
                   <Title level={5} className="mb-3">
-                    <FileText size={20} className="inline mr-2" />
-                    Tệp hợp đồng (tải lên vào contract_file)
+                    <Paperclip size={20} className="inline mr-2" />
+                    Tài liệu kèm theo (tuỳ chọn)
                   </Title>
-                  {/* Existing contract file preview */}
-                  {activeContract.contract_file && (
-                    <Card size="small" className="mb-3 border-dashed">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <FileText size={20} className="text-gray-500" />
-                          <div>
-                            <Text strong>
-                              {activeContract.contract_file.filename || 'Hợp đồng hiện tại'}
-                            </Text>
-                            <br />
-                            <Text type="secondary" className="text-xs">
-                              {activeContract.contract_file.filesize
-                                ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
-                                : ''}
-                            </Text>
-                          </div>
-                        </div>
-                        {activeContract.contract_file.url && (
-                          <Button icon={<Download size={14} />} type="text" onClick={handleDownload}>
-                            Tải xuống
-                          </Button>
-                        )}
-                      </div>
-                    </Card>
-                  )}
-
-                  <Upload.Dragger
-                    multiple={false}
-                    beforeUpload={handleContractFileUpload}
-                    showUploadList={!!contractFile}
-                    maxCount={1}
-                    onRemove={() => setContractFile(null)}
-                    accept=".pdf,.doc,.docx"
-                    className="mb-3"
+                  <Upload
+                    multiple
+                    beforeUpload={handleAttachmentUpload}
+                    showUploadList
+                    fileList={attachments.map((f) => ({
+                      uid: f.name,
+                      name: f.name,
+                      status: "done" as const,
+                    }))}
+                    onRemove={(file) => {
+                      const target = attachments.find(
+                        (f) => f.name === file.name
+                      );
+                      if (target) removeAttachment(target);
+                    }}
+                    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
                   >
-                    <p className="ant-upload-drag-icon">
-                      <UploadCloud />
-                    </p>
-                    <p className="ant-upload-text">
-                      Kéo thả file vào đây hoặc bấm để chọn file
-                    </p>
-                    <p className="ant-upload-hint">Hỗ trợ PDF, Word.</p>
-                  </Upload.Dragger>
-
-                  <Button
-                    type="primary"
-                    onClick={handleUploadContractFileOnly}
-                    loading={savingContractFile}
-                    disabled={!contractFile}
-                  >
-                    Lưu tệp hợp đồng
-                  </Button>
+                    <Button icon={<UploadCloud size={16} />}>
+                      Thêm tài liệu
+                    </Button>
+                  </Upload>
                 </div>
               )}
-
-              {/* Attachments Upload - Available when contract exists */}
-              <div className="mt-6">
-                <Title level={5} className="mb-3">
-                  <Paperclip size={20} className="inline mr-2" />
-                  Tài liệu kèm theo (tuỳ chọn)
-                </Title>
-                <Upload
-                  multiple
-                  beforeUpload={handleAttachmentUpload}
-                  showUploadList
-                  fileList={attachments.map((f) => ({
-                    uid: f.name,
-                    name: f.name,
-                    status: "done" as const,
-                  }))}
-                  onRemove={(file) => {
-                    const target = attachments.find(
-                      (f) => f.name === file.name
-                    );
-                    if (target) removeAttachment(target);
-                  }}
-                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
-                >
-                  <Button icon={<UploadCloud size={16} />}>
-                    Thêm tài liệu
-                  </Button>
-                </Upload>
-              </div>
             </div>
           )}
 
@@ -689,7 +700,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               </div>
 
               <div>
-                <Title level={5} className="mb-3">Ghi chú (tuỳ chọn)</Title>
+                <Title level={5} className="mb-3">
+                  Ghi chú (tuỳ chọn)
+                </Title>
                 <TextArea
                   rows={3}
                   placeholder="Ghi chú thêm về hợp đồng..."
