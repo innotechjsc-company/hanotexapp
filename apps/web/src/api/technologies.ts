@@ -128,7 +128,98 @@ export async function getPublicTechnologies(
   filters: Omit<TechnologyFilters, "visibility_mode"> = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Technology[]>> {
-  return getTechnologies({ ...filters, visibility_mode: "public" }, pagination);
+  try {
+    return await getTechnologies(
+      { ...filters, visibility_mode: "public" },
+      pagination
+    );
+  } catch (error) {
+    console.warn(
+      "getPublicTechnologies falling back to /api/technologies",
+      error
+    );
+
+    try {
+      const params = new URLSearchParams();
+
+      if (filters.search && filters.search.trim()) {
+        params.set("search", filters.search.trim());
+      }
+
+      if (filters.category_id) {
+        params.set("category", filters.category_id);
+      }
+
+      if (typeof filters.trl_level === "number") {
+        params.set("trl_level", String(filters.trl_level));
+      }
+
+      if (filters.status) {
+        params.set("status", String(filters.status).toUpperCase());
+      }
+
+      if (pagination.limit) {
+        params.set("limit", String(pagination.limit));
+      }
+
+      if (pagination.page) {
+        params.set("page", String(pagination.page));
+      }
+
+      if (pagination.sort) {
+        const sortRaw = pagination.sort;
+        const order = sortRaw.startsWith("-") ? "DESC" : "ASC";
+        const field = sortRaw.replace(/^-/, "");
+        const fallbackField = field
+          .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+          .toLowerCase();
+        params.set("sort", fallbackField || "created_at");
+        params.set("order", order);
+      }
+
+      const query = params.toString();
+      const response = await fetch(`/api/technologies${query ? `?${query}` : ""}`);
+
+      if (!response.ok) {
+        throw new Error(`Fallback request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const docs = Array.isArray(data?.data)
+        ? (data?.data as Technology[])
+        : Array.isArray(data?.docs)
+          ? (data?.docs as Technology[])
+          : [];
+
+      const total = Number(data?.pagination?.total ?? docs.length ?? 0);
+      const limit = Number(
+        data?.pagination?.limit ?? pagination.limit ?? PAGINATION_DEFAULTS.limit
+      );
+      const page = Number(
+        data?.pagination?.page ?? pagination.page ?? PAGINATION_DEFAULTS.page
+      );
+      const totalPages = Number(
+        data?.pagination?.totalPages ??
+          Math.max(1, Math.ceil((total || docs.length) / Math.max(limit, 1)))
+      );
+
+      return {
+        data: docs,
+        docs,
+        totalDocs: total,
+        limit,
+        page,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page < totalPages ? page + 1 : null,
+        prevPage: page > 1 ? page - 1 : null,
+      } as ApiResponse<Technology[]>;
+    } catch (fallbackError) {
+      console.error("Fallback fetch for public technologies failed", fallbackError);
+      throw fallbackError;
+    }
+  }
 }
 
 /**
