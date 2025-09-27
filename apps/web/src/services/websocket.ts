@@ -108,7 +108,7 @@ class WebSocketService {
     }
 
     const serverUrl =
-      process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:4000";
+      process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:4000";
 
     this.socket = io(serverUrl, {
       path: "/socket.io/",
