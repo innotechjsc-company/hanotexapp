@@ -10,6 +10,7 @@ import {
   Typography,
   Space,
   Tooltip,
+  App,
 } from "antd";
 import {
   UploadOutlined,
@@ -321,16 +322,17 @@ export default function FileUpload({
   className,
   style,
 }: FileUploadProps) {
+  const { message: appMessage } = App.useApp();
   const isControlled = value !== undefined;
   const [fileList, setFileList] = useState<FileUploadItem[]>(
-    isControlled ? value : defaultValue
+    isControlled ? (Array.isArray(value) ? value : []) : (Array.isArray(defaultValue) ? defaultValue : [])
   );
 
   const uploadingFiles = useRef<Set<string>>(new Set());
 
   // Sync controlled value
   React.useEffect(() => {
-    if (isControlled && value) {
+    if (isControlled && Array.isArray(value)) {
       setFileList(value);
     }
   }, [isControlled, value]);
@@ -340,7 +342,10 @@ export default function FileUpload({
       if (!isControlled) {
         setFileList(newFileList);
       }
-      onChange?.(newFileList);
+      // Use setTimeout to avoid setState during render
+      setTimeout(() => {
+        onChange?.(newFileList);
+      }, 0);
     },
     [isControlled, onChange]
   );
@@ -380,7 +385,7 @@ export default function FileUpload({
         };
 
         // Add to file list immediately
-        const currentList = isControlled ? value || [] : fileList;
+        const currentList = isControlled ? (Array.isArray(value) ? value : []) : (Array.isArray(fileList) ? fileList : []);
         updateFileList([...currentList, tempItem]);
 
         // Simulate progress (since we don't have real progress from the API)
@@ -419,7 +424,7 @@ export default function FileUpload({
         updateFileList(finalList);
 
         onUploadSuccess?.(file, uploadedMedia);
-        message.success(`Tải lên thành công: ${file.name}`);
+        appMessage.success(`Tải lên thành công: ${file.name}`);
 
         return uploadedMedia;
       } catch (error) {
@@ -427,7 +432,7 @@ export default function FileUpload({
           error instanceof Error ? error.message : "Lỗi không xác định";
 
         // Update with error status
-        const currentList = isControlled ? value || [] : fileList;
+        const currentList = isControlled ? (Array.isArray(value) ? value : []) : (Array.isArray(fileList) ? fileList : []);
         const errorItem: FileUploadItem = {
           ...(currentList.find((f) => f.filename === file.name) || {
             id: Date.now(),
@@ -450,7 +455,7 @@ export default function FileUpload({
         ]);
 
         onUploadError?.(file, errorMessage);
-        message.error(`Tải lên thất bại: ${file.name} - ${errorMessage}`);
+        appMessage.error(`Tải lên thất bại: ${file.name} - ${errorMessage}`);
 
         return null;
       } finally {
@@ -472,24 +477,24 @@ export default function FileUpload({
 
   const handleBeforeUpload = useCallback(
     (file: File): boolean => {
-      const currentList = isControlled ? value || [] : fileList;
+      const currentList = isControlled ? (Array.isArray(value) ? value : []) : (Array.isArray(fileList) ? fileList : []);
 
       // Check max count
       const currentCount = currentList.length;
       if (currentCount >= maxCount) {
-        message.error(`Chỉ được phép tải lên tối đa ${maxCount} file`);
+        appMessage.error(`Chỉ được phép tải lên tối đa ${maxCount} file`);
         return false;
       }
 
       // Check for duplicate files
       if (isDuplicateFile(file, currentList)) {
-        message.warning(`File "${file.name}" đã tồn tại`);
+        appMessage.warning(`File "${file.name}" đã tồn tại`);
         return false;
       }
 
       // Validate file extension
       if (!isValidFileExtension(file.name, allowedTypes)) {
-        message.error(
+        appMessage.error(
           `Phần mở rộng file "${getFileExtension(file.name)}" không được hỗ trợ`
         );
         return false;
@@ -498,7 +503,7 @@ export default function FileUpload({
       // Validate file
       const validation = validateFile(file, allowedTypes, maxSize);
       if (!validation.valid) {
-        message.error(validation.error);
+        appMessage.error(validation.error);
         return false;
       }
 
@@ -513,7 +518,7 @@ export default function FileUpload({
               }
             })
             .catch((error) => {
-              message.error(
+              appMessage.error(
                 `Validation error: ${error.message || "Unknown error"}`
               );
             });
@@ -542,6 +547,7 @@ export default function FileUpload({
       autoUpload,
       uploadOnAdd,
       handleUpload,
+      appMessage,
     ]
   );
 
@@ -557,17 +563,17 @@ export default function FileUpload({
           await deleteFile(file.id);
         }
 
-        const currentList = isControlled ? value || [] : fileList;
+        const currentList = isControlled ? (Array.isArray(value) ? value : []) : (Array.isArray(fileList) ? fileList : []);
         const newList = currentList.filter((f) => f.id !== file.id);
         updateFileList(newList);
 
         onRemove?.(file);
-        message.success(`Đã xóa file: ${file.filename}`);
+        appMessage.success(`Đã xóa file: ${file.filename}`);
       } catch (error) {
-        message.error(`Không thể xóa file: ${file.filename}`);
+        appMessage.error(`Không thể xóa file: ${file.filename}`);
       }
     },
-    [isControlled, value, fileList, updateFileList, onRemove]
+    [isControlled, value, fileList, updateFileList, onRemove, appMessage]
   );
 
   const handlePreview = useCallback(
@@ -583,7 +589,7 @@ export default function FileUpload({
 
   // Convert to Ant Design UploadFile format for display
   const antdFileList: UploadFile[] =
-    (isControlled ? value : fileList)?.map((file) => ({
+    (isControlled ? value || [] : fileList || [])?.map((file) => ({
       uid: String(file.id),
       name: file.filename || file.alt,
       status:

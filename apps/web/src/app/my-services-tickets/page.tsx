@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message, Upload, Tabs } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, ReloadOutlined, EyeOutlined, DeleteOutlined, UploadOutlined, EditOutlined } from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined, EyeOutlined, DeleteOutlined, UploadOutlined, EditOutlined, MessageOutlined } from "@ant-design/icons";
 import { getServiceTickets, createServiceTicket, deleteServiceTicket, updateServiceTicket } from "@/api/service-ticket";
 import { getServices } from "@/api/services";
 import { getTechnologiesByUser } from "@/api/technologies";
@@ -16,6 +16,8 @@ import type { Project } from "@/types/project";
 import { useAuthStore } from "@/store/auth";
 import dayjs from "dayjs";
 import { getUserByRoleAdmin, getUsers } from "@/api/user";
+import { useRouter } from "next/navigation";
+import FileUpload, { type FileUploadItem } from "@/components/input/FileUpload";
 
 type EditableServiceTicket = Partial<ServiceTicket> & { id?: string };
 
@@ -49,6 +51,7 @@ const statusLabelMap: Record<string, string> = {
 
 export default function MyServiceTicketsPage() {
   const user = useAuthStore((state) => state.user);
+  const router = useRouter();
 
   const [tickets, setTickets] = useState<ServiceTicket[]>([]);
   const [processingTickets, setProcessingTickets] = useState<ServiceTicket[]>([]);
@@ -67,8 +70,6 @@ export default function MyServiceTicketsPage() {
   const [processingPagination, setProcessingPagination] = useState<PaginationState>({ current: 1, pageSize: 10 });
   const [search, setSearch] = useState("");
   const [processingSearch, setProcessingSearch] = useState("");
-  const [documentUploading, setDocumentUploading] = useState(false);
-  const [editDocumentUploading, setEditDocumentUploading] = useState(false);
 
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -188,7 +189,7 @@ export default function MyServiceTicketsPage() {
         // Add new fields
         technologies: values.technologies || [],
         project: values.project || undefined,
-        document: values.document || undefined,
+        document: values.documentId || undefined,
       };
       await createServiceTicket(payload);
       message.success("Tạo phiếu dịch vụ thành công");
@@ -227,7 +228,7 @@ export default function MyServiceTicketsPage() {
         description: values.description,
         technologies: values.technologies || [],
         project: values.project || undefined,
-        document: values.document || undefined,
+        document: values.documentId || undefined,
       };
       
       await updateServiceTicket(String(current.id), payload);
@@ -356,6 +357,16 @@ export default function MyServiceTicketsPage() {
             >
               Xem
             </Button>
+            <Button
+              icon={<MessageOutlined />}
+              onClick={() => {
+                if (record?.id) {
+                  router.push(`/my-services-tickets/negotiations/${record.id}`);
+                }
+              }}
+            >
+              Trao đổi
+            </Button>
             {record.status === "pending" && (
               <Button
                 icon={<EditOutlined />}
@@ -364,7 +375,10 @@ export default function MyServiceTicketsPage() {
                 Sửa
               </Button>
             )}
-            <Popconfirm
+            {
+              // status is completed or cancelled
+              (record.status !== "completed" && record.status !== "cancelled") && (
+                <Popconfirm
               title="Xoá phiếu này?"
               okText="Xoá"
               cancelText="Huỷ"
@@ -372,6 +386,9 @@ export default function MyServiceTicketsPage() {
             >
               <Button danger icon={<DeleteOutlined />}>Xoá</Button>
             </Popconfirm>
+              )
+            }
+           
           </Space>
         ),
       },
@@ -441,18 +458,31 @@ export default function MyServiceTicketsPage() {
         title: "Trạng thái",
         dataIndex: "status",
         key: "status",
-        render: (status: string | undefined, record: any) => (
-          <Select
-            value={status || "pending"}
-            onChange={(value) => updateTicketStatus(String(record.id), value)}
-            style={{ width: 120 }}
-          >
-            <Select.Option value="pending">Chờ xử lý</Select.Option>
-            <Select.Option value="processing">Đang xử lý</Select.Option>
-            <Select.Option value="completed">Đã hoàn thành</Select.Option>
-            <Select.Option value="cancelled">Đã hủy</Select.Option>
-          </Select>
-        ),
+        render: (status: string | undefined, record: any) => {
+          const currentStatus = status || "pending";
+          const isCompletedOrCancelled = currentStatus === "completed" || currentStatus === "cancelled";
+          
+          if (isCompletedOrCancelled) {
+            return (
+              <Tag color={statusColorMap[currentStatus]}>
+                {statusLabelMap[currentStatus] || currentStatus}
+              </Tag>
+            );
+          }
+          
+          return (
+            <Select
+              value={currentStatus}
+              onChange={(value) => updateTicketStatus(String(record.id), value)}
+              style={{ width: 120 }}
+            >
+              <Select.Option value="pending">Chờ xử lý</Select.Option>
+              <Select.Option value="processing">Đang xử lý</Select.Option>
+              <Select.Option value="completed">Đã hoàn thành</Select.Option>
+              <Select.Option value="cancelled">Đã hủy</Select.Option>
+            </Select>
+          );
+        },
       },
       {
         title: "Ngày tạo",
@@ -473,6 +503,16 @@ export default function MyServiceTicketsPage() {
               }}
             >
               Xem
+            </Button>
+            <Button
+              icon={<MessageOutlined />}
+              onClick={() => {
+                if (record?.id) {
+                  router.push(`/my-services-tickets/negotiations/${record.id}`);
+                }
+              }}
+            >
+              Trao đổi
             </Button>
           </Space>
         ),
@@ -625,28 +665,29 @@ export default function MyServiceTicketsPage() {
             <Input.TextArea rows={4} placeholder="Mô tả yêu cầu của bạn" />
           </Form.Item>
           <Form.Item name="document" label="Tài liệu đính kèm">
-            <Upload
-              beforeUpload={() => false}
-              onChange={async (info) => {
-                const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
-                if (files.length === 0) return;
-                try {
-                  setDocumentUploading(true);
-                  const uploaded = await uploadFiles(files as File[]);
-                  const documentId = (uploaded[0] as any)?.id ?? (uploaded[0] as any)?._id;
-                  form.setFieldValue('document', String(documentId));
-                  message.success("Đã upload tài liệu");
-                } catch (err) {
-                  message.error("Upload tài liệu thất bại");
-                } finally {
-                  setDocumentUploading(false);
+            <FileUpload
+              variant="button"
+              buttonText="Chọn tài liệu"
+              multiple={false}
+              maxCount={1}
+              allowedTypes={["document", "image"]}
+              maxSize={50 * 1024 * 1024} // 50MB
+              onChange={useCallback((files: FileUploadItem[]) => {
+                // Store the file list in the form, and extract the document ID for the API
+                form.setFieldValue('document', files);
+                if (files.length > 0 && files[0].uploadStatus === "done") {
+                  form.setFieldValue('documentId', String(files[0].id));
+                } else {
+                  form.setFieldValue('documentId', undefined);
                 }
-              }}
-            >
-              <Button icon={<UploadOutlined />} loading={documentUploading}>
-                Chọn tài liệu
-              </Button>
-            </Upload>
+              }, [form])}
+              onUploadSuccess={useCallback((file: File, media: any) => {
+                message.success(`Đã upload tài liệu: ${file.name}`);
+              }, [])}
+              onUploadError={useCallback((file: File, error: string) => {
+                message.error(`Upload tài liệu thất bại: ${file.name} - ${error}`);
+              }, [])}
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -769,28 +810,29 @@ export default function MyServiceTicketsPage() {
             <Input.TextArea rows={4} placeholder="Mô tả yêu cầu của bạn" />
           </Form.Item>
           <Form.Item name="document" label="Tài liệu đính kèm">
-            <Upload
-              beforeUpload={() => false}
-              onChange={async (info) => {
-                const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
-                if (files.length === 0) return;
-                try {
-                  setEditDocumentUploading(true);
-                  const uploaded = await uploadFiles(files as File[]);
-                  const documentId = (uploaded[0] as any)?.id ?? (uploaded[0] as any)?._id;
-                  editForm.setFieldValue('document', String(documentId));
-                  message.success("Đã upload tài liệu");
-                } catch (err) {
-                  message.error("Upload tài liệu thất bại");
-                } finally {
-                  setEditDocumentUploading(false);
+            <FileUpload
+              variant="button"
+              buttonText="Chọn tài liệu"
+              multiple={false}
+              maxCount={1}
+              allowedTypes={["document", "image"]}
+              maxSize={50 * 1024 * 1024} // 50MB
+              onChange={useCallback((files: FileUploadItem[]) => {
+                // Store the file list in the form, and extract the document ID for the API
+                editForm.setFieldValue('document', files);
+                if (files.length > 0 && files[0].uploadStatus === "done") {
+                  editForm.setFieldValue('documentId', String(files[0].id));
+                } else {
+                  editForm.setFieldValue('documentId', undefined);
                 }
-              }}
-            >
-              <Button icon={<UploadOutlined />} loading={editDocumentUploading}>
-                Chọn tài liệu
-              </Button>
-            </Upload>
+              }, [editForm])}
+              onUploadSuccess={useCallback((file: File, media: any) => {
+                message.success(`Đã upload tài liệu: ${file.name}`);
+              }, [])}
+              onUploadError={useCallback((file: File, error: string) => {
+                message.error(`Upload tài liệu thất bại: ${file.name} - ${error}`);
+              }, [])}
+            />
           </Form.Item>
         </Form>
       </Modal>

@@ -52,6 +52,7 @@ export const API_ENDPOINTS = {
   ROOM_USER: "/room-user",
   SERVICES: "/services",
   SERVICE_TICKET: "/service-ticket",
+  SERVICE_TICKET_LOG: "/service-ticket-log",
   OFFERS: "/offer",
   CONTRACT_LOGS: "/contract-logs",
 } as const;
