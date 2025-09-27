@@ -13,24 +13,30 @@ export const TechnologyPropose: CollectionConfig = {
   },
   hooks: {
     afterChange: [
-      async ({ doc, req, operation }) => {
-        if (operation === 'create') {
-          try {
-            // Lấy technology ID - có thể là string hoặc object
-            const technologyId =
-              typeof doc.technology === 'string' ? doc.technology : doc.technology?.id
+      async ({ doc, req, operation, previousDoc }) => {
+        try {
+          // Lấy technology ID - có thể là string hoặc object
+          const technologyId =
+            typeof doc.technology === 'string' ? doc.technology : doc.technology?.id
 
-            if (!technologyId) {
-              console.error('Không tìm thấy technology ID')
-              return
-            }
+          if (!technologyId) {
+            console.error('Không tìm thấy technology ID')
+            return
+          }
 
-            const technology = await req.payload.findByID({
-              collection: 'technologies',
-              id: technologyId,
-            })
+          const technology = await req.payload.findByID({
+            collection: 'technologies',
+            id: technologyId,
+          })
 
-            if (technology && technology.submitter) {
+          if (!technology) {
+            console.error('Không tìm thấy technology')
+            return
+          }
+
+          // Xử lý khi tạo mới propose
+          if (operation === 'create') {
+            if (technology.submitter) {
               const technologyUserId =
                 typeof technology.submitter === 'string'
                   ? technology.submitter
@@ -67,9 +73,66 @@ export const TechnologyPropose: CollectionConfig = {
                 })
               }
             }
-          } catch (error) {
-            console.error('Lỗi khi tạo notification cho technology propose mới:', error)
           }
+
+          // Xử lý khi cập nhật trạng thái thành negotiating
+          if (
+            operation === 'update' &&
+            doc.status === 'negotiating' &&
+            previousDoc?.status !== 'negotiating'
+          ) {
+            // Lấy thông tin người đề xuất
+            const proposeUserId = typeof doc.user === 'string' ? doc.user : doc.user?.id
+            let proposeUserName = 'Người dùng'
+
+            if (proposeUserId) {
+              try {
+                const proposeUser = await req.payload.findByID({
+                  collection: 'users',
+                  id: proposeUserId,
+                })
+                proposeUserName = proposeUser?.full_name || proposeUser?.email || 'Người dùng'
+              } catch (error) {
+                console.error('Lỗi khi lấy thông tin user đề xuất:', error)
+              }
+            }
+
+            // Gửi thông báo cho người nhận đề xuất (receiver)
+            const receiverId = typeof doc.receiver === 'string' ? doc.receiver : doc.receiver?.id
+            console.log('receiverId', receiverId)
+            if (receiverId) {
+              await req.payload.create({
+                collection: 'notifications',
+                data: {
+                  user: receiverId,
+                  title: `Đề xuất đầu tư đang được thương lượng`,
+                  message: `Đề xuất đầu tư cho công nghệ "${technology.title}" từ ${proposeUserName} đã chuyển sang trạng thái thương lượng`,
+                  type: 'technology',
+                  action_url: `my-proposals`,
+                  priority: 'high',
+                  is_read: false,
+                },
+              })
+            }
+
+            // Gửi thông báo cho người đề xuất (user)
+            if (proposeUserId) {
+              await req.payload.create({
+                collection: 'notifications',
+                data: {
+                  user: proposeUserId,
+                  title: `Đề xuất của bạn đang được thương lượng`,
+                  message: `Đề xuất đầu tư của bạn cho công nghệ "${technology.title}" đã chuyển sang trạng thái thương lượng`,
+                  type: 'technology',
+                  action_url: `my-proposals`,
+                  priority: 'high',
+                  is_read: false,
+                },
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Lỗi khi xử lý notification cho technology propose:', error)
         }
       },
     ],
