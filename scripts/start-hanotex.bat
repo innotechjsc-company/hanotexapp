@@ -47,16 +47,16 @@ echo [4/6] Waiting for database to be ready...
 timeout /t 10 /nobreak >nul
 echo ✅ Database is ready
 
-:: Install backend dependencies and start
+:: Install CMS dependencies and start
 echo.
-echo [5/6] Starting backend API...
-cd apps\api
+echo [5/6] Starting CMS (Payload)...
+cd apps\cms
 if not exist node_modules (
-    echo Installing backend dependencies...
-    npm install
+    echo Installing CMS dependencies...
+    bun install
 )
-echo Starting backend server...
-start "HANOTEX Backend" cmd /k "npm run dev"
+echo Starting CMS server...
+start "HANOTEX CMS" cmd /k "bun dev"
 cd ..\..
 
 :: Install frontend dependencies and start
@@ -65,10 +65,10 @@ echo [6/6] Starting frontend application...
 cd apps\web
 if not exist node_modules (
     echo Installing frontend dependencies...
-    npm install
+    bun install
 )
 echo Starting frontend server...
-start "HANOTEX Frontend" cmd /k "npm run dev"
+start "HANOTEX Frontend" cmd /k "bun dev"
 cd ..\..
 
 echo.
@@ -76,10 +76,10 @@ echo ========================================
 echo    🎉 HANOTEX is starting up!
 echo ========================================
 echo.
-echo Backend API:  http://localhost:3001
-echo Frontend:     http://localhost:3000
-echo Database:     localhost:5432 (postgres/123456)
-echo pgAdmin:      http://localhost:5050 (admin@hanotex.com/admin123)
+echo CMS (Payload): http://localhost:4000
+echo Frontend:      http://localhost:3000
+echo Database:      localhost:5432 (postgres/123456)
+echo pgAdmin:       http://localhost:5050 (admin@hanotex.com/admin123)
 echo.
 echo Please wait for both servers to start...
 echo You can close this window once everything is running.

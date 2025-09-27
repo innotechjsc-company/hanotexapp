@@ -371,7 +371,7 @@ export function ProposalsModal({
       ) : error ? (
         <Card>
           <div className="text-center py-10">
-            <Text type="danger">{error}</Text>
+            <Text type="secondary">{error}</Text>
             <div className="mt-4">
               <Button type="primary" onClick={fetchProposals}>
                 Thử lại

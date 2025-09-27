@@ -473,7 +473,7 @@ export function ViewTechnologyModal({
         return "success";
       case "rejected":
       case "inactive":
-        return "danger";
+        return "default";
       default:
         return "default";
     }

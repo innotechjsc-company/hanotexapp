@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Category } from "@/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { getCategories } from "@/api/categories";
+import { getAllCategories } from "@/api/categories";
 
 const categoryIcons: Record<string, any> = {
   AI: Brain,
@@ -39,7 +39,7 @@ export default function CategoriesSection() {
     const fetchCategories = async () => {
       try {
         // Prefer server sort by custom order, limit to 6 for homepage
-        const response = await getCategories({}, { limit: 6, sort: "sort_order" });
+        const response = await getAllCategories({ limit: 6, sort: "sort_order" });
         const list = (Array.isArray((response as any).data)
           ? (response as any).data
           : Array.isArray((response as any).docs)
@@ -84,18 +84,18 @@ export default function CategoriesSection() {
 
         {/* Categories Grid */}
         {categories.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {categories.map((category, index) => {
               const IconComponent =
                 categoryIcons[category.name] || FlaskConical;
 
               return (
-                <div key={category.id} className="h-full">
+                <div key={category.id}>
                   <Link
-                    href={`/technologies?category=${category.id}`}
-                    className="flex h-full flex-col bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                    href={`/technologies?category_id=${category.id}`}
+                    className="block bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                   >
-                    <div className="flex h-full flex-1 flex-col px-6 py-4 text-center">
+                    <div className="px-6 py-4 text-center">
                       {/* Icon */}
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                         <IconComponent className="h-8 w-8" />
@@ -114,7 +114,6 @@ export default function CategoriesSection() {
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical",
                         }}
-                        title={category.name}
                       >
                         {category.name}
                       </p>
@@ -125,7 +124,7 @@ export default function CategoriesSection() {
                       </div>
 
                       {/* Arrow */}
-                      <div className="mt-auto flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform">
+                      <div className="flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform">
                         <span className="text-sm font-medium mr-1">
                           Khám phá
                         </span>

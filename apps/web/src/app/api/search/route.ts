@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Call CMS search API
-    const cmsSearchUrl = `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL}/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}&limit=${limit}`;
+    const cmsSearchUrl = `http://localhost:4000/api/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}&limit=${limit}`;
     
     console.log('Calling CMS search API:', cmsSearchUrl);
     

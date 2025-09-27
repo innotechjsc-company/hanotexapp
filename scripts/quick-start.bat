@@ -25,7 +25,7 @@ echo [2/3] Installing frontend dependencies...
 cd apps\web
 if not exist node_modules (
     echo Installing dependencies... This may take a few minutes.
-    npm install
+    bun install
     if %errorlevel% neq 0 (
         echo ❌ Failed to install dependencies!
         echo.
@@ -39,7 +39,7 @@ echo ✅ Dependencies installed
 echo.
 echo [3/3] Starting frontend application...
 echo Starting Next.js development server...
-start "HANOTEX Frontend" cmd /k "npm run dev"
+start "HANOTEX Frontend" cmd /k "bun dev"
 cd ..\..
 
 echo.
@@ -49,7 +49,7 @@ echo ========================================
 echo.
 echo Frontend:     http://localhost:3000
 echo.
-echo Note: Some features may not work without backend API
+echo Note: Some features may not work without CMS
 echo To start full system, run: start-hanotex.bat
 echo.
 echo You can close this window once the server is running.

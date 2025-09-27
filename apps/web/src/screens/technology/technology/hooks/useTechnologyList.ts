@@ -38,7 +38,7 @@ export interface UseTechnologyListReturn {
 
   // helpers
   showClear: boolean;
-  trlChipColor: (level?: number) => "danger" | "warning" | "success";
+  trlChipColor: (level?: number) => "default" | "warning" | "success";
   statusChipColor: (status?: string) => "success" | "warning" | "default";
 }
 
@@ -207,7 +207,7 @@ export function useTechnologyList(): UseTechnologyListReturn {
 
   const trlChipColor = (level?: number) => {
     const lv = level ?? 0;
-    if (lv <= 3) return "danger" as const;
+    if (lv <= 3) return "default" as const;
     if (lv <= 6) return "warning" as const;
     return "success" as const;
   };
