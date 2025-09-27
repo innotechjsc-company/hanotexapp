@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,6 +16,9 @@ import { Bell, Search as SearchIcon } from "lucide-react";
 import { getUserIconByType, userMenuItemsBase } from "./constants";
 import { UserType } from "@/types";
 import { useUser } from "@/store/auth";
+import { getNotifications } from "@/api/noti";
+import { Notification } from "@/types/notification";
+import NotificationItem from "./NotificationItem";
 
 type Props = {
   user?: {
@@ -39,11 +42,44 @@ function getUserType(type: UserType) {
 }
 export default function UserMenu({ onLogout, onOpenSearch }: Props) {
   const router = useRouter();
-  const [notificationTab, setNotificationTab] = useState<"unread" | "read">(
-    "unread"
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notificationTab, setNotificationTab] = useState<"system" | "other">(
+    "system"
   );
 
   const user = useUser();
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getNotifications(
+        { user: user.id },
+        { limit: 100 }
+      );
+      setNotifications(response.docs || []);
+    } catch (err) {
+      setError("Không thể tải thông báo.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (isNotiOpen) {
+      fetchNotifications();
+    }
+  }, [isNotiOpen, fetchNotifications]);
+
+  const systemNotifications = notifications.filter((n) => n.type === "system");
+  const otherNotifications = notifications.filter((n) => n.type !== "system");
+
   const DisplayIcon = getUserIconByType(user?.user_type);
 
   const menuItems: Array<
@@ -74,7 +110,7 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
       </Button>
 
       {/* Notifications */}
-      <Dropdown placement="bottom-end">
+      <Dropdown placement="bottom-end" onOpenChange={setIsNotiOpen}>
         <Badge content="" color="danger" shape="circle" placement="top-right">
           <DropdownTrigger>
             <Button isIconOnly variant="light" aria-label="Thông báo">
@@ -94,40 +130,69 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
               </h3>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setNotificationTab("unread")}
+                  onClick={() => setNotificationTab("system")}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    notificationTab === "unread"
+                    notificationTab === "system"
                       ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
-                  Thông báo hệ thống
+                  Hệ thống
                 </button>
                 <button
-                  onClick={() => setNotificationTab("read")}
+                  onClick={() => setNotificationTab("other")}
                   className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                    notificationTab === "read"
+                    notificationTab === "other"
                       ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                 >
-                  Thông báo khác
+                  Khác
                 </button>
               </div>
             </div>
           </DropdownItem>
           <DropdownItem key="content" isReadOnly className="h-auto p-0">
-            <div className="p-4 max-h-96 overflow-y-auto">
-              {notificationTab === "unread" ? (
-                <div className="text-center text-gray-500 py-8">
-                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm">Không có thông báo chưa đọc</p>
-                </div>
+            <div className="p-2 max-h-96 overflow-y-auto">
+              {loading ? (
+                <div className="text-center text-gray-500 p-4">Đang tải...</div>
+              ) : error ? (
+                <div className="text-center text-red-500 p-4">{error}</div>
               ) : (
-                <div className="text-center text-gray-500 py-8">
-                  <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm">Không có thông báo đã đọc</p>
-                </div>
+                <>
+                  {notificationTab === "system" && (
+                    <>
+                      {systemNotifications.length === 0 ? (
+                        <div className="text-center text-gray-500 py-8">
+                          <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                          <p className="text-sm">Không có thông báo hệ thống</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          {systemNotifications.map((n) => (
+                            <NotificationItem key={n.id} notification={n} />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {notificationTab === "other" && (
+                    <>
+                      {otherNotifications.length === 0 ? (
+                        <div className="text-center text-gray-500 py-8">
+                          <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                          <p className="text-sm">Không có thông báo khác</p>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          {otherNotifications.map((n) => (
+                            <NotificationItem key={n.id} notification={n} />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
               )}
             </div>
           </DropdownItem>
