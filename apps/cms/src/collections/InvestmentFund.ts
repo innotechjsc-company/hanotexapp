@@ -15,6 +15,12 @@ export const InvestmentFund: CollectionConfig = {
   },
   fields: [
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,

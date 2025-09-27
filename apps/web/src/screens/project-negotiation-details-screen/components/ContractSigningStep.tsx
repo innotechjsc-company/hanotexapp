@@ -321,13 +321,17 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
           message.success(result.message);
 
           // If both parties accepted, refresh contract and notify parent to refresh proposal
+          
           if ((result as any)?.bothAccepted) {
             try {
               await refreshContract();
             } finally {
               onBothAccepted?.();
               // chỉnh sửa dự án thành không kêu gọi đầu tư nữa
-              await updateProject(activeContract.project_propose?.project?.id as string, { open_investment_fund: false });
+            //   if(activeContract.project_propose?.project?.id){
+            //  debugger
+            //     const rs = await updateProject(activeContract.project_propose?.project?.id, { open_investment_fund: false });
+            //   }
             }
             return;
           }

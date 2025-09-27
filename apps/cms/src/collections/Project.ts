@@ -16,6 +16,12 @@ export const Project: CollectionConfig = {
   fields: [
     // Thông tin dự án
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,

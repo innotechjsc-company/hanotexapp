@@ -13,7 +13,6 @@ import {
   Table,
   Tooltip,
   DatePicker,
-  Upload,
   Form,
   Row,
   Col,
@@ -36,8 +35,9 @@ import {
   CalendarOutlined,
   DollarOutlined,
   TeamOutlined,
-  UploadOutlined,
   SearchOutlined,
+  DownloadOutlined,
+  FileOutlined,
 } from "@ant-design/icons";
 import { FileTextOutlined } from "@ant-design/icons";
 import {
@@ -51,9 +51,8 @@ import type { Project } from "@/types/project";
 import type { Technology } from "@/types/technologies";
 import { Toaster, toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/auth";
-import { uploadFiles } from "@/api/media";
-import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
+import type { ColumnsType } from "antd/es/table";
+import dayjs from "dayjs";
 import { getInvestmentFunds } from "@/api/investment-fund";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { projectProposeApi } from "@/api/project-propose";
@@ -65,6 +64,8 @@ import { CheckCircle, ExternalLink, X } from "lucide-react";
 import { createServiceTicket } from "@/api/service-ticket";
 import { getUserByRoleAdmin } from "@/api/user";
 import type { ServiceTicket } from "@/types/service-ticket";
+import { FileUpload, type FileUploadItem } from "@/components/input";
+import downloadService from "@/services/downloadService";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -100,6 +101,14 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("vi-VN");
 };
 
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
@@ -122,17 +131,16 @@ const getStatusLabel = (status: string) => {
     case "rejected":
       return "Từ chối";
     default:
-      return 'Không xác định';
+      return "Không xác định";
   }
 };
-
-
 
 const getTechnologyTitlesFromValues = (
   value: string[] | Technology[] | undefined,
   list: Technology[]
 ): string => {
-  if (!value || (Array.isArray(value) && value.length === 0)) return "Chưa chọn";
+  if (!value || (Array.isArray(value) && value.length === 0))
+    return "Chưa chọn";
   return (value as any[])
     .map((v) => {
       if (typeof v === "string") {
@@ -150,7 +158,8 @@ const getInvestmentFundTitlesFromValues = (
   value: string[] | any[] | undefined,
   list: any[]
 ): string => {
-  if (!value || (Array.isArray(value) && value.length === 0)) return "Chưa chọn";
+  if (!value || (Array.isArray(value) && value.length === 0))
+    return "Chưa chọn";
   return (value as any[])
     .map((v) => {
       if (typeof v === "string") {
@@ -171,78 +180,99 @@ const getInvestmentFundTitlesFromValues = (
 //   { service: "service_id_2", description: "mô tả yêu cầu 2" },
 //   ...
 // ]
-function ServiceTicketForm({ 
-  services, 
-  form, 
-  fieldName 
-}: { 
-  services: Service[]; 
-  form: any; 
-  fieldName: string; 
+function ServiceTicketForm({
+  services,
+  form,
+  fieldName,
+}: {
+  services: Service[];
+  form: any;
+  fieldName: string;
 }) {
   const getSelectedServices = () => {
-    const serviceTickets = form.getFieldValue('service_tickets') || [];
+    const serviceTickets = form.getFieldValue("service_tickets") || [];
     return serviceTickets.map((ticket: any) => ticket?.service).filter(Boolean);
   };
 
   const getAvailableServices = (currentIndex: number) => {
     const selectedServices = getSelectedServices();
-    return services.filter(service => {
+    return services.filter((service) => {
       const serviceId = String((service as any).id || (service as any)._id);
       // Không hiển thị dịch vụ đã được chọn ở các vị trí khác
-      return !selectedServices.some((selectedId: string, index: number) => 
-        index !== currentIndex && selectedId === serviceId
+      return !selectedServices.some(
+        (selectedId: string, index: number) =>
+          index !== currentIndex && selectedId === serviceId
       );
     });
   };
 
   // Helper function để đảm bảo data structure đúng
   const getServiceTicketData = (): ServiceTicketFormData[] => {
-    const serviceTickets = form.getFieldValue('service_tickets') || [];
-    return serviceTickets.map((ticket: any) => ({
-      service: ticket?.service || '',
-      description: ticket?.description || ''
-    })).filter((ticket: ServiceTicketFormData) => ticket.service && ticket.description);
+    const serviceTickets = form.getFieldValue("service_tickets") || [];
+    return serviceTickets
+      .map((ticket: any) => ({
+        service: ticket?.service || "",
+        description: ticket?.description || "",
+      }))
+      .filter(
+        (ticket: ServiceTicketFormData) => ticket.service && ticket.description
+      );
   };
 
   // Debug: Log data structure khi có thay đổi
   useEffect(() => {
-    const serviceTickets = form.getFieldValue('service_tickets') || [];
+    const serviceTickets = form.getFieldValue("service_tickets") || [];
     if (serviceTickets.length > 0) {
-      console.log('ServiceTicketForm raw data:', serviceTickets);
-      console.log('ServiceTicketForm formatted data:', getServiceTicketData());
-      console.log('Data structure example:', [
+      console.log("ServiceTicketForm raw data:", serviceTickets);
+      console.log("ServiceTicketForm formatted data:", getServiceTicketData());
+      console.log("Data structure example:", [
         { service: "service_id_1", description: "mô tả yêu cầu 1" },
-        { service: "service_id_2", description: "mô tả yêu cầu 2" }
+        { service: "service_id_2", description: "mô tả yêu cầu 2" },
       ]);
     }
-  }, [form.getFieldValue('service_tickets')]);
+  }, [form.getFieldValue("service_tickets")]);
 
   return (
     <Form.List name="service_tickets">
       {(fields, { add, remove }) => (
         <>
           {fields.map(({ key, name, ...restField }) => (
-            <div key={key} style={{ marginBottom: 16, padding: 16, border: '1px solid #d9d9d9', borderRadius: 6 }}>
+            <div
+              key={key}
+              style={{
+                marginBottom: 16,
+                padding: 16,
+                border: "1px solid #d9d9d9",
+                borderRadius: 6,
+              }}
+            >
               <Row gutter={16} align="middle">
                 <Col span={20}>
                   <Form.Item
                     {...restField}
-                    name={[name, 'service']}
+                    name={[name, "service"]}
                     label="Dịch vụ"
-                    rules={[{ required: true, message: 'Vui lòng chọn dịch vụ!' }]}
+                    rules={[
+                      { required: true, message: "Vui lòng chọn dịch vụ!" },
+                    ]}
                   >
                     <Select
                       placeholder="Chọn dịch vụ"
                       showSearch
                       filterOption={(input, option) =>
-                        (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
                       }
                     >
                       {getAvailableServices(name).map((service) => (
                         <Option
-                          key={String((service as any).id || (service as any)._id)}
-                          value={String((service as any).id || (service as any)._id)}
+                          key={String(
+                            (service as any).id || (service as any)._id
+                          )}
+                          value={String(
+                            (service as any).id || (service as any)._id
+                          )}
                         >
                           {service.name}
                         </Option>
@@ -251,7 +281,14 @@ function ServiceTicketForm({
                   </Form.Item>
                 </Col>
                 <Col span={4}>
-                  <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: 8 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      height: "100%",
+                      paddingTop: 8,
+                    }}
+                  >
                     <Button
                       type="text"
                       danger
@@ -267,9 +304,14 @@ function ServiceTicketForm({
                 <Col span={24}>
                   <Form.Item
                     {...restField}
-                    name={[name, 'description']}
+                    name={[name, "description"]}
                     label="Mô tả yêu cầu"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả yêu cầu!' }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập mô tả yêu cầu!",
+                      },
+                    ]}
                   >
                     <Input.TextArea
                       rows={3}
@@ -315,21 +357,30 @@ function AddProjectModal({
   services: Service[];
 }) {
   const [form] = Form.useForm();
-  const [docsUploading, setDocsUploading] = useState(false);
+  const [documentsFinance, setDocumentsFinance] = useState<FileUploadItem[]>(
+    []
+  );
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      await onCreate(values);
+      // Thêm documents_finance từ FileUpload component
+      const formData = {
+        ...values,
+        documents_finance: documentsFinance.map((doc) => String(doc.id)),
+      };
+      await onCreate(formData);
       form.resetFields();
+      setDocumentsFinance([]);
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error("Validation failed:", error);
     }
   };
 
   const handleCancel = () => {
     onCancel();
     form.resetFields();
+    setDocumentsFinance([]);
   };
 
   return (
@@ -340,287 +391,264 @@ function AddProjectModal({
       onCancel={handleCancel}
       width="70vw"
       style={{
-        top: 0,   
+        top: 0,
         paddingBottom: 0,
       }}
       styles={{
         body: {
-          height: 'calc(100vh - 110px)',
-          overflow: 'hidden',
+          height: "calc(100vh - 110px)",
+          overflow: "hidden",
           padding: 0,
         },
       }}
       confirmLoading={loading}
-      okText="Tạo dự án"  
+      okText="Tạo dự án"
       cancelText="Hủy"
     >
-      <div style={{
-        height: '100%',
-        overflow: 'auto',
-      }}>
-        <Form
-          form={form}
-          layout="vertical"
-          scrollToFirstError
-        >
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="name"
-              label="Tên dự án"
-              rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
-            >
-              <Input placeholder="Nhập tên dự án" />
-            </Form.Item>
-          </Col>
-        </Row>
-        
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="description"
-              label="Mô tả dự án"
-              rules={[{ required: true, message: 'Vui lòng nhập mô tả dự án!' }]}
-            >
-              <Input.TextArea
-                rows={4}
-                placeholder="Nhập mô tả chi tiết về dự án"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="technologies"
-              label="Công nghệ"
-              rules={[{ required: true, message: 'Vui lòng chọn công nghệ!' }]}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Chọn công nghệ"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
-                }
+      <div
+        style={{
+          height: "100%",
+          overflow: "auto",
+        }}
+      >
+        <Form form={form} layout="vertical" scrollToFirstError>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="name"
+                label="Tên dự án"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên dự án!" },
+                ]}
               >
-                {technologies.map((tech) => (
-                  <Option
-                    key={String((tech as any).id || (tech as any)._id)}
-                    value={String((tech as any).id || (tech as any)._id)}
-                  >
-                    {tech.title}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Input placeholder="Nhập tên dự án" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="investment_fund"
-              label="Quỹ đầu tư"
-            >
-              <Select
-                mode="multiple"
-                placeholder="Chọn quỹ đầu tư"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
-                }
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="description"
+                label="Mô tả dự án"
+                rules={[
+                  { required: true, message: "Vui lòng nhập mô tả dự án!" },
+                ]}
               >
-                {funds.map((fund) => (
-                  <Option
-                    key={String((fund as any).id || (fund as any)._id)}
-                    value={String((fund as any).id || (fund as any)._id)}
-                  >
-                    {(fund as any).name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Nhập mô tả chi tiết về dự án"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="business_model"
-              label="Mô hình kinh doanh"
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Mô tả mô hình kinh doanh"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="market_data"
-              label="Số liệu và thị trường"
-            >
-              <Input.TextArea
-                rows={4}
-                placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="team_profile"
-              label="Hồ sơ đội ngũ"
-            >
-              <Input.TextArea
-                rows={5}
-                placeholder="Thông tin đội ngũ chính"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              name="revenue"
-              label="Doanh thu (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập doanh thu"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="profit"
-              label="Lợi nhuận (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập lợi nhuận"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="assets"
-              label="Tài sản (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập tổng tài sản"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="documents_finance"
-              label="Tài liệu tài chính"
-            >
-              <Upload
-                multiple
-                beforeUpload={() => false}
-                onChange={async (info) => {
-                  const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
-                  if (files.length === 0) return;
-                  try {
-                    setDocsUploading(true);
-                    const uploaded = await uploadFiles(files as File[]);
-                    const ids = uploaded.map((m: any) => String(m.id ?? m._id));
-                    form.setFieldValue('documents_finance', ids);
-                    message.success("Đã upload tài liệu tài chính");
-                  } catch (err) {
-                    message.error("Upload tài liệu thất bại");
-                  } finally {
-                    setDocsUploading(false);
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="technologies"
+                label="Công nghệ"
+                rules={[
+                  { required: true, message: "Vui lòng chọn công nghệ!" },
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn công nghệ"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                }}
+                >
+                  {technologies.map((tech) => (
+                    <Option
+                      key={String((tech as any).id || (tech as any)._id)}
+                      value={String((tech as any).id || (tech as any)._id)}
+                    >
+                      {tech.title}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="investment_fund" label="Quỹ đầu tư">
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn quỹ đầu tư"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {funds.map((fund) => (
+                    <Option
+                      key={String((fund as any).id || (fund as any)._id)}
+                      value={String((fund as any).id || (fund as any)._id)}
+                    >
+                      {(fund as any).name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="business_model" label="Mô hình kinh doanh">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Mô tả mô hình kinh doanh"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="market_data" label="Số liệu và thị trường">
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="team_profile" label="Hồ sơ đội ngũ">
+                <Input.TextArea
+                  rows={5}
+                  placeholder="Thông tin đội ngũ chính"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="revenue" label="Doanh thu (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập doanh thu"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="profit" label="Lợi nhuận (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập lợi nhuận"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="assets" label="Tài sản (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập tổng tài sản"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Tài liệu tài chính">
+                <FileUpload
+                  value={documentsFinance}
+                  onChange={setDocumentsFinance}
+                  multiple={true}
+                  maxCount={10}
+                  allowedTypes={["document", "image"]}
+                  maxSize={50 * 1024 * 1024} // 50MB
+                  variant="button"
+                  buttonText="Chọn tài liệu tài chính"
+                  title="Tải lên tài liệu tài chính"
+                  description="Chọn các file tài liệu tài chính (PDF, Word, Excel, hình ảnh) - tối đa 50MB mỗi file"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="goal_money" label="Số tiền đầu tư kêu gọi (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập số tiền"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="share_percentage"
+                label="Tỷ lệ cổ phần đề xuất (%)"
               >
-                <Button icon={<UploadOutlined />} loading={docsUploading}>
-                  Chọn tài liệu
-                </Button>
-              </Upload>
-            </Form.Item>
-          </Col>
-        </Row>
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập tỷ lệ cổ phần"
+                  min={0}
+                  max={100}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              name="goal_money"
-              label="Số tiền đầu tư kêu gọi (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập số tiền"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="share_percentage"
-              label="Tỷ lệ cổ phần đề xuất (%)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập tỷ lệ cổ phần"
-                min={0}
-                max={100}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="goal_money_purpose" label="Mục đích sử dụng vốn">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Mô tả cách sử dụng số tiền kêu gọi"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="goal_money_purpose"
-              label="Mục đích sử dụng vốn"
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Mô tả cách sử dụng số tiền kêu gọi"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="end_date"
-              label="Ngày kết thúc"
-              rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
-            >
-              <DatePicker
-                style={{ width: '100%' }}
-                placeholder="Chọn ngày kết thúc"
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        {/* <Row gutter={16}>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="end_date"
+                label="Ngày kết thúc"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày kết thúc!" },
+                ]}
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  placeholder="Chọn ngày kết thúc"
+                  format="YYYY-MM-DD"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          {/* <Row gutter={16}>
           <Col span={24}>
             <Form.Item
               name="open_investment_fund"
@@ -630,13 +658,20 @@ function AddProjectModal({
             </Form.Item>
           </Col>
         </Row> */}
-        <Row gutter={16}>
-          <Col span={24}>
-            <Text strong>Phiếu dịch vụ (Tùy chọn)</Text>
-          </Col>
-        </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Text strong>Mục dịch vụ (Tùy chọn)</Text>
+            </Col>
+            <Col span={24}>
+              <Text type="secondary">Dịch vụ hỗ trợ các vấn đề của dự án</Text>
+            </Col>
+          </Row>
 
-        <ServiceTicketForm services={services} form={form} fieldName="service_tickets" />
+          <ServiceTicketForm
+            services={services}
+            form={form}
+            fieldName="service_tickets"
+          />
         </Form>
       </div>
     </Modal>
@@ -664,7 +699,9 @@ function EditProjectModal({
   project: EditableProject | null;
 }) {
   const [form] = Form.useForm();
-  const [docsUploading, setDocsUploading] = useState(false);
+  const [documentsFinance, setDocumentsFinance] = useState<FileUploadItem[]>(
+    []
+  );
 
   useEffect(() => {
     if (project && open) {
@@ -686,22 +723,51 @@ function EditProjectModal({
         end_date: project.end_date ? dayjs(project.end_date) : null,
       };
       form.setFieldsValue(formValues);
+
+      // Load documents finance if available
+      if (
+        (project as any).documents_finance &&
+        Array.isArray((project as any).documents_finance)
+      ) {
+        // Convert document IDs to FileUploadItem format
+        const docs = (project as any).documents_finance.map((doc: any) => ({
+          ...doc,
+          id: doc.id,
+          filename: `${doc.name ?? doc.filename ?? doc.id}`,
+          alt: `Document ${doc.id}`,
+          filesize: doc.filesize,
+          type: "document" as const,
+          uploadStatus: "done" as const,
+          createdAt: doc.createdAt,
+          updatedAt: doc.updatedAt,
+        }));
+        setDocumentsFinance(docs);
+      } else {
+        setDocumentsFinance([]);
+      }
     }
   }, [project, open, form]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      await onUpdate(values);
+      // Thêm documents_finance từ FileUpload component
+      const formData = {
+        ...values,
+        documents_finance: documentsFinance.map((doc) => String(doc.id)),
+      };
+      await onUpdate(formData);
       form.resetFields();
+      setDocumentsFinance([]);
     } catch (error) {
-      console.error('Validation failed:', error);
+      console.error("Validation failed:", error);
     }
   };
 
   const handleCancel = () => {
     onCancel();
     form.resetFields();
+    setDocumentsFinance([]);
   };
 
   return (
@@ -712,13 +778,13 @@ function EditProjectModal({
       onCancel={handleCancel}
       width="70vw"
       style={{
-        top: 0,   
+        top: 0,
         paddingBottom: 0,
       }}
       styles={{
         body: {
-          height: 'calc(100vh - 110px)',
-          overflow: 'hidden',
+          height: "calc(100vh - 110px)",
+          overflow: "hidden",
           padding: 0,
         },
       }}
@@ -726,281 +792,251 @@ function EditProjectModal({
       okText="Cập nhật"
       cancelText="Hủy"
     >
-      <div style={{
-        height: '100%',
-        overflow: 'auto',
-        padding: '24px 32px'
-      }}>
-        <Form
-          form={form}
-          layout="vertical"
-          scrollToFirstError
-        >
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="name"
-              label="Tên dự án"
-              rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
-            >
-              <Input placeholder="Nhập tên dự án" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="description"
-              label="Mô tả dự án"
-              rules={[{ required: true, message: 'Vui lòng nhập mô tả dự án!' }]}
-            >
-              <Input.TextArea
-                rows={4}
-                placeholder="Nhập mô tả chi tiết về dự án"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="technologies"
-              label="Công nghệ"
-              rules={[{ required: true, message: 'Vui lòng chọn công nghệ!' }]}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Chọn công nghệ"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
-                }
+      <div
+        style={{
+          height: "100%",
+          overflow: "auto",
+          padding: "24px 32px",
+        }}
+      >
+        <Form form={form} layout="vertical" scrollToFirstError>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="name"
+                label="Tên dự án"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên dự án!" },
+                ]}
               >
-                {technologies.map((tech) => (
-                  <Option
-                    key={String((tech as any).id || (tech as any)._id)}
-                    value={String((tech as any).id || (tech as any)._id)}
-                  >
-                    {tech.title}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Input placeholder="Nhập tên dự án" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="investment_fund"
-              label="Quỹ đầu tư"
-            >
-              <Select
-                mode="multiple"
-                placeholder="Chọn quỹ đầu tư"
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
-                }
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="description"
+                label="Mô tả dự án"
+                rules={[
+                  { required: true, message: "Vui lòng nhập mô tả dự án!" },
+                ]}
               >
-                {funds.map((fund) => (
-                  <Option
-                    key={String((fund as any).id || (fund as any)._id)}
-                    value={String((fund as any).id || (fund as any)._id)}
-                  >
-                    {(fund as any).name}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Nhập mô tả chi tiết về dự án"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="business_model"
-              label="Mô hình kinh doanh"
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Mô tả mô hình kinh doanh"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="market_data"
-              label="Số liệu và thị trường"
-            >
-              <Input.TextArea
-                rows={4}
-                placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="team_profile"
-              label="Hồ sơ đội ngũ"
-            >
-              <Input.TextArea
-                rows={5}
-                placeholder="Thông tin đội ngũ chính"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              name="revenue"
-              label="Doanh thu (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập doanh thu"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="profit"
-              label="Lợi nhuận (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập lợi nhuận"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="assets"
-              label="Tài sản (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập tổng tài sản"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="documents_finance"
-              label="Tài liệu tài chính"
-            >
-              <Upload
-                multiple
-                beforeUpload={() => false}
-                onChange={async (info) => {
-                  const files = info.fileList.map(file => file.originFileObj).filter(Boolean);
-                  if (files.length === 0) return;
-                  try {
-                    setDocsUploading(true);
-                    const uploaded = await uploadFiles(files as File[]);
-                    const ids = uploaded.map((m: any) => String(m.id ?? m._id));
-                    form.setFieldValue('documents_finance', ids);
-                    message.success("Đã upload tài liệu tài chính");
-                  } catch (err) {
-                    message.error("Upload tài liệu thất bại");
-                  } finally {
-                    setDocsUploading(false);
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="technologies"
+                label="Công nghệ"
+                rules={[
+                  { required: true, message: "Vui lòng chọn công nghệ!" },
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn công nghệ"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
                   }
-                }}
+                >
+                  {technologies.map((tech) => (
+                    <Option
+                      key={String((tech as any).id || (tech as any)._id)}
+                      value={String((tech as any).id || (tech as any)._id)}
+                    >
+                      {tech.title}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="investment_fund" label="Quỹ đầu tư">
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn quỹ đầu tư"
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.children as unknown as string)
+                      ?.toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                >
+                  {funds.map((fund) => (
+                    <Option
+                      key={String((fund as any).id || (fund as any)._id)}
+                      value={String((fund as any).id || (fund as any)._id)}
+                    >
+                      {(fund as any).name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="business_model" label="Mô hình kinh doanh">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Mô tả mô hình kinh doanh"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="market_data" label="Số liệu và thị trường">
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Dữ liệu quy mô thị trường mục tiêu; Số lượng khách hàng tiềm năng và các số liệu kinh doanh thực tế (VD doanh số đã bán và doanh số dự kiến"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="team_profile" label="Hồ sơ đội ngũ">
+                <Input.TextArea
+                  rows={5}
+                  placeholder="Thông tin đội ngũ chính"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="revenue" label="Doanh thu (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập doanh thu"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="profit" label="Lợi nhuận (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập lợi nhuận"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="assets" label="Tài sản (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập tổng tài sản"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Tài liệu tài chính">
+                <FileUpload
+                  value={documentsFinance}
+                  onChange={setDocumentsFinance}
+                  multiple={true}
+                  maxCount={10}
+                  allowedTypes={["document", "image"]}
+                  maxSize={50 * 1024 * 1024} // 50MB
+                  variant="button"
+                  buttonText="Chọn tài liệu tài chính"
+                  title="Tải lên tài liệu tài chính"
+                  description="Chọn các file tài liệu tài chính (PDF, Word, Excel, hình ảnh) - tối đa 50MB mỗi file"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="goal_money" label="Số tiền đầu tư kêu gọi (VND)">
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập số tiền"
+                  formatter={(value) =>
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                  }
+                  parser={(value) => value!.replace(/\$\s?|(|,*)/g, "")}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="share_percentage"
+                label="Tỷ lệ cổ phần đề xuất (%)"
               >
-                <Button icon={<UploadOutlined />} loading={docsUploading}>
-                  Chọn tài liệu
-                </Button>
-              </Upload>
-            </Form.Item>
-          </Col>
-        </Row>
+                <InputNumber
+                  style={{ width: "100%" }}
+                  placeholder="Nhập tỷ lệ cổ phần"
+                  min={0}
+                  max={100}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              name="goal_money"
-              label="Số tiền đầu tư kêu gọi (VND)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập số tiền"
-                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={(value) => value!.replace(/\$\s?|(|,*)/g, '')}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="share_percentage"
-              label="Tỷ lệ cổ phần đề xuất (%)"
-            >
-              <InputNumber
-                style={{ width: '100%' }}
-                placeholder="Nhập tỷ lệ cổ phần"
-                min={0}
-                max={100}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="goal_money_purpose" label="Mục đích sử dụng vốn">
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Mô tả cách sử dụng số tiền kêu gọi"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="goal_money_purpose"
-              label="Mục đích sử dụng vốn"
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Mô tả cách sử dụng số tiền kêu gọi"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              name="end_date"
-              label="Ngày kết thúc"
-              rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
-            >
-              <DatePicker
-                style={{ width: '100%' }}
-                placeholder="Chọn ngày kết thúc"
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Text strong>Phiếu dịch vụ (Tùy chọn)</Text>
-          </Col>
-        </Row>
-
-        {/* <Row gutter={16}>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                name="end_date"
+                label="Ngày kết thúc"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày kết thúc!" },
+                ]}
+              >
+                <DatePicker
+                  style={{ width: "100%" }}
+                  placeholder="Chọn ngày kết thúc"
+                  format="YYYY-MM-DD"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          {/* <Row gutter={16}>
           <Col span={24}>
             <Form.Item
               name="open_investment_fund"
@@ -1050,128 +1086,241 @@ function ViewProjectModal({
       onCancel={onCancel}
       width="70vw"
       style={{
-        top: 0,   
+        top: 0,
         paddingBottom: 0,
       }}
       styles={{
         body: {
-          height: 'calc(100vh - 110px)',
-          overflow: 'hidden',
+          height: "calc(100vh - 110px)",
+          overflow: "hidden",
           padding: 0,
         },
       }}
       footer={[
         <Button key="close" type="primary" onClick={onCancel}>
           Đóng
-        </Button>
+        </Button>,
       ]}
     >
-      <div style={{
-        height: '100%',
-        overflow: 'auto',
-        paddingTop: 32,
-      }}>
+      <div
+        style={{
+          height: "100%",
+          overflow: "auto",
+          paddingTop: 32,
+        }}
+      >
         <Descriptions bordered column={2}>
-        <Descriptions.Item label="Tên dự án" span={2}>
-          <Text strong>{project?.name}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Mô tả" span={2}>
-          <Text>{project?.description}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Công nghệ">
-          <Text>{getTechnologyNames((project as any)?.technologies)}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Quỹ đầu tư">
-          <Text>{getFundNames((project as any)?.investment_fund)}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Trạng thái">
-          <Tag color={getStatusColor((project as any)?.status || "")}>
-            {getStatusLabel((project as any)?.status || "")}
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item label="Doanh thu">
-          <Text>
-            {(project as any)?.revenue
-              ? formatCurrency((project as any).revenue)
-              : "Chưa xác định"}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Lợi nhuận">
-          <Text>
-            {(project as any)?.profit
-              ? formatCurrency((project as any).profit)
-              : "Chưa xác định"}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Tài sản">
-          <Text>
-            {(project as any)?.assets
-              ? formatCurrency((project as any).assets)
-              : "Chưa xác định"}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Số tiền kêu gọi">
-          <Text>
-            {(project as any)?.goal_money
-              ? formatCurrency((project as any).goal_money)
-              : "Chưa xác định"}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item label="Tỷ lệ cổ phần">
-          <Text>
-            {(project as any)?.share_percentage != null
-              ? `${(project as any).share_percentage}%`
-              : "Chưa xác định"}
-          </Text>
-        </Descriptions.Item>
-        {(project as any)?.end_date && (
-          <Descriptions.Item label="Ngày kết thúc">
-            <Text>{formatDate((project as any).end_date)}</Text>
+          <Descriptions.Item label="Tên dự án" span={2}>
+            <Text strong>{project?.name}</Text>
           </Descriptions.Item>
-        )}
-        <Descriptions.Item label="Mở kêu gọi đầu tư">
-          <Text>{(project as any)?.open_investment_fund ? 'Có' : 'Không'}</Text>
-        </Descriptions.Item>
-        {(project as any)?.goal_money_purpose && (
-          <Descriptions.Item label="Mục đích sử dụng vốn" span={2}>
-            <Text>{(project as any).goal_money_purpose}</Text>
+          <Descriptions.Item label="Mô tả" span={2}>
+            <Text>{project?.description}</Text>
           </Descriptions.Item>
-        )}
-        {(project as any)?.business_model && (
-          <Descriptions.Item label="Mô hình kinh doanh" span={2}>
-            <Text>{(project as any).business_model}</Text>
+          <Descriptions.Item label="Công nghệ">
+            <Text>{getTechnologyNames((project as any)?.technologies)}</Text>
           </Descriptions.Item>
-        )}
-        {(project as any)?.market_data && (
-          <Descriptions.Item label="Dữ liệu thị trường" span={2}>
-            <Text>{(project as any).market_data}</Text>
+          <Descriptions.Item label="Quỹ đầu tư">
+            <Text>{getFundNames((project as any)?.investment_fund)}</Text>
           </Descriptions.Item>
-        )}
-        {(project as any)?.team_profile && (
-          <Descriptions.Item label="Hồ sơ đội ngũ" span={2}>
-            <Text>{(project as any).team_profile}</Text>
+          <Descriptions.Item label="Trạng thái">
+            <Tag color={getStatusColor((project as any)?.status || "")}>
+              {getStatusLabel((project as any)?.status || "")}
+            </Tag>
           </Descriptions.Item>
-        )}
-        {(project as any)?.service_tickets && Array.isArray((project as any).service_tickets) && (project as any).service_tickets.length > 0 && (
-          <Descriptions.Item label="Phiếu dịch vụ" span={2}>
-            <div>
-              {(project as any).service_tickets.map((ticket: any, index: number) => (
-                <div key={index} style={{ marginBottom: 12, padding: 12, border: '1px solid #f0f0f0', borderRadius: 6 }}>
-                  <div style={{ marginBottom: 8 }}>
-                    <Text strong>Dịch vụ: </Text>
-                    <Text>{getServiceName(ticket.service)}</Text>
-                  </div>
-                  {ticket.description && (
-                    <div>
-                      <Text strong>Mô tả: </Text>
-                      <Text>{ticket.description}</Text>
-                    </div>
+          <Descriptions.Item label="Doanh thu">
+            <Text>
+              {(project as any)?.revenue
+                ? formatCurrency((project as any).revenue)
+                : "Chưa xác định"}
+            </Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Lợi nhuận">
+            <Text>
+              {(project as any)?.profit
+                ? formatCurrency((project as any).profit)
+                : "Chưa xác định"}
+            </Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Tài sản">
+            <Text>
+              {(project as any)?.assets
+                ? formatCurrency((project as any).assets)
+                : "Chưa xác định"}
+            </Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Số tiền kêu gọi">
+            <Text>
+              {(project as any)?.goal_money
+                ? formatCurrency((project as any).goal_money)
+                : "Chưa xác định"}
+            </Text>
+          </Descriptions.Item>
+          <Descriptions.Item label="Tỷ lệ cổ phần">
+            <Text>
+              {(project as any)?.share_percentage != null
+                ? `${(project as any).share_percentage}%`
+                : "Chưa xác định"}
+            </Text>
+          </Descriptions.Item>
+          {(project as any)?.end_date && (
+            <Descriptions.Item label="Ngày kết thúc">
+              <Text>{formatDate((project as any).end_date)}</Text>
+            </Descriptions.Item>
+          )}
+          <Descriptions.Item label="Mở kêu gọi đầu tư">
+            <Text>
+              {(project as any)?.open_investment_fund ? "Có" : "Không"}
+            </Text>
+          </Descriptions.Item>
+          {(project as any)?.goal_money_purpose && (
+            <Descriptions.Item label="Mục đích sử dụng vốn" span={2}>
+              <Text>{(project as any).goal_money_purpose}</Text>
+            </Descriptions.Item>
+          )}
+          {(project as any)?.business_model && (
+            <Descriptions.Item label="Mô hình kinh doanh" span={2}>
+              <Text>{(project as any).business_model}</Text>
+            </Descriptions.Item>
+          )}
+          {(project as any)?.market_data && (
+            <Descriptions.Item label="Dữ liệu thị trường" span={2}>
+              <Text>{(project as any).market_data}</Text>
+            </Descriptions.Item>
+          )}
+          {(project as any)?.team_profile && (
+            <Descriptions.Item label="Hồ sơ đội ngũ" span={2}>
+              <Text>{(project as any).team_profile}</Text>
+            </Descriptions.Item>
+          )}
+          {(project as any)?.documents_finance &&
+            Array.isArray((project as any).documents_finance) &&
+            (project as any).documents_finance.length > 0 && (
+              <Descriptions.Item label="Tài liệu đính kèm" span={2}>
+                <div>
+                  {(project as any).documents_finance.map(
+                    (fileData: any, index: number) => (
+                      <div
+                        key={index}
+                        style={{
+                          marginBottom: 12,
+                          padding: 12,
+                          border: "1px solid #f0f0f0",
+                          borderRadius: 6,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            flex: 1,
+                          }}
+                        >
+                          <FileOutlined
+                            style={{
+                              fontSize: 20,
+                              color: "#1890ff",
+                              marginRight: 8,
+                            }}
+                          />
+                          <div>
+                            <Text strong>
+                              {fileData.filename ||
+                                fileData.name ||
+                                `Tài liệu ${index + 1}`}
+                            </Text>
+                            <br />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {fileData.filesize
+                                ? formatFileSize(fileData.filesize)
+                                : ""}
+                              {fileData.mimeType && ` • ${fileData.mimeType}`}
+                              {/* date */}
+                              {fileData.createdAt
+                                ? ` • ${dayjs(fileData.createdAt).format("DD/MM/YYYY HH:mm")}`
+                                : ""}
+                            </Text>
+                          </div>
+                        </div>
+                        <Space>
+                          {fileData.url && (
+                            <Tooltip title="Tải xuống">
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<DownloadOutlined />}
+                                onClick={async () => {
+                                  try {
+                                    await downloadService.downloadByUrl(
+                                      fileData.url,
+                                      fileData.filename ||
+                                        fileData.name ||
+                                        undefined
+                                    );
+                                    message.success(
+                                      "Đang tải xuống tài liệu..."
+                                    );
+                                  } catch (error) {
+                                    message.error(
+                                      "Không thể tải xuống tài liệu"
+                                    );
+                                    console.error("Download error:", error);
+                                  }
+                                }}
+                              />
+                            </Tooltip>
+                          )}
+                          {/* {fileData.url && (
+                            <Tooltip title="Xem trước">
+                              <Button
+                                type="text"
+                                size="small"
+                                icon={<EyeOutlined />}
+                                onClick={() => window.open(fileData.url, "_blank")}
+                              />
+                            </Tooltip>
+                          )} */}
+                        </Space>
+                      </div>
+                    )
                   )}
                 </div>
-              ))}
-            </div>
-          </Descriptions.Item>
-        )}
+              </Descriptions.Item>
+            )}
+          {(project as any)?.service_tickets &&
+            Array.isArray((project as any).service_tickets) &&
+            (project as any).service_tickets.length > 0 && (
+              <Descriptions.Item label="Phiếu dịch vụ" span={2}>
+                <div>
+                  {(project as any).service_tickets.map(
+                    (ticket: any, index: number) => (
+                      <div
+                        key={index}
+                        style={{
+                          marginBottom: 12,
+                          padding: 12,
+                          border: "1px solid #f0f0f0",
+                          borderRadius: 6,
+                        }}
+                      >
+                        <div style={{ marginBottom: 8 }}>
+                          <Text strong>Dịch vụ: </Text>
+                          <Text>{getServiceName(ticket.service)}</Text>
+                        </div>
+                        {ticket.description && (
+                          <div>
+                            <Text strong>Mô tả: </Text>
+                            <Text>{ticket.description}</Text>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
+                </div>
+              </Descriptions.Item>
+            )}
         </Descriptions>
       </div>
     </Modal>
@@ -1205,8 +1354,13 @@ function ProjectProposalsModal({
     setLoading(true);
     setError("");
     try {
-      const res = await projectProposeApi.list({ project: projectId }, { limit: 100, sort: "-createdAt" });
-      const list = ((res as any).docs || (res as any).data || []) as ProjectPropose[];
+      const res = await projectProposeApi.list(
+        { project: projectId },
+        { limit: 100, sort: "-createdAt" }
+      );
+      const list = ((res as any).docs ||
+        (res as any).data ||
+        []) as ProjectPropose[];
       setProposals(list);
     } catch (e) {
       console.error(e);
@@ -1259,7 +1413,11 @@ function ProjectProposalsModal({
         message.error("Vui lòng đăng nhập để xác nhận đề xuất");
         return;
       }
-      await projectProposeApi.acceptProposal(proposalId, "self", "Đã chấp nhận đề xuất");
+      await projectProposeApi.acceptProposal(
+        proposalId,
+        "self",
+        "Đã chấp nhận đề xuất"
+      );
       const pid = String((project as any)?.id || (project as any)?._id || "");
       if (pid) await fetchProposals(pid);
       message.success("Đã xác nhận đề xuất");
@@ -1278,7 +1436,10 @@ function ProjectProposalsModal({
         message.error("Vui lòng đăng nhập để từ chối đề xuất");
         return;
       }
-      await projectProposeApi.setStatus(proposalId, ProjectProposeStatus.Cancelled);
+      await projectProposeApi.setStatus(
+        proposalId,
+        ProjectProposeStatus.Cancelled
+      );
       const pid = String((project as any)?.id || (project as any)?._id || "");
       if (pid) await fetchProposals(pid);
       message.success("Đã từ chối đề xuất");
@@ -1290,52 +1451,72 @@ function ProjectProposalsModal({
     }
   };
 
-    // Handle opening negotiation details
-    const handleViewNegotiationDetails = (proposalId: string) => {
-      const url = `/my-projects/negotiations/${proposalId}`;
-      router.push(url);
-    };
+  // Handle opening negotiation details
+  const handleViewNegotiationDetails = (proposalId: string) => {
+    const url = `/my-projects/negotiations/${proposalId}`;
+    router.push(url);
+  };
 
   const columns: ColumnsType<ProjectPropose> = [
     {
-      title: 'Người đề xuất',
-      dataIndex: 'user',
-      key: 'user',
+      title: "Người đề xuất",
+      dataIndex: "user",
+      key: "user",
       width: 180,
-      render: (user: any) => <Text strong>{(user && (user.full_name || user.email)) || 'Không xác định'}</Text>,
+      render: (user: any) => (
+        <Text strong>
+          {(user && (user.full_name || user.email)) || "Không xác định"}
+        </Text>
+      ),
     },
     {
-      title: 'Số tiền đầu tư',
-      dataIndex: 'investment_amount',
-      key: 'investment_amount',
+      title: "Số tiền đầu tư",
+      dataIndex: "investment_amount",
+      key: "investment_amount",
       width: 160,
-      render: (amount: number) => <Text>{amount ? formatCurrency(amount) : 'Không có'}</Text>,
+      render: (amount: number) => (
+        <Text>{amount ? formatCurrency(amount) : "Không có"}</Text>
+      ),
     },
     {
-      title: 'Tỷ lệ (%)',
-      dataIndex: 'investment_ratio',
-      key: 'investment_ratio',
+      title: "Tỷ lệ (%)",
+      dataIndex: "investment_ratio",
+      key: "investment_ratio",
       width: 120,
-      render: (ratio: number) => <Text>{ratio != null ? `${ratio}%` : 'Không có'}</Text>,
+      render: (ratio: number) => (
+        <Text>{ratio != null ? `${ratio}%` : "Không có"}</Text>
+      ),
     },
     {
-      title: 'Lợi ích',
-      dataIndex: 'investment_benefits',
-      key: 'investment_benefits',
+      title: "Lợi ích",
+      dataIndex: "investment_benefits",
+      key: "investment_benefits",
       width: 240,
-      render: (benefits: string) => <Text ellipsis style={{ maxWidth: 220 }}>{benefits || 'Không có'}</Text>,
+      render: (benefits: string) => (
+        <Text ellipsis style={{ maxWidth: 220 }}>
+          {benefits || "Không có"}
+        </Text>
+      ),
     },
     {
-      title: 'Tài liệu',
-      dataIndex: 'documents',
-      key: 'documents',
+      title: "Tài liệu",
+      dataIndex: "documents",
+      key: "documents",
       width: 140,
-      render: (docs: any[]) => (
+      render: (docs: any) => (
         <Space>
-          {Array.isArray(docs) && docs.length > 0 ? (
-            docs.slice(0, 2).map((d: any, idx: number) => (
-              <Button key={idx} type="link" size="small" onClick={() => d?.url && window.open(d.url, '_blank')}>Tài liệu {idx + 1}</Button>
-            ))
+          {typeof docs === "object" && docs ? (
+            <Button
+              key={docs.id}
+              type="link"
+              size="small"
+              onClick={() =>
+                docs?.url &&
+                downloadService.downloadByUrl(docs.url, docs.filename)
+              }
+            >
+              Tài liệu đính kèm
+            </Button>
           ) : (
             <Text type="secondary">Không có</Text>
           )}
@@ -1343,34 +1524,36 @@ function ProjectProposalsModal({
       ),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       width: 140,
       render: (status: ProjectProposeStatus) => (
         <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
       ),
     },
     {
-      title: 'Cập nhật',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
+      title: "Cập nhật",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
       width: 160,
-      render: (date: string) => <Text>{date ? formatDate(date) : 'Không xác định'}</Text>,
+      render: (date: string) => (
+        <Text>{date ? formatDate(date) : "Không xác định"}</Text>
+      ),
     },
     {
-      title: 'Thao tác',
-      key: 'actions',
-      fixed: 'right',
+      title: "Thao tác",
+      key: "actions",
+      fixed: "right",
       width: 140,
       render: (_, record: any) => {
         const id = String((record as any).id || (record as any)._id);
         const pending = (record as any).status === ProjectProposeStatus.Pending;
         const loadingKey = actionLoading === id;
         const canViewNegotiation =
-        record.status === "negotiating" ||
-        record.status === "contact_signing" ||
-        record.status === "contract_signed";
+          record.status === "negotiating" ||
+          record.status === "contact_signing" ||
+          record.status === "contract_signed";
 
         return (
           <Space>
@@ -1412,7 +1595,7 @@ function ProjectProposalsModal({
                 </Popconfirm>
               </>
             )}
-             {canViewNegotiation && (
+            {canViewNegotiation && (
               <Tooltip title="Xem chi tiết" color="#1677ff">
                 <Button
                   type="text"
@@ -1425,7 +1608,7 @@ function ProjectProposalsModal({
             )}
           </Space>
         );
-      }
+      },
     },
   ];
 
@@ -1433,35 +1616,48 @@ function ProjectProposalsModal({
     <Modal
       title={
         <div>
-          <Title level={4} style={{ margin: 0 }}>Danh sách đề xuất</Title>
-          <Text type="secondary">Dự án: {(project as any)?.name || ''}</Text>
+          <Title level={4} style={{ margin: 0 }}>
+            Danh sách đề xuất
+          </Title>
+          <Text type="secondary">Dự án: {(project as any)?.name || ""}</Text>
         </div>
       }
       open={open}
       onCancel={onCancel}
       footer={[
-        <Button key="close" type="primary" onClick={onCancel}>Đóng</Button>
+        <Button key="close" type="primary" onClick={onCancel}>
+          Đóng
+        </Button>,
       ]}
       width={1200}
       styles={{ body: { paddingTop: 16 } }}
     >
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '24px 0' }}>Đang tải...</div>
+        <div style={{ textAlign: "center", padding: "24px 0" }}>
+          Đang tải...
+        </div>
       ) : error ? (
         <Card>
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <div style={{ textAlign: "center", padding: "24px 0" }}>
             <Text type="danger">{error}</Text>
             <div style={{ marginTop: 16 }}>
-              <Button type="primary" onClick={() => {
-                const pid = String((project as any)?.id || (project as any)?._id || "");
-                if (pid) fetchProposals(pid);
-              }}>Thử lại</Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  const pid = String(
+                    (project as any)?.id || (project as any)?._id || ""
+                  );
+                  if (pid) fetchProposals(pid);
+                }}
+              >
+                Thử lại
+              </Button>
             </div>
           </div>
         </Card>
       ) : proposals.length === 0 ? (
         <Card>
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <div style={{ textAlign: "center", padding: "24px 0" }}>
             <Text type="secondary">Chưa có đề xuất nào cho dự án này</Text>
           </div>
         </Card>
@@ -1470,7 +1666,11 @@ function ProjectProposalsModal({
           columns={columns as any}
           dataSource={proposals}
           rowKey={(record) => String((record as any).id || (record as any)._id)}
-          pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+          }}
           scroll={{ x: 1000 }}
         />
       )}
@@ -1498,10 +1698,12 @@ export default function MyProjectsPage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [proposalsModalOpen, setProposalsModalOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState<EditableProject | null>(null);
+  const [currentProject, setCurrentProject] = useState<EditableProject | null>(
+    null
+  );
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  
+
   const handleViewProposals = (project: Project) => {
     setCurrentProject(project);
     setProposalsModalOpen(true);
@@ -1510,14 +1712,15 @@ export default function MyProjectsPage() {
   const filteredItems = useMemo(() => {
     let filtered = items;
     if (search) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.description.toLowerCase().includes(search.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.description.toLowerCase().includes(search.toLowerCase())
       );
     }
 
     if (statusFilter) {
-      filtered = filtered.filter(item => item.status === statusFilter);
+      filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
     return filtered;
@@ -1553,7 +1756,11 @@ export default function MyProjectsPage() {
       const techList = ((userTechnologies as any).docs ||
         (userTechnologies as any).data ||
         []) as Technology[];
-      setTechnologies(techList?.filter((item) => item.status === "active" || item.status === "approved") || []);
+      setTechnologies(
+        techList?.filter(
+          (item) => item.status === "active" || item.status === "approved"
+        ) || []
+      );
     } catch (e) {
       console.error("Failed to fetch technologies:", e);
     }
@@ -1561,9 +1768,14 @@ export default function MyProjectsPage() {
 
   const fetchFunds = async () => {
     try {
-      const res = await getInvestmentFunds({ user: String((user as any).id || (user as any)._id) }, { limit: 200 });
-      const list = ((res as any).docs || (res as any).data || []) as InvestmentFund[];
-      setFunds(list); 
+      const res = await getInvestmentFunds(
+        { user: String((user as any).id || (user as any)._id) },
+        { limit: 200 }
+      );
+      const list = ((res as any).docs ||
+        (res as any).data ||
+        []) as InvestmentFund[];
+      setFunds(list);
     } catch (e) {
       console.error("Failed to fetch investment funds:", e);
     }
@@ -1571,8 +1783,15 @@ export default function MyProjectsPage() {
 
   const fetchServices = async () => {
     try {
-      const res = await getServices({ search: "" }, { limit: 100, page: 1, sort: "-createdAt" });
-      const list = (res as any)?.docs || (res as any)?.data || (Array.isArray(res) ? res : []) || [];
+      const res = await getServices(
+        { search: "" },
+        { limit: 100, page: 1, sort: "-createdAt" }
+      );
+      const list =
+        (res as any)?.docs ||
+        (res as any)?.data ||
+        (Array.isArray(res) ? res : []) ||
+        [];
       setServices(list as Service[]);
     } catch (e) {
       console.error("Failed to fetch services:", e);
@@ -1595,45 +1814,64 @@ export default function MyProjectsPage() {
     try {
       const obj = {
         ...values,
-        end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : undefined,
+        end_date: values.end_date
+          ? values.end_date.format("YYYY-MM-DD")
+          : undefined,
         status: "pending",
         user: user!,
       };
       console.log(obj);
+      return;
       const createdProject = await createProject(obj);
-      
+
       // Tạo service tickets nếu có dịch vụ được chọn
-      if (values.service_tickets && Array.isArray(values.service_tickets) && values.service_tickets.length > 0) {
+      if (
+        values.service_tickets &&
+        Array.isArray(values.service_tickets) &&
+        values.service_tickets.length > 0
+      ) {
         try {
           // Lấy user admin để làm implementer
           const userAdmin = await getUserByRoleAdmin();
-          const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
+          const userAdminList =
+            (userAdmin as any)?.docs ||
+            (userAdmin as any)?.data ||
+            (Array.isArray(userAdmin) ? userAdmin : []) ||
+            [];
           const userAdminId = userAdminList[0]?.id;
 
           // Tạo service ticket cho mỗi dịch vụ được chọn
-          const serviceTicketPromises = values.service_tickets.map(async (ticketData: any) => {
-            const serviceTicketData = {
-              service: ticketData.service,
-              user: user!.id,
-              description: ticketData.description || `Yêu cầu hỗ trợ dịch vụ cho dự án: ${values.name}`,
-              responsible_user: user!.id,
-              implementers: userAdminId ? [userAdminId] : [],
-              status: "pending" as ServiceTicket["status"],
-              project: String((createdProject as any).id || (createdProject as any)._id),
-            };
-            return createServiceTicket(serviceTicketData);
-          });
+          const serviceTicketPromises = values.service_tickets.map(
+            async (ticketData: any) => {
+              const serviceTicketData = {
+                service: ticketData.service,
+                user: user!.id,
+                description:
+                  ticketData.description ||
+                  `Yêu cầu hỗ trợ dịch vụ cho dự án: ${values.name}`,
+                responsible_user: user!.id,
+                implementers: userAdminId ? [userAdminId] : [],
+                status: "pending" as ServiceTicket["status"],
+                project: String(
+                  (createdProject as any).id || (createdProject as any)._id
+                ),
+              };
+              return createServiceTicket(serviceTicketData);
+            }
+          );
 
           await Promise.all(serviceTicketPromises);
           message.success("Tạo dự án và phiếu dịch vụ thành công");
         } catch (serviceError) {
           console.error("Error creating service tickets:", serviceError);
-          message.warning("Tạo dự án thành công nhưng có lỗi khi tạo phiếu dịch vụ");
+          message.warning(
+            "Tạo dự án thành công nhưng có lỗi khi tạo phiếu dịch vụ"
+          );
         }
       } else {
         message.success("Tạo dự án thành công");
       }
-      
+
       setAddModalOpen(false);
       await fetchList();
     } catch (e) {
@@ -1652,17 +1890,25 @@ export default function MyProjectsPage() {
     try {
       await updateProject(id, {
         ...values,
-        end_date: values.end_date ? values.end_date.format('YYYY-MM-DD') : undefined,
+        end_date: values.end_date
+          ? values.end_date.format("YYYY-MM-DD")
+          : undefined,
         user: user!,
       });
-      
+
       // Thông báo về service tickets nếu có thay đổi
-      if (values.service_tickets && Array.isArray(values.service_tickets) && values.service_tickets.length > 0) {
-        message.success("Cập nhật dự án thành công. Lưu ý: Để thay đổi phiếu dịch vụ, vui lòng tạo phiếu dịch vụ mới từ trang 'Phiếu dịch vụ'");
+      if (
+        values.service_tickets &&
+        Array.isArray(values.service_tickets) &&
+        values.service_tickets.length > 0
+      ) {
+        message.success(
+          "Cập nhật dự án thành công. Lưu ý: Để thay đổi phiếu dịch vụ, vui lòng tạo phiếu dịch vụ mới từ trang 'Phiếu dịch vụ'"
+        );
       } else {
         message.success("Cập nhật dự án thành công");
       }
-      
+
       setEditModalOpen(false);
       setCurrentProject(null);
       await fetchList();
@@ -1710,9 +1956,9 @@ export default function MyProjectsPage() {
   // Table columns configuration
   const columns: ColumnsType<Project> = [
     {
-      title: 'Tên dự án',
-      dataIndex: 'name',
-      key: 'name',
+      title: "Tên dự án",
+      dataIndex: "name",
+      key: "name",
       render: (text: string, record: Project) => (
         <div>
           <Text strong>{text}</Text>
@@ -1724,9 +1970,9 @@ export default function MyProjectsPage() {
       ),
     },
     {
-      title: 'Công nghệ',
-      dataIndex: 'technologies',
-      key: 'technologies',
+      title: "Công nghệ",
+      dataIndex: "technologies",
+      key: "technologies",
       render: (techs: any) => (
         <Text ellipsis style={{ maxWidth: 150 }}>
           {getTechnologyTitlesFromValues(techs, technologies)}
@@ -1734,9 +1980,9 @@ export default function MyProjectsPage() {
       ),
     },
     {
-      title: 'Quỹ đầu tư',
-      dataIndex: 'investment_fund',
-      key: 'investment_fund',
+      title: "Quỹ đầu tư",
+      dataIndex: "investment_fund",
+      key: "investment_fund",
       render: (fundVals: any) => (
         <Text ellipsis style={{ maxWidth: 150 }}>
           {getInvestmentFundTitlesFromValues(fundVals, funds)}
@@ -1744,63 +1990,65 @@ export default function MyProjectsPage() {
       ),
     },
     {
-      title: 'Số tiền kêu gọi',
-      dataIndex: 'goal_money',
-      key: 'goal_money',
+      title: "Số tiền kêu gọi",
+      dataIndex: "goal_money",
+      key: "goal_money",
       render: (amount: number) => (
-        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+        <Text>{amount ? formatCurrency(amount) : "Chưa xác định"}</Text>
       ),
     },
     {
-      title: 'Doanh thu',
-      dataIndex: 'revenue',
-      key: 'revenue',
+      title: "Doanh thu",
+      dataIndex: "revenue",
+      key: "revenue",
       render: (amount: number) => (
-        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+        <Text>{amount ? formatCurrency(amount) : "Chưa xác định"}</Text>
       ),
     },
     {
-      title: 'Lợi nhuận',
-      dataIndex: 'profit',
-      key: 'profit',
+      title: "Lợi nhuận",
+      dataIndex: "profit",
+      key: "profit",
       render: (amount: number) => (
-        <Text>{amount ? formatCurrency(amount) : 'Chưa xác định'}</Text>
+        <Text>{amount ? formatCurrency(amount) : "Chưa xác định"}</Text>
       ),
     },
     {
-      title: 'Tỷ lệ cổ phần',
-      dataIndex: 'share_percentage',
-      key: 'share_percentage',
+      title: "Tỷ lệ cổ phần",
+      dataIndex: "share_percentage",
+      key: "share_percentage",
       render: (percentage: number) => (
-        <Text>{percentage != null ? `${percentage}%` : 'Chưa xác định'}</Text>
+        <Text>{percentage != null ? `${percentage}%` : "Chưa xác định"}</Text>
       ),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
       render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {getStatusLabel(status)}
-        </Tag>
+        <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
       ),
     },
     {
-      title: 'Ngày kết thúc',
-      dataIndex: 'end_date',
-      key: 'end_date',
+      title: "Ngày kết thúc",
+      dataIndex: "end_date",
+      key: "end_date",
       render: (date: string) => (
-        <Text>{date ? formatDate(date) : 'Chưa xác định'}</Text>
+        <Text>{date ? formatDate(date) : "Chưa xác định"}</Text>
       ),
     },
     {
-      title: 'Hành động',
-      key: 'actions',
-      fixed: 'right',
+      title: "Hành động",
+      key: "actions",
+      fixed: "right",
       width: 200,
       render: (_, record: Project) => (
         <Space>
-          <Tooltip title="Xem chi tiết" color="#1677ff" overlayInnerStyle={{ color: 'white' }}>
+          <Tooltip
+            title="Xem chi tiết"
+            color="#1677ff"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -1811,7 +2059,11 @@ export default function MyProjectsPage() {
               }}
             />
           </Tooltip>
-          <Tooltip title="Xem đề xuất" color="#1677ff" overlayInnerStyle={{ color: 'white' }}>
+          <Tooltip
+            title="Xem đề xuất"
+            color="#1677ff"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -1819,7 +2071,11 @@ export default function MyProjectsPage() {
               onClick={() => handleViewProposals(record)}
             />
           </Tooltip>
-          <Tooltip title="Chỉnh sửa" color="#52c41a" overlayInnerStyle={{ color: 'white' }}>
+          <Tooltip
+            title="Chỉnh sửa"
+            color="#52c41a"
+            overlayInnerStyle={{ color: "white" }}
+          >
             <Button
               type="text"
               size="small"
@@ -1832,18 +2088,29 @@ export default function MyProjectsPage() {
             />
           </Tooltip>
           <Tooltip
-            title={<span style={{ color: '#ff4d4f' }}>Xóa</span>}
+            title={<span style={{ color: "#ff4d4f" }}>Xóa</span>}
             color="#fff"
-            overlayInnerStyle={{ color: '#ff4d4f', border: '1px solid #ff4d4f', backgroundColor: 'white' }}
+            overlayInnerStyle={{
+              color: "#ff4d4f",
+              border: "1px solid #ff4d4f",
+              backgroundColor: "white",
+            }}
           >
             <Popconfirm
               title="Xác nhận xóa"
               description={`Bạn có chắc chắn muốn xóa dự án "${record.name}"?`}
-              onConfirm={() => handleDelete(String((record as any).id || (record as any)._id))}
+              onConfirm={() =>
+                handleDelete(String((record as any).id || (record as any)._id))
+              }
               okText="Xóa"
               cancelText="Hủy"
             >
-              <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+              />
             </Popconfirm>
           </Tooltip>
         </Space>
@@ -1864,12 +2131,20 @@ export default function MyProjectsPage() {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Content style={{ padding: '24px' }}>
+    <Layout style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+      <Content style={{ padding: "24px" }}>
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <Title level={2} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <FolderOpenOutlined style={{ color: '#1890ff' }} />
+          <Title
+            level={2}
+            style={{
+              margin: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <FolderOpenOutlined style={{ color: "#1890ff" }} />
             Dự án của tôi
           </Title>
           <Text type="secondary">Quản lý các dự án đầu tư của bạn</Text>
@@ -1883,7 +2158,7 @@ export default function MyProjectsPage() {
                 title="Tổng dự án"
                 value={totalDocs ?? items.length}
                 prefix={<FolderOpenOutlined />}
-                valueStyle={{ color: '#1890ff' }}
+                valueStyle={{ color: "#1890ff" }}
               />
             </Card>
           </Col>
@@ -1891,9 +2166,9 @@ export default function MyProjectsPage() {
             <Card>
               <Statistic
                 title="Đang hoạt động"
-                value={items.filter(item => item.status === 'active').length}
+                value={items.filter((item) => item.status === "active").length}
                 prefix={<CalendarOutlined />}
-                valueStyle={{ color: '#52c41a' }}
+                valueStyle={{ color: "#52c41a" }}
               />
             </Card>
           </Col>
@@ -1901,9 +2176,11 @@ export default function MyProjectsPage() {
             <Card>
               <Statistic
                 title="Bị từ chối"
-                value={items.filter(item => item.status === 'rejected').length}
+                value={
+                  items.filter((item) => item.status === "rejected").length
+                }
                 prefix={<TeamOutlined />}
-                valueStyle={{ color: '#722ed1' }}
+                valueStyle={{ color: "#722ed1" }}
               />
             </Card>
           </Col>
@@ -1911,10 +2188,13 @@ export default function MyProjectsPage() {
             <Card>
               <Statistic
                 title="Tổng vốn kêu gọi"
-                value={items.reduce((sum, item) => sum + (item.goal_money || 0), 0)}
+                value={items.reduce(
+                  (sum, item) => sum + (item.goal_money || 0),
+                  0
+                )}
                 formatter={(value) => formatCurrency(Number(value))}
                 prefix={<DollarOutlined />}
-                valueStyle={{ color: '#fa8c16' }}
+                valueStyle={{ color: "#fa8c16" }}
               />
             </Card>
           </Col>
@@ -1923,7 +2203,16 @@ export default function MyProjectsPage() {
         {/* Main Content Card */}
         <Card>
           {/* Toolbar */}
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+          <div
+            style={{
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 16,
+            }}
+          >
             <Space wrap>
               <Search
                 placeholder="Tìm theo tên, mô tả..."
@@ -1988,7 +2277,9 @@ export default function MyProjectsPage() {
           <Table
             columns={columns}
             dataSource={filteredItems}
-            rowKey={(record) => String((record as any).id || (record as any)._id)}
+            rowKey={(record) =>
+              String((record as any).id || (record as any)._id)
+            }
             rowSelection={rowSelection}
             loading={isLoading}
             pagination={{
@@ -1997,7 +2288,8 @@ export default function MyProjectsPage() {
               total: totalDocs,
               showSizeChanger: true,
               showQuickJumper: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} mục`,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} của ${total} mục`,
               onChange: (newPage, newPageSize) => {
                 setPage(newPage);
                 if (newPageSize !== limit) {

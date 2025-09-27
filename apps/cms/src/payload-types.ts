@@ -764,6 +764,7 @@ export interface ServiceTicket {
  */
 export interface Project {
   id: string;
+  image?: (string | null) | Media;
   name: string;
   description: string;
   business_model?: string | null;
@@ -794,6 +795,7 @@ export interface Project {
  */
 export interface InvestmentFund {
   id: string;
+  image?: (string | null) | Media;
   name: string;
   description: string;
   user: string | User;
@@ -947,7 +949,7 @@ export interface ServiceTicketLog {
   user: string | User;
   content: string;
   document?: (string | Media)[] | null;
-  status?: ('approved' | 'rejected') | null;
+  status?: ('pending' | 'completed' | 'cancelled') | null;
   reason?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1780,6 +1782,7 @@ export interface DemandSelect<T extends boolean = true> {
  * via the `definition` "investment-fund_select".
  */
 export interface InvestmentFundSelect<T extends boolean = true> {
+  image?: T;
   name?: T;
   description?: T;
   user?: T;
@@ -1791,6 +1794,7 @@ export interface InvestmentFundSelect<T extends boolean = true> {
  * via the `definition` "project_select".
  */
 export interface ProjectSelect<T extends boolean = true> {
+  image?: T;
   name?: T;
   description?: T;
   business_model?: T;

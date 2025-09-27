@@ -39,13 +39,20 @@ export const ServiceTicketLog: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
-      options: ['approved', 'rejected'],
+      options: ['pending', 'completed', 'cancelled'],
+      defaultValue: 'pending',
       label: 'Trạng thái',
     },
     {
       name: 'reason',
       type: 'text',
       label: 'Lý do',
+    },
+    {
+      name: 'is_done_service',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Xác nhận hoàn thành dịch vụ',
     },
   ],
   timestamps: true,

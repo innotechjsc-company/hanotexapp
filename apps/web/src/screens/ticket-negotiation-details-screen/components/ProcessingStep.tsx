@@ -133,7 +133,7 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({
                             {log.user?.full_name || log.user?.email || "Người dùng"}
                           </Text>
                           <Text type="secondary" className="text-xs">
-                            {log.createdAt ? dayjs(log.createdAt).format("HH:mm") : ""}
+                            {log.createdAt ? dayjs(log.createdAt).format("DD/MM/YYYY HH:mm") : ""}
                           </Text>
                         </div>
                         

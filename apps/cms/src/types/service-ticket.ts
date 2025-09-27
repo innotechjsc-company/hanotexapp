@@ -1,4 +1,4 @@
-import { Service, User } from '@/payload-types'
+import { Media, Service, User } from '@/payload-types'
 import { ID, DateTimeString } from './common'
 
 // Trạng thái phiếu dịch vụ
@@ -13,4 +13,5 @@ export interface ServiceTicket {
   implementer: string // Người thực hiện
   createdAt?: DateTimeString // Thời điểm tạo bản ghi
   updatedAt?: DateTimeString // Thời điểm cập nhật bản ghi
+  document?: ID | Media // Tài liệu đính kèm
 }

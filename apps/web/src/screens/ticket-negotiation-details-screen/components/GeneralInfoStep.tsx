@@ -7,6 +7,7 @@ import type { Technology } from "@/types/technologies";
 import type { Project } from "@/types/project";
 import dayjs from "dayjs";
 import { statusColorMap, statusLabelMap } from "./TicketNegotiationHeader";
+import { useUser } from "@/store/auth";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -34,6 +35,7 @@ export const GeneralInfoStep: React.FC<GeneralInfoStepProps> = ({
 }) => {
   const [showDispatchModal, setShowDispatchModal] = React.useState(false);
   const [form] = Form.useForm();
+  const currentUser = useUser();
 
   const getServiceName = () => {
     if (!ticket.service) return "Không xác định";
@@ -57,6 +59,20 @@ export const GeneralInfoStep: React.FC<GeneralInfoStepProps> = ({
   const getImplementersNames = () => {
     if (!ticket.implementers || !Array.isArray(ticket.implementers)) return [];
     return ticket.implementers.map(impl => getUserName(impl));
+  };
+
+  // Kiểm tra xem user hiện tại có trong danh sách implementers không
+  const isCurrentUserImplementer = () => {
+    if (!currentUser?.id || !ticket.implementers || !Array.isArray(ticket.implementers)) {
+      return false;
+    }
+    
+    return ticket.implementers.some(impl => {
+      if (typeof impl === "string") {
+        return String(impl) === String(currentUser.id);
+      }
+      return String((impl as any)?.id) === String(currentUser.id);
+    });
   };
 
   const getTechnologiesList = () => {
@@ -90,7 +106,7 @@ export const GeneralInfoStep: React.FC<GeneralInfoStepProps> = ({
     }
   };
 
-  const canDispatch = ticket.status === "pending";
+  const canDispatch = ticket.status === "pending" && isCurrentUserImplementer();
 
   return (
     <div className="h-full overflow-auto p-6 space-y-6">
@@ -213,21 +229,47 @@ export const GeneralInfoStep: React.FC<GeneralInfoStepProps> = ({
         </div>
       </Card>
 
-      {canDispatch && !isViewing && (
+      {!isViewing && (
         <Card className="shadow-sm">
           <div className="text-center">
-            <Title level={4}>Điều phối phiếu dịch vụ</Title>
-            <Text type="secondary" className="block mb-4">
-              Sau khi điều phối, phiếu sẽ chuyển sang trạng thái "Đang thực hiện"
-            </Text>
-            <Button 
-              type="primary" 
-              size="large"
-              onClick={() => setShowDispatchModal(true)}
-              loading={updatingStatus}
-            >
-              Điều phối phiếu
-            </Button>
+            {canDispatch ? (
+              <>
+                <Title level={4}>Điều phối phiếu dịch vụ</Title>
+                <Text type="secondary" className="block mb-4">
+                  Sau khi điều phối, phiếu sẽ chuyển sang trạng thái "Đang thực hiện"
+                </Text>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  onClick={() => setShowDispatchModal(true)}
+                  loading={updatingStatus}
+                >
+                  Điều phối phiếu
+                </Button>
+              </>
+            ) : ticket.status === "pending" ? (
+                <div className="text-sm text-gray-500">
+                  <Text>Người thực hiện hiện tại:</Text>
+                  <div className="mt-2">
+                    {getImplementersNames().length > 0 ? (
+                      <Space wrap>
+                        {getImplementersNames().map((name, index) => (
+                          <Tag key={index} color="blue">{name}</Tag>
+                        ))}
+                      </Space>
+                    ) : (
+                      <Text type="secondary">Chưa có người thực hiện</Text>
+                    )}
+                  </div>
+                </div>
+            ) : (
+              <>
+                <Title level={4}>Phiếu đã được xử lý</Title>
+                <Text type="secondary" className="block mb-4">
+                  Phiếu này đã được điều phối và đang trong quá trình xử lý
+                </Text>
+              </>
+            )}
           </div>
         </Card>
       )}
