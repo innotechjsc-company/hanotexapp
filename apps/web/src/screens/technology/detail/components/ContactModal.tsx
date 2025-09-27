@@ -1,7 +1,12 @@
 "use client";
 
 import { ContactFormState } from "../hooks/useTechnologyDetail";
-import { Upload, X } from "lucide-react";
+import {
+  MoneyInput,
+  FileUpload,
+  type FileUploadItem,
+} from "@/components/input";
+import { MediaType } from "@/types/media1";
 
 interface ContactModalProps {
   open: boolean;
@@ -10,6 +15,7 @@ interface ContactModalProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  onDocumentsChange: (documents: FileUploadItem[]) => void;
   value: ContactFormState;
   loading?: boolean;
 }
@@ -19,6 +25,7 @@ export default function ContactModal({
   onClose,
   onSubmit,
   onChange,
+  onDocumentsChange,
   value,
   loading = false,
 }: ContactModalProps) {
@@ -57,57 +64,62 @@ export default function ContactModal({
             >
               Ngân sách dự kiến (VNĐ) *
             </label>
-            <input
+            <MoneyInput
               id="budget"
               name="budget"
-              type="number"
+              // live format while typing
+              formatOnBlur={false}
+              decimalScale={0}
+              locale="vi-VN"
+              currency="VND"
               required
-              min="0"
-              step="1000"
-              value={value.budget}
-              onChange={onChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              min={0}
+              step={1000}
+              // map current value to number/null for MoneyInput
+              value={
+                typeof value.budget === "number"
+                  ? value.budget
+                  : String(value.budget).trim() === ""
+                    ? null
+                    : Number(value.budget)
+              }
+              onChange={(n) =>
+                onChange({
+                  target: {
+                    name: "budget",
+                    value: n == null ? "" : n,
+                  },
+                } as any)
+              }
+              className="w-full"
               placeholder="Nhập ngân sách dự kiến..."
             />
           </div>
-          <div className="relative">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tài liệu đính kèm (tùy chọn)
             </label>
-            <input
-              id="document"
-              name="document"
-              type="file"
-              onChange={onChange}
-              className="hidden"
+            <FileUpload
+              value={value.documents}
+              onChange={onDocumentsChange}
+              multiple={true}
+              maxCount={3}
+              maxSize={10 * 1024 * 1024} // 10MB
+              allowedTypes={["document", "image"]}
+              variant="dragger"
+              title="Chọn tài liệu"
+              description="Kéo thả hoặc click để chọn tài liệu (PDF, Word, Excel, PowerPoint, hình ảnh). Tối đa 3 file, mỗi file 10MB."
+              onUploadSuccess={(file, media) => {
+                console.log("Document uploaded successfully:", { file, media });
+              }}
+              onUploadError={(file, error) => {
+                console.error("Document upload failed:", { file, error });
+              }}
+              mediaFields={{
+                type: MediaType.DOCUMENT,
+                caption: "Tài liệu đính kèm cho đề xuất công nghệ",
+              }}
             />
-            <div className="flex items-center space-x-2">
-              <label
-                htmlFor="document"
-                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Chọn tệp
-              </label>
-              {value.document && (
-                <span className="text-sm text-gray-700">
-                  {value.document.name}
-                </span>
-              )}
-              {value.document && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    onChange({
-                      target: { name: "document", value: null, files: [] },
-                    } as any)
-                  }
-                  className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
           </div>
           <div className="flex justify-end space-x-3">
             <button

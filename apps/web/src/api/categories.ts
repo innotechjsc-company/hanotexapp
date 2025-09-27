@@ -86,7 +86,20 @@ export async function deleteCategory(id: string): Promise<void> {
 export async function getAllCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  return getCategories({}, pagination);
+  // Use the web API route which fetches from CMS
+  const response = await fetch('/api/categories', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data;
 }
 
 /**

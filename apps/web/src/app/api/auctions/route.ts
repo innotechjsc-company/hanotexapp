@@ -42,11 +42,15 @@ export async function GET() {
     const transformedAuctions = auctions.map((auction: any) => ({
       id: auction.id || '',
       title: auction.title || 'Đấu giá không có tiêu đề',
+      startingPrice: auction.startingPrice || 0,
       currentBid: auction.currentBid || auction.startingPrice || 0,
       bidCount: auction.bids?.length || 0,
-      timeLeft: auction.endTime ? calculateTimeLeft(new Date(auction.endTime)) : 'Không xác định',
+      timeLeft: auction.startTime && auction.endTime ? 
+        calculateTimeLeft(auction.startTime, auction.endTime) : 'Không xác định',
       viewers: auction.viewers || Math.floor(Math.random() * 50) + 10,
-      isActive: auction.endTime ? new Date() < new Date(auction.endTime) : false,
+      isActive: auction.startTime && auction.endTime ? 
+        (new Date() >= new Date(auction.startTime) && new Date() < new Date(auction.endTime)) : false,
+      status: auction.startTime && auction.endTime ? getAuctionStatus(auction.startTime, auction.endTime) : 'unknown',
       image: auction.image?.url || null,
       category: categoryMap[auction.category] || auction.category || "Công nghệ thông tin",
       endTime: auction.endTime ? new Date(auction.endTime) : new Date(),
@@ -145,12 +149,31 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function calculateTimeLeft(endTime: Date): string {
+function calculateTimeLeft(startTime: string, endTime: string): string {
   const now = new Date();
-  const diff = endTime.getTime() - now.getTime();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  
+  let targetTime: Date;
+  let prefix: string;
+  
+  if (now < start) {
+    // Auction hasn't started yet - show time until start
+    targetTime = start;
+    prefix = "Bắt đầu sau ";
+  } else if (now >= start && now < end) {
+    // Auction is active - show time until end
+    targetTime = end;
+    prefix = "Kết thúc sau ";
+  } else {
+    // Auction has ended
+    return "Đã kết thúc";
+  }
+  
+  const diff = targetTime.getTime() - now.getTime();
   
   if (diff <= 0) {
-    return "Đã kết thúc";
+    return now < start ? "Đã bắt đầu" : "Đã kết thúc";
   }
   
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -158,10 +181,24 @@ function calculateTimeLeft(endTime: Date): string {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   
   if (days > 0) {
-    return `${days} ngày ${hours} giờ`;
+    return `${prefix}${days} ngày ${hours} giờ`;
   } else if (hours > 0) {
-    return `${hours} giờ ${minutes} phút`;
+    return `${prefix}${hours} giờ ${minutes} phút`;
   } else {
-    return `${minutes} phút`;
+    return `${prefix}${minutes} phút`;
+  }
+}
+
+function getAuctionStatus(startTime: string, endTime: string): string {
+  const now = new Date();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  
+  if (now < start) {
+    return 'upcoming'; // Sắp diễn ra
+  } else if (now >= start && now < end) {
+    return 'active'; // Đang diễn ra
+  } else {
+    return 'ended'; // Đã kết thúc
   }
 }

@@ -35,6 +35,41 @@ services:
       - postgres
     restart: unless-stopped
 
+  # CMS (Payload) - Port 4000
+  cms:
+    build:
+      context: ./apps/cms
+      dockerfile: Dockerfile
+    container_name: hanotex-cms
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URI=postgresql://postgres:123456@postgres:5432/hanotex
+      - REDIS_URI=redis://redis:6379
+      - PAYLOAD_SECRET=your-secret-key-here
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  # Web (Next.js) - Port 3000
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: hanotex-web
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_PAYLOAD_API_URL=http://cms:4000/api
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - cms
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:

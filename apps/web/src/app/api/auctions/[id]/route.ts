@@ -36,6 +36,29 @@ export async function GET(
     const auction = await cmsResponse.json();
     
     console.log('Individual auction data from CMS:', JSON.stringify(auction, null, 2));
+
+    // Get bids from CMS API
+    const bidsApiUrl = `http://localhost:4000/api/auctions/${auctionId}/bids`;
+    console.log('Fetching bids from CMS:', bidsApiUrl);
+    
+    let auctionBids: any[] = [];
+    try {
+      const bidsResponse = await fetch(bidsApiUrl, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (bidsResponse.ok) {
+        const bidsData = await bidsResponse.json();
+        auctionBids = bidsData.success ? bidsData.data.bids : [];
+        console.log(`Retrieved ${auctionBids.length} bids from CMS`);
+      } else {
+        console.warn('Failed to fetch bids from CMS, using empty array');
+      }
+    } catch (error) {
+      console.warn('Error fetching bids from CMS:', error);
+    }
     
     // Category mapping from CMS codes to display names
     const categoryMap: { [key: string]: string } = {
@@ -76,15 +99,19 @@ export async function GET(
       id: auction.id || '',
       title: auction.title || 'Đấu giá không có tiêu đề',
       description: getDescriptionText(auction.description),
+      startingPrice: auction.startingPrice || 0,
       currentBid: auction.currentBid || auction.startingPrice || 0,
       minBid: auction.minBid || auction.startingPrice || 0,
       bidIncrement: auction.bidIncrement || 100000,
-      bidCount: auction.bids?.length || 0,
+      bidCount: auctionBids.length,
       startTime: auction.startTime ? new Date(auction.startTime) : new Date(),
       endTime: auction.endTime ? new Date(auction.endTime) : new Date(),
-      timeLeft: auction.endTime ? calculateTimeLeft(new Date(auction.endTime)) : 'Không xác định',
+      timeLeft: auction.startTime && auction.endTime ? 
+        calculateTimeLeft(auction.startTime, auction.endTime) : 'Không xác định',
       viewers: auction.viewers || Math.floor(Math.random() * 50) + 10,
-      isActive: auction.endTime ? new Date() < new Date(auction.endTime) : false,
+      isActive: auction.startTime && auction.endTime ? 
+        (new Date() >= new Date(auction.startTime) && new Date() < new Date(auction.endTime)) : false,
+      status: auction.startTime && auction.endTime ? getAuctionStatus(auction.startTime, auction.endTime) : 'unknown',
       isWatching: false,
       location: auction.location || "Hà Nội",
       category: categoryMap[auction.category] || auction.category || "Công nghệ thông tin",
@@ -100,7 +127,7 @@ export async function GET(
         size: doc.file?.filesize ? `${(doc.file.filesize / 1024 / 1024).toFixed(2)} MB` : 'N/A',
       })),
       terms: (auction.terms || []).map((termObj: any) => termObj.term || termObj).filter(Boolean),
-      bids: (auction.bids || []).map((bid: any) => ({
+      bids: auctionBids.map((bid: any) => ({
         id: bid.id || Math.random().toString(),
         amount: bid.amount || 0,
         bidder: bid.bidder || 'Ẩn danh',
@@ -119,12 +146,31 @@ export async function GET(
   }
 }
 
-function calculateTimeLeft(endTime: Date): string {
+function calculateTimeLeft(startTime: string, endTime: string): string {
   const now = new Date();
-  const diff = endTime.getTime() - now.getTime();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  
+  let targetTime: Date;
+  let prefix: string;
+  
+  if (now < start) {
+    // Auction hasn't started yet - show time until start
+    targetTime = start;
+    prefix = "Bắt đầu sau ";
+  } else if (now >= start && now < end) {
+    // Auction is active - show time until end
+    targetTime = end;
+    prefix = "Kết thúc sau ";
+  } else {
+    // Auction has ended
+    return "Đã kết thúc";
+  }
+  
+  const diff = targetTime.getTime() - now.getTime();
   
   if (diff <= 0) {
-    return "Đã kết thúc";
+    return now < start ? "Đã bắt đầu" : "Đã kết thúc";
   }
   
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -132,10 +178,24 @@ function calculateTimeLeft(endTime: Date): string {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   
   if (days > 0) {
-    return `${days} ngày ${hours} giờ`;
+    return `${prefix}${days} ngày ${hours} giờ`;
   } else if (hours > 0) {
-    return `${hours} giờ ${minutes} phút`;
+    return `${prefix}${hours} giờ ${minutes} phút`;
   } else {
-    return `${minutes} phút`;
+    return `${prefix}${minutes} phút`;
+  }
+}
+
+function getAuctionStatus(startTime: string, endTime: string): string {
+  const now = new Date();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  
+  if (now < start) {
+    return 'upcoming'; // Sắp diễn ra
+  } else if (now >= start && now < end) {
+    return 'active'; // Đang diễn ra
+  } else {
+    return 'ended'; // Đã kết thúc
   }
 }

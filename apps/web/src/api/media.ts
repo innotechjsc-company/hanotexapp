@@ -69,6 +69,21 @@ class MediaApi {
   }
 
   /**
+   * Get a media file by ID from Payload CMS `/api/media/{id}`.
+   */
+  async getById(id: number | string): Promise<Media> {
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `${API_ENDPOINTS.MEDIA}/${id}`,
+    };
+
+    const res = await this.axios.request(config);
+    const payload = res.data as any;
+    const doc = (payload?.doc || payload?.data || payload) as Media;
+    return doc;
+  }
+
+  /**
    * Delete a media file by ID from Payload CMS `/api/media/{id}`.
    */
   async delete(id: number | string): Promise<void> {
@@ -97,4 +112,5 @@ export const uploadFiles = (
   fields?: Partial<Pick<Media, "alt" | "caption" | "type">>
 ) => mediaApiInstance.uploadMulti(files, fields);
 
+export const getMediaById = (id: number | string) => mediaApiInstance.getById(id);
 export const deleteFile = (id: number | string) => mediaApiInstance.delete(id);

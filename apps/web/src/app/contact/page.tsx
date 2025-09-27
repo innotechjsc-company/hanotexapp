@@ -89,7 +89,7 @@ export default function ContactPage() {
     "Hỗ trợ pháp lý",
     "Kết nối đầu tư",
     "Đăng ký công nghệ",
-    "Đăng nhu cầu công nghệ",
+    "Đăng nhu cầu KH&CN",
     "Hỗ trợ kỹ thuật",
     "Khác",
   ];

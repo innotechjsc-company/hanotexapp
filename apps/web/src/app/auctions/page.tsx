@@ -51,6 +51,33 @@ export default function AuctionsPage() {
     fetchAuctions();
   }, [searchParams]);
 
+  // Real-time updates - refresh auction list every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAuctions();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Listen for localStorage changes (when user places bids)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // Refetch auctions when localStorage changes (bid placed)
+      fetchAuctions();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events from bid placement
+    window.addEventListener('bidPlaced', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('bidPlaced', handleStorageChange);
+    };
+  }, []);
+
   const fetchAuctions = async () => {
     try {
       setLoading(true);
@@ -59,7 +86,29 @@ export default function AuctionsPage() {
         throw new Error("Không thể tải danh sách đấu giá");
       }
       const data = await response.json();
-      setAuctions(data);
+      
+      // Update auctions with localStorage bid data
+      const updatedAuctions = data.map((auction: Auction) => {
+        const storedBids = localStorage.getItem(`auction_bids_${auction.id}`);
+        if (storedBids) {
+          try {
+            const parsedBids = JSON.parse(storedBids);
+            if (parsedBids.length > 0) {
+              const latestBid = parsedBids[parsedBids.length - 1];
+              return {
+                ...auction,
+                currentBid: latestBid.amount || auction.currentBid,
+                bidCount: parsedBids.length,
+              };
+            }
+          } catch (e) {
+            console.warn(`Failed to parse stored bids for auction ${auction.id}:`, e);
+          }
+        }
+        return auction;
+      });
+      
+      setAuctions(updatedAuctions);
     } catch (error) {
       console.error("Error fetching auctions:", error);
     } finally {
