@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getPayloadApiUrl } from "@/lib/api-config";
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +9,7 @@ export async function GET(
     const auctionId = params.id;
     
     // Fetch from CMS API
-    const cmsApiUrl = `http://localhost:4000/api/auctions/${auctionId}`;
+    const cmsApiUrl = getPayloadApiUrl(`/auctions/${auctionId}`);
     console.log('Fetching auction from CMS API URL:', cmsApiUrl);
     console.log('Environment NEXT_PUBLIC_PAYLOAD_API_URL:', process.env.NEXT_PUBLIC_PAYLOAD_API_URL);
     
@@ -38,7 +39,7 @@ export async function GET(
     console.log('Individual auction data from CMS:', JSON.stringify(auction, null, 2));
 
     // Get bids from CMS API
-    const bidsApiUrl = `http://localhost:4000/api/auctions/${auctionId}/bids`;
+    const bidsApiUrl = getPayloadApiUrl(`/auctions/${auctionId}/bids`);
     console.log('Fetching bids from CMS:', bidsApiUrl);
     
     let auctionBids: any[] = [];
