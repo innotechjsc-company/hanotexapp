@@ -17,8 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { Demand } from "@/types/demand";
-import { useCategories } from "@/hooks/useCategories";
 import { createDemand } from "@/api/demands";
+import { getAllCategories } from "@/api/categories";
+import { Category } from "@/types/categories";
 import { uploadFile, deleteFile } from "@/api/media";
 import { Media, MediaType } from "@/types/media1";
 import DatePicker from "react-datepicker";
@@ -37,12 +38,15 @@ export default function RegisterDemandPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const user = useUser();
 
-  // Fetch categories from API
-  const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useCategories();
+  // State for categories
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState("");
+
+  // Debug categories state
+  useEffect(() => {
+    console.log("Categories state updated:", categories);
+  }, [categories]);
 
   const [formData, setFormData] = useState<
     Omit<Partial<Demand>, "start_date" | "end_date"> & {
@@ -256,6 +260,30 @@ export default function RegisterDemandPage() {
       setLoading(false);
     }
   };
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError("");
+        const response = await getAllCategories();
+        console.log("Categories API response:", response);
+        // Handle the response structure where categories are in 'docs' array
+        const categoriesData = response.docs || response.data || [];
+        console.log("Categories data:", categoriesData);
+        // Ensure we have a flat array of categories
+        setCategories(categoriesData as Category[]);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+        setCategoriesError("Không thể tải danh mục. Vui lòng thử lại.");
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     // Update formData user field when user changes
@@ -545,11 +573,14 @@ export default function RegisterDemandPage() {
                           ? "Đang tải danh mục..."
                           : "Chọn danh mục"}
                       </option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
+                      {categories.map((category) => {
+                        console.log("Rendering category:", category);
+                        return (
+                          <option key={category.id} value={category.id}>
+                            {category.name}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
 

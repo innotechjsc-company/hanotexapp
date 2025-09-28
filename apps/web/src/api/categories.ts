@@ -27,20 +27,24 @@ export async function getCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
   const queryParams = new URLSearchParams();
-  
-  if (filters.search) queryParams.set('search', filters.search);
-  if (filters.parent_id) queryParams.set('parent_id', filters.parent_id);
-  if (filters.is_active !== undefined) queryParams.set('is_active', filters.is_active.toString());
-  if (pagination.limit) queryParams.set('limit', pagination.limit.toString());
-  if (pagination.page) queryParams.set('page', pagination.page.toString());
-  if (pagination.sort) queryParams.set('sort', pagination.sort);
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories?${queryParams.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  if (filters.search) queryParams.set("search", filters.search);
+  if (filters.parent_id) queryParams.set("parent_id", filters.parent_id);
+  if (filters.is_active !== undefined)
+    queryParams.set("is_active", filters.is_active.toString());
+  if (pagination.limit) queryParams.set("limit", pagination.limit.toString());
+  if (pagination.page) queryParams.set("page", pagination.page.toString());
+  if (pagination.sort) queryParams.set("sort", pagination.sort);
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api"}/master-data/categories?${queryParams.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -53,12 +57,15 @@ export async function getCategories(
  * Get category by ID
  */
 export async function getCategoryById(id: string): Promise<Category> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories/${id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api"}/master-data/categories/${id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -109,18 +116,21 @@ export async function getAllCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
   const queryParams = new URLSearchParams();
-  
-  if (pagination.limit) queryParams.set('limit', pagination.limit.toString());
-  if (pagination.page) queryParams.set('page', pagination.page.toString());
-  if (pagination.sort) queryParams.set('sort', pagination.sort);
+
+  if (pagination.limit) queryParams.set("limit", pagination.limit.toString());
+  if (pagination.page) queryParams.set("page", pagination.page.toString());
+  if (pagination.sort) queryParams.set("sort", pagination.sort);
 
   // Use the updated web API route which fetches from CMS
-  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories?${queryParams.toString()}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000/api"}/categories`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);

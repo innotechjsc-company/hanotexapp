@@ -4,6 +4,7 @@ import { Button, Card, Tag, Space, Tooltip } from "antd";
 import { Eye, Edit, Trash2, FileText } from "lucide-react";
 import { Demand } from "@/types/demand";
 import { getFullMediaUrl } from "@/utils/mediaUrl";
+import { useEffect } from "react";
 
 interface DemandCardProps {
   demand: Demand;
@@ -29,13 +30,23 @@ function getPriceRange(demand: Demand): string {
 }
 
 function getThumb(demand: Demand): string | undefined {
-  // Try to get image from documents
+  // First, try to get the main image
+  if (demand.image) {
+    if (typeof demand.image === "string") {
+      return getFullMediaUrl(demand.image);
+    } else if (typeof demand.image === "object" && demand.image.url) {
+      return getFullMediaUrl(demand.image.url);
+    }
+  }
+
+  // Fallback: try to get image from documents
   if (Array.isArray(demand.documents) && demand.documents.length > 0) {
     const firstDoc = demand.documents[0];
     if (typeof firstDoc === "object" && firstDoc?.url) {
-      return firstDoc.url;
+      return getFullMediaUrl(firstDoc.url);
     }
   }
+
   return undefined;
 }
 
@@ -49,10 +60,14 @@ export default function DemandCard({
 }: DemandCardProps) {
   const categoryName = getCategoryName(demand);
   const priceRange = getPriceRange(demand);
-  const thumb = getFullMediaUrl(demand.image as string);
+  const thumb = getThumb(demand as Demand);
   const createdAt = demand.createdAt
     ? new Date(demand.createdAt).toLocaleDateString("vi-VN")
     : "—";
+
+  useEffect(() => {
+    console.log("demand", demand, demand?.image);
+  }, [demand]);
 
   return (
     <Card hoverable className="w-full" bodyStyle={{ padding: 0 }}>
@@ -60,13 +75,34 @@ export default function DemandCard({
         {/* Image Section - Left */}
         <div className="w-full sm:w-1/3 flex-shrink-0">
           {thumb ? (
-            <img
-              src={thumb}
-              alt={demand.title}
-              className="w-full h-48 sm:h-full object-cover"
-            />
+            <div className="w-full h-64 bg-gray-100 relative overflow-hidden">
+              <img
+                src={thumb}
+                alt={demand.title}
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                loading="lazy"
+                onError={(e) => {
+                  // Fallback to Hanotex logo if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = "flex";
+                }}
+              />
+              {/* Fallback logo (hidden by default) */}
+              <div
+                className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center"
+                style={{ display: "none" }}
+              >
+                <img
+                  src="/logo.png"
+                  alt="Hanotex"
+                  className="w-16 h-16 object-contain opacity-60"
+                />
+              </div>
+            </div>
           ) : (
-            <div className="w-full h-48 sm:h-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
+            <div className="w-full h-64 bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
               <div className="absolute inset-0 flex items-center justify-center">
                 <img
                   src="/logo.png"
