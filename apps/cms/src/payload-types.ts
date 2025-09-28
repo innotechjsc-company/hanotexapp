@@ -761,6 +761,8 @@ export interface ServiceTicket {
   createdAt: string;
 }
 /**
+ * Quản lý các dự án đầu tư và kêu gọi vốn
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "project".
  */
@@ -769,24 +771,66 @@ export interface Project {
   image?: (string | null) | Media;
   name: string;
   description: string;
+  /**
+   * Mô tả chi tiết về mô hình kinh doanh của dự án, cách thức hoạt động và tạo ra doanh thu
+   */
   business_model?: string | null;
+  /**
+   * Thông tin về thị trường mục tiêu, quy mô thị trường, cạnh tranh và các số liệu liên quan
+   */
   market_data?: string | null;
   user: string | User;
+  /**
+   * Các công nghệ được sử dụng trong dự án
+   */
   technologies: (string | Technology)[];
+  /**
+   * Các quỹ đầu tư liên quan đến dự án
+   */
   investment_fund?: (string | InvestmentFund)[] | null;
+  /**
+   * Doanh thu của dự án (tính bằng VND)
+   */
   revenue?: number | null;
+  /**
+   * Lợi nhuận của dự án (tính bằng VND)
+   */
   profit?: number | null;
+  /**
+   * Tổng tài sản của dự án (tính bằng VND)
+   */
   assets?: number | null;
+  /**
+   * Các tài liệu tài chính liên quan đến dự án (báo cáo tài chính, bảng cân đối kế toán, v.v.)
+   */
   documents_finance?: (string | Media)[] | null;
+  /**
+   * Thông tin chi tiết về đội ngũ thực hiện dự án (kinh nghiệm, kỹ năng, vai trò, v.v.)
+   */
   team_profile?: string | null;
+  /**
+   * Số tiền vốn mục tiêu kêu gọi từ các nhà đầu tư (tính bằng VND)
+   */
   goal_money?: number | null;
+  /**
+   * Phần trăm cổ phần dự kiến trao đổi cho nhà đầu tư (0-100%)
+   */
   share_percentage?: number | null;
+  /**
+   * Mô tả chi tiết về mục đích sử dụng số vốn kêu gọi và cách phân bổ
+   */
   goal_money_purpose?: string | null;
   /**
-   * Trạng thái
+   * Trạng thái hiện tại của dự án
    */
-  status: 'pending' | 'active' | 'rejected';
+  status: 'pending' | 'active' | 'rejected' | 'completed' | 'cancelled';
+  /**
+   * Đánh dấu nếu dự án đang mở kêu gọi đầu tư từ cộng đồng
+   */
   open_investment_fund?: boolean | null;
+  /**
+   * Ngày dự kiến hoàn thành dự án hoặc ngày kết thúc kêu gọi vốn
+   */
   end_date: string;
   updatedAt: string;
   createdAt: string;
