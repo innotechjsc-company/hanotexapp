@@ -826,7 +826,7 @@ export default function RegisterDemandPage() {
 
             {/* Submit Button */}
             {/* TODO: button dùng của antd */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 mt-4">
               <Button
                 type="default"
                 onClick={() => router.back()}
@@ -837,6 +837,7 @@ export default function RegisterDemandPage() {
               <Button
                 type="primary"
                 disabled={loading || uploadingFiles}
+                onClick={handleSubmit}
                 className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploadingFiles ? (
@@ -850,7 +851,7 @@ export default function RegisterDemandPage() {
                     Đang tạo nhu cầu...
                   </>
                 ) : (
-                  <>
+                  <div className="flex items-center">
                     <Save className="h-4 w-4 mr-2" />
                     Đăng nhu cầu
                     {selectedFiles.length > 0 && (
@@ -858,7 +859,7 @@ export default function RegisterDemandPage() {
                         +{selectedFiles.length} file
                       </span>
                     )}
-                  </>
+                  </div>
                 )}
               </Button>
             </div>

@@ -52,7 +52,7 @@ export const Project: CollectionConfig = {
                 user: userId,
                 title: `Cập nhật trạng thái dự án`,
                 message: `Dự án "${doc.name}" của bạn ${statusMessage}.`,
-                type: 'project',
+                type: 'info',
                 priority: 'normal',
                 is_read: false,
                 action_url: `projects/${doc.id}`,
@@ -90,7 +90,8 @@ export const Project: CollectionConfig = {
       type: 'textarea',
       label: 'Mô hình kinh doanh',
       admin: {
-        description: 'Mô tả chi tiết về mô hình kinh doanh của dự án, cách thức hoạt động và tạo ra doanh thu',
+        description:
+          'Mô tả chi tiết về mô hình kinh doanh của dự án, cách thức hoạt động và tạo ra doanh thu',
       },
     },
     {
@@ -98,7 +99,8 @@ export const Project: CollectionConfig = {
       type: 'textarea',
       label: 'Số liệu và thị trường',
       admin: {
-        description: 'Thông tin về thị trường mục tiêu, quy mô thị trường, cạnh tranh và các số liệu liên quan',
+        description:
+          'Thông tin về thị trường mục tiêu, quy mô thị trường, cạnh tranh và các số liệu liên quan',
       },
     },
 
@@ -148,7 +150,7 @@ export const Project: CollectionConfig = {
         description: 'Doanh thu của dự án (tính bằng VND)',
         step: 1000000, // Bước nhảy 1 triệu VND
       },
-      validate: (value) => {
+      validate: (value: any) => {
         if (value !== undefined && value < 0) {
           return 'Doanh thu không thể âm'
         }
@@ -172,7 +174,7 @@ export const Project: CollectionConfig = {
         description: 'Tổng tài sản của dự án (tính bằng VND)',
         step: 1000000, // Bước nhảy 1 triệu VND
       },
-      validate: (value) => {
+      validate: (value: any) => {
         if (value !== undefined && value < 0) {
           return 'Tài sản không thể âm'
         }
@@ -186,7 +188,8 @@ export const Project: CollectionConfig = {
       hasMany: true,
       label: 'Tài liệu tài chính',
       admin: {
-        description: 'Các tài liệu tài chính liên quan đến dự án (báo cáo tài chính, bảng cân đối kế toán, v.v.)',
+        description:
+          'Các tài liệu tài chính liên quan đến dự án (báo cáo tài chính, bảng cân đối kế toán, v.v.)',
       },
     },
     // Profile đội ngũ
@@ -195,7 +198,8 @@ export const Project: CollectionConfig = {
       type: 'textarea',
       label: 'Profile đội ngũ',
       admin: {
-        description: 'Thông tin chi tiết về đội ngũ thực hiện dự án (kinh nghiệm, kỹ năng, vai trò, v.v.)',
+        description:
+          'Thông tin chi tiết về đội ngũ thực hiện dự án (kinh nghiệm, kỹ năng, vai trò, v.v.)',
       },
     },
     //Thông tin kêu gọi
@@ -207,7 +211,7 @@ export const Project: CollectionConfig = {
         description: 'Số tiền vốn mục tiêu kêu gọi từ các nhà đầu tư (tính bằng VND)',
         step: 10000000, // Bước nhảy 10 triệu VND
       },
-      validate: (value) => {
+      validate: (value: any) => {
         if (value !== undefined && value <= 0) {
           return 'Số vốn kêu gọi phải lớn hơn 0'
         }
@@ -222,7 +226,7 @@ export const Project: CollectionConfig = {
         description: 'Phần trăm cổ phần dự kiến trao đổi cho nhà đầu tư (0-100%)',
         step: 0.1,
       },
-      validate: (value) => {
+      validate: (value: any) => {
         if (value !== undefined && (value < 0 || value > 100)) {
           return 'Tỉ lệ cổ phần phải trong khoảng 0-100%'
         }
