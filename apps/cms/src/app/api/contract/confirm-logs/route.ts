@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'
 import type { ContractLog } from '@/payload-types'
+import { NotificationData, notificationManager } from '@/app/api/createNotification'
 
 type ConfirmContractLogBody = {
   contract_log_id: string
@@ -32,6 +33,97 @@ const buildCorsHeaders = async (req: Request) => {
   }
 
   return headers
+}
+
+// Helper function to create notifications for contract completion
+const createContractCompletionNotifications = async (
+  payload: any,
+  updatedLog: ContractLog,
+  currentUser: any,
+  corsHeaders: Record<string, string>,
+) => {
+  try {
+    console.log('🎯 Creating notifications for contract completion')
+
+    // Lấy thông tin contract
+    const contract = await payload.findByID({
+      collection: 'contract',
+      id: typeof updatedLog.contract === 'string' ? updatedLog.contract : updatedLog.contract?.id,
+      depth: 2,
+    })
+
+    if (!contract) {
+      console.log('Contract not found, skipping notification')
+      return
+    }
+
+    const currentUserName = currentUser?.full_name || currentUser?.email || 'Người dùng'
+    const userAId = typeof contract.user_a === 'string' ? contract.user_a : contract.user_a?.id
+    const userBId = typeof contract.user_b === 'string' ? contract.user_b : contract.user_b?.id
+
+    const contractTitle = `Hợp đồng #${contract.id}`
+    const logContent =
+      updatedLog.content?.substring(0, 100) +
+      (updatedLog.content && updatedLog.content.length > 100 ? '...' : '')
+
+    // Lấy technology ID từ technology_propose
+    let technologyId = null
+    if (updatedLog.technology_propose) {
+      const techProposeId =
+        typeof updatedLog.technology_propose === 'string'
+          ? updatedLog.technology_propose
+          : updatedLog.technology_propose?.id
+      if (techProposeId) {
+        try {
+          const techPropose = await payload.findByID({
+            collection: 'technology-propose',
+            id: techProposeId,
+            depth: 1,
+          })
+          technologyId =
+            typeof techPropose.technology === 'string'
+              ? techPropose.technology
+              : techPropose.technology?.id
+        } catch (error) {
+          console.error('Error getting technology from technology_propose:', error)
+        }
+      }
+    }
+
+    // Tạo notifications cho các bên liên quan (trừ người xác nhận)
+    const notifications = []
+
+    if (userAId && userAId !== currentUser?.id) {
+      notifications.push({
+        user: userAId,
+        title: `Thông báo xác nhận hoàn thành hợp đồng`,
+        message: `${currentUserName} đã xác nhận hoàn thành hợp đồng "${contractTitle}". Nội dung: "${logContent}"`,
+        type: 'contract',
+        action_url: `technologies/negotiations/${technologyId}`,
+        priority: 'high',
+      })
+    }
+
+    if (userBId && userBId !== currentUser?.id) {
+      notifications.push({
+        user: userBId,
+        title: `Thông báo xác nhận hoàn thành hợp đồng`,
+        message: `${currentUserName} đã xác nhận hoàn thành hợp đồng "${contractTitle}". Nội dung: "${logContent}"`,
+        type: 'contract',
+        action_url: `technologies/negotiations/${technologyId}`,
+        priority: 'high',
+      })
+    }
+
+    if (notifications.length > 0) {
+      const result = await notificationManager.createBatchNotifications(
+        notifications as NotificationData[],
+      )
+      console.log(`✅ Created ${result.created} contract completion notifications`)
+    }
+  } catch (error) {
+    console.error('❌ Error creating contract completion notifications:', error)
+  }
 }
 
 export async function OPTIONS(req: NextRequest) {
@@ -66,7 +158,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure user is authenticated
-    await authenticateUser(req, corsHeaders)
+    const currentUser = await authenticateUser(req, corsHeaders)
 
     const payload = await getPayload({ config: configPromise })
 
@@ -120,6 +212,9 @@ export async function POST(req: NextRequest) {
             overrideAccess: true,
           })
 
+          // Tạo notifications khi hoàn thành contract
+          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
+
           return Response.json(
             {
               success: true,
@@ -138,6 +233,9 @@ export async function POST(req: NextRequest) {
             overrideAccess: true,
           })
 
+          // Tạo notifications khi hoàn thành contract
+          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
+
           return Response.json(
             {
               success: true,
@@ -155,6 +253,9 @@ export async function POST(req: NextRequest) {
             data: { status: 'completed' },
             overrideAccess: true,
           })
+
+          // Tạo notifications khi hoàn thành contract
+          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
 
           return Response.json(
             { success: true, contract_log: updatedLog, propose: updatedPropose },

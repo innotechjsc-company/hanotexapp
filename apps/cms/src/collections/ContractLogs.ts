@@ -92,6 +92,30 @@ export const ContractLogs: CollectionConfig = {
             const userBId =
               typeof contract.user_b === 'string' ? contract.user_b : contract.user_b?.id
 
+            // Lấy technology ID từ technology_propose
+            let technologyId = null
+            if (doc.technology_propose) {
+              const techProposeId =
+                typeof doc.technology_propose === 'string'
+                  ? doc.technology_propose
+                  : doc.technology_propose?.id
+              if (techProposeId) {
+                try {
+                  const techPropose = await req.payload.findByID({
+                    collection: 'technology-propose',
+                    id: techProposeId,
+                    depth: 1,
+                  })
+                  technologyId =
+                    typeof techPropose.technology === 'string'
+                      ? techPropose.technology
+                      : techPropose.technology?.id
+                } catch (error) {
+                  console.error('Error getting technology from technology_propose:', error)
+                }
+              }
+            }
+
             // Tạo notifications cho các bên liên quan (trừ người gửi log)
             const notifications: NotificationData[] = []
 
@@ -102,7 +126,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `technologies/negotiations/${contract.id}`,
+                action_url: `technologies/negotiations/${technologyId}`,
                 priority: 'normal',
               })
             }
@@ -114,7 +138,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `technologies/negotiations/${contract.id}`,
+                action_url: `technologies/negotiations/${technologyId}`,
                 priority: 'normal',
               })
             }
