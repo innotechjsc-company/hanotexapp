@@ -119,6 +119,35 @@ const getStatusColor = (
   }
 };
 
+// Lấy hình ảnh ngẫu nhiên cho đấu giá - 7 ảnh bất kỳ với nội dung đa dạng
+const getRandomAuctionImage = (auctionId: string): string => {
+  const images = [
+    // Ảnh 1: Cảnh thiên nhiên - Mountain landscape
+    "https://picsum.photos/400/300?random=1",
+    // Ảnh 2: Thành phố hiện đại - City skyline
+    "https://picsum.photos/400/300?random=2",
+    // Ảnh 3: Đồ ăn ngon - Food
+    "https://picsum.photos/400/300?random=3",
+    // Ảnh 4: Nghệ thuật trừu tượng - Abstract art
+    "https://picsum.photos/400/300?random=4",
+    // Ảnh 5: Thể thao - Sports
+    "https://picsum.photos/400/300?random=5",
+    // Ảnh 6: Du lịch - Travel
+    "https://picsum.photos/400/300?random=6",
+    // Ảnh 7: Âm nhạc - Music
+    "https://picsum.photos/400/300?random=7",
+  ];
+
+  // Sử dụng auction ID để tạo seed ngẫu nhiên nhất quán
+  const hash = auctionId.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const index = Math.abs(hash) % images.length;
+  return images[index];
+};
+
 export default function AuctionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -289,7 +318,7 @@ export default function AuctionsPage() {
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
               isActive: calculatedStatus === "active",
-              image: auction.image?.url || undefined,
+              image: getRandomAuctionImage(auction.id),
               category: auction.category || "Không phân loại",
               startTime: startTime,
               endTime: endTime,
@@ -322,7 +351,7 @@ export default function AuctionsPage() {
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
               isActive: calculatedStatus === "active",
-              image: auction.image?.url || undefined,
+              image: getRandomAuctionImage(auction.id),
               category: auction.category || "Không phân loại",
               startTime: startTime,
               endTime: endTime,
@@ -503,27 +532,31 @@ export default function AuctionsPage() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                  {auction.image ? (
-                    <img
-                      src={auction.image}
-                      alt={auction.title}
-                      className="w-full h-48 object-cover"
-                      onError={(e) => {
-                        // Hide the broken image and show placeholder
-                        e.currentTarget.style.display = "none";
-                        const placeholder = e.currentTarget
-                          .nextElementSibling as HTMLElement;
-                        if (placeholder) {
-                          placeholder.style.display = "block";
-                        }
-                      }}
-                    />
-                  ) : null}
+                  <img
+                    src={auction.image}
+                    alt={auction.title}
+                    className="w-full h-48 object-cover transition-opacity duration-300"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      // Fade in when loaded
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails to load
+                      e.currentTarget.style.display = "none";
+                      const placeholder = e.currentTarget
+                        .nextElementSibling as HTMLElement;
+                      if (placeholder) {
+                        placeholder.style.display = "block";
+                      }
+                    }}
+                    style={{ opacity: 0 }}
+                  />
 
-                  {/* Placeholder - always rendered but hidden when image exists */}
+                  {/* Placeholder - hidden by default, shown only on image error */}
                   <div
-                    className={`w-full h-48 ${auction.image ? "hidden" : "block"}`}
-                    style={{ display: auction.image ? "none" : "block" }}
+                    className="w-full h-48 hidden"
+                    style={{ display: "none" }}
                   >
                     <AuctionImagePlaceholder
                       category={auction.category}
