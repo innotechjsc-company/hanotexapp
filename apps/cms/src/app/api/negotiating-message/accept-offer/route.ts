@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
           title: `Offer của bạn đã được chấp nhận`,
           message: `Offer của bạn với giá ${updatedOffer.price?.toLocaleString() || 'N/A'} VNĐ cho công nghệ "${technology?.title || 'N/A'}" đã được chấp nhận. Hợp đồng đã được tạo và sẵn sàng ký kết.`,
           type: 'success',
-          action_url: `contracts/${contract.id}`,
+          action_url: `technologies/negotiations/${contract.id}`,
           priority: 'high',
         })
       } catch (notificationError) {
@@ -227,7 +227,7 @@ export async function POST(req: NextRequest) {
           title: `Offer của bạn đã được chấp nhận`,
           message: `Offer của bạn với giá ${updatedOffer.price?.toLocaleString() || 'N/A'} VNĐ cho dự án đã được chấp nhận. Hợp đồng đã được tạo và sẵn sàng ký kết.`,
           type: 'success',
-          action_url: `contracts/${contract.id}`,
+          action_url: `technologies/negotiations/${contract.id}`,
           priority: 'high',
         })
       } catch (notificationError) {
@@ -304,7 +304,7 @@ export async function POST(req: NextRequest) {
           title: `Offer của bạn đã được chấp nhận`,
           message: `Offer của bạn với giá ${updatedOffer.price?.toLocaleString() || 'N/A'} VNĐ cho công nghệ "${technology?.title || 'N/A'}" đã được chấp nhận. Hợp đồng đã được tạo và sẵn sàng ký kết.`,
           type: 'success',
-          action_url: `contracts/${contract.id}`,
+          action_url: `technologies/negotiations/${contract.id}`,
           priority: 'high',
         })
       } catch (notificationError) {
