@@ -1,4 +1,4 @@
-import {  NextResponse  } from 'next/server'
+import { NextResponse } from 'next/server'
 import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       auctionId,
       amount,
       bidder,
-      body
+      body,
     })
 
     if (!amount || amount <= 0) {
@@ -47,11 +47,11 @@ export async function POST(request: Request) {
 
     if (amount < minBid) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Bid must be at least ${minBid.toLocaleString()} VNĐ` 
+        {
+          success: false,
+          error: `Bid must be at least ${minBid.toLocaleString()} VNĐ`,
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -65,12 +65,12 @@ export async function POST(request: Request) {
       collection: 'bids',
       where: {
         auction: {
-          equals: auctionId
+          equals: auctionId,
         },
         is_winning: {
-          equals: true
-        }
-      }
+          equals: true,
+        },
+      },
     })
 
     // Update existing winning bids to not winning
@@ -79,8 +79,8 @@ export async function POST(request: Request) {
         collection: 'bids',
         id: bid.id,
         data: {
-          is_winning: false
-        }
+          is_winning: false,
+        },
       })
     }
 
@@ -96,9 +96,9 @@ export async function POST(request: Request) {
         currency: 'VND',
         bid_type: bid_type,
         status: 'ACTIVE',
-        bid_time: new Date(),
-        is_winning: true
-      }
+        bid_time: new Date().toISOString(),
+        is_winning: true,
+      },
     })
 
     // Update auction with new current bid
@@ -106,8 +106,8 @@ export async function POST(request: Request) {
       collection: 'auctions',
       id: auctionId,
       data: {
-        currentBid: amount
-      }
+        currentBid: amount,
+      },
     })
 
     // Get bid count
@@ -115,16 +115,16 @@ export async function POST(request: Request) {
       collection: 'bids',
       where: {
         auction: {
-          equals: auctionId
-        }
-      }
+          equals: auctionId,
+        },
+      },
     })
 
     console.log('Bid placed successfully:', {
       bidId: newBid.id,
       auctionId,
       amount,
-      bidCount: bidCount.totalDocs
+      bidCount: bidCount.totalDocs,
     })
 
     return corsResponse({
@@ -133,10 +133,9 @@ export async function POST(request: Request) {
       data: {
         bid: newBid,
         auction: updatedAuction,
-        bidCount: bidCount.totalDocs
-      }
+        bidCount: bidCount.totalDocs,
+      },
     })
-
   } catch (error) {
     console.error('CMS Bid API error:', error)
     return corsErrorResponse('Internal server error', 500)

@@ -39,7 +39,24 @@ export async function getBids(
     sort: pagination.sort || "-createdAt",
   };
 
-  return payloadApiClient.get<Bid>(API_ENDPOINTS.BIDS, params);
+  const response = await payloadApiClient.get<Bid>(API_ENDPOINTS.BIDS, params);
+  
+  // Handle response format that has success, data, pagination structure
+  if ((response as any).success && (response as any).data) {
+    return {
+      docs: (response as any).data,
+      totalDocs: (response as any).pagination?.total,
+      limit: (response as any).pagination?.limit,
+      page: (response as any).pagination?.page,
+      totalPages: (response as any).pagination?.totalPages,
+      hasNextPage: (response as any).pagination?.hasNextPage,
+      hasPrevPage: (response as any).pagination?.hasPrevPage,
+      nextPage: (response as any).pagination?.nextPage,
+      prevPage: (response as any).pagination?.prevPage,
+    };
+  }
+  
+  return response;
 }
 
 /**
@@ -49,7 +66,7 @@ export async function getBidById(id: string): Promise<Bid> {
   const response = await payloadApiClient.get<Bid>(
     `${API_ENDPOINTS.BIDS}/${id}`
   );
-  return response.data!;
+  return (response as any) || response.data!;
 }
 
 /**
@@ -60,7 +77,7 @@ export async function createBid(data: CreateBidData): Promise<Bid> {
     API_ENDPOINTS.BIDS,
     data
   );
-  return response.data!;
+  return (response as any) || response.data!;
 }
 
 /**
@@ -70,7 +87,22 @@ export async function getBidsByAuction(
   auctionId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Bid>> {
-  return getBids({ auction_id: auctionId }, pagination);
+  const response = await getBids({ auction_id: auctionId }, pagination);
+  // Handle response format that has success, data, pagination structure
+  if ((response as any).success && (response as any).data) {
+    return {
+      docs: (response as any).data,
+      totalDocs: (response as any).pagination?.total,
+      limit: (response as any).pagination?.limit,
+      page: (response as any).pagination?.page,
+      totalPages: (response as any).pagination?.totalPages,
+      hasNextPage: (response as any).pagination?.hasNextPage,
+      hasPrevPage: (response as any).pagination?.hasPrevPage,
+      nextPage: (response as any).pagination?.nextPage,
+      prevPage: (response as any).pagination?.prevPage,
+    };
+  }
+  return response;
 }
 
 /**
@@ -80,7 +112,8 @@ export async function getMyBids(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Bid>> {
   // The API will automatically filter by authenticated user
-  return getBids({}, pagination);
+  const response = await getBids({}, pagination);
+  return response;
 }
 
 /**
@@ -90,10 +123,11 @@ export async function getActiveBidsByAuction(
   auctionId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Bid>> {
-  return getBids(
+  const response = await getBids(
     { auction_id: auctionId, status: "ACTIVE" }, 
     { ...pagination, sort: "-bid_time" }
   );
+  return response;
 }
 
 /**
@@ -119,8 +153,9 @@ export async function getBidHistory(
   auctionId: string,
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Bid>> {
-  return getBids(
+  const response = await getBids(
     { auction_id: auctionId },
     { ...pagination, sort: "-bid_time" }
   );
+  return response;
 }

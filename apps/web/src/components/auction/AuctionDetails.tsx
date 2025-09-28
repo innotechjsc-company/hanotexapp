@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, MapPin, User, Phone, Mail, FileText, Download } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  User,
+  Phone,
+  Mail,
+  FileText,
+  Download,
+} from "lucide-react";
 
 interface AuctionDetailsProps {
   description: string;
@@ -11,7 +19,7 @@ interface AuctionDetailsProps {
   organizer: {
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
   };
   documents: Array<{
     id: string;
@@ -80,7 +88,9 @@ export default function AuctionDetails({
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-5 w-5 text-gray-400" />
                   <div>
-                    <div className="text-sm text-gray-500">Thời gian bắt đầu</div>
+                    <div className="text-sm text-gray-500">
+                      Thời gian bắt đầu
+                    </div>
                     <div className="font-medium text-gray-900">
                       {startTime.toLocaleString()}
                     </div>
@@ -90,7 +100,9 @@ export default function AuctionDetails({
                 <div className="flex items-center space-x-3">
                   <Calendar className="h-5 w-5 text-gray-400" />
                   <div>
-                    <div className="text-sm text-gray-500">Thời gian kết thúc</div>
+                    <div className="text-sm text-gray-500">
+                      Thời gian kết thúc
+                    </div>
                     <div className="font-medium text-gray-900">
                       {endTime.toLocaleString()}
                     </div>
@@ -107,20 +119,30 @@ export default function AuctionDetails({
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Thông tin người tổ chức</h4>
+                <h4 className="font-medium text-gray-900 mb-3">
+                  Thông tin người tổ chức
+                </h4>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-700">{organizer.name}</span>
+                    <span className="text-sm text-gray-700">
+                      {organizer.name}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Mail className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-700">{organizer.email}</span>
+                    <span className="text-sm text-gray-700">
+                      {organizer.email}
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-700">{organizer.phone}</span>
-                  </div>
+                  {organizer.phone && (
+                    <div className="flex items-center space-x-2">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-gray-700">
+                        {organizer.phone}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -141,7 +163,9 @@ export default function AuctionDetails({
                   <div className="flex items-center space-x-3">
                     <FileText className="h-5 w-5 text-gray-400" />
                     <div>
-                      <div className="font-medium text-gray-900">{doc.name}</div>
+                      <div className="font-medium text-gray-900">
+                        {doc.name}
+                      </div>
                       <div className="text-sm text-gray-500">{doc.size}</div>
                     </div>
                   </div>

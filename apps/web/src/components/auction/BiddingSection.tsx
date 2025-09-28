@@ -12,6 +12,8 @@ interface BiddingSectionProps {
   status?: "upcoming" | "active" | "ended" | "unknown";
   onBid: (amount: number) => void;
   onAutoBid: (maxAmount: number) => void;
+  isPlacingBid?: boolean;
+  isPlacingAutoBid?: boolean;
 }
 
 export default function BiddingSection({
@@ -23,6 +25,8 @@ export default function BiddingSection({
   status = "unknown",
   onBid,
   onAutoBid,
+  isPlacingBid = false,
+  isPlacingAutoBid = false,
 }: BiddingSectionProps) {
   const [bidAmount, setBidAmount] = useState(minBid);
   const [autoBidAmount, setAutoBidAmount] = useState(minBid);
@@ -81,6 +85,11 @@ export default function BiddingSection({
             <span className="font-semibold text-green-600">
               {(currentBid || 0).toLocaleString()} VNĐ
             </span>
+            {status === "active" && (
+              <span className="text-xs text-blue-600 ml-2">
+                - Bạn có thể đấu giá ngay!
+              </span>
+            )}
           </span>
         </div>
       </div>
@@ -118,6 +127,9 @@ export default function BiddingSection({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Số tiền đấu giá
+              <span className="text-xs text-blue-600 font-normal ml-2">
+                (đã đăng nhập - có thể đấu giá)
+              </span>
             </label>
             <div className="flex items-center space-x-2">
               <input
@@ -133,15 +145,26 @@ export default function BiddingSection({
               <button
                 type="button"
                 onClick={handleBid}
-                disabled={bidAmount < minBid}
-                className="px-4 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                disabled={bidAmount < minBid || isPlacingBid}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm font-semibold shadow-sm hover:shadow-md flex items-center space-x-2"
               >
-                Đấu giá
+                {isPlacingBid ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Đang xử lý...</span>
+                  </>
+                ) : (
+                  <span>Đấu giá ngay</span>
+                )}
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="mt-4">
+            <p className="text-xs text-gray-600 mb-2">
+              🚀 Chọn nhanh số tiền đấu giá:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
             {quickBidAmounts.map((amount) => (
               <button
                 key={amount}
@@ -155,7 +178,8 @@ export default function BiddingSection({
               >
                 {(amount || 0).toLocaleString()} VNĐ
               </button>
-            ))}
+              ))}
+            </div>
           </div>
 
           <div className="border-t pt-4">
@@ -189,10 +213,17 @@ export default function BiddingSection({
                   <button
                     type="button"
                     onClick={handleAutoBid}
-                    disabled={autoBidAmount < minBid}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm hover:shadow-md"
+                    disabled={autoBidAmount < minBid || isPlacingAutoBid}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-semibold shadow-sm hover:shadow-md flex items-center space-x-2"
                   >
-                    Kích hoạt
+                    {isPlacingAutoBid ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Đang xử lý...</span>
+                      </>
+                    ) : (
+                      <span>Kích hoạt</span>
+                    )}
                   </button>
                 </div>
                 <p className="text-xs text-blue-600 mt-2">

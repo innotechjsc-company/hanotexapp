@@ -45,7 +45,8 @@ export async function getAuctionById(id: string): Promise<Auction> {
   const response = await payloadApiClient.get<Auction>(
     `${API_ENDPOINTS.AUCTIONS}/${id}`
   );
-  return response.data!;
+  // PayloadCMS returns direct object for single document, not wrapped in data property
+  return (response as any) || response.data!;
 }
 
 /**
@@ -56,7 +57,7 @@ export async function createAuction(data: Partial<Auction>): Promise<Auction> {
     API_ENDPOINTS.AUCTIONS,
     data
   );
-  return response.data!;
+  return (response as any) || response.data!;
 }
 
 /**
@@ -70,7 +71,7 @@ export async function updateAuction(
     `${API_ENDPOINTS.AUCTIONS}/${id}`,
     data
   );
-  return response.data!;
+  return (response as any) || response.data!;
 }
 
 /**
