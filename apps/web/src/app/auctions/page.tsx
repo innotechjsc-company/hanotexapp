@@ -15,11 +15,14 @@ import {
 } from "lucide-react";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
 import AuctionImagePlaceholder from "@/components/auction/AuctionImagePlaceholder";
-import { useAuth } from "@/store/auth";
+import { useAuth, useAuthStore } from "@/store/auth";
 import { Spinner } from "@heroui/react";
 import toast from "react-hot-toast";
+import { getAuctions } from "@/api/auctions";
+import { getBidsByAuction } from "@/api/bids";
+import { payloadApiClient } from "@/api/client";
 
-interface Auction {
+interface AuctionDisplay {
   id: string;
   title: string;
   currentBid: number;
@@ -30,17 +33,42 @@ interface Auction {
   image?: string;
   category: string;
   endTime: Date;
+  status?: string;
+  startingPrice?: number;
 }
+
+// Tính thời gian còn lại
+const calculateTimeLeft = (endTime: string | Date | undefined): string => {
+  if (!endTime) return 'Không xác định';
+  
+  const now = new Date().getTime();
+  const end = new Date(endTime).getTime();
+  const timeLeft = end - now;
+
+  if (timeLeft <= 0) return 'Đã kết thúc';
+
+  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) {
+    return `${days} ngày ${hours} giờ`;
+  } else if (hours > 0) {
+    return `${hours} giờ ${minutes} phút`;
+  } else {
+    return `${minutes} phút`;
+  }
+};
 
 export default function AuctionsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [auctions, setAuctions] = useState<AuctionDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, token } = useAuth();
   const [authChecked, setAuthChecked] = useState(false);
 
   // Authentication check effect
@@ -54,6 +82,12 @@ export default function AuctionsPage() {
         toast.error("Vui lòng đăng nhập để xem danh sách đấu giá");
         router.push("/auth/login");
         return;
+      }
+      
+      // Setup API client authentication
+      const token = localStorage.getItem('auth_token');
+      if (token && isAuthenticated) {
+        payloadApiClient.setToken(token);
       }
     }
   }, [isAuthenticated, isLoading, router]);
@@ -92,65 +126,102 @@ export default function AuctionsPage() {
     return () => clearInterval(interval);
   }, [authChecked, isAuthenticated]);
 
-  // Listen for localStorage changes (when user places bids)
+  // Listen for bid placement events
   useEffect(() => {
     // Only set up listeners if user is authenticated
     if (!authChecked || !isAuthenticated) {
       return;
     }
 
-    const handleStorageChange = () => {
-      // Refetch auctions when localStorage changes (bid placed)
+    const handleBidPlaced = () => {
+      // Refetch auctions when a bid is placed
+      console.log('Bid placed event received, refreshing auctions...');
       fetchAuctions();
     };
 
-    window.addEventListener("storage", handleStorageChange);
-
-    // Also listen for custom events from bid placement
-    window.addEventListener("bidPlaced", handleStorageChange);
+    // Listen for custom events from bid placement
+    window.addEventListener("bidPlaced", handleBidPlaced);
+    window.addEventListener("auctionUpdated", handleBidPlaced);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("bidPlaced", handleStorageChange);
+      window.removeEventListener("bidPlaced", handleBidPlaced);
+      window.removeEventListener("auctionUpdated", handleBidPlaced);
     };
   }, [authChecked, isAuthenticated]);
 
   const fetchAuctions = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/auctions");
-      if (!response.ok) {
-        throw new Error("Không thể tải danh sách đấu giá");
+      
+      // Set token for API client if available
+      if (token) {
+        payloadApiClient.setToken(token);
       }
-      const data = await response.json();
+      
+      // Fetch auctions using CMS API client
+      const response = await getAuctions({}, { limit: 50, sort: "-createdAt" });
+      const auctionsList = response.docs || [];
 
-      // Update auctions with localStorage bid data
-      const updatedAuctions = data.map((auction: Auction) => {
-        const storedBids = localStorage.getItem(`auction_bids_${auction.id}`);
-        if (storedBids) {
+      // Transform data and fetch bid counts
+      const auctionsWithBids = await Promise.allSettled(
+        auctionsList.map(async (auction: any) => {
           try {
-            const parsedBids = JSON.parse(storedBids);
-            if (parsedBids.length > 0) {
-              const latestBid = parsedBids[parsedBids.length - 1];
-              return {
-                ...auction,
-                currentBid: latestBid.amount || auction.currentBid,
-                bidCount: parsedBids.length,
-              };
+            // Fetch bid count for each auction using CMS API client
+            const bidResponse = await getBidsByAuction(auction.id, { limit: 1 });
+            let bidCount = bidResponse.totalDocs || 0;
+            let currentBid = auction.currentBid || auction.current_price || auction.startingPrice || auction.start_price || 0;
+            
+            // If there are bids, get the highest bid amount
+            if (bidCount > 0 && bidResponse.docs && bidResponse.docs.length > 0) {
+              const highestBid = Math.max(...bidResponse.docs.map((bid: any) => bid.amount || bid.bid_amount || 0));
+              currentBid = Math.max(currentBid, highestBid);
             }
-          } catch (e) {
-            console.warn(
-              `Failed to parse stored bids for auction ${auction.id}:`,
-              e
-            );
+            
+            const endTime = new Date(auction.endTime || auction.end_time || Date.now());
+            return {
+              id: auction.id,
+              title: auction.title || "Không có tiêu đề",
+              currentBid,
+              bidCount,
+              timeLeft: calculateTimeLeft(endTime),
+              viewers: auction.viewers || 0,
+              isActive: auction.status === 'ACTIVE',
+              image: auction.image?.url || undefined,
+              category: auction.category || "Không phân loại",
+              endTime: endTime,
+              status: auction.status,
+              startingPrice: auction.startingPrice || auction.start_price || 0,
+            };
+          } catch (error) {
+            console.warn(`Failed to fetch bids for auction ${auction.id}:`, error);
+            const endTime = new Date(auction.endTime || auction.end_time || Date.now());
+            return {
+              id: auction.id,
+              title: auction.title || "Không có tiêu đề",
+              currentBid: auction.currentBid || auction.current_price || auction.startingPrice || auction.start_price || 0,
+              bidCount: 0,
+              timeLeft: calculateTimeLeft(endTime),
+              viewers: auction.viewers || 0,
+              isActive: auction.status === 'ACTIVE',
+              image: auction.image?.url || undefined,
+              category: auction.category || "Không phân loại",
+              endTime: endTime,
+              status: auction.status,
+              startingPrice: auction.startingPrice || auction.start_price || 0,
+            };
           }
-        }
-        return auction;
-      });
+        })
+      );
 
-      setAuctions(updatedAuctions);
+      // Filter successful results
+      const successfulAuctions = auctionsWithBids
+        .filter((result) => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<AuctionDisplay>).value);
+
+      setAuctions(successfulAuctions);
     } catch (error) {
       console.error("Error fetching auctions:", error);
+      toast.error("Không thể tải danh sách đấu giá");
     } finally {
       setLoading(false);
     }

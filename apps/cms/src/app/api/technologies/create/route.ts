@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Technology as TechnologyType, User as UserType, ServiceTicket } from '@/payload-types'
@@ -293,8 +294,7 @@ export async function POST(request: NextRequest) {
       // Don't fail the entire request if notification creation fails
     }
 
-    return NextResponse.json(
-      {
+    return corsResponse({
         success: true,
         data: createdTechnology,
         doc: createdTechnology, // For compatibility with existing frontend code

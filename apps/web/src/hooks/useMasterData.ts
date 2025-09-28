@@ -30,7 +30,7 @@ export const useMasterData = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('/api/master-data/all');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/all`);
         const result = await response.json();
         
         if (result.success) {

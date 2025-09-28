@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { TechnologyPropose as TechnologyProposeType } from '@/payload-types'
@@ -173,8 +174,7 @@ export async function POST(request: NextRequest) {
       // Không throw error để không ảnh hưởng đến response chính
     }
 
-    return NextResponse.json(
-      {
+    return corsResponse({
         success: true,
         technology_propose: updatedTechnologyPropose,
         negotiating_message: negotiatingMessage,

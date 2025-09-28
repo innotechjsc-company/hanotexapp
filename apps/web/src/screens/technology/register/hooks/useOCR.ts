@@ -17,7 +17,7 @@ export const useOCR = () => {
       formData.append("file", file);
 
       // Call OCR API
-      const response = await fetch("/api/ocr/process", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/ocr/process`, {
         method: "POST",
         body: formData,
       });

@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { notificationManager, RoomMessageContext } from '../NotificationManager'
 
 // CORS headers
