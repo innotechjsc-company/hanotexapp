@@ -22,6 +22,7 @@ import { getAllCategories } from "@/api/categories";
 import { Demand } from "@/types/demand";
 import { Category } from "@/types/categories";
 import { formatPriceRange } from "@/constants/demands";
+import DemandCard from "./components/DemandCard";
 
 export default function DemandsPage() {
   const router = useRouter();
@@ -137,7 +138,14 @@ export default function DemandsPage() {
       setLoading(false);
       setIsFiltering(false);
     }
-  }, [activeSearchQuery, filters.category, pagination.page, pagination.limit, sortBy, sortOrder]);
+  }, [
+    activeSearchQuery,
+    filters.category,
+    pagination.page,
+    pagination.limit,
+    sortBy,
+    sortOrder,
+  ]);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -146,9 +154,7 @@ export default function DemandsPage() {
 
   useEffect(() => {
     fetchDemands();
-  }, [
-    fetchDemands
-  ]);
+  }, [fetchDemands]);
 
   // Extracted search logic to be reusable
   const performSearch = useCallback(() => {
@@ -163,10 +169,13 @@ export default function DemandsPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, [searchQuery, activeSearchQuery]);
 
-  const handleSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    performSearch();
-  }, [performSearch]);
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      performSearch();
+    },
+    [performSearch]
+  );
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: any) => {
@@ -174,14 +183,17 @@ export default function DemandsPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
 
-  const handleSort = useCallback((field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
-    } else {
-      setSortBy(field);
-      setSortOrder("DESC");
-    }
-  }, [sortBy, sortOrder]);
+  const handleSort = useCallback(
+    (field: string) => {
+      if (sortBy === field) {
+        setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+      } else {
+        setSortBy(field);
+        setSortOrder("DESC");
+      }
+    },
+    [sortBy, sortOrder]
+  );
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -376,154 +388,28 @@ export default function DemandsPage() {
             <div
               className={
                 viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch"
                   : "space-y-3"
               }
             >
               {demands.map((demand, index) => (
-                <Card
+                <DemandCard
                   key={demand.id || index}
-                  className={`shadow-sm hover:shadow-md transition-shadow ${
-                    viewMode === "grid" ? "h-full flex flex-col" : ""
-                  }`}
-                >
-                  <div className="p-2 flex flex-col h-full">
-                    {viewMode === "grid" ? (
-                      // Grid View
-                      <>
-                        <div className="flex items-start justify-between mb-4">
-                          <Tag color="blue" className="text-xs">
-                            {typeof demand.category === "object" &&
-                            demand.category?.name
-                              ? demand.category.name
-                              : typeof demand.category === "string"
-                                ? demand.category
-                                : "Chưa phân loại"}
-                          </Tag>
-                          <Tag color="green" className="text-xs">
-                            TRL {demand.trl_level}
-                          </Tag>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
-                          {demand.title}
-                        </h3>
-
-                        <p className="text-default-600 text-sm mb-4 line-clamp-3 flex-grow">
-                          {demand.description}
-                        </p>
-
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center text-sm text-default-500">
-                            <DollarSign className="h-4 w-4 mr-2" />
-                            <span>
-                              {formatPriceRange(
-                                demand.from_price,
-                                demand.to_price
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex items-center text-sm text-default-500">
-                            <Users className="h-4 w-4 mr-2" />
-                            <span>
-                              {typeof demand.user === "object" &&
-                              demand.user?.full_name
-                                ? demand.user.full_name
-                                : "Người dùng"}
-                            </span>
-                          </div>
-                          <div className="flex items-center text-sm text-default-500">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            <span>Mới đăng</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm text-default-500 mb-4">
-                          <div className="flex items-center">
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                              {demand.cooperation || "Hợp tác"}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <span className="text-xs text-default-400">
-                              {demand.documents?.length || 0} tài liệu
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2 mt-auto">
-                          <Button
-                            type="primary"
-                            className="w-full"
-                            onClick={() => {
-                              const target = `/demands/${demand.id || index}`;
-                              if (isAuthenticated) {
-                                router.push(target);
-                              } else {
-                                router.push(
-                                  `/auth/login?redirect=${encodeURIComponent(target)}`
-                                );
-                              }
-                            }}
-                            icon={<ArrowRight className="h-4 w-4" />}
-                          >
-                            Xem chi tiết
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      // List View
-                      <div className="flex items-start space-x-4">
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-foreground">
-                              {demand.title}
-                            </h3>
-                            <div className="flex items-center space-x-2">
-                              <Tag color="blue" className="text-xs">
-                                {typeof demand.category === "object" &&
-                                demand.category?.name
-                                  ? demand.category.name
-                                  : typeof demand.category === "string"
-                                    ? demand.category
-                                    : "Chưa phân loại"}
-                              </Tag>
-                              <Tag color="green" className="text-xs">
-                                TRL {demand.trl_level}
-                              </Tag>
-                            </div>
-                          </div>
-
-                          <p className="text-default-600 text-sm mb-3 line-clamp-2">
-                            {demand.description}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col space-y-2">
-                          <Button
-                            type="primary"
-                            size="small"
-                            onClick={() => router.push(`/demands/${demand.id}`)}
-                            icon={<ArrowRight className="h-4 w-4" />}
-                          >
-                            Xem chi tiết
-                          </Button>
-                          {isAuthenticated && (
-                            <Button
-                              size="small"
-                              onClick={() =>
-                                router.push(`/demands/${demand.id}/propose`)
-                              }
-                              icon={<Send className="h-4 w-4" />}
-                            >
-                              Đề xuất
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                  demand={demand}
+                  viewMode={viewMode}
+                  isAuthenticated={isAuthenticated}
+                  onViewDetails={() => {
+                    const target = `/demands/${demand.id || index}`;
+                    if (isAuthenticated) {
+                      router.push(target);
+                    } else {
+                      router.push(
+                        `/auth/login?redirect=${encodeURIComponent(target)}`
+                      );
+                    }
+                  }}
+                  onPropose={() => router.push(`/demands/${demand.id}/propose`)}
+                />
               ))}
             </div>
           ) : (

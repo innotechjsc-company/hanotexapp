@@ -73,7 +73,7 @@ export const News: CollectionConfig = {
     },
     {
       name: 'image',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       required: true,
       label: 'Ảnh đại diện',
@@ -91,7 +91,7 @@ export const News: CollectionConfig = {
     },
     {
       name: 'document',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       label: 'Tài liệu',
     },

@@ -66,11 +66,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     let targetUrl: string;
     if (isProduction) {
       // Production: use env variable
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     } else {
       // Development: use env variable
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 

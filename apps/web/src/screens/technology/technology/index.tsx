@@ -68,10 +68,9 @@ export default function TechnologyListScreen() {
 
     const queryString = params.toString();
     if (queryString === searchParams.toString()) return;
-    router.replace(
-      `/technologies${queryString ? `?${queryString}` : ""}`,
-      { scroll: false }
-    );
+    router.replace(`/technologies${queryString ? `?${queryString}` : ""}`, {
+      scroll: false,
+    });
   };
 
   // Simple helpers for chips
@@ -178,7 +177,8 @@ export default function TechnologyListScreen() {
     });
 
     const pageParam = Number(searchParams.get("page") ?? "1");
-    const normalizedPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+    const normalizedPage =
+      Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
     setPage((prev) => (prev === normalizedPage ? prev : normalizedPage));
   }, [searchParams]);
 
@@ -207,11 +207,15 @@ export default function TechnologyListScreen() {
       <SectionBanner
         title="Kho Công nghệ"
         subtitle="Khám phá và tìm kiếm các công nghệ tiên tiến từ doanh nghiệp, viện nghiên cứu và trường đại học trên toàn quốc"
-        icon={<AnimatedIcon animation="rotate" delay={500}><Cpu className="h-12 w-12 text-white" /></AnimatedIcon>}
+        icon={
+          <AnimatedIcon animation="rotate" delay={500}>
+            <Cpu className="h-12 w-12 text-white" />
+          </AnimatedIcon>
+        }
         variant="hero"
         className="mb-8"
       />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6 flex items-center space-x-3">
           <AnimatedIcon animation="pulse">
@@ -237,7 +241,12 @@ export default function TechnologyListScreen() {
             setCategorySelectedKeys(new Set());
             setTrlSelectedKeys(new Set());
             setPage(1);
-            updateUrlParams({ query: "", categoryId: null, trlLevel: null, page: 1 });
+            updateUrlParams({
+              query: "",
+              categoryId: null,
+              trlLevel: null,
+              page: 1,
+            });
           }}
           showClear={Boolean(
             query || categorySelectedKeys.size || trlSelectedKeys.size
@@ -246,9 +255,8 @@ export default function TechnologyListScreen() {
           categorySelectedKeys={categorySelectedKeys}
           onCategoryChange={(keys) => {
             setCategorySelectedKeys(new Set(keys));
-            const nextCategoryId = keys && keys.size
-              ? String(Array.from(keys)[0])
-              : "";
+            const nextCategoryId =
+              keys && keys.size ? String(Array.from(keys)[0]) : "";
             setPage(1);
             updateUrlParams({
               categoryId: nextCategoryId || null,
@@ -258,9 +266,8 @@ export default function TechnologyListScreen() {
           trlSelectedKeys={trlSelectedKeys}
           onTrlChange={(keys) => {
             setTrlSelectedKeys(new Set(keys));
-            const nextTrlLevel = keys && keys.size
-              ? String(Array.from(keys)[0])
-              : "";
+            const nextTrlLevel =
+              keys && keys.size ? String(Array.from(keys)[0]) : "";
             setPage(1);
             updateUrlParams({
               trlLevel: nextTrlLevel || null,

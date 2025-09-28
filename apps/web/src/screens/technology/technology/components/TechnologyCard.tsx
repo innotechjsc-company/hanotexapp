@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Chip,
-} from "@heroui/react";
+import { Button, Card, Tag, Avatar } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
@@ -49,9 +42,9 @@ function getOwnerType(item: any): string | undefined {
   if (Array.isArray(item?.owners) && item.owners[0]?.owner_type) {
     const ownerType = item.owners[0].owner_type;
     const typeMap: Record<string, string> = {
-      'individual': 'Cá nhân',
-      'company': 'Doanh nghiệp',
-      'research_institution': 'Viện/Trường'
+      individual: "Cá nhân",
+      company: "Doanh nghiệp",
+      research_institution: "Viện/Trường",
     };
     return typeMap[ownerType] || ownerType;
   }
@@ -116,59 +109,87 @@ export default function TechnologyCard({
 
   if (viewMode === "list") {
     return (
-      <Card
-        shadow="sm"
-        className="w-full overflow-hidden hover:shadow-lg transition-all"
-      >
+      <Card hoverable className="w-full" bodyStyle={{ padding: 0 }}>
         <div className="flex flex-col sm:flex-row">
+          {/* Image Section - Left */}
+          <div className="w-full sm:w-1/3 flex-shrink-0">
+            {thumb ? (
+              <img
+                src={thumb}
+                alt={item.title}
+                className="w-full h-48 sm:h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 sm:h-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src="/logo.png"
+                    alt="Hanotex"
+                    className="w-16 h-16 object-contain opacity-60"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Content */}
           <div className="p-4 flex flex-col flex-1">
             {/* Header with chips - improved layout */}
             <div className="flex flex-col gap-2 mb-3">
-              {/* First row: Category only */}
-              <div className="flex justify-start">
-                {categoryName && (
-                  <Chip 
-                    size="sm" 
-                    variant="flat" 
-                    color="primary"
-                    className="max-w-full"
-                  >
-                    <span className="truncate block" title={categoryName}>
-                      {categoryName}
-                    </span>
-                  </Chip>
-                )}
-              </div>
-              
-              {/* Second row: Status, TRL and Owner info */}
-              <div className="flex justify-between items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Chip
-                    size="sm"
-                    variant="flat"
-                    color={statusChipColor(item.status)}
+              {/* First row: Category and Status on same line */}
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  {categoryName && (
+                    <Tag color="blue" className="w-full">
+                      <span className="truncate block" title={categoryName}>
+                        {categoryName}
+                      </span>
+                    </Tag>
+                  )}
+                </div>
+                <div className="flex-shrink-0">
+                  <Tag
+                    color={
+                      statusChipColor(item.status) === "success"
+                        ? "green"
+                        : statusChipColor(item.status) === "warning"
+                          ? "orange"
+                          : "default"
+                    }
                     className="whitespace-nowrap"
                   >
                     {StatusLabel}
-                  </Chip>
+                  </Tag>
+                </div>
+              </div>
+
+              {/* Second row: TRL and Owner info */}
+              <div className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2">
                   {item.trl_level && (
-                    <Chip
-                      size="sm"
-                      variant="flat"
-                      color={trlChipColor(Number(item.trl_level))}
+                    <Tag
+                      color={
+                        trlChipColor(Number(item.trl_level)) === "success"
+                          ? "green"
+                          : trlChipColor(Number(item.trl_level)) === "warning"
+                            ? "orange"
+                            : "default"
+                      }
                     >
                       TRL {item.trl_level}
-                    </Chip>
+                    </Tag>
                   )}
                   {ownerType && (
-                    <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
+                    <Tag color="default" className="text-xs">
                       {ownerType}
-                    </span>
+                    </Tag>
                   )}
                 </div>
                 {ownerName && (
-                  <span className="text-xs text-default-600 truncate max-w-[150px]" title={ownerName}>
+                  <span
+                    className="text-xs text-default-600 truncate max-w-[150px]"
+                    title={ownerName}
+                  >
                     {ownerName}
                   </span>
                 )}
@@ -193,8 +214,13 @@ export default function TechnologyCard({
             {/* Territory information */}
             {territoryInfo && (
               <div className="mb-3">
-                <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
-                <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
+                <p className="text-xs text-default-500 mb-1">
+                  Phạm vi áp dụng:
+                </p>
+                <p
+                  className="text-xs text-default-600 line-clamp-1"
+                  title={territoryInfo}
+                >
                   {territoryInfo}
                 </p>
               </div>
@@ -212,8 +238,8 @@ export default function TechnologyCard({
                   </p>
                 )}
               </div>
-              <Button as={Link} href={href} color="primary" size="sm">
-                Xem chi tiết
+              <Button type="primary" size="small">
+                <Link href={href}>Xem chi tiết</Link>
               </Button>
             </div>
           </div>
@@ -225,104 +251,115 @@ export default function TechnologyCard({
   // Grid mode
   return (
     <Card
-      shadow="sm"
-      className="h-full overflow-hidden hover:shadow-lg transition-all flex flex-col"
-    >
-      <CardBody className="p-4 flex-1">
-        {/* Header with chips - improved layout */}
-        <div className="flex flex-col gap-2 mb-3">
-          {/* First row: Category and Status */}
-          <div className="flex justify-between items-start gap-3">
-            <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 90px)' }}>
-              {categoryName && (
-                <Chip
-                  size="sm"
-                  variant="flat"
-                  color="primary"
-                  className="w-full"
-                >
-                  <span className="truncate block" title={categoryName}>
-                    {categoryName}
-                  </span>
-                </Chip>
-              )}
-            </div>
-            <div className="flex-shrink-0" style={{ minWidth: '70px' }}>
-              <Chip
-                size="sm"
-                variant="flat"
-                color={statusChipColor(item.status)}
-                className="whitespace-nowrap w-full"
-              >
-                {StatusLabel}
-              </Chip>
+      hoverable
+      className="h-full flex flex-col"
+      cover={
+        thumb ? (
+          <img
+            src={thumb}
+            alt={item.title}
+            className="w-full h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Hanotex"
+                className="w-16 h-16 object-contain opacity-60"
+              />
             </div>
           </div>
-          
-          {/* Second row: TRL and Owner info */}
-          <div className="flex justify-between items-center gap-2">
-            <div className="flex items-center gap-2">
-              {item.trl_level && (
-                <Chip size="sm" variant="flat" color={trlChipColor(item.trl_level)}>
-                  TRL {item.trl_level}
-                </Chip>
-              )}
-              {ownerType && (
-                <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
-                  {ownerType}
+        )
+      }
+      bodyStyle={{ padding: "16px" }}
+    >
+      {/* Header with chips - improved layout */}
+      <div className="flex flex-col gap-2 mb-3">
+        {/* First row: Category and Status */}
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex-1 min-w-0">
+            {categoryName && (
+              <Tag color="blue" className="w-full">
+                <span
+                  className="truncate block w-0.7 overflow-hidden"
+                  title={categoryName}
+                >
+                  {categoryName}
                 </span>
-              )}
-            </div>
+              </Tag>
+            )}
           </div>
         </div>
 
-        <h3 className="font-semibold text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
-          <Link href={href} className="hover:text-primary transition-colors">
-            {item.title}
-          </Link>
-        </h3>
+        {/* Second row: TRL and Owner info */}
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2">
+            {item.trl_level && (
+              <Tag
+                color={
+                  trlChipColor(item.trl_level) === "success"
+                    ? "green"
+                    : trlChipColor(item.trl_level) === "warning"
+                      ? "orange"
+                      : "default"
+                }
+              >
+                TRL {item.trl_level}
+              </Tag>
+            )}
+            {ownerType && (
+              <Tag color="default" className="text-xs">
+                {ownerType}
+              </Tag>
+            )}
+          </div>
+        </div>
+      </div>
 
-        {item.description && (
-          <p className="text-sm text-default-600 mb-3 line-clamp-2">
-            {item.description}
-          </p>
+      <h3 className="font-semibold text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
+        <Link href={href} className="hover:text-primary transition-colors">
+          {item.title}
+        </Link>
+      </h3>
+
+      {/* Additional info */}
+      <div className="space-y-2 mb-3">
+        {ownerName && (
+          <div>
+            <p className="text-xs text-default-500 mb-1">Đơn vị sở hữu:</p>
+            <p className="text-xs text-default-600 truncate" title={ownerName}>
+              {ownerName}
+            </p>
+          </div>
         )}
 
-        {/* Additional info */}
-        <div className="space-y-2 mb-3">
-          {ownerName && (
-            <div>
-              <p className="text-xs text-default-500 mb-1">Đơn vị sở hữu:</p>
-              <p className="text-xs text-default-600 truncate" title={ownerName}>
-                {ownerName}
-              </p>
-            </div>
-          )}
-          
-          {territoryInfo && (
-            <div>
-              <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
-              <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
-                {territoryInfo}
-              </p>
-            </div>
-          )}
-        </div>
-      </CardBody>
-      <CardFooter className="p-4 flex items-center justify-between bg-content2">
+        {territoryInfo && (
+          <div>
+            <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
+            <p
+              className="text-xs text-default-600 line-clamp-1"
+              title={territoryInfo}
+            >
+              {territoryInfo}
+            </p>
+          </div>
+        )}
+      </div>
+      <div className="p-4 flex items-center justify-between bg-gray-50 border-t">
         <div className="min-w-0">
           {formattedPrice ? (
-            <p className="font-bold text-primary truncate">
+            <p className="font-bold text-blue-600 truncate">
               {formattedPrice} {currency}
             </p>
           ) : (
-            <p className="text-sm font-medium text-default-600">Thương lượng</p>
+            <p className="text-sm font-medium text-gray-600">Thương lượng</p>
           )}
         </div>
-        <Button as={Link} href={href} color="primary" size="sm">
-          Chi tiết
+        <Button type="primary" size="small">
+          <Link href={href}>Chi tiết</Link>
         </Button>
-      </CardFooter>
+      </div>
     </Card>
   );
 }
