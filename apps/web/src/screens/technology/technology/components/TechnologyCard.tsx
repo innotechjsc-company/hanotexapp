@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Button, Tag, Typography, Space, Tooltip } from "antd";
+import { Card, Button, Tag, Typography, Space } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
@@ -96,13 +96,29 @@ function getThumb(item: any): string | undefined {
   return (cover || image || doc0) as string | undefined;
 }
 
+// Helper function to get Vietnamese status label
+function getVietnameseStatusLabel(status?: string): string {
+  if (!status) return "";
+  
+  const statusLabels: Record<string, string> = {
+    draft: "Bản nháp",
+    pending: "Chờ phê duyệt",
+    approved: "Đã phê duyệt",
+    rejected: "Đã từ chối",
+    active: "Đang hoạt động",
+    inactive: "Không hoạt động",
+  };
+  
+  const normalizedStatus = status.toLowerCase();
+  return statusLabels[normalizedStatus] || status;
+}
+
 export default function TechnologyCard({
   item,
   viewMode,
   trlChipColor,
   statusChipColor,
 }: TechnologyCardProps) {
-  const normalizedStatus = String(item?.status ?? "").toUpperCase();
   const categoryName = getCategoryName(item);
   const ownerName = getOwnerName(item);
   const ownerType = getOwnerType(item);
@@ -111,12 +127,7 @@ export default function TechnologyCard({
   const thumb = getThumb(item);
   const href = item?.id ? `/technologies/${item.id}` : "#";
 
-  const StatusLabel =
-    normalizedStatus === "ACTIVE"
-      ? "Sẵn sàng"
-      : normalizedStatus === "PENDING"
-        ? "Chờ duyệt"
-        : (item?.status ?? "");
+  const StatusLabel = getVietnameseStatusLabel(item?.status);
 
   const formattedPrice = price
     ? new Intl.NumberFormat("vi-VN").format(Number(price))
@@ -135,16 +146,11 @@ export default function TechnologyCard({
             {/* Category Tag */}
             <div className="flex justify-start">
               {categoryName && (
-                <Tooltip title={categoryName}>
-                  <Tag color="blue" className="max-w-full">
-                    <Text
-                      ellipsis={{ tooltip: true }}
-                      style={{ maxWidth: 200, margin: 0 }}
-                    >
-                      {categoryName}
-                    </Text>
-                  </Tag>
-                </Tooltip>
+                <Tag color="blue" className="max-w-full">
+                  <Text style={{ maxWidth: 200, margin: 0 }}>
+                    {categoryName.length > 30 ? `${categoryName.substring(0, 30)}...` : categoryName}
+                  </Text>
+                </Tag>
               )}
             </div>
             
@@ -166,15 +172,12 @@ export default function TechnologyCard({
                 )}
               </Space>
               {ownerName && (
-                <Tooltip title={ownerName}>
-                  <Text
-                    type="secondary"
-                    style={{ fontSize: 12, maxWidth: 150 }}
-                    ellipsis
-                  >
-                    {ownerName}
-                  </Text>
-                </Tooltip>
+                <Text
+                  type="secondary"
+                  style={{ fontSize: 12, maxWidth: 150 }}
+                >
+                  {ownerName.length > 20 ? `${ownerName.substring(0, 20)}...` : ownerName}
+                </Text>
               )}
             </div>
           </div>
@@ -182,14 +185,11 @@ export default function TechnologyCard({
           {/* Title */}
           <Text strong style={{ fontSize: 16, lineHeight: '1.4' }}>
             <Link href={href} className="hover:text-blue-600 transition-colors">
-              <Tooltip title={item.title}>
-                <Text
-                  ellipsis={{ rows: 2, tooltip: true }}
-                  style={{ margin: 0, fontWeight: 600 }}
-                >
-                  {item.title}
-                </Text>
-              </Tooltip>
+              <Text
+                style={{ margin: 0, fontWeight: 600 }}
+              >
+                {item.title && item.title.length > 80 ? `${item.title.substring(0, 80)}...` : item.title}
+              </Text>
             </Link>
           </Text>
 
@@ -197,10 +197,9 @@ export default function TechnologyCard({
           {item.description && (
             <Paragraph
               type="secondary"
-              ellipsis={{ rows: 2, tooltip: true }}
               style={{ marginBottom: 8 }}
             >
-              {item.description}
+              {item.description.length > 120 ? `${item.description.substring(0, 120)}...` : item.description}
             </Paragraph>
           )}
 
@@ -210,15 +209,12 @@ export default function TechnologyCard({
               <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
                 Phạm vi áp dụng:
               </Text>
-              <Tooltip title={territoryInfo}>
-                <Text
-                  type="secondary"
-                  style={{ fontSize: 12 }}
-                  ellipsis
-                >
-                  {territoryInfo}
-                </Text>
-              </Tooltip>
+              <Text
+                type="secondary"
+                style={{ fontSize: 12 }}
+              >
+                {territoryInfo.length > 50 ? `${territoryInfo.substring(0, 50)}...` : territoryInfo}
+              </Text>
             </div>
           )}
 
@@ -278,16 +274,11 @@ export default function TechnologyCard({
           <div className="flex justify-between items-start gap-2">
             <div className="flex-1 min-w-0">
               {categoryName && (
-                <Tooltip title={categoryName}>
-                  <Tag color="blue" className="w-full text-center">
-                    <Text
-                      ellipsis={{ tooltip: true }}
-                      style={{ maxWidth: '100%', margin: 0 }}
-                    >
-                      {categoryName}
-                    </Text>
-                  </Tag>
-                </Tooltip>
+                <Tag color="blue" className="w-full text-center">
+                  <Text style={{ maxWidth: '100%', margin: 0 }}>
+                    {categoryName.length > 25 ? `${categoryName.substring(0, 25)}...` : categoryName}
+                  </Text>
+                </Tag>
               )}
             </div>
             <div className="flex-shrink-0">
@@ -317,22 +308,20 @@ export default function TechnologyCard({
         {/* Title */}
         <div style={{ minHeight: 48, marginBottom: 12 }}>
           <Link href={href} className="hover:text-blue-600 transition-colors">
-            <Tooltip title={item.title}>
-              <Text
-                strong
-                style={{ 
-                  fontSize: 16,
-                  lineHeight: '1.4',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  margin: 0
-                }}
-              >
-                {item.title}
-              </Text>
-            </Tooltip>
+            <Text
+              strong
+              style={{ 
+                fontSize: 16,
+                lineHeight: '1.4',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                margin: 0
+              }}
+            >
+              {item.title && item.title.length > 60 ? `${item.title.substring(0, 60)}...` : item.title}
+            </Text>
           </Link>
         </div>
 
@@ -341,10 +330,9 @@ export default function TechnologyCard({
           {item.description && (
             <Paragraph
               type="secondary"
-              ellipsis={{ rows: 3, tooltip: true }}
               style={{ marginBottom: 0, fontSize: 14 }}
             >
-              {item.description}
+              {item.description.length > 100 ? `${item.description.substring(0, 100)}...` : item.description}
             </Paragraph>
           )}
         </div>
@@ -357,14 +345,11 @@ export default function TechnologyCard({
                 <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
                   Đơn vị sở hữu:
                 </Text>
-                <Tooltip title={ownerName}>
-                  <Text
-                    style={{ fontSize: 12 }}
-                    ellipsis
-                  >
-                    {ownerName}
-                  </Text>
-                </Tooltip>
+                <Text
+                  style={{ fontSize: 12 }}
+                >
+                  {ownerName.length > 30 ? `${ownerName.substring(0, 30)}...` : ownerName}
+                </Text>
               </div>
             )}
             
@@ -373,14 +358,11 @@ export default function TechnologyCard({
                 <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
                   Phạm vi áp dụng:
                 </Text>
-                <Tooltip title={territoryInfo}>
-                  <Text
-                    style={{ fontSize: 12 }}
-                    ellipsis
-                  >
-                    {territoryInfo}
-                  </Text>
-                </Tooltip>
+                <Text
+                  style={{ fontSize: 12 }}
+                >
+                  {territoryInfo.length > 40 ? `${territoryInfo.substring(0, 40)}...` : territoryInfo}
+                </Text>
               </div>
             )}
           </Space>
@@ -400,16 +382,14 @@ export default function TechnologyCard({
         <div className="min-w-0 flex-1">
           {formattedPrice ? (
             <Text strong style={{ color: '#1890ff' }}>
-              <Tooltip title={`${formattedPrice} ${currency}`}>
-                <span style={{ 
-                  display: 'block',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {formattedPrice} {currency}
-                </span>
-              </Tooltip>
+              <span style={{ 
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {formattedPrice} {currency}
+              </span>
             </Text>
           ) : (
             <Text type="secondary">
