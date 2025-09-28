@@ -716,7 +716,9 @@ export interface Notification {
   /**
    * Phân loại thông báo để tạo kiểu và lọc
    */
-  type?: ('info' | 'success' | 'warning' | 'error' | 'auction' | 'transaction' | 'technology' | 'system') | null;
+  type?:
+    | ('info' | 'success' | 'warning' | 'error' | 'auction' | 'transaction' | 'technology' | 'system' | 'contract')
+    | null;
   /**
    * Người dùng đã đọc thông báo này hay chưa
    */
@@ -951,6 +953,7 @@ export interface ServiceTicketLog {
   document?: (string | Media)[] | null;
   status?: ('pending' | 'completed' | 'cancelled') | null;
   reason?: string | null;
+  is_done_service?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1894,6 +1897,7 @@ export interface ServiceTicketLogSelect<T extends boolean = true> {
   document?: T;
   status?: T;
   reason?: T;
+  is_done_service?: T;
   updatedAt?: T;
   createdAt?: T;
 }

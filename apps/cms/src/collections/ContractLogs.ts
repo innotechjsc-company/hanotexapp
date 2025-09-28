@@ -102,7 +102,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `contracts/${contract.id}`,
+                action_url: `technologies/negotiations/${contract.id}`,
                 priority: 'normal',
               })
             }
@@ -114,7 +114,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `contracts/${contract.id}`,
+                action_url: `technologies/negotiations/${contract.id}`,
                 priority: 'normal',
               })
             }
