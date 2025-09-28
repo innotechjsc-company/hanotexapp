@@ -18,8 +18,8 @@ import { X, Edit, ExternalLink, CheckCircle } from "lucide-react";
 import {
   getProposes,
   updatePropose,
-  acceptPropose,
-  rejectPropose,
+  acceptProposeWithMessage,
+  rejectProposeWithMessage,
 } from "@/api/propose";
 import type { Propose, ProposeStatus } from "@/types/propose";
 import { formatDateTime, formatCurrency } from "@/lib/utils";
@@ -110,10 +110,6 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
     setCurrentPage(1);
   };
 
-  const handleViewDemand = (demandId: string) => {
-    window.open(`/demands/${demandId}`, "_blank");
-  };
-
   const handleViewTechnology = (technologyId: string) => {
     window.open(`/technologies/${technologyId}`, "_blank");
   };
@@ -146,9 +142,17 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
 
     setActionLoading(proposal.id);
     try {
-      await acceptPropose(proposal.id);
-      message.success("Đã xác nhận đề xuất");
-      await fetchProposals();
+      const response = await acceptProposeWithMessage(
+        proposal.id,
+        "Đã chấp nhận đề xuất và sẵn sàng đàm phán giá."
+      );
+
+      if (response.success) {
+        message.success("Đã xác nhận đề xuất và tạo đàm phán thành công");
+        await fetchProposals();
+      } else {
+        throw new Error("Failed to accept proposal");
+      }
     } catch (error) {
       console.error("Failed to confirm proposal:", error);
       message.error("Không thể xác nhận đề xuất");
@@ -162,7 +166,7 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
 
     setActionLoading(proposal.id);
     try {
-      await rejectPropose(proposal.id);
+      await rejectProposeWithMessage(proposal.id, "Đã từ chối đề xuất này.");
       message.success("Đã từ chối đề xuất");
       await fetchProposals();
     } catch (error) {
@@ -340,14 +344,16 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
                   </Popconfirm>
                 </>
               )}
-              <Tooltip title="Xem chi tiết" color="blue">
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<ExternalLink className="h-4 w-4" />}
-                  onClick={() => handleViewNegotiation(record)}
-                />
-              </Tooltip>
+              {!isPending && !isCancelled && (
+                <Tooltip title="Xem chi tiết" color="blue">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<ExternalLink className="h-4 w-4" />}
+                    onClick={() => handleViewNegotiation(record)}
+                  />
+                </Tooltip>
+              )}
             </Space>
           );
         }
@@ -364,14 +370,16 @@ export default function DemandProposalsTab({ userId }: { userId: string }) {
                 />
               </Tooltip>
             )}
-            <Tooltip title="Xem chi tiết" color="blue">
-              <Button
-                type="text"
-                size="small"
-                icon={<ExternalLink className="h-4 w-4" />}
-                onClick={() => handleViewNegotiation(record)}
-              />
-            </Tooltip>
+            {!isPending && (
+              <Tooltip title="Xem chi tiết" color="blue">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ExternalLink className="h-4 w-4" />}
+                  onClick={() => handleViewNegotiation(record)}
+                />
+              </Tooltip>
+            )}
             {(isPending || isCancelled) && (
               <Tooltip title="Hủy đề xuất" color="red">
                 <Button

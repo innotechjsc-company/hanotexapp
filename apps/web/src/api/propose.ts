@@ -126,17 +126,58 @@ export async function updateProposeStatus(
 }
 
 /**
- * Accept propose
+ * Accept propose (simple status change)
  */
 export async function acceptPropose(id: string): Promise<Propose> {
   return updateProposeStatus(id, ProposeStatusEnum.negotiating);
 }
 
 /**
- * Reject propose
+ * Accept propose with message and negotiation setup
+ */
+export async function acceptProposeWithMessage(
+  proposeId: string,
+  message?: string
+): Promise<{
+  success: boolean;
+  propose: Propose;
+  propose_type: string;
+  negotiating_message: any;
+  offer: any;
+  message: string;
+}> {
+  const response = await payloadApiClient.post("/propose/accept", {
+    proposeId,
+    proposeType: "propose", // For demand proposals
+    message: message || "Đã chấp nhận đề xuất và sẵn sàng đàm phán.",
+  });
+
+  return response as any;
+}
+
+/**
+ * Reject propose (simple status change)
  */
 export async function rejectPropose(id: string): Promise<Propose> {
   return updateProposeStatus(id, ProposeStatusEnum.cancelled);
+}
+
+/**
+ * Reject propose with message
+ */
+export async function rejectProposeWithMessage(
+  proposeId: string,
+  message?: string
+): Promise<Propose> {
+  // For rejection, we can just update the status directly
+  // since we don't need to create negotiation messages
+  const response = await payloadApiClient.patch<Propose>(
+    `${API_ENDPOINTS.PROPOSE}/${proposeId}`,
+    {
+      status: ProposeStatusEnum.cancelled,
+    }
+  );
+  return response.data!;
 }
 
 /**

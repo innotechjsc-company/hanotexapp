@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
           ? `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`
           : `Bạn đã chấp nhận hợp đồng. Đang chờ bên còn lại chấp nhận.`,
         type: bothAccepted ? 'success' : 'info',
-        action_url: `technologies/negotiations/${contractId}`,
+        action_url: `contracts/${contractId}`,
         priority: bothAccepted ? 'high' : 'normal',
       })
       // Notification cho user hiện tại (người vừa accept)
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
           ? `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`
           : `Bạn đã chấp nhận hợp đồng. Đang chờ bên còn lại chấp nhận.`,
         type: bothAccepted ? 'success' : 'info',
-        action_url: `technologies/negotiations/${contractId}`,
+        action_url: `contracts/${contractId}`,
         priority: bothAccepted ? 'high' : 'normal',
       })
 
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
           title: `Có người đã chấp nhận hợp đồng`,
           message: `${currentUserName} đã chấp nhận hợp đồng. Bạn cần chấp nhận để hoàn tất hợp đồng.`,
           type: 'info',
-          action_url: `technologies/negotiations/${contractId}`,
+          action_url: `contracts/${contractId}`,
           priority: 'normal',
         })
 
@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
           title: `Hợp đồng đã hoàn thành!`,
           message: `Hợp đồng đã được hoàn thành! Cả hai bên đã chấp nhận và hợp đồng đã có hiệu lực.`,
           type: 'success',
-          action_url: `technologies/negotiations/${contractId}`,
+          action_url: `contracts/${contractId}`,
           priority: 'high',
         })
 
