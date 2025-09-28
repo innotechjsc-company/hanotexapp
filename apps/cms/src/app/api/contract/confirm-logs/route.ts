@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
     const payload = await getPayload({ config: configPromise })
 
     // 1) Load the contract log
-    const log = await payload.findByID({ collection: 'contract-logs', id: body.contract_log_id }) as ContractLog | null
+    const log = (await payload.findByID({
+      collection: 'contract-logs',
+      id: body.contract_log_id,
+    })) as ContractLog | null
     if (!log) {
       return Response.json(
         { success: false, error: 'Contract log not found' },
@@ -80,19 +83,21 @@ export async function POST(req: NextRequest) {
     }
 
     // 2) Update the log status / reason / is_done_contract / contract
-    const updateData: Partial<Pick<ContractLog, 'status' | 'is_done_contract' | 'reason' | 'contract'>> = {}
+    const updateData: Partial<
+      Pick<ContractLog, 'status' | 'is_done_contract' | 'reason' | 'contract'>
+    > = {}
     if (body.status) updateData.status = body.status
     if (typeof body.is_done_contract === 'boolean')
       updateData.is_done_contract = body.is_done_contract
     if (body.status === 'cancelled' && body.reason) updateData.reason = body.reason
     if (body.contract_id) updateData.contract = body.contract_id
 
-    const updatedLog = await payload.update({
+    const updatedLog = (await payload.update({
       collection: 'contract-logs',
       id: body.contract_log_id,
       data: updateData,
       overrideAccess: true,
-    }) as ContractLog
+    })) as ContractLog
 
     // 3) If contract is marked done, set related proposal to completed
     if (body.is_done_contract === true) {
@@ -100,9 +105,12 @@ export async function POST(req: NextRequest) {
         const techRel = updatedLog.technology_propose
         const projRel = updatedLog.project_propose
         const propRel = updatedLog.propose
-        const techPropId = typeof techRel === 'object' && techRel !== null ? techRel.id : techRel ?? undefined
-        const projPropId = typeof projRel === 'object' && projRel !== null ? projRel.id : projRel ?? undefined
-        const propId = typeof propRel === 'object' && propRel !== null ? propRel.id : propRel ?? undefined
+        const techPropId =
+          typeof techRel === 'object' && techRel !== null ? techRel.id : (techRel ?? undefined)
+        const projPropId =
+          typeof projRel === 'object' && projRel !== null ? projRel.id : (projRel ?? undefined)
+        const propId =
+          typeof propRel === 'object' && propRel !== null ? propRel.id : (propRel ?? undefined)
 
         if (techPropId) {
           const updatedTechnologyPropose = await payload.update({
@@ -161,7 +169,10 @@ export async function POST(req: NextRequest) {
       } catch (err: unknown) {
         // If updating proposal fails, return error
         return Response.json(
-          { success: false, error: err instanceof Error ? err.message : 'Failed to update proposal' },
+          {
+            success: false,
+            error: err instanceof Error ? err.message : 'Failed to update proposal',
+          },
           { status: 500, headers: corsHeaders },
         )
       }
