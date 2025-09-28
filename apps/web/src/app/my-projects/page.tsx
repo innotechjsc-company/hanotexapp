@@ -67,6 +67,7 @@ import { getUserByRoleAdmin } from "@/api/user";
 import type { ServiceTicket } from "@/types/service-ticket";
 import { FileUpload, type FileUploadItem } from "@/components/input";
 import downloadService from "@/services/downloadService";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -361,18 +362,21 @@ function AddProjectModal({
   const [documentsFinance, setDocumentsFinance] = useState<FileUploadItem[]>(
     []
   );
+  const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      // Thêm documents_finance từ FileUpload component
+      // Thêm documents_finance và image từ FileUpload component
       const formData = {
         ...values,
         documents_finance: documentsFinance.map((doc) => String(doc.id)),
+        image: imageFiles.length > 0 ? imageFiles[0].id : undefined,
       };
       await onCreate(formData);
       form.resetFields();
       setDocumentsFinance([]);
+      setImageFiles([]);
     } catch (error) {
       console.error("Validation failed:", error);
     }
@@ -382,6 +386,7 @@ function AddProjectModal({
     onCancel();
     form.resetFields();
     setDocumentsFinance([]);
+    setImageFiles([]);
   };
 
   return (
@@ -661,6 +666,25 @@ function AddProjectModal({
         </Row> */}
           <Row gutter={16}>
             <Col span={24}>
+              <Form.Item label="Ảnh đại diện">
+                <FileUpload
+                  value={imageFiles}
+                  onChange={setImageFiles}
+                  multiple={false}
+                  maxCount={1}
+                  allowedTypes={['image']}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  variant="button"
+                  buttonText="Chọn ảnh đại diện"
+                  title="Tải lên ảnh đại diện"
+                  description="Chọn ảnh đại diện cho dự án (JPG, PNG, GIF, WebP) - tối đa 5MB"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
               <Text strong>Mục dịch vụ (Tùy chọn)</Text>
             </Col>
             <Col span={24}>
@@ -703,6 +727,7 @@ function EditProjectModal({
   const [documentsFinance, setDocumentsFinance] = useState<FileUploadItem[]>(
     []
   );
+  const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
 
   useEffect(() => {
     if (project && open) {
@@ -746,20 +771,41 @@ function EditProjectModal({
       } else {
         setDocumentsFinance([]);
       }
+
+      // Load existing image if available
+      if (project.image && typeof project.image === 'object') {
+        const imageData = project.image as any;
+        setImageFiles([{
+          id: imageData.id,
+          filename: imageData.filename || imageData.alt || 'Current image',
+          alt: imageData.alt || 'Current image',
+          filesize: imageData.filesize,
+          mimeType: imageData.mimeType,
+          type: 'image' as any,
+          url: imageData.url,
+          uploadStatus: 'done' as const,
+          createdAt: imageData.createdAt,
+          updatedAt: imageData.updatedAt,
+        }]);
+      } else {
+        setImageFiles([]);
+      }
     }
   }, [project, open, form]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      // Thêm documents_finance từ FileUpload component
+      // Thêm documents_finance và image từ FileUpload component
       const formData = {
         ...values,
         documents_finance: documentsFinance.map((doc) => String(doc.id)),
+        image: imageFiles.length > 0 ? imageFiles[0].id : undefined,
       };
       await onUpdate(formData);
       form.resetFields();
       setDocumentsFinance([]);
+      setImageFiles([]);
     } catch (error) {
       console.error("Validation failed:", error);
     }
@@ -769,6 +815,7 @@ function EditProjectModal({
     onCancel();
     form.resetFields();
     setDocumentsFinance([]);
+    setImageFiles([]);
   };
 
   return (
@@ -1022,6 +1069,25 @@ function EditProjectModal({
 
           <Row gutter={16}>
             <Col span={24}>
+              <Form.Item label="Ảnh đại diện">
+                <FileUpload
+                  value={imageFiles}
+                  onChange={setImageFiles}
+                  multiple={false}
+                  maxCount={1}
+                  allowedTypes={['image']}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  variant="button"
+                  buttonText="Chọn ảnh đại diện"
+                  title="Tải lên ảnh đại diện"
+                  description="Chọn ảnh đại diện cho dự án (JPG, PNG, GIF, WebP) - tối đa 5MB"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={24}>
               <Form.Item
                 name="end_date"
                 label="Ngày kết thúc"
@@ -1114,6 +1180,17 @@ function ViewProjectModal({
           <Descriptions.Item label="Tên dự án" span={2}>
             <Text strong>{project?.name}</Text>
           </Descriptions.Item>
+          {project?.image && typeof project.image === 'object' && (
+            <Descriptions.Item label="Ảnh đại diện" span={2}>
+              <div className="flex justify-center">
+                <img
+                  src={(project.image as any).url}
+                  alt={project.name || 'Project'}
+                  className="max-w-full h-48 object-cover rounded-lg border"
+                />
+              </div>
+            </Descriptions.Item>
+          )}
           <Descriptions.Item label="Mô tả" span={2}>
             <Text>{project?.description}</Text>
           </Descriptions.Item>
@@ -1813,7 +1890,7 @@ export default function MyProjectsPage() {
 
     setActionLoading(true);
     try {
-       // create service tickets
+       // create service tickest
        let serviceTickets: any[] = [];
        if (
         values.service_tickets &&
@@ -1839,11 +1916,12 @@ export default function MyProjectsPage() {
           ? values.end_date.format("YYYY-MM-DD")
           : undefined,
         status: "pending",
-        user: user,
+        user: user?.id,
         services: serviceTickets, // add service tickets to payload to create service tickets
       };
       console.log(obj);
-      const result = serviceTickets.length > 0 ? await createProjectWithServices(obj) : await createProject(obj) as any;
+      delete obj.service_tickets;
+      const result = await createProjectWithServices(obj);
 
      // Show success toast with details and navigate to technologies page
      let successMessage = "Tạo dự án thành công!";
@@ -1938,6 +2016,37 @@ export default function MyProjectsPage() {
 
   // Table columns configuration
   const columns: ColumnsType<Project> = [
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      width: 80,
+      render: (image: any, record: Project) => {
+        const getImageUrl = () => {
+          if(image && typeof image === 'object' && image.url) {
+            const img = getFullMediaUrl(image.url);
+          return img;
+          }
+          return undefined;
+        };
+
+        return (
+          <div className="flex justify-center">
+            {getImageUrl() ? (
+              <img
+                src={getImageUrl()}
+                alt={record.name}
+                className="w-12 h-12 object-cover rounded-lg border"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                <FolderOpenOutlined className="text-gray-400" />
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
     {
       title: "Tên dự án",
       dataIndex: "name",

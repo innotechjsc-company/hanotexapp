@@ -35,7 +35,7 @@ export async function getCategories(
   if (pagination.page) queryParams.set('page', pagination.page.toString());
   if (pagination.sort) queryParams.set('sort', pagination.sort);
 
-  const response = await fetch(`/api/master-data/categories?${queryParams.toString()}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories?${queryParams.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export async function getCategories(
  * Get category by ID
  */
 export async function getCategoryById(id: string): Promise<Category> {
-  const response = await fetch(`/api/master-data/categories/${id}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export async function getAllCategories(
   if (pagination.sort) queryParams.set('sort', pagination.sort);
 
   // Use the updated web API route which fetches from CMS
-  const response = await fetch(`/api/master-data/categories?${queryParams.toString()}`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/master-data/categories?${queryParams.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

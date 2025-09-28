@@ -48,8 +48,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   // Placeholder for user avatar - replace with actual data if available
   const userAvatarUrl = "https://i.pravatar.cc/150?u=" + notification.id;
 
-  // Helper function to build the correct URL based on environment
-  const buildNavigationUrl = (actionUrl: string) => {
+  // Helper function to extract route path from action_url
+  const extractRoutePath = (actionUrl: string): string | null => {
     if (!actionUrl) return null;
 
     // Remove leading slash if present to avoid double slashes
@@ -74,11 +74,19 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 
-    return {
-      fullUrl: targetUrl,
-      isExternal: !targetUrl.startsWith(currentDomain),
-      relativePath: `/${cleanActionUrl}`,
-    };
+    // If actionUrl is a complete URL, extract the pathname
+    if (actionUrl.startsWith("http://") || actionUrl.startsWith("https://")) {
+      try {
+        const url = new URL(actionUrl);
+        return url.pathname;
+      } catch (error) {
+        console.error("Invalid URL format:", actionUrl);
+        return null;
+      }
+    }
+
+    // If actionUrl is just a path without leading slash, add it
+    return `/${actionUrl}`;
   };
 
   const handleClick = async () => {
@@ -99,23 +107,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
       // Navigate to action URL if it exists
       if (notification.action_url) {
-        const urlInfo = buildNavigationUrl(notification.action_url);
+        const routePath = extractRoutePath(notification.action_url);
         console.log("Original action_url:", notification.action_url);
-        console.log("Environment:", process.env.NODE_ENV);
-        console.log("URL Info:", urlInfo);
+        console.log("Extracted route path:", routePath);
 
-        if (urlInfo) {
-          if (urlInfo.isExternal) {
-            console.log("External navigation to:", urlInfo.fullUrl);
-            // Use window.location.href for external navigation
-            window.location.href = urlInfo.fullUrl;
-          } else {
-            console.log("Internal navigation to:", urlInfo.relativePath);
-            // Use router.push for internal navigation (same domain)
-            router.push(urlInfo.relativePath);
-          }
+        if (routePath) {
+          console.log("Navigating to:", routePath);
+          router.push(routePath);
         } else {
-          console.log("Failed to build navigation URL");
+          console.log("Failed to extract valid route path");
         }
       } else {
         console.log("No action_url found for this notification");

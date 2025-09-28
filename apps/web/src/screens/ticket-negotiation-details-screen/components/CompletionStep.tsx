@@ -127,7 +127,6 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
           sort: "createdAt",
         });
         const data = (res as any).docs || (res as any).data || [];
-        debugger
         setServiceLogs(data as ServiceTicketLog[]);
         setTimeout(() => {
           if (scrollContainerRef.current) {
@@ -255,7 +254,10 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
     }
     await updateServiceTicketLog(String(log.id), {
       is_done_service: true,
+      status: "completed",
     });
+    await onStatusUpdate("completed", "Đã xác nhận hoàn thành dịch vụ");
+
     message.success("Đã xác nhận hoàn thành dịch vụ");
     setIsDoneServiceLogId(true);
     await fetchServiceLogs();
@@ -425,11 +427,21 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
     }
   };
 
-  const handleAccept = async () => {
-    await onStatusUpdate("completed", "Đã xác nhận hoàn thành");
-  };
 
   const isCompleted = ticket.status === "completed" && isDoneServiceLogId;
+
+  // Kiểm tra xem user hiện tại có phải là người chịu trách nhiệm không
+  const isCurrentUserResponsible = () => {
+    if (!currentUser?.id || !ticket.responsible_user) {
+      return false;
+    }
+    
+    if (typeof ticket.responsible_user === "string") {
+      return String(ticket.responsible_user) === String(currentUser.id);
+    }
+    
+    return String((ticket.responsible_user as any)?.id) === String(currentUser.id);
+  };
 
   return (
     <div className="h-full overflow-auto p-6 space-y-6">
@@ -608,34 +620,41 @@ export const CompletionStep: React.FC<CompletionStepProps> = ({
                   l.content.toLowerCase().includes("hoàn thành dịch vụ")
               );
               const disabled = Boolean(hasPendingCompletion);
+              const isResponsible = isCurrentUserResponsible();
+              
               return (
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500">
-                    {disabled ? (
-                      <span>⏳ Đang chờ xác nhận hoàn thành dịch vụ.</span>
-                    ) : isCompleted ? (
-                      <span>
-                        Dịch vụ đã hoàn thành. Chờ xác nhận cuối cùng.
-                      </span>
-                    ) : (
-                      <span>Chọn một hành động để tiếp tục.</span>
-                    )}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs text-gray-500">
+                      {disabled ? (
+                        <span>⏳ Đang chờ xác nhận hoàn thành dịch vụ.</span>
+                      ) : isCompleted ? (
+                        <span>
+                          Dịch vụ đã hoàn thành. Chờ xác nhận cuối cùng.
+                        </span>
+                      ) : (
+                        <span>Chọn một hành động để tiếp tục.</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={openProgressModal}
+                        disabled={disabled || isCompleted}
+                      >
+                        Gửi báo cáo tiến độ
+                      </Button>
+                      {isResponsible && (
+                      <Button
+                        type="primary"
+                        onClick={openCompleteModal}
+                        disabled={disabled || isCompleted}
+                      >
+                          Xác nhận hoàn thành dịch vụ {isResponsible ? "" : "(Chỉ người chịu trách nhiệm mới có thể thực hiện thao tác này)"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={openProgressModal}
-                      disabled={disabled || isCompleted}
-                    >
-                      Gửi báo cáo tiến độ
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={openCompleteModal}
-                      disabled={disabled || isCompleted}
-                    >
-                      Gửi xác nhận hoàn thành dịch vụ
-                    </Button>
-                  </div>
+                 
                 </div>
               );
             })()}

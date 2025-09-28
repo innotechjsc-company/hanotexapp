@@ -1,4 +1,5 @@
-import { NextRequest } from 'next/server'
+import {  NextRequest  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'
@@ -40,7 +41,6 @@ const createContractCompletionNotifications = async (
   payload: any,
   updatedLog: ContractLog,
   currentUser: any,
-  corsHeaders: Record<string, string>,
 ) => {
   try {
     console.log('🎯 Creating notifications for contract completion')
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest) {
           })
 
           // Tạo notifications khi hoàn thành contract
-          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
+          await createContractCompletionNotifications(payload, updatedLog, currentUser)
 
           return Response.json(
             {
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
           })
 
           // Tạo notifications khi hoàn thành contract
-          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
+          await createContractCompletionNotifications(payload, updatedLog, currentUser)
 
           return Response.json(
             {
@@ -255,7 +255,7 @@ export async function POST(req: NextRequest) {
           })
 
           // Tạo notifications khi hoàn thành contract
-          await createContractCompletionNotifications(payload, updatedLog, currentUser, corsHeaders)
+          await createContractCompletionNotifications(payload, updatedLog, currentUser)
 
           return Response.json(
             { success: true, contract_log: updatedLog, propose: updatedPropose },

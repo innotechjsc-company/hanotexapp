@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { Bid } from '@/payload-types'
+
+export async function OPTIONS() {
+  return handleCORSPreflight()
+}
 
 export async function GET(
   request: NextRequest,
@@ -20,10 +25,7 @@ export async function GET(
     })
 
     if (!auction) {
-      return NextResponse.json(
-        { success: false, error: 'Auction not found' },
-        { status: 404 }
-      )
+      return corsErrorResponse('Auction not found', 404)
     }
 
     // Get all bids for this auction
@@ -42,17 +44,22 @@ export async function GET(
     const transformedBids = bids.docs.map((bid: Bid) => ({
       id: bid.id,
       amount: bid.bid_amount,
-      // "bidder" is stored as string in Bid type
-      bidder: bid.bidder || 'Ẩn danh',
+      bidder_id: bid.bidder || 'anonymous',
+      bidder_name: bid.bidder_name || 'Ẩn danh',
+      bidder_email: bid.bidder_email || null,
+      currency: bid.currency || 'VND',
+      bid_type: bid.bid_type || 'MANUAL',
+      status: bid.status || 'ACTIVE',
       timestamp: new Date(bid.bid_time),
       isWinning: bid.is_winning || false,
+      bid_time: bid.bid_time,
       createdAt: bid.createdAt,
       updatedAt: bid.updatedAt
     }))
 
     console.log(`Found ${transformedBids.length} bids for auction ${auctionId}`)
 
-    return NextResponse.json({
+    return corsResponse({
       success: true,
       data: {
         bids: transformedBids,
@@ -64,9 +71,6 @@ export async function GET(
 
   } catch (error) {
     console.error('CMS Get Bids API error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    )
+    return corsErrorResponse('Internal server error', 500)
   }
 }

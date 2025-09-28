@@ -1,24 +1,75 @@
 import { ID, DateTimeString } from "./common";
-import { Technology } from "./technologies";
+import { Media } from "./media1";
 
-// Loại đấu giá
-export type AuctionType = "ENGLISH" | "DUTCH" | "SEALED_BID"; // Kiểu đấu giá
+// Danh mục đấu giá
+export type AuctionCategory =
+  | "it"
+  | "biotech"
+  | "energy"
+  | "materials"
+  | "medical"
+  | "agriculture";
 
 // Trạng thái phiên đấu giá
-export type AuctionStatus = "SCHEDULED" | "ACTIVE" | "ENDED" | "CANCELLED"; // Trạng thái tiến trình phiên
+export type AuctionStatus = "upcoming" | "active" | "ended" | "cancelled";
 
-// Phiên đấu giá cho một công nghệ
+// Thông tin người tổ chức
+export interface Organizer {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
+// Tài liệu đính kèm
+export interface Document {
+  name: string;
+  file: ID | Media;
+  description?: string;
+}
+
+// Điều khoản đấu giá
+export interface Term {
+  term: string;
+}
+
+// Lịch sử đấu giá
+export interface BidHistory {
+  amount: number;
+  bidder: string;
+  timestamp: DateTimeString;
+  isWinning: boolean;
+}
+
+// Đấu giá tự động
+export interface AutoBid {
+  maxAmount: number;
+  bidder: string;
+  createdAt: DateTimeString;
+  isActive: boolean;
+}
+
+// Phiên đấu giá
 export interface Auction {
   id?: ID; // ID duy nhất của phiên đấu giá
-  technology: ID | Technology; // ID công nghệ được đấu giá
-  auction_type: AuctionType; // Kiểu đấu giá
-  start_price?: number; // Giá khởi điểm
-  reserve_price?: number; // Giá sàn (tối thiểu chấp nhận)
-  current_price?: number; // Giá/giá thầu hiện tại cao nhất
-  start_time?: DateTimeString; // Thời gian bắt đầu
-  end_time?: DateTimeString; // Thời gian kết thúc
-  status: AuctionStatus; // Trạng thái phiên đấu giá
-  bids?: ID[]; // Danh sách ID các lượt đặt giá liên quan
+  title: string; // Tiêu đề đấu giá
+  description: any; // Mô tả chi tiết (rich text)
+  category: AuctionCategory; // Danh mục
+  startingPrice: number; // Giá khởi điểm (VNĐ)
+  currentBid?: number; // Giá hiện tại (VNĐ)
+  minBid?: number; // Giá đấu giá tối thiểu (VNĐ)
+  bidIncrement: number; // Bước nhảy đấu giá (VNĐ)
+  startTime: DateTimeString; // Thời gian bắt đầu
+  endTime: DateTimeString; // Thời gian kết thúc
+  location?: string; // Địa điểm
+  image?: ID | Media; // Hình ảnh
+  organizer: Organizer; // Thông tin người tổ chức
+  documents?: Document[]; // Tài liệu đính kèm
+  terms?: Term[]; // Điều khoản đấu giá
+  bids?: BidHistory[]; // Lịch sử đấu giá
+  autoBids?: AutoBid[]; // Đấu giá tự động
+  status: AuctionStatus; // Trạng thái
+  viewers: number; // Số người xem
+  bidCount: number; // Số lượt đấu giá
   createdAt?: DateTimeString; // Thời điểm tạo bản ghi
   updatedAt?: DateTimeString; // Thời điểm cập nhật bản ghi
 }

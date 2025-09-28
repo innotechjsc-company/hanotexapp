@@ -327,14 +327,13 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             } finally {
               onBothAccepted?.();
               // chỉnh sửa dự án thành không kêu gọi đầu tư nữa
-            //   if(activeContract.project_propose?.project?.id){
-            //  debugger
-            //     const rs = await updateProject(activeContract.project_propose?.project?.id, { open_investment_fund: false });
-            //   }
-              await updateProject(
-                activeContract.project_propose?.project?.id as string,
-                { open_investment_fund: false }
-              );
+              if(proposal.project?.id){
+             await updateProject(
+              proposal.project?.id as string,
+              { open_investment_fund: false }
+            );
+              }
+             
             }
             return;
           }

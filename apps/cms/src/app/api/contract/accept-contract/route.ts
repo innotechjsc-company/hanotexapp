@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { User, Contract } from '@/payload-types'
@@ -280,8 +281,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      {
+    return corsResponse({
         success: true,
         contract: updatedContract,
         bothAccepted,

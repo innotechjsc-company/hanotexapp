@@ -341,7 +341,7 @@ export default function LiveAuction({
           <div>
             <p className="font-medium text-gray-900">Auction Type</p>
             <p className="text-gray-600 capitalize">
-              {auction.auction_type.toLowerCase().replace("_", " ")}
+              {auction.auction_type?.toLowerCase().replace("_", " ") || "Standard"}
             </p>
           </div>
           <div>

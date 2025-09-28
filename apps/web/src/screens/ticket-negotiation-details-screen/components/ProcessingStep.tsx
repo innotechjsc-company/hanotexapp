@@ -153,8 +153,9 @@ export const ProcessingStep: React.FC<ProcessingStepProps> = ({
                           }`}>
                             <FileTextOutlined className="text-blue-500" />
                             <Text type="secondary" className="text-xs">
-                              Đã đính kèm: {log.document.filename || log.document.alt || 'Tài liệu'}
+                              File: {log.document.filename || log.document.alt || 'Tài liệu'}
                             </Text>
+                            <Button type="text" icon={<DownloadOutlined />} onClick={() => handleDownloadDocument(log.document)} />
                           </div>
                         )}
                       </div>

@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Typography, Divider, Input, message, Modal } from "antd";
-import { FileText, Download, CheckCircle, Paperclip } from "lucide-react";
+import {
+  Card,
+  Button,
+  Typography,
+  Divider,
+  Input,
+  message,
+  Modal,
+  Spin,
+} from "antd";
+import {
+  FileText,
+  Download,
+  CheckCircle,
+  Paperclip,
+  RefreshCw,
+} from "lucide-react";
 import type { Propose } from "@/types/propose";
 import type { Contract } from "@/types/contract";
 import { ContractStatusEnum } from "@/types/contract";
@@ -26,6 +41,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
 }) => {
   const currentUser = useUser();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeContract, setActiveContract] = useState<
     Contract | undefined | null
   >(null);
@@ -73,9 +89,13 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     // No template download. Start from upload only.
   };
 
-  const refreshContract = async () => {
+  const refreshContract = async (isAutoRefresh = false) => {
     try {
-      setLoading(true);
+      if (isAutoRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       console.log("Refreshing contract for proposal:", proposal.id);
       if (!proposal.id) return;
       const found = await contractsApi.getByPropose(proposal.id, 1);
@@ -85,12 +105,28 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
       console.error("Error refreshing contract:", e);
     } finally {
       setLoading(false);
+      if (isAutoRefresh) {
+        // Keep refreshing indicator for a brief moment to show activity
+        setTimeout(() => setRefreshing(false), 500);
+      }
     }
   };
 
   useEffect(() => {
     refreshContract();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proposal.id]);
+
+  // Auto-refresh every 5 seconds
+  useEffect(() => {
+    if (!proposal.id) return;
+
+    const interval = setInterval(() => {
+      refreshContract(true); // Pass true to indicate auto-refresh
+    }, 5000); // 5 seconds
+
+    // Cleanup interval on component unmount or proposal.id change
+    return () => clearInterval(interval);
   }, [proposal.id]);
 
   // Auto-upload handlers using FileUpload component
@@ -291,20 +327,35 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
     <div className="p-6 max-w-2xl mx-auto">
       <Card className="shadow-lg">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4 relative">
             {isContractSigned ? (
               <CheckCircle size={64} className="text-green-500" />
             ) : (
               <FileText size={64} className="text-blue-500" />
             )}
+            {/* Auto-refresh indicator */}
+            {refreshing && (
+              <div className="absolute -top-2 -right-2">
+                <RefreshCw size={16} className="text-blue-500 animate-spin" />
+              </div>
+            )}
           </div>
           <Title level={3} className="mb-2">
             {isContractSigned ? "Hợp đồng đã được ký" : "Ký hợp đồng"}
+            {refreshing && (
+              <span className="ml-2 text-sm text-blue-500 font-normal">
+                Đang cập nhật...
+              </span>
+            )}
           </Title>
           <Text className="text-gray-600">
             {isContractSigned
               ? "Hợp đồng đã được ký thành công. Dự án có thể bắt đầu triển khai."
               : "Vui lòng xem xét và ký hợp đồng để hoàn tất quá trình đàm phán."}
+          </Text>
+          {/* Auto-refresh info */}
+          <Text className="text-xs text-gray-400 block mt-2">
+            Dữ liệu tự động cập nhật mỗi 5 giây
           </Text>
         </div>
 
@@ -504,59 +555,62 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               </div>
 
               {/* Contract File Upload (contract_file) - visible when contract exists and not signed */}
-              {!isContractSigned && !bothPartiesAccepted() && !readOnly && proposal.status !== "completed" && (
-                <div className="mt-6">
-                  <Title level={5} className="mb-3">
-                    <FileText size={20} className="inline mr-2" />
-                    Tệp hợp đồng (tải lên vào contract_file)
-                  </Title>
-                  {/* Existing contract file preview */}
-                  {activeContract.contract_file && (
-                    <Card size="small" className="mb-3 border-dashed">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <FileText size={20} className="text-gray-500" />
-                          <div>
-                            <Text strong>
-                              {activeContract.contract_file.filename ||
-                                "Hợp đồng hiện tại"}
-                            </Text>
-                            <br />
-                            <Text type="secondary" className="text-xs">
-                              {activeContract.contract_file.filesize
-                                ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
-                                : ""}
-                            </Text>
+              {!isContractSigned &&
+                !bothPartiesAccepted() &&
+                !readOnly &&
+                proposal.status !== "completed" && (
+                  <div className="mt-6">
+                    <Title level={5} className="mb-3">
+                      <FileText size={20} className="inline mr-2" />
+                      Tệp hợp đồng (tải lên vào contract_file)
+                    </Title>
+                    {/* Existing contract file preview */}
+                    {activeContract.contract_file && (
+                      <Card size="small" className="mb-3 border-dashed">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <FileText size={20} className="text-gray-500" />
+                            <div>
+                              <Text strong>
+                                {activeContract.contract_file.filename ||
+                                  "Hợp đồng hiện tại"}
+                              </Text>
+                              <br />
+                              <Text type="secondary" className="text-xs">
+                                {activeContract.contract_file.filesize
+                                  ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
+                                  : ""}
+                              </Text>
+                            </div>
                           </div>
+                          {activeContract.contract_file.url && (
+                            <Button
+                              icon={<Download size={14} />}
+                              type="text"
+                              onClick={handleDownload}
+                            >
+                              Tải xuống
+                            </Button>
+                          )}
                         </div>
-                        {activeContract.contract_file.url && (
-                          <Button
-                            icon={<Download size={14} />}
-                            type="text"
-                            onClick={handleDownload}
-                          >
-                            Tải xuống
-                          </Button>
-                        )}
-                      </div>
-                    </Card>
-                  )}
+                      </Card>
+                    )}
 
-                  <FileUpload
-                    multiple={false}
-                    maxCount={1}
-                    allowedTypes={["document"]}
-                    title="Chọn tệp hợp đồng"
-                    description="Kéo thả hoặc bấm để chọn (PDF, Word)"
-                    mediaFields={{
-                      type: MediaType.DOCUMENT,
-                      caption: "Tệp hợp đồng",
-                    }}
-                    onUploadSuccess={handleContractUploadSuccess}
-                    onUploadError={handleContractUploadError}
-                  />
-                </div>
-              )}
+                    <FileUpload
+                      multiple={false}
+                      maxCount={1}
+                      allowedTypes={["document"]}
+                      title="Chọn tệp hợp đồng"
+                      description="Kéo thả hoặc bấm để chọn (PDF, Word)"
+                      mediaFields={{
+                        type: MediaType.DOCUMENT,
+                        caption: "Tệp hợp đồng",
+                      }}
+                      onUploadSuccess={handleContractUploadSuccess}
+                      onUploadError={handleContractUploadError}
+                    />
+                  </div>
+                )}
 
               {/* Attachments Upload - Available when contract exists and not completed */}
               {proposal.status !== "completed" && (
@@ -717,30 +771,6 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 </div>
               </div>
             )}
-
-          {/* Quick upload for attachments */}
-          {!readOnly && activeContract?.id && proposal.status !== "completed" && (
-            <div className="mt-4">
-              <FileUpload
-                multiple
-                maxCount={10}
-                allowedTypes={["document", "image"]}
-                title="Thêm tài liệu kèm theo"
-                description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
-                mediaFields={{
-                  type: MediaType.DOCUMENT,
-                  caption: "Tài liệu kèm theo",
-                }}
-                onUploadSuccess={handleAttachmentUploadSuccess}
-                onUploadError={(_f, err) =>
-                  message.error(err || "Tải lên tài liệu thất bại")
-                }
-                onRemove={handleAttachmentRemove}
-              />
-            </div>
-          )}
-
-          {/* No template download or direct sign fallback. Start from uploading only. */}
 
           {isContractSigned && (
             <div className="text-center pt-6">

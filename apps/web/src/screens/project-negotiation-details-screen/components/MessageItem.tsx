@@ -263,7 +263,7 @@ const MessageBubble: React.FC<{
       setActionLoading("accept");
       await negotiatingMessageApi.acceptOffer((message.offer as any).id);
       setOfferStatus(OfferStatus.ACCEPTED);
-      antdMessage.success("Đđề xuất ã chấp nhận giá");
+      antdMessage.success("Đã chấp nhận đề xuất");
       // The accept route also updates proposal status and creates contract
       // Refresh the page to reflect step changes if needed
       setTimeout(() => {

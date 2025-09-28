@@ -1,4 +1,5 @@
-import { NextRequest } from 'next/server'
+import {  NextRequest  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { authenticateUser } from '@/utils/auth-utils'

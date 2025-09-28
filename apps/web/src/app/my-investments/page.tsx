@@ -31,14 +31,16 @@ import {
   Tooltip,
 } from "@heroui/react";
 import {
-  getInvestmentFunds,
+  getMyInvestmentFunds,
   createInvestmentFund,
   updateInvestmentFund,
   deleteInvestmentFund,
 } from "@/api/investment-fund";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { Toaster, toast } from "react-hot-toast";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore, useUser } from "@/store/auth";
+import { FileUpload, type FileUploadItem } from "@/components/input";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 type EditableFund = Partial<InvestmentFund> & { id?: string };
 
@@ -58,9 +60,30 @@ function AddFundModal({
   disclosure: DisclosureLike;
   current: EditableFund | null;
   setCurrent: React.Dispatch<React.SetStateAction<EditableFund | null>>;
-  onCreate: () => Promise<void> | void;
+  onCreate: (data?: EditableFund) => Promise<void> | void;
   loading?: boolean;
 }) {
+  const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
+
+  const handleCreate = async () => {
+    if (!current?.name || !current?.description) return;
+    
+    // Get image ID from uploaded files
+    const imageId = imageFiles.length > 0 ? String(imageFiles[0].id) : undefined;
+    
+    // Create the data object with image
+    const fundData = {
+      ...current,
+      image: imageId
+    };
+    
+    // Call onCreate with the complete data
+    await onCreate(fundData);
+    
+    // Reset image files
+    setImageFiles([]);
+  };
+
   return (
     <Modal
       isOpen={disclosure.isOpen}
@@ -92,6 +115,23 @@ function AddFundModal({
                 }
                 minRows={4}
               />
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Ảnh đại diện
+                </label>
+                <FileUpload
+                  value={imageFiles}
+                  onChange={setImageFiles}
+                  multiple={false}
+                  maxCount={1}
+                  allowedTypes={['image']}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  variant="button"
+                  buttonText="Chọn ảnh đại diện"
+                  title="Tải lên ảnh đại diện"
+                  description="Chọn ảnh đại diện cho quỹ/nhà đầu tư (JPG, PNG, GIF, WebP) - tối đa 5MB"
+                />
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="flat" onPress={onClose}>
@@ -100,7 +140,7 @@ function AddFundModal({
               <Button
                 color="primary"
                 variant="bordered"
-                onPress={onCreate}
+                onPress={handleCreate}
                 isDisabled={!current?.name || !current?.description || loading}
                 isLoading={!!loading}
               >
@@ -124,9 +164,53 @@ function EditFundModal({
   disclosure: DisclosureLike;
   current: EditableFund | null;
   setCurrent: React.Dispatch<React.SetStateAction<EditableFund | null>>;
-  onUpdate: () => Promise<void> | void;
+  onUpdate: (data?: EditableFund) => Promise<void> | void;
   loading?: boolean;
 }) {
+  const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
+
+  // Load existing image when modal opens
+  useEffect(() => {
+    if (current && disclosure.isOpen) {
+      if (current.image && typeof current.image === 'object') {
+        const imageData = current.image as any;
+        setImageFiles([{
+          id: imageData.id,
+          filename: imageData.filename || imageData.alt || 'Current image',
+          alt: imageData.alt || 'Current image',
+          filesize: imageData.filesize,
+          mimeType: imageData.mimeType,
+          type: 'image' as any,
+          url: imageData.url,
+          uploadStatus: 'done' as const,
+          createdAt: imageData.createdAt,
+          updatedAt: imageData.updatedAt,
+        }]);
+      } else {
+        setImageFiles([]);
+      }
+    }
+  }, [current, disclosure.isOpen]);
+
+  const handleUpdate = async () => {
+    if (!current?.name || !current?.description) return;
+    
+    // Get image ID from uploaded files
+    const imageId = imageFiles.length > 0 ? String(imageFiles[0].id) : undefined;
+    
+    // Create the data object with image
+    const fundData = {
+      ...current,
+      image: imageId
+    };
+    
+    // Call onUpdate with the complete data
+    await onUpdate(fundData);
+    
+    // Reset image files
+    setImageFiles([]);
+  };
+
   return (
     <Modal
       isOpen={disclosure.isOpen}
@@ -158,6 +242,23 @@ function EditFundModal({
                 minRows={4}
                 variant="bordered"
               />
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Ảnh đại diện
+                </label>
+                <FileUpload
+                  value={imageFiles}
+                  onChange={setImageFiles}
+                  multiple={false}
+                  maxCount={1}
+                  allowedTypes={['image']}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  variant="button"
+                  buttonText="Chọn ảnh đại diện"
+                  title="Tải lên ảnh đại diện"
+                  description="Chọn ảnh đại diện cho quỹ/nhà đầu tư (JPG, PNG, GIF, WebP) - tối đa 5MB"
+                />
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button variant="flat" onPress={onClose}>
@@ -166,7 +267,7 @@ function EditFundModal({
               <Button
                 color="primary"
                 variant="bordered"
-                onPress={onUpdate}
+                onPress={handleUpdate}
                 isDisabled={!current?.name || !current?.description || loading}
                 isLoading={!!loading}
               >
@@ -187,6 +288,13 @@ function ViewFundModal({
   disclosure: DisclosureLike;
   current: EditableFund | null;
 }) {
+  const getImageUrl = () => {
+    if (current?.image && typeof current.image === 'object') {
+      return getFullMediaUrl(current.image.url as string);
+    }
+    return undefined;
+  };
+
   return (
     <Modal
       isOpen={disclosure.isOpen}
@@ -198,7 +306,19 @@ function ViewFundModal({
           <>
             <ModalHeader>Thông tin quỹ/nhà đầu tư</ModalHeader>
             <ModalBody>
-              <div className="space-y-2">
+              <div className="space-y-4">
+                {getImageUrl() && (
+                  <div>
+                    <div className="text-sm text-gray-500 mb-2">Ảnh đại diện</div>
+                    <div className="flex justify-center">
+                      <img
+                        src={getImageUrl()}
+                        alt={current?.name || 'Investment Fund'}
+                        className="max-w-full h-48 object-cover rounded-lg border"
+                      />
+                    </div>
+                  </div>
+                )}
                 <div>
                   <div className="text-sm text-gray-500">Tên</div>
                   <div className="font-medium">{current?.name}</div>
@@ -275,7 +395,8 @@ function DeleteFundModal({
 
 export default function MyInvestmentsPage() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const user = useUser();
+  
   const [items, setItems] = useState<InvestmentFund[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -300,9 +421,21 @@ export default function MyInvestmentsPage() {
   const selectedCount = useMemo(() => selectedKeys.size, [selectedKeys]);
 
   const fetchList = async () => {
+    if (!user) {
+      console.log("No user found, skipping fetchList");
+      return;
+    }
+    
+    console.log("Fetching investment funds for user:", {
+      userId: user.id,
+      userEmail: user.email,
+      hasUser: !!user
+    });
+    
     setIsLoading(true);
     try {
-      const res = await getInvestmentFunds(
+      const res = await getMyInvestmentFunds(
+        user,
         { search: search || undefined },
         { limit, page }
       );
@@ -315,28 +448,36 @@ export default function MyInvestmentsPage() {
       setItems(list);
       setTotalDocs(tDocs);
       setTotalPages(tPages);
+      console.log("Successfully fetched investment funds:", { count: list.length });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
-      // lazy import toast at top
-    } finally {
+      console.error("Error fetching investment funds:", e);
+      toast.error("Không thể tải danh sách quỹ/nhà đầu tư");
+    } finally { 
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log("useEffect triggered - user state:", {
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      isAuthenticated: !!user
+    });
     fetchList();
-  }, [page, limit, search]);
+  }, [page, limit, search, user]);
 
-  const handleCreate = async () => {
-    if (!current?.name || !current?.description) return;
+  const handleCreate = async (data?: EditableFund) => {
+    const fundData = data || current;
+    if (!fundData?.name || !fundData?.description) return;
     setActionLoading(true);
     try {
       if (!user) return;
       await createInvestmentFund({
-        name: current.name,
-        description: current.description,
+        name: fundData.name,
+        description: fundData.description,
         user: user,
+        image: fundData.image, // Include image field
       });
       toast.success("Tạo quỹ thành công");
       setCurrent(null);
@@ -349,16 +490,18 @@ export default function MyInvestmentsPage() {
     }
   };
 
-  const handleUpdate = async () => {
-    if (!current?.name || !current?.description || !(current as any).id) return;
-    const id = (current as any).id as string;
+  const handleUpdate = async (data?: EditableFund) => {
+    const fundData = data || current;
+    if (!fundData?.name || !fundData?.description || !(fundData as any).id) return;
+    const id = (fundData as any).id as string;
     setActionLoading(true);
     try {
       if (!user) return;
       await updateInvestmentFund(id, {
-        name: current.name,
-        description: current.description,
+        name: fundData.name,
+        description: fundData.description,
         user: user,
+        image: fundData.image, // Include image field
       });
       toast.success("Cập nhật quỹ thành công");
       setCurrent(null);
@@ -416,6 +559,30 @@ export default function MyInvestmentsPage() {
       setActionLoading(false);
     }
   };
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Briefcase className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Quỹ đầu tư của tôi
+          </h1>
+          <p className="text-gray-600 mb-6">
+            Bạn cần đăng nhập để xem danh sách quỹ/nhà đầu tư
+          </p>
+          <Button
+            color="primary"
+            variant="bordered"
+            onPress={() => router.push('/auth/login')}
+          >
+            Đăng nhập
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -514,6 +681,9 @@ export default function MyInvestmentsPage() {
                 >
                   <TableHeader>
                     <TableColumn className="sticky backdrop-blur z-20">
+                      Ảnh
+                    </TableColumn>
+                    <TableColumn className="sticky backdrop-blur z-20">
                       Tên quỹ/nhà đầu tư
                     </TableColumn>
                     <TableColumn className="sticky backdrop-blur z-20">
@@ -530,49 +700,71 @@ export default function MyInvestmentsPage() {
                     emptyContent={isLoading ? "Đang tải..." : "Chưa có dữ liệu"}
                     items={filteredItems as any}
                   >
-                    {(item: any) => (
-                      <TableRow key={item.id || item._id}>
-                        <TableCell className="font-medium">
-                          {item.name}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {item.description}
-                        </TableCell>
-                        <TableCell className="sticky backdrop-blur z-10 right-0 text-right justify-end">
-                          {selectedCount > 0 ? null : (
-                            <div className="flex items-center gap-2 justify-end">
-                              <Button
-                                variant="flat"
-                                size="sm"
-                                startContent={<Eye className="h-4 w-4" />}
-                                onPress={() => {
-                                  setCurrent(item);
-                                  viewDisclosure.onOpen();
-                                }}
+                    {(item: any) => {
+                      const getImageUrl = () => {
+                        if (item.image && typeof item.image === 'object') {
+                          return getFullMediaUrl(item.image.url as string);
+                        }
+                        return undefined;
+                      };
+
+                      return (
+                        <TableRow key={item.id || item._id}>
+                          <TableCell>
+                            {getImageUrl() ? (
+                              <img
+                                src={getImageUrl()}
+                                alt={item.name}
+                                className="w-12 h-12 object-cover rounded-lg border"
                               />
-                              <Button
-                                variant="flat"
-                                size="sm"
-                                startContent={<Edit className="h-4 w-4" />}
-                                onPress={() => {
-                                  setCurrent(item);
-                                  editDisclosure.onOpen();
-                                }}
-                              />
-                              <Button
-                                variant="flat"
-                                size="sm"
-                                startContent={<Trash2 className="h-4 w-4" />}
-                                onPress={() => {
-                                  setCurrent(item);
-                                  deleteDisclosure.onOpen();
-                                }}
-                              />
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )}
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <Briefcase className="h-6 w-6 text-gray-400" />
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {item.name}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {item.description}
+                          </TableCell>
+                          <TableCell className="sticky backdrop-blur z-10 right-0 text-right justify-end">
+                            {selectedCount > 0 ? null : (
+                              <div className="flex items-center gap-2 justify-end">
+                                <Button
+                                  variant="flat"
+                                  size="sm"
+                                  startContent={<Eye className="h-4 w-4" />}
+                                  onPress={() => {
+                                    setCurrent(item);
+                                    viewDisclosure.onOpen();
+                                  }}
+                                />
+                                <Button
+                                  variant="flat"
+                                  size="sm"
+                                  startContent={<Edit className="h-4 w-4" />}
+                                  onPress={() => {
+                                    setCurrent(item);
+                                    editDisclosure.onOpen();
+                                  }}
+                                />
+                                <Button
+                                  variant="flat"
+                                  size="sm"
+                                  startContent={<Trash2 className="h-4 w-4" />}
+                                  onPress={() => {
+                                    setCurrent(item);
+                                    deleteDisclosure.onOpen();
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }}
                   </TableBody>
                 </Table>
               </div>

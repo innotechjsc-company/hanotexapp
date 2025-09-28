@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import { useAuth } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import { Card, CardBody, Tabs, Tab, Button } from "@heroui/react";
-import { ArrowLeft, Lightbulb, Target, Briefcase } from "lucide-react";
+import { ArrowLeft, Lightbulb, Target, Briefcase, BarChart3 } from "lucide-react";
 import TechnologyProposalsTab from "./components/TechnologyProposalsTab";
 import DemandProposalsTab from "./components/DemandProposalsTab";
 import ProjectProposalsTab from "./components/ProjectProposalsTab";
+import OverviewTab from "./components/OverviewTab";
 
 export default function MyProposalsScreen() {
   const { user } = useAuth();
@@ -48,11 +49,17 @@ export default function MyProposalsScreen() {
           </div>
         </CardBody>
       </Card>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Card className="rounded-xl shadow-sm border border-gray-200">  
+          <CardBody className="p-6">
+            <OverviewTab userId={user.id} activeTab={activeTab} />
+          </CardBody>
+        </Card>
+      </div>
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
-          <CardBody>
+        <Card className="rounded-xl shadow-sm border border-gray-200">
+          <CardBody className="p-0">
             <Tabs
               aria-label="Proposals tabs"
               className="w-full"
@@ -61,57 +68,55 @@ export default function MyProposalsScreen() {
               variant="underlined"
               classNames={{
                 tabList:
-                  "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                  "w-full relative rounded-none p-0 border-b border-gray-200 bg-gray-50/50",
                 cursor: "w-full bg-primary",
-                tab: "max-w-fit px-0 h-12",
+                tab: "max-w-fit px-6 h-14 rounded-t-lg group-data-[selected=true]:bg-white group-data-[selected=true]:text-primary group-data-[selected=true]:shadow-sm group-data-[selected=true]:border group-data-[selected=true]:border-b-0 group-data-[selected=true]:border-gray-200",
                 tabContent:
-                  "group-data-[selected=true]:text-primary font-medium",
+                  "group-data-[selected=true]:text-primary font-semibold text-gray-600",
+                panel: "p-6"
               }}
             >
+
               <Tab
                 key="technology"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">
+                  <div className="flex items-center space-x-3" style={{ backgroundColor: activeTab === "technology" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }} >
+                    <Lightbulb className="h-5 w-5" style={{ color: activeTab === "technology" ? "#ffffff" : "#000000" }} />
+                    <span className="font-medium" style={{ color: activeTab === "technology" ? "#ffffff" : "#000000" }}>
                       Đề xuất chuyển giao công nghệ
                     </span>
                   </div>
                 }
               >
-                <div className="py-6">
-                  <TechnologyProposalsTab userId={user.id} />
-                </div>
+                <TechnologyProposalsTab userId={user.id} />
               </Tab>
 
               <Tab
                 key="demand"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Target className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">
+                  <div className="flex items-center space-x-3" style={{ backgroundColor: activeTab === "demand" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }} >
+                    <Target className="h-5 w-5" style={{ color: activeTab === "demand" ? "#ffffff" : "#000000" }}   />
+                    <span className="font-medium" style={{ color: activeTab === "demand" ? "#ffffff" : "#000000" }} >
                       Đề xuất nhu cầu
                     </span>
                   </div>
                 }
               >
-                <div className="py-6">
-                  <DemandProposalsTab userId={user.id} />
-                </div>
+                <DemandProposalsTab userId={user.id} />
               </Tab>
 
               <Tab
                 key="project"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">Đề xuất dự án</span>
+                  <div className="flex items-center space-x-3" style={{ backgroundColor: activeTab === "project" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }}  >
+                    <Briefcase className="h-5 w-5" style={{ color: activeTab === "project" ? "#ffffff" : "#000000" }} />
+                    <span className="font-medium" style={{ color: activeTab === "project" ? "#ffffff" : "#000000" }} >
+                      Đề xuất dự án
+                    </span>
                   </div>
                 }
               >
-                <div className="py-6">
-                  <ProjectProposalsTab userId={user.id} />
-                </div>
+                <ProjectProposalsTab userId={user.id} />
               </Tab>
             </Tabs>
           </CardBody>
