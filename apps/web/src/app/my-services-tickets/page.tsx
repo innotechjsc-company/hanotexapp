@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, Card, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, message, Upload, Tabs } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, ReloadOutlined, EyeOutlined, DeleteOutlined, UploadOutlined, EditOutlined, MessageOutlined } from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined, EyeOutlined, DeleteOutlined, UploadOutlined, EditOutlined, MessageOutlined, DownloadOutlined } from "@ant-design/icons";
 import { getServiceTickets, createServiceTicket, deleteServiceTicket, updateServiceTicket } from "@/api/service-ticket";
 import { getServices } from "@/api/services";
 import { getTechnologiesByUser } from "@/api/technologies";
@@ -190,7 +190,7 @@ export default function MyServiceTicketsPage() {
         // Add new fields
         technologies: values.technologies || [],
         project: values.project || undefined,
-        document: values.documentId || undefined,
+        document: values.document ? values.document[0] : undefined,
       };
       await createServiceTicket(payload);
       message.success("Tạo phiếu dịch vụ thành công");
@@ -328,6 +328,27 @@ export default function MyServiceTicketsPage() {
           return value?.name || "-";
         },
       },
+      // add download button
+      {
+        title: "Tài liệu đính kèm",
+        dataIndex: "document",
+        key: "document",
+        render: (value: any) => {
+          if (!value) return "-";
+          return (
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={() => {
+                if (value?.url) {
+                  downloadService.downloadByUrl(value.url, value.filename);
+                }
+              }}
+            >
+              Tải xuống
+            </Button>
+          );
+        },
+      },
       {
         title: "Trạng thái",
         dataIndex: "status",
@@ -453,6 +474,27 @@ export default function MyServiceTicketsPage() {
             return proj?.name || value;
           }
           return value?.name || "-";
+        },
+      },
+       // add download button
+       {
+        title: "Tài liệu đính kèm",
+        dataIndex: "document",
+        key: "document",
+        render: (value: any) => {
+          if (!value) return "-";
+          return (
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={() => {
+                if (value?.url) {
+                  downloadService.downloadByUrl(value.url, value.filename);
+                }
+              }}
+            >
+              Tải xuống
+            </Button>
+          );
         },
       },
       {

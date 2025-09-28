@@ -621,6 +621,8 @@ export default function FundraisingProjectDetailPage() {
                     hợp tác
                   </Paragraph>
                   <Space size="large">
+                    {/* ẩn nút đề xuất nếu là chủ dự án  */}
+                    {typeof project.user === "object" && project.user && project.user?.id !== currentUser?.id && (
                     <Button
                       type="primary"
                       size="large"
@@ -630,6 +632,7 @@ export default function FundraisingProjectDetailPage() {
                         ? "Xem đề xuất"
                         : "Gửi đề xuất đầu tư"}
                     </Button>
+                    )}
                     <Button size="large" type="primary" ghost>
                       <Link href="/funds/fundraising">Xem dự án khác</Link>
                     </Button>

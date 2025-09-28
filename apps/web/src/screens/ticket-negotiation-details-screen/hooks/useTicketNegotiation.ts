@@ -141,7 +141,7 @@ export const useTicketNegotiation = ({ ticketId }: UseTicketNegotiationProps) =>
         user: user as any, // Pass the user object
         content: pendingMessage.content,
         document: documentIds.length > 0 ? documentIds[0] as any : undefined,
-        status: "approved", // Default status
+        status: "pending", // Default status
         reason: "",
       };
 

@@ -8,6 +8,7 @@ import type { Project } from "@/types/project";
 import dayjs from "dayjs";
 import { statusColorMap, statusLabelMap } from "./TicketNegotiationHeader";
 import { useUser } from "@/store/auth";
+import downloadService from "@/services/downloadService";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -170,7 +171,9 @@ export const GeneralInfoStep: React.FC<GeneralInfoStepProps> = ({
               icon={<LinkOutlined />}
               onClick={() => {
                 // TODO: Implement document download
-                console.log("Download document:", ticket.document);
+                if (typeof ticket.document === "object" && ticket.document?.url) {
+                  downloadService.downloadByUrl(ticket.document.url, ticket.document.filename || undefined);
+                }
               }}
             >
               Tải xuống
