@@ -56,6 +56,8 @@ import { projectProposeApi } from "@/api/project-propose";
 import { ProjectProposeStatus } from "@/types/project-propose";
 import { useUser } from "@/store/auth";
 import toastService from "@/services/toastService";
+import { FileUpload, type FileUploadItem } from "@/components/input";
+import downloadService from "@/services/downloadService";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -144,6 +146,7 @@ export default function FundraisingProjectDetailPage() {
   const [isSubmittingProposal, setIsSubmittingProposal] = useState(false);
   const [form] = Form.useForm();
   const [hasExistingProposal, setHasExistingProposal] = useState(false);
+  const [proposalFiles, setProposalFiles] = useState<FileUploadItem[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -216,7 +219,8 @@ export default function FundraisingProjectDetailPage() {
         const hasRelevant = proposals.some(
           (p) =>
             p?.status !== ProjectProposeStatus.Negotiating &&
-            p?.status !== ProjectProposeStatus.Cancelled
+            p?.status !== ProjectProposeStatus.Cancelled &&
+            p?.status !== ProjectProposeStatus.ContractSigned
         );
         setHasExistingProposal(hasRelevant);
       } catch (err) {
@@ -265,7 +269,7 @@ export default function FundraisingProjectDetailPage() {
       return;
     }
     if (hasExistingProposal) {
-      message.info("Bạn đã gửi đề xuất cho dự án này. Vui lòng chờ phản hồi.");
+      router.push(`/my-proposals`);
       return;
     }
     setIsProposalModalOpen(true);
@@ -296,6 +300,12 @@ export default function FundraisingProjectDetailPage() {
         return;
       }
       setIsSubmittingProposal(true);
+      
+      // Prepare file attachments
+      const fileAttachments = proposalFiles
+        .filter(file => file.uploadStatus === "done" && file.id)
+        .map(file => file.id);
+
       await projectProposeApi.create({
         project: (project as any).id || projectId,
         user: currentUser.id,
@@ -305,6 +315,7 @@ export default function FundraisingProjectDetailPage() {
         investment_ratio: values.investment_ratio ?? project.share_percentage,
         investment_type: values.investment_type,
         investment_benefits: values.investment_benefits,
+        documents: fileAttachments,
         status: ProjectProposeStatus.Pending,
       } as any);
       // Show success toast
@@ -315,6 +326,7 @@ export default function FundraisingProjectDetailPage() {
       setIsProposalModalOpen(false);
       setHasExistingProposal(true);
       form.resetFields();
+      setProposalFiles([]);
     } catch (err: any) {
       if (err?.errorFields) return; // validation errors already shown
       console.error("Create project propose error:", err);
@@ -517,15 +529,19 @@ export default function FundraisingProjectDetailPage() {
                       <Card
                         size="small"
                         className="text-center hover:shadow-md transition-shadow"
+                        onClick={() => {
+                          if (doc.url) {
+                            downloadService.downloadByUrl(doc.url, doc.filename);
+                          }
+                        }}
                       >
-                        <ReadOutlined className="text-4xl text-green-600 mb-2" />
                         <Space
                           direction="vertical"
                           size={0}
                           className="items-center"
                         >
-                          <Text strong>Tài liệu {index + 1}</Text>
-                          <Text type="secondary">PDF</Text>
+                          <Text strong>Tải Tài liệu {index + 1}</Text>
+                          <Text type="secondary">{doc.filename}</Text>
                         </Space>
                       </Card>
                     </Col>
@@ -609,10 +625,9 @@ export default function FundraisingProjectDetailPage() {
                       type="primary"
                       size="large"
                       onClick={handleSendProposal}
-                      disabled={hasExistingProposal}
                     >
                       {hasExistingProposal
-                        ? "Đã gửi đề xuất"
+                        ? "Xem đề xuất"
                         : "Gửi đề xuất đầu tư"}
                     </Button>
                     <Button size="large" type="primary" ghost>
@@ -696,6 +711,29 @@ export default function FundraisingProjectDetailPage() {
               rows={3}
               placeholder="Ví dụ: mạng lưới, chuyên gia, thị trường..."
             />
+          </Form.Item>
+          
+          {/* File Upload Section */}
+          <Form.Item label="Tài liệu đính kèm">
+            <FileUpload
+              value={proposalFiles}
+              onChange={setProposalFiles}
+              multiple={true}
+              maxCount={5}
+              allowedTypes={['document', 'image']}
+              maxSize={50 * 1024 * 1024} // 50MB
+              title="Tải lên tài liệu"
+              description="Chọn tài liệu hỗ trợ cho đề xuất đầu tư (PDF, Word, Excel, PowerPoint, hình ảnh)"
+              onUploadSuccess={(file, media) => {
+                message.success(`Tải lên thành công: ${file.name}`);
+              }}
+              onUploadError={(file, error) => {
+                message.error(`Tải lên thất bại: ${file.name} - ${error}`);
+              }}
+            />
+            <Text type="secondary" className="text-xs">
+              Hỗ trợ: PDF, Word, Excel, PowerPoint, hình ảnh. Tối đa 5 file, mỗi file 50MB
+            </Text>
           </Form.Item>
         </Form>
       </Modal>

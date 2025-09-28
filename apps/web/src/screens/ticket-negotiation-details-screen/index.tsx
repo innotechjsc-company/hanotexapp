@@ -291,7 +291,10 @@ export const TicketNegotiationDetailsScreen: React.FC<
                   onFileUpload={handleFileUpload}
                   onRemoveAttachment={removeAttachment}
                   formatFileSize={formatFileSize}
-                  onStatusUpdate={handleStatusUpdate}
+                  onStatusUpdate={(status, reason) => {
+                    // next step3 
+                    handleStatusUpdate(status, reason);
+                  }}
                   updatingStatus={updatingStatus}
                   isViewing={viewingStep !== null}
                 />
@@ -310,6 +313,7 @@ export const TicketNegotiationDetailsScreen: React.FC<
                   onStatusUpdate={handleStatusUpdate}
                   updatingStatus={updatingStatus}
                   isViewing={viewingStep !== null}
+                  onLogsUpdate={reloadTicket}
                 />
               </>
             )}

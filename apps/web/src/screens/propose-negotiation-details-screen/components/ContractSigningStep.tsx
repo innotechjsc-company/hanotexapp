@@ -504,7 +504,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
               </div>
 
               {/* Contract File Upload (contract_file) - visible when contract exists and not signed */}
-              {!isContractSigned && !bothPartiesAccepted() && !readOnly && (
+              {!isContractSigned && !bothPartiesAccepted() && !readOnly && proposal.status !== "completed" && (
                 <div className="mt-6">
                   <Title level={5} className="mb-3">
                     <FileText size={20} className="inline mr-2" />
@@ -558,29 +558,31 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                 </div>
               )}
 
-              {/* Attachments Upload - Available when contract exists */}
-              <div className="mt-6">
-                <Title level={5} className="mb-3">
-                  <Paperclip size={20} className="inline mr-2" />
-                  Tài liệu kèm theo (tuỳ chọn)
-                </Title>
-                <FileUpload
-                  multiple
-                  maxCount={10}
-                  allowedTypes={["document", "image"]}
-                  title="Thêm tài liệu"
-                  description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
-                  mediaFields={{
-                    type: MediaType.DOCUMENT,
-                    caption: "Tài liệu kèm theo",
-                  }}
-                  onUploadSuccess={handleAttachmentUploadSuccess}
-                  onUploadError={(_f, err) =>
-                    message.error(err || "Tải lên tài liệu thất bại")
-                  }
-                  onRemove={handleAttachmentRemove}
-                />
-              </div>
+              {/* Attachments Upload - Available when contract exists and not completed */}
+              {proposal.status !== "completed" && (
+                <div className="mt-6">
+                  <Title level={5} className="mb-3">
+                    <Paperclip size={20} className="inline mr-2" />
+                    Tài liệu kèm theo (tuỳ chọn)
+                  </Title>
+                  <FileUpload
+                    multiple
+                    maxCount={10}
+                    allowedTypes={["document", "image"]}
+                    title="Thêm tài liệu"
+                    description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
+                    mediaFields={{
+                      type: MediaType.DOCUMENT,
+                      caption: "Tài liệu kèm theo",
+                    }}
+                    onUploadSuccess={handleAttachmentUploadSuccess}
+                    onUploadError={(_f, err) =>
+                      message.error(err || "Tải lên tài liệu thất bại")
+                    }
+                    onRemove={handleAttachmentRemove}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -717,7 +719,7 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
             )}
 
           {/* Quick upload for attachments */}
-          {!readOnly && activeContract?.id && (
+          {!readOnly && activeContract?.id && proposal.status !== "completed" && (
             <div className="mt-4">
               <FileUpload
                 multiple

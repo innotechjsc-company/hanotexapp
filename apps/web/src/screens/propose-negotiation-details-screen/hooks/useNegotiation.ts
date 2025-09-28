@@ -8,8 +8,6 @@ import {
 import { offerApi, type ApiOffer } from "@/api/offers";
 import { uploadFile } from "@/api/media";
 import { useUser } from "@/store/auth";
-import webSocketManager from "@/lib/websocket";
-import { localStorageService } from "@/services/localstorage";
 import { MediaType } from "@/types/media1";
 import { OfferStatus } from "@/types/offer";
 // Local Offer form data shape (not used for propose, kept for typing)
@@ -22,7 +20,7 @@ export interface OfferFormData {
 export interface UseNegotiationProps {
   proposalId: string; // Propose ID
   // Backward compat: ignored here, this screen is propose-only
-  forceType?: 'technology' | 'propose';
+  forceType?: "technology" | "propose";
 }
 
 export interface UseNegotiationReturn {
@@ -66,16 +64,6 @@ export interface UseNegotiationReturn {
   // Refresh proposal from server
   reloadProposal: () => Promise<void>;
 }
-
-type NegotiationSocketMessagePayload = {
-  roomId?: string;
-  message?: ApiNegotiatingMessage;
-};
-
-type NegotiationSocketDeletePayload = {
-  roomId?: string;
-  messageId?: string;
-};
 
 // Helper function to detect file type based on MIME type or file extension
 const detectFileType = (file: File): MediaType => {
@@ -171,33 +159,32 @@ export const useNegotiation = ({
   // propose-only screen: no technology propose context
   const offerCacheRef = useRef<Map<string, ApiOffer>>(new Map());
 
-  const negotiationRoomId = useMemo(() => {
-    if (!proposalId) return null;
-    return `negotiation:propose:${proposalId}`;
-  }, [proposalId]);
-
-  const fetchProposalDetails = useCallback(async (options: { silent?: boolean } = {}) => {
-    const { silent = false } = options;
-    try {
-      if (!silent) {
-        setLoading(true);
+  const fetchProposalDetails = useCallback(
+    async (options: { silent?: boolean } = {}) => {
+      const { silent = false } = options;
+      try {
+        if (!silent) {
+          setLoading(true);
+        }
+        setError("");
+        // This screen is for Propose only
+        const p = await getProposeById(proposalId);
+        if (!p || !(p as any).id) {
+          throw new Error("Không tìm thấy đề xuất");
+        }
+        setProposal(p as any);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        setError(`Không thể tải thông tin đề xuất: ${errorMessage}`);
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
       }
-      setError("");
-      // This screen is for Propose only
-      const p = await getProposeById(proposalId);
-      if (!p || !(p as any).id) {
-        throw new Error("Không tìm thấy đề xuất");
-      }
-      setProposal(p as any);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      setError(`Không thể tải thông tin đề xuất: ${errorMessage}`);
-    } finally {
-      if (!silent) {
-        setLoading(false);
-      }
-    }
-  }, [proposalId]);
+    },
+    [proposalId]
+  );
 
   const ensureOfferDetails = useCallback(
     async (
@@ -207,7 +194,10 @@ export const useNegotiation = ({
       const { forceRefresh = false } = options;
       if (message.is_offer && message.offer) {
         if (typeof message.offer === "object" && message.offer.id) {
-          offerCacheRef.current.set(message.offer.id, message.offer as ApiOffer);
+          offerCacheRef.current.set(
+            message.offer.id,
+            message.offer as ApiOffer
+          );
           return message;
         }
 
@@ -224,7 +214,10 @@ export const useNegotiation = ({
             offerCacheRef.current.set(resolvedOffer.id, resolvedOffer);
             return { ...message, offer: resolvedOffer };
           } catch (offerError) {
-            console.error("Failed to load offer for negotiation message:", offerError);
+            console.error(
+              "Failed to load offer for negotiation message:",
+              offerError
+            );
           }
         }
       }
@@ -255,7 +248,8 @@ export const useNegotiation = ({
     try {
       const params: any = { limit: 100, page: 1, propose: proposalId };
       const response = await negotiatingMessageApi.getMessages(params);
-      const rawMessages = (response.docs as unknown as ApiNegotiatingMessage[]) || [];
+      const rawMessages =
+        (response.docs as unknown as ApiNegotiatingMessage[]) || [];
       const normalizedMessages = await enrichMessagesWithOffers(rawMessages, {
         forceRefresh: true,
       });
@@ -308,125 +302,6 @@ export const useNegotiation = ({
     fetchNegotiationMessages,
     fetchLatestOffer,
     fetchProposalDetails,
-  ]);
-
-  useEffect(() => {
-    if (!negotiationRoomId || !currentUser?.id) {
-      return;
-    }
-
-    const resolveToken = () => {
-      const storedToken = localStorageService.get<string | null>(
-        "auth_token",
-        null
-      );
-      if (storedToken) return storedToken;
-      if (typeof window !== "undefined") {
-        return window.localStorage.getItem("payload_token");
-      }
-      return null;
-    };
-
-    const socket = webSocketManager.connect(resolveToken() || undefined);
-
-    const userName =
-      currentUser.full_name ||
-      currentUser.email ||
-      `user:${currentUser.id.slice(0, 6)}`;
-
-    const handleConnect = () => {
-      webSocketManager.emit("authenticate", {
-        userId: currentUser.id,
-        userName,
-      });
-    };
-
-    const handleAuthenticated = () => {
-      webSocketManager.emit("join-room", negotiationRoomId);
-    };
-
-    const sortMessages = (items: ApiNegotiatingMessage[]) =>
-      [...items].sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-
-    const upsertMessage = async (incoming: ApiNegotiatingMessage) => {
-      const normalized = await ensureOfferDetails(incoming);
-
-      setMessages((prev) => {
-        const existingIndex = prev.findIndex((item) => item.id === normalized.id);
-        if (existingIndex !== -1) {
-          const updated = [...prev];
-          updated[existingIndex] = normalized;
-          return sortMessages(updated);
-        }
-        return sortMessages([...prev, normalized]);
-      });
-
-      if (normalized.is_offer) {
-        if (normalized.offer && typeof normalized.offer === "object") {
-          offerCacheRef.current.set(normalized.offer.id, normalized.offer as ApiOffer);
-          setLatestOffer(normalized.offer as ApiOffer);
-        } else {
-          fetchLatestOffer();
-        }
-      }
-    };
-
-    const handleNewMessage = (payload: NegotiationSocketMessagePayload) => {
-      if (!payload?.message || payload.roomId !== negotiationRoomId) return;
-      void upsertMessage(payload.message);
-    };
-
-    const handleUpdatedMessage = (
-      payload: NegotiationSocketMessagePayload
-    ) => {
-      if (!payload?.message || payload.roomId !== negotiationRoomId) return;
-      void upsertMessage(payload.message);
-    };
-
-    const handleDeletedMessage = (
-      payload: NegotiationSocketDeletePayload
-    ) => {
-      if (!payload?.messageId || payload.roomId !== negotiationRoomId) return;
-      setMessages((prev) =>
-        prev.filter((message) => message.id !== payload.messageId)
-      );
-      fetchLatestOffer();
-    };
-
-    if (socket) {
-      socket.on("connect", handleConnect);
-      socket.on("authenticated", handleAuthenticated);
-
-      if (socket.connected) {
-        handleConnect();
-      }
-    }
-
-    webSocketManager.on("negotiation:new-message", handleNewMessage);
-    webSocketManager.on("negotiation:message-updated", handleUpdatedMessage);
-    webSocketManager.on("negotiation:message-deleted", handleDeletedMessage);
-
-    return () => {
-      webSocketManager.emit("leave-room", negotiationRoomId);
-      webSocketManager.off("negotiation:new-message", handleNewMessage);
-      webSocketManager.off("negotiation:message-updated", handleUpdatedMessage);
-      webSocketManager.off("negotiation:message-deleted", handleDeletedMessage);
-
-      if (socket) {
-        socket.off("connect", handleConnect);
-        socket.off("authenticated", handleAuthenticated);
-      }
-    };
-  }, [
-    negotiationRoomId,
-    currentUser?.id,
-    currentUser?.email,
-    currentUser?.full_name,
-    fetchLatestOffer,
-    ensureOfferDetails,
   ]);
 
   const handleSendMessage = async (values: { message: string }) => {
@@ -593,8 +468,10 @@ export const useNegotiation = ({
       ? (proposal.user as any).id
       : proposal.user
     : undefined;
-  const isProposalCreator = String(proposalUserId || "") === String(currentUser?.id || "");
-  const canSendOffer = proposal?.status === "negotiating" && !!isProposalCreator;
+  const isProposalCreator =
+    String(proposalUserId || "") === String(currentUser?.id || "");
+  const canSendOffer =
+    proposal?.status === "negotiating" && !!isProposalCreator;
   const hasPendingOffer = latestOffer?.status === OfferStatus.PENDING;
 
   return {

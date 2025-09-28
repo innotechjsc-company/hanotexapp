@@ -6,6 +6,7 @@
 import { Project, ProjectStatusEnum } from "@/types/project";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
+import { getStoredToken } from "./auth";
 
 export interface ProjectFilters {
   status?: Project["status"];
@@ -105,6 +106,133 @@ export async function getProjectById(id: string): Promise<Project> {
   }
 
   return projectData;
+}
+
+
+/**
+ * Interface for creating project with services and IP
+ */
+export interface CreateProjectPayload {
+  name: string;
+  description: string;
+  goal_money: number;
+  end_date: string;
+  technology: string; // Technology ID
+  user: string; // User ID
+  status?: string;
+  investment_fund?: string; // Investment fund ID
+  open_investment_fund?: boolean;
+  documents?: string[]; // Media IDs
+  owners?: Array<{
+    owner_type: "individual" | "company" | "research_institution";
+    owner_name: string;
+    ownership_percentage: number;
+    contact_info?: string;
+  }>;
+ // Service ticket creation
+ services?: Array<{
+  service_id: string;
+  description: string;
+  responsible_user_id: string;
+  implementer_ids: string[];
+  document_id?: string;
+}>;
+  intellectual_property?: Array<{
+    ip_type: "patent" | "trademark" | "copyright" | "trade_secret";
+    title: string;
+    description: string;
+    registration_number?: string;
+    registration_date?: string;
+    expiry_date?: string;
+  }>;
+}
+
+/**
+ * Response interface for project creation with additional data
+ */
+export interface CreateProjectResponse {
+  success: boolean;
+  data: Project;
+  doc: Project; // For compatibility
+  intellectual_property_records?: Array<any>;
+  service_tickets?: Array<any>;
+  message: string;
+}
+
+/**
+ * Create new project with services and intellectual property support
+ * Uses our custom CMS API endpoint that handles service tickets and IP creation
+ */
+export async function createProjectWithServices(
+  data: CreateProjectPayload
+): Promise<CreateProjectResponse> {
+  // Use direct fetch to call our custom CMS API endpoint
+  const cmsApiUrl =
+    process.env.NEXT_PUBLIC_PAYLOAD_API_URL || "http://localhost:4000";
+  const endpoint = `${cmsApiUrl}/project/create`;
+
+  try {
+    // Get auth token if available (for PayloadCMS authentication)
+    let authHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    // Try to get token from multiple sources
+    if (typeof window !== "undefined") {
+      // Use the centralized token retrieval function first
+      let token = getStoredToken();
+
+      // Fallback to manual localStorage checks if getStoredToken returns null
+      if (!token) {
+        token =
+          localStorage.getItem("payload_token") || // Main token storage key
+          localStorage.getItem("payload-token") ||
+          sessionStorage.getItem("payload-token") ||
+          localStorage.getItem("token") ||
+          sessionStorage.getItem("token") ||
+          // Check for cookie token
+          document.cookie
+            .split(";")
+            .find((c) => c.trim().startsWith("payload-token="))
+            ?.split("=")[1] ||
+          null;
+      }
+
+      if (token) {
+        authHeaders["Authorization"] = `Bearer ${token}`;
+        console.log(
+          "Token found and added to headers:",
+          token.substring(0, 20) + "..."
+        );
+      } else {
+        console.warn("No authentication token found in storage");
+      }
+    }
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `HTTP ${response.status}: ${response.statusText}`
+      );
+    }
+
+    const result = await response.json();
+    return result as CreateProjectResponse;
+  } catch (error) {
+    console.error("Create project error:", error);
+
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+
+    throw new Error("Failed to create project");
+  }
 }
 
 /**

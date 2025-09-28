@@ -3,6 +3,7 @@ import { Service } from "./services";
 import { User } from "./users";
 import { Technology } from "./technologies";
 import { Project } from "./project";
+import { Media } from "./media1";
 
 // Trạng thái phiếu dịch vụ
 export type ServiceTicketStatus = "pending" | "processing" | "completed" | "cancelled"; // Trạng thái xử lý
@@ -18,7 +19,7 @@ export interface ServiceTicket {
   technologies?: (ID | Technology)[]; // Công nghệ liên quan
   project?: ID | Project; // Dự án liên quan
   description: string; // Mô tả yêu cầu
-  document?: ID; // Tài liệu đính kèm
+  document?: ID | Media; // Tài liệu đính kèm
   createdAt?: DateTimeString; // Thời điểm tạo bản ghi
   updatedAt?: DateTimeString; // Thời điểm cập nhật bản ghi
 }

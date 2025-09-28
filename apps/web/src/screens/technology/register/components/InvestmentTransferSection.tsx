@@ -89,7 +89,7 @@ export const InvestmentTransferSection = forwardRef<
     <Card>
       <CardHeader className="px-6 py-4">
         <h2 className="text-lg font-semibold text-gray-900">
-          6. Mong muốn đầu tư & Hình thức chuyển giao (Tùy chọn)
+          6. Mong muốn đầu tư & Hình thức chuyển giao (Bắt buộc)
         </h2>
       </CardHeader>
       <CardBody className="p-6 space-y-6">

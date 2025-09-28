@@ -10,6 +10,7 @@ export enum ProjectStatusEnum {
 
 export type Project = {
   id?: string
+  image?: string | Media
   name: string
   description: string
   business_model?: string

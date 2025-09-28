@@ -129,6 +129,21 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           throw new Error("Thông tin định giá là bắt buộc");
         }
 
+         // create service tickets
+         let serviceTickets: any[] = [];
+         if (services.length > 0) {
+          const userAdmin = await getUserByRoleAdmin();
+          const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
+          const userAdminId = userAdminList[0]?.id;
+          // create service tickets by API
+          serviceTickets = services.map((service) => ({
+          service_id: service.service,
+          description: service.description,
+          responsible_user_id: user?.id,
+          implementer_ids: [userAdminId],
+        }));
+        }
+
         // Aggregate payload for our custom API endpoint
         const payload: CreateTechnologyPayload = {
           title: basic.title.trim(),
@@ -158,17 +173,13 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           intellectual_property:
             ipDetails && ipDetails.length ? ipDetails : undefined,
           visibility_mode: visibility?.visibility_mode || "public",
+          services: serviceTickets, // add service tickets to payload to create service tickets
         };
 
         const result = await createTechnologyWithServices(payload);
         console.log("Created technology:", result);
 
-        // create service tickets
-        if (services.length > 0) {
-          // create service tickets by API
-          // DUY
-          // CHIEN
-        }
+       
         // Log additional information about created records
         if (
           result.intellectual_property_records &&
@@ -196,7 +207,7 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         }
 
         if (result.service_tickets && result.service_tickets.length > 0) {
-          successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ.`;
+          successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ trong dịch vụ của tôi.`;
         }
 
         toast.success(successMessage);

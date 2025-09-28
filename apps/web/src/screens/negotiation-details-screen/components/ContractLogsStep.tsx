@@ -53,6 +53,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectTargetId, setRejectTargetId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
   const [activeContractId, setActiveContractId] = useState<string | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -319,6 +320,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       return;
     }
     try {
+      setRejecting(true);
       await contractLogsApi.confirmLog({
         contract_log_id: rejectTargetId,
         status: "cancelled",
@@ -332,6 +334,8 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     } catch (e) {
       console.error(e);
       message.error("Không thể từ chối");
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -727,6 +731,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
         onOk={handleRejectOk}
         okText="Từ chối"
         okButtonProps={{ danger: true }}
+        confirmLoading={rejecting}
       >
         <Typography.Text className="block mb-1">Lý do</Typography.Text>
         <Input.TextArea

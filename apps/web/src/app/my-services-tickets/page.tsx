@@ -18,6 +18,7 @@ import dayjs from "dayjs";
 import { getUserByRoleAdmin, getUsers } from "@/api/user";
 import { useRouter } from "next/navigation";
 import FileUpload, { type FileUploadItem } from "@/components/input/FileUpload";
+import downloadService from "@/services/downloadService";
 
 type EditableServiceTicket = Partial<ServiceTicket> & { id?: string };
 
@@ -755,6 +756,9 @@ export default function MyServiceTicketsPage() {
                   onClick={() => {
                     // You can add logic to download/view the document here
                     // message.info("Tính năng tải xuống tài liệu đang được phát triển");
+                    if( typeof current.document === "object" && current.document?.url && current.document?.filename) {
+                      downloadService.downloadByUrl(current.document.url, current.document.filename);
+                    }
                   }}
                 >
                   Tải xuống tài liệu

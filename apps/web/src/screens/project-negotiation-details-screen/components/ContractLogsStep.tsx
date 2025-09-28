@@ -97,7 +97,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     try {
       // Load active contract for this proposal (required by CMS schema)
       try {
-        const contract = await contractsApi.getByPropose(
+        const contract = await contractsApi.getByProjectPropose(
           proposal.id,
           1
         );
@@ -109,7 +109,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       }
 
       const res = await contractLogsApi.list(
-        { propose: proposal.id },
+        { project_propose: proposal.id },
         { limit: 100, sort: "createdAt" }
       );
       const data = (res as any).docs || (res as any).data || [];
@@ -186,7 +186,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
       }
 
       await contractLogsApi.create({
-        propose: proposal?.id as any,
+        project_propose: proposal?.id as any,
         contract: activeContractId as any,
         user: currentUser!.id as any,
         content: content.trim(),

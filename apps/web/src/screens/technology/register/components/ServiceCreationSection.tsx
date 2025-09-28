@@ -147,7 +147,7 @@ const ServiceCreationSection = forwardRef<ServiceCreationSectionRef, ServiceCrea
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Chọn dịch vụ
+                  Chọn dịch vụ (Tùy chọn)
                 </h3>
                 {selectedServices.length > 0 && (
                   <Chip size="sm" color="primary" variant="flat">
@@ -156,7 +156,7 @@ const ServiceCreationSection = forwardRef<ServiceCreationSectionRef, ServiceCrea
                 )}
               </div>
               <p className="text-sm text-gray-600">
-                Chọn dịch vụ cho công nghệ này
+                Chọn dịch vụ hỗ trợ cho công nghệ này 
               </p>
             </div>
           </div>
