@@ -163,6 +163,26 @@ export async function POST(request: NextRequest) {
 
       const contractPrice = contract.price ? contract.price.toLocaleString() + ' VNĐ' : 'N/A'
 
+      // Lấy propose ID để sử dụng trong action_url
+      const contractTechProp = contract.technology_propose
+      const techPropId =
+        typeof contractTechProp === 'object' && contractTechProp !== null
+          ? contractTechProp.id
+          : (contractTechProp ?? undefined)
+      const contractProjProp = contract.project_propose
+      const projPropId =
+        typeof contractProjProp === 'object' && contractProjProp !== null
+          ? contractProjProp.id
+          : (contractProjProp ?? undefined)
+      const contractProp = contract.propose
+      const propId =
+        typeof contractProp === 'object' && contractProp !== null
+          ? contractProp.id
+          : (contractProp ?? undefined)
+
+      // Xác định propose ID để sử dụng trong action_url
+      const proposeId = techPropId || projPropId || propId || contractId
+
       if (bothAccepted) {
         // Cả hai bên đã ký - tạo notification cho cả hai
         console.log('📋 Both parties have signed - creating completion notifications')
@@ -173,7 +193,7 @@ export async function POST(request: NextRequest) {
             title: `🎉 Hợp đồng đã được ký kết thành công`,
             message: `Hợp đồng "${contractTitle}" với ${otherUserName} đã được ký kết thành công với giá trị ${contractPrice}. Cả hai bên đã xác nhận và hợp đồng có hiệu lực.`,
             type: 'success' as const,
-            action_url: `technologies/negotiations/${contractId}`,
+            action_url: `technologies/negotiations/${proposeId}`,
             priority: 'high' as const,
           },
           {
@@ -181,7 +201,7 @@ export async function POST(request: NextRequest) {
             title: `🎉 Hợp đồng đã được ký kết thành công`,
             message: `Hợp đồng "${contractTitle}" với ${currentUserName} đã được ký kết thành công với giá trị ${contractPrice}. Cả hai bên đã xác nhận và hợp đồng có hiệu lực.`,
             type: 'success' as const,
-            action_url: `technologies/negotiations/${contractId}`,
+            action_url: `technologies/negotiations/${proposeId}`,
             priority: 'high' as const,
           },
         ]
@@ -201,7 +221,7 @@ export async function POST(request: NextRequest) {
           title: `📝 ${currentUserName} đã ký hợp đồng`,
           message: `${currentUserName} đã ký hợp đồng "${contractTitle}" với giá trị ${contractPrice}. Vui lòng xem xét và ký kết để hoàn tất hợp đồng.`,
           type: 'info',
-          action_url: `technologies/negotiations/${contractId}`,
+          action_url: `technologies/negotiations/${proposeId}`,
           priority: 'normal',
         })
 

@@ -99,7 +99,7 @@ const createContractCompletionNotifications = async (
         title: `Thông báo xác nhận hoàn thành hợp đồng`,
         message: `${currentUserName} đã xác nhận hoàn thành hợp đồng "${contractTitle}". Nội dung: "${logContent}"`,
         type: 'contract',
-        action_url: `technologies/negotiations/${technologyId}`,
+        action_url: `technologies/negotiations/${updatedLog?.id}`,
         priority: 'high',
       })
     }
@@ -110,7 +110,7 @@ const createContractCompletionNotifications = async (
         title: `Thông báo xác nhận hoàn thành hợp đồng`,
         message: `${currentUserName} đã xác nhận hoàn thành hợp đồng "${contractTitle}". Nội dung: "${logContent}"`,
         type: 'contract',
-        action_url: `technologies/negotiations/${technologyId}`,
+        action_url: `technologies/negotiations/${updatedLog?.id}`,
         priority: 'high',
       })
     }

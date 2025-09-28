@@ -256,9 +256,7 @@ export class NotificationManager {
         context.message ||
         `Offer của bạn với giá ${context.price.toLocaleString()} VNĐ đã được chấp nhận.`,
       type: 'success',
-      action_url: context.technologyId
-        ? `technologies/${context.technologyId}`
-        : `negotiations/${context.negotiationId}`,
+      action_url: `technologies/negotiations/${context.negotiationId}`,
       priority: 'high',
     })
 
