@@ -1,7 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Avatar } from "@heroui/react";
-import { MessageSquare } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Notification } from "@/types/notification";
 import { markAsRead } from "@/api/noti";
 
@@ -44,9 +43,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   onNotificationClick,
 }) => {
   const router = useRouter();
-
-  // Placeholder for user avatar - replace with actual data if available
-  const userAvatarUrl = "https://i.pravatar.cc/150?u=" + notification.id;
 
   // Helper function to extract route path from action_url
   const extractRoutePath = (actionUrl: string): string | null => {
@@ -131,10 +127,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       onClick={handleClick}
     >
       <div className="relative">
-        <Avatar src={userAvatarUrl} size="lg" />
-        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
-          <MessageSquare className="h-3 w-3 text-white" />
+        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <Bell className="h-6 w-6 text-blue-600" />
         </div>
+        {!notification.is_read && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+        )}
       </div>
       <div className="flex-1">
         {notification.title && (
@@ -149,9 +147,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           {formatTimeAgo(notification.createdAt)}
         </p>
       </div>
-      {!notification.is_read && (
-        <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-      )}
     </div>
   );
 };
