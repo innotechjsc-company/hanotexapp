@@ -112,7 +112,7 @@ export default function AuctionResultsList({ bids }: AuctionResultsListProps) {
           </div>
           <div className="text-left sm:text-right">
             <div className="text-sm text-gray-500 mb-1">Giá trúng thầu</div>
-            <div className="text-2xl sm:text-2xl font-bold text-green-600">
+            <div className="text-2xl sm:text-xl font-bold text-green-600">
               {finalResults[0]?.amount?.toLocaleString() || 0} VNĐ
             </div>
           </div>
