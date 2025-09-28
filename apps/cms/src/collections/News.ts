@@ -91,7 +91,7 @@ export const News: CollectionConfig = {
     },
     {
       name: 'document',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       label: 'Tài liệu',
     },
