@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Spinner } from "@heroui/react";
+import { Button, Spin, Typography, Pagination, Row, Col, Space } from "antd";
 import { Cpu, Lightbulb, Zap, TrendingUp } from "lucide-react";
 import TechnologyCard from "./components/TechnologyCard";
 import EmptyState from "./components/EmptyState";
@@ -11,6 +11,8 @@ import { getAllCategories } from "@/api/categories";
 import Filters from "./components/Filters";
 import SectionBanner from "@/components/ui/SectionBanner";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
+
+const { Title, Text } = Typography;
 
 export default function TechnologyListScreen() {
   const searchParams = useSearchParams();
@@ -104,6 +106,7 @@ export default function TechnologyListScreen() {
           trl_level: Number.isFinite(trlLevel as number)
             ? (trlLevel as number)
             : undefined,
+          status: "approved", // Only fetch approved technologies
         },
         { page, limit, sort: "-createdAt" }
       );
@@ -217,19 +220,21 @@ export default function TechnologyListScreen() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex items-center space-x-3">
-          <AnimatedIcon animation="pulse">
-            <Lightbulb className="h-8 w-8 text-blue-600" />
-          </AnimatedIcon>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Danh sách công nghệ
-            </h1>
-            <p className="text-default-600">
-              Tìm kiếm và duyệt các công nghệ công bố công khai
-            </p>
-          </div>
-        </div>
+        <Space direction="vertical" size="large" className="w-full mb-6">
+          <Space align="start" size="large">
+            <AnimatedIcon animation="pulse">
+              <Lightbulb className="h-8 w-8 text-blue-600" />
+            </AnimatedIcon>
+            <div>
+              <Title level={1} className="!mb-2">
+                Danh sách công nghệ
+              </Title>
+              <Text type="secondary" className="text-lg">
+                Tìm kiếm và duyệt các công nghệ công bố công khai
+              </Text>
+            </div>
+          </Space>
+        </Space>
 
         {/* Search + Filters */}
         <Filters
@@ -277,71 +282,51 @@ export default function TechnologyListScreen() {
         />
 
         {/* Content */}
-        {loading ? (
-          <div className="flex justify-center py-10">
-            <Spinner size="lg" color="primary" />
-          </div>
-        ) : items.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.map((tech) => (
-                <TechnologyCard
-                  key={tech.id}
-                  item={tech}
-                  viewMode="grid"
-                  trlChipColor={trlChipColor}
-                  statusChipColor={statusChipColor}
-                />
-              ))}
+        <Space direction="vertical" size="large" className="w-full">
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <Spin size="large" />
             </div>
+          ) : items.length > 0 ? (
+            <>
+              <Row gutter={[24, 24]}>
+                {items.map((tech) => (
+                  <Col key={tech.id} xs={24} sm={12} lg={8}>
+                    <TechnologyCard
+                      item={tech}
+                      viewMode="grid"
+                      trlChipColor={trlChipColor}
+                      statusChipColor={statusChipColor}
+                    />
+                  </Col>
+                ))}
+              </Row>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between mt-8">
-              <p className="text-sm text-default-600">
-                Tổng:{" "}
-                <span className="font-semibold text-foreground">
-                  {totalDocs}
-                </span>{" "}
-                kết quả
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="bordered"
-                  isDisabled={!canPrev}
-                  onPress={() => {
-                    if (!canPrev) return;
-                    const nextPage = Math.max(1, page - 1);
-                    setPage(nextPage);
-                    updateUrlParams({ page: nextPage });
+              {/* Pagination and Results Count */}
+              <div className="flex items-center justify-between mt-8">
+                <Text type="secondary">
+                  Tổng: <Text strong>{totalDocs}</Text> kết quả
+                </Text>
+                <Pagination
+                  current={page}
+                  total={totalDocs}
+                  pageSize={limit}
+                  showSizeChanger={false}
+                  showQuickJumper
+                  showTotal={(total, range) => 
+                    `${range[0]}-${range[1]} trên ${total} kết quả`
+                  }
+                  onChange={(newPage) => {
+                    setPage(newPage);
+                    updateUrlParams({ page: newPage });
                   }}
-                >
-                  Trang trước
-                </Button>
-                <span className="text-sm text-default-600">
-                  Trang{" "}
-                  <span className="font-semibold text-foreground">{page}</span>{" "}
-                  / {totalPages}
-                </span>
-                <Button
-                  size="sm"
-                  variant="bordered"
-                  isDisabled={!canNext}
-                  onPress={() => {
-                    if (!canNext) return;
-                    const nextPage = page + 1;
-                    setPage(nextPage);
-                    updateUrlParams({ page: nextPage });
-                  }}
-                >
-                  Trang sau
-                </Button>
+                />
               </div>
-            </div>
-          </>
-        ) : (
-          <EmptyState />
-        )}
+            </>
+          ) : (
+            <EmptyState />
+          )}
+        </Space>
       </div>
     </div>
   );

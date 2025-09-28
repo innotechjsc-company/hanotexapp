@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Button,
-  Typography,
-  Divider,
-  Input,
-  message,
-  Modal,
-} from "antd";
-import {
-  FileText,
-  Download,
-  CheckCircle,
-  Paperclip,
-} from "lucide-react";
+import { Card, Button, Typography, Divider, Input, message, Modal } from "antd";
+import { FileText, Download, CheckCircle, Paperclip } from "lucide-react";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import type { Contract } from "@/types/contract";
 import { ContractStatusEnum } from "@/types/contract";
@@ -173,7 +160,9 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
       const nextIds = existing
         .map((d: any) => (typeof d === "object" ? d.id : d))
         .filter((id: any) => String(id) !== String(removeId));
-      await contractsApi.update(activeContract.id, { documents: nextIds as any });
+      await contractsApi.update(activeContract.id, {
+        documents: nextIds as any,
+      });
       message.success("Đã xóa tài liệu khỏi hợp đồng");
       await refreshContract();
     } catch (e) {
@@ -557,18 +546,23 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                           <FileText size={20} className="text-gray-500" />
                           <div>
                             <Text strong>
-                              {activeContract.contract_file.filename || 'Hợp đồng hiện tại'}
+                              {activeContract.contract_file.filename ||
+                                "Hợp đồng hiện tại"}
                             </Text>
                             <br />
                             <Text type="secondary" className="text-xs">
                               {activeContract.contract_file.filesize
                                 ? `${((activeContract.contract_file.filesize || 0) / 1024 / 1024).toFixed(2)} MB`
-                                : ''}
+                                : ""}
                             </Text>
                           </div>
                         </div>
                         {activeContract.contract_file.url && (
-                          <Button icon={<Download size={14} />} type="text" onClick={handleDownload}>
+                          <Button
+                            icon={<Download size={14} />}
+                            type="text"
+                            onClick={handleDownload}
+                          >
                             Tải xuống
                           </Button>
                         )}
@@ -581,31 +575,39 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                     allowedTypes={["document"]}
                     title="Chọn tệp hợp đồng"
                     description="Kéo thả hoặc bấm để chọn (PDF, Word)"
-                    mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng" }}
+                    mediaFields={{
+                      type: MediaType.DOCUMENT,
+                      caption: "Tệp hợp đồng",
+                    }}
                     onUploadSuccess={handleContractUploadSuccess}
                     onUploadError={handleContractUploadError}
                   />
                 </div>
               )}
-
-              {/* Attachments Upload - Available when contract exists */}
-              <div className="mt-6">
-                <Title level={5} className="mb-3">
-                  <Paperclip size={20} className="inline mr-2" />
-                  Tài liệu kèm theo (tự động tải lên)
-                </Title>
-                <FileUpload
-                  multiple
-                  maxCount={10}
-                  allowedTypes={["document", "image"]}
-                  title="Thêm tài liệu"
-                  description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
-                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tài liệu kèm theo" }}
-                  onUploadSuccess={handleAttachmentUploadSuccess}
-                  onUploadError={(_f, err) => message.error(err || "Tải lên tài liệu thất bại")}
-                  onRemove={handleAttachmentRemove}
-                />
-              </div>
+              {proposal.status !== "completed" && (
+                <div className="mt-6">
+                  <Title level={5} className="mb-3">
+                    <Paperclip size={20} className="inline mr-2" />
+                    Tài liệu kèm theo (tự động tải lên)
+                  </Title>
+                  <FileUpload
+                    multiple
+                    maxCount={10}
+                    allowedTypes={["document", "image"]}
+                    title="Thêm tài liệu"
+                    description="Kéo thả hoặc bấm để chọn (PDF, Word, Excel, PowerPoint, hình ảnh)"
+                    mediaFields={{
+                      type: MediaType.DOCUMENT,
+                      caption: "Tài liệu kèm theo",
+                    }}
+                    onUploadSuccess={handleAttachmentUploadSuccess}
+                    onUploadError={(_f, err) =>
+                      message.error(err || "Tải lên tài liệu thất bại")
+                    }
+                    onRemove={handleAttachmentRemove}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -626,14 +628,19 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                   allowedTypes={["document"]}
                   title="Chọn tệp hợp đồng đã ký"
                   description="Kéo thả hoặc bấm để chọn (PDF, Word)"
-                  mediaFields={{ type: MediaType.DOCUMENT, caption: "Tệp hợp đồng đã ký" }}
+                  mediaFields={{
+                    type: MediaType.DOCUMENT,
+                    caption: "Tệp hợp đồng đã ký",
+                  }}
                   onUploadSuccess={handleContractUploadSuccess}
                   onUploadError={handleContractUploadError}
                 />
               </div>
 
               <div>
-                <Title level={5} className="mb-3">Ghi chú (tuỳ chọn)</Title>
+                <Title level={5} className="mb-3">
+                  Ghi chú (tuỳ chọn)
+                </Title>
                 <TextArea
                   rows={3}
                   placeholder="Ghi chú thêm về hợp đồng..."

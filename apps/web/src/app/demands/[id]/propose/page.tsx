@@ -99,26 +99,38 @@ function ProposeSolutionPage() {
 
     // Fetch technologies from API
     const fetchTechnologies = async () => {
+      if (!user?.id) {
+        console.log("User not authenticated, skipping technology fetch");
+        setLoadingTechnologies(false);
+        return;
+      }
+
       setLoadingTechnologies(true);
       try {
         const response = await getTechnologies(
-          { status: "active" }, // Only get active technologies
+          {
+            status: "approved", // Only get approved technologies
+            submitter: user.id, // Only get technologies submitted by current user
+          },
           { limit: 100 } // Get up to 100 technologies
         );
 
         if (response.docs) {
           setUserTechnologies(response.docs as any as Technology[]);
+        } else {
+          setUserTechnologies([]);
         }
       } catch (error) {
         console.error("Error fetching technologies:", error);
         setError("Không thể tải danh sách công nghệ. Vui lòng thử lại.");
+        setUserTechnologies([]);
       } finally {
         setLoadingTechnologies(false);
       }
     };
 
     fetchTechnologies();
-  }, [params.id]);
+  }, [params.id, user?.id]);
 
   // Helper function to convert form data to Propose format
   const convertFormDataToPropose = (
@@ -126,10 +138,11 @@ function ProposeSolutionPage() {
     uploadedDocument: Media | null
   ): Partial<Propose> => {
     // Determine receiver from demand owner
-    const receiverId =
-      (typeof demand?.user === "object"
+    const receiverId = (
+      typeof demand?.user === "object"
         ? (demand?.user as any)?.id || (demand?.user as any)?._id
-        : demand?.user) as string | undefined;
+        : demand?.user
+    ) as string | undefined;
 
     return {
       title: formData.title,
@@ -392,19 +405,17 @@ function ProposeSolutionPage() {
                   label="Tiêu đề đề xuất *"
                   placeholder="Nhập tiêu đề ngắn gọn cho đề xuất của bạn"
                   value={proposal.title}
-                  onChange={(e) => {
+                  onValueChange={(value) =>
                     setProposal((prev) => ({
                       ...prev,
-                      title: e.target.value,
-                    }));
-                    if (error) setError("");
-                  }}
-                  className="w-full"
+                      title: value,
+                    }))
+                  }
+                  variant="bordered"
+                  isRequired
                   classNames={{
-                    inputWrapper: "bg-white",
-                    input: "bg-white text-gray-900",
+                    label: "text-sm font-medium text-foreground",
                   }}
-                  description="Tiêu đề sẽ giúp dễ dàng nhận diện đề xuất của bạn"
                 />
 
                 {/* Technology Selection */}
@@ -437,9 +448,11 @@ function ProposeSolutionPage() {
                     label: "text-sm font-medium text-foreground",
                   }}
                   description={
-                    userTechnologies.length > 0
-                      ? `Có ${userTechnologies.length} công nghệ khả dụng`
-                      : "Đang tải danh sách công nghệ từ hệ thống"
+                    loadingTechnologies
+                      ? "Đang tải danh sách công nghệ của bạn..."
+                      : userTechnologies.length > 0
+                        ? `Có ${userTechnologies.length} công nghệ đã được duyệt của bạn`
+                        : "Bạn chưa có công nghệ nào được duyệt"
                   }
                   startContent={
                     loadingTechnologies ? (
@@ -455,13 +468,13 @@ function ProposeSolutionPage() {
                     <SelectItem key="no-tech" isDisabled>
                       {loadingTechnologies
                         ? "Đang tải..."
-                        : "Không có công nghệ nào"}
+                        : "Không có công nghệ đã duyệt nào"}
                     </SelectItem>
                   )}
                 </Select>
 
                 {/* Match Score */}
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Mức độ phù hợp (1-10) *
                   </label>
@@ -496,7 +509,7 @@ function ProposeSolutionPage() {
                     <span>Không phù hợp</span>
                     <span>Rất phù hợp</span>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Solution Description */}
                 <Textarea

@@ -21,11 +21,15 @@ import {
 } from "@heroui/react";
 import type { Technology } from "@/types/technologies";
 import { trlLevels } from "@/constants/technology";
+import type { Category } from "@/types/categories";
 
 interface BasicInfoSectionProps {
   initialData?: Partial<Technology>;
   onChange?: (data: ReturnType<BasicInfoSectionRef["getData"]>) => void;
   // keep optional props for compatibility, but not used here
+  categories?: Category[];
+  categoriesLoading?: boolean;
+  categoriesError?: string | null;
 }
 
 export interface BasicInfoSectionRef {
@@ -43,7 +47,13 @@ export interface BasicInfoSectionRef {
 export const BasicInfoSection = forwardRef<
   BasicInfoSectionRef,
   BasicInfoSectionProps
->(({ initialData, onChange }, ref) => {
+>(({
+  initialData,
+  onChange,
+  categories: categoriesProp,
+  categoriesLoading: categoriesLoadingProp,
+  categoriesError: categoriesErrorProp,
+}, ref) => {
   // Local state aligned to Technology type
   const [title, setTitle] = useState<string>(initialData?.title || "");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -61,12 +71,21 @@ export const BasicInfoSection = forwardRef<
     initialData?.confidential_detail || ""
   );
 
-  // Categories from API
+  // Categories from API (allow parent to provide data to avoid duplicate fetch)
+  const shouldUseCategoriesHook =
+    categoriesProp === undefined &&
+    categoriesLoadingProp === undefined &&
+    categoriesErrorProp === undefined;
+
   const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useCategories();
+    categories: hookCategories,
+    loading: hookCategoriesLoading,
+    error: hookCategoriesError,
+  } = useCategories({ enabled: shouldUseCategoriesHook });
+
+  const categories = categoriesProp ?? hookCategories;
+  const categoriesLoading = categoriesLoadingProp ?? hookCategoriesLoading;
+  const categoriesError = categoriesErrorProp ?? hookCategoriesError;
 
   // Initialize category selection from initialData when categories are loaded
   useEffect(() => {

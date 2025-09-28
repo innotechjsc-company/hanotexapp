@@ -23,6 +23,7 @@ import { uploadFile, deleteFile } from "@/api/media";
 import { Media, MediaType } from "@/types/media1";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Button } from "antd";
 
 export default function RegisterDemandPage() {
   const router = useRouter();
@@ -824,17 +825,19 @@ export default function RegisterDemandPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
+            {/* TODO: button dùng của antd */}
+            <div className="flex justify-end space-x-3 mt-4">
+              <Button
+                type="default"
                 onClick={() => router.back()}
                 className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Hủy
-              </button>
-              <button
-                type="submit"
+              </Button>
+              <Button
+                type="primary"
                 disabled={loading || uploadingFiles}
+                onClick={handleSubmit}
                 className="flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploadingFiles ? (
@@ -848,7 +851,7 @@ export default function RegisterDemandPage() {
                     Đang tạo nhu cầu...
                   </>
                 ) : (
-                  <>
+                  <div className="flex items-center">
                     <Save className="h-4 w-4 mr-2" />
                     Đăng nhu cầu
                     {selectedFiles.length > 0 && (
@@ -856,9 +859,9 @@ export default function RegisterDemandPage() {
                         +{selectedFiles.length} file
                       </span>
                     )}
-                  </>
+                  </div>
                 )}
-              </button>
+              </Button>
             </div>
           </fieldset>
         </form>

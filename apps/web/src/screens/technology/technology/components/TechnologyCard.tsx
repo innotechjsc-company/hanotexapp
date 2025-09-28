@@ -1,15 +1,30 @@
 "use client";
 
-import { Button, Card, Tag, Avatar } from "antd";
+import { Button, Card, Tag, Avatar, Typography, Space } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
+
+const { Text, Paragraph } = Typography;
 
 interface TechnologyCardProps {
   item: Technology;
   viewMode: ViewMode;
   trlChipColor: (level?: number) => "default" | "warning" | "success";
   statusChipColor: (status?: string) => "success" | "warning" | "default";
+}
+
+// Helper function to convert chip colors to Ant Design Tag colors
+function getAntdTagColor(color: "default" | "warning" | "success"): string {
+  switch (color) {
+    case "success":
+      return "green";
+    case "warning":
+      return "orange";
+    case "default":
+    default:
+      return "blue";
+  }
 }
 
 function getCategoryName(item: any): string | undefined {
@@ -81,13 +96,29 @@ function getThumb(item: any): string | undefined {
   return (cover || image || doc0) as string | undefined;
 }
 
+// Helper function to get Vietnamese status label
+function getVietnameseStatusLabel(status?: string): string {
+  if (!status) return "";
+
+  const statusLabels: Record<string, string> = {
+    draft: "Bản nháp",
+    pending: "Chờ phê duyệt",
+    approved: "Đã phê duyệt",
+    rejected: "Đã từ chối",
+    active: "Đang hoạt động",
+    inactive: "Không hoạt động",
+  };
+
+  const normalizedStatus = status.toLowerCase();
+  return statusLabels[normalizedStatus] || status;
+}
+
 export default function TechnologyCard({
   item,
   viewMode,
   trlChipColor,
   statusChipColor,
 }: TechnologyCardProps) {
-  const normalizedStatus = String(item?.status ?? "").toUpperCase();
   const categoryName = getCategoryName(item);
   const ownerName = getOwnerName(item);
   const ownerType = getOwnerType(item);
@@ -96,12 +127,7 @@ export default function TechnologyCard({
   const thumb = getThumb(item);
   const href = item?.id ? `/technologies/${item.id}` : "#";
 
-  const StatusLabel =
-    normalizedStatus === "ACTIVE"
-      ? "Sẵn sàng"
-      : normalizedStatus === "PENDING"
-        ? "Chờ duyệt"
-        : (item?.status ?? "");
+  const StatusLabel = getVietnameseStatusLabel(item?.status);
 
   const formattedPrice = price
     ? new Intl.NumberFormat("vi-VN").format(Number(price))
@@ -242,6 +268,58 @@ export default function TechnologyCard({
                 <Link href={href}>Xem chi tiết</Link>
               </Button>
             </div>
+          </div>
+
+          {/* Title */}
+          <Text strong style={{ fontSize: 16, lineHeight: "1.4" }}>
+            <Link href={href} className="hover:text-blue-600 transition-colors">
+              <Text style={{ margin: 0, fontWeight: 600 }}>
+                {item.title && item.title.length > 80
+                  ? `${item.title.substring(0, 80)}...`
+                  : item.title}
+              </Text>
+            </Link>
+          </Text>
+
+          {/* Description */}
+          {item.description && (
+            <Paragraph type="secondary" style={{ marginBottom: 8 }}>
+              {item.description.length > 120
+                ? `${item.description.substring(0, 120)}...`
+                : item.description}
+            </Paragraph>
+          )}
+
+          {/* Territory Information */}
+          {territoryInfo && (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+                Phạm vi áp dụng:
+              </Text>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {territoryInfo.length > 50
+                  ? `${territoryInfo.substring(0, 50)}...`
+                  : territoryInfo}
+              </Text>
+            </div>
+          )}
+
+          {/* Price and Action */}
+          <div className="flex items-center justify-between">
+            <div>
+              {formattedPrice ? (
+                <Text strong style={{ color: "#1890ff" }}>
+                  {formattedPrice} {currency}
+                </Text>
+              ) : (
+                <Text type="secondary">Thương lượng</Text>
+              )}
+            </div>
+            <Link href={href}>
+              <Button type="primary" size="small">
+                Xem chi tiết
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>
