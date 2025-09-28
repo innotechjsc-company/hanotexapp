@@ -573,7 +573,7 @@ export default function FundraisingProjectDetailPage() {
                     <Statistic
                       title="Doanh thu"
                       value={project.revenue}
-                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      // formatter={(value) => formatCurrencyAbbr(Number(value))}
                       prefix={<ArrowUpOutlined style={{ color: "#52c41a" }} />}
                     />
                   )}
@@ -581,7 +581,7 @@ export default function FundraisingProjectDetailPage() {
                     <Statistic
                       title="Lợi nhuận"
                       value={project.profit}
-                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      // formatter={(value) => formatCurrencyAbbr(Number(value))}
                       prefix={<ArrowUpOutlined style={{ color: "#52c41a" }} />}
                     />
                   )}
@@ -589,7 +589,7 @@ export default function FundraisingProjectDetailPage() {
                     <Statistic
                       title="Tài sản"
                       value={project.assets}
-                      formatter={(value) => formatCurrencyAbbr(Number(value))}
+                      // formatter={(value) => formatCurrencyAbbr(Number(value))}
                       prefix={<DollarCircleOutlined className="w-4 h-4" />}
                     />
                   )}

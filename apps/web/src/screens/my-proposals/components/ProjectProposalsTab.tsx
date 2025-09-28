@@ -265,7 +265,8 @@ export default function ProjectProposalsTab({ userId }: { userId: string }) {
         const canViewNegotiation =
           record.status === "negotiating" ||
           record.status === "contact_signing" ||
-          record.status === "contract_signed";
+          record.status === "contract_signed" ||
+          record.status === "completed";
 
         if (isReceivedView) {
           return (
