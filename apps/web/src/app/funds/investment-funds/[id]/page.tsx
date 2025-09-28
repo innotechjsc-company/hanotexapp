@@ -8,6 +8,7 @@ import { getInvestmentFundById } from "@/api/investment-fund";
 import { getProjectsByInvestmentFund } from "@/api/projects";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { Project, ProjectStatusEnum } from "@/types/project";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 function formatVND(value: number) {
   return new Intl.NumberFormat("vi-VN", {
@@ -129,11 +130,17 @@ export default function InvestmentFundDetailPage() {
         {/* Fund Header */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
           {/* Fund Image/Banner */}
-          <div className="h-64 bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
+          <div className="h-64 relative overflow-hidden bg-gray-200">
+            {fund.image && typeof fund.image === 'object' && fund.image.url ? (
+              <img src={getFullMediaUrl(fund.image.url)} alt={fund.name} className="object-cover w-full h-64" />
+            ) : (
+              <div className="h-64 bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
             <div className="text-center text-white">
               <Building2 className="w-16 h-16 mx-auto mb-4" />
               <h1 className="text-3xl font-bold">{fund.name}</h1>
             </div>
+          </div>
+          )}
           </div>
 
           {/* Fund Info */}

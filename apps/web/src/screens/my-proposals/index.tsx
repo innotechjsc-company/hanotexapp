@@ -51,7 +51,7 @@ export default function MyProposalsScreen() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card>
+      <Card>
           <CardBody>
             <Tabs
               aria-label="Proposals tabs"
@@ -61,9 +61,9 @@ export default function MyProposalsScreen() {
               variant="underlined"
               classNames={{
                 tabList:
-                  "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+                  "w-full relative rounded-none p-0 border-b border-divider",
                 cursor: "w-full bg-primary",
-                tab: "max-w-fit px-0 h-12",
+                tab: "max-w-fit px-0 h-12 rounded-md group-data-[selected=true]:bg-primary/10 group-data-[selected=true]:text-primary",
                 tabContent:
                   "group-data-[selected=true]:text-primary font-medium",
               }}
@@ -71,9 +71,9 @@ export default function MyProposalsScreen() {
               <Tab
                 key="technology"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">
+                  <div className="flex items-center space-x-2" style={{ backgroundColor: activeTab === "technology" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }}>
+                    <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: activeTab === "technology" ? "#ffffff" : "#000000" }} />
+                    <span className="text-sm sm:text-base" style={{ color: activeTab === "technology" ? "#ffffff" : "#000000" }}>
                       Đề xuất chuyển giao công nghệ
                     </span>
                   </div>
@@ -87,9 +87,9 @@ export default function MyProposalsScreen() {
               <Tab
                 key="demand"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Target className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">
+                  <div className="flex items-center space-x-2" style={{ backgroundColor: activeTab === "demand" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }}>
+                    <Target className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: activeTab === "demand" ? "#ffffff" : "#000000" }} />
+                    <span className="text-sm sm:text-base" style={{ color: activeTab === "demand" ? "#ffffff" : "#000000" }}>
                       Đề xuất nhu cầu
                     </span>
                   </div>
@@ -103,9 +103,11 @@ export default function MyProposalsScreen() {
               <Tab
                 key="project"
                 title={
-                  <div className="flex items-center space-x-2">
-                    <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">Đề xuất dự án</span>
+                  <div className="flex items-center space-x-2" style={{ backgroundColor: activeTab === "project" ? "#3b82f6" : "transparent", borderRadius: "8px", padding: "4px 8px" }}  >
+                    <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: activeTab === "project" ? "#ffffff" : "#000000" }} />
+                    <span className="text-sm sm:text-base" style={{ color: activeTab === "project" ? "#ffffff" : "#000000" }}>
+                      Đề xuất dự án
+                    </span>
                   </div>
                 }
               >

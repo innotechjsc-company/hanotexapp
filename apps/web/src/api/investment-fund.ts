@@ -3,6 +3,7 @@
  * Các function để quản lý investment-fund với PayloadCMS
  */
 
+import { User } from "@/types/users";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 import type { InvestmentFund } from "@/types/investment_fund";
@@ -37,6 +38,27 @@ export async function getInvestmentFunds(
     params
   );
 }
+
+// get my investment funds
+export async function getMyInvestmentFunds(
+  user: User,
+  filters: InvestmentFundFilters = {},
+  pagination: PaginationParams = {}
+): Promise<ApiResponse<InvestmentFund[]>> {
+  const params = {
+    ...filters,
+    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
+    page: pagination.page || PAGINATION_DEFAULTS.page,
+    sort: pagination.sort || "-createdAt",
+    "where[user][equals]": user.id,
+  };
+
+  return payloadApiClient.get<InvestmentFund[]>(
+    API_ENDPOINTS.INVESTMENT_FUND,
+    params
+  );
+}
+
 
 /**
  * Get investment fund by ID
