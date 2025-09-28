@@ -68,6 +68,7 @@ import type { ServiceTicket } from "@/types/service-ticket";
 import { FileUpload, type FileUploadItem } from "@/components/input";
 import downloadService from "@/services/downloadService";
 import { getFullMediaUrl } from "@/utils/mediaUrl";
+import { de } from "date-fns/locale";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -672,7 +673,7 @@ function AddProjectModal({
                   onChange={setImageFiles}
                   multiple={false}
                   maxCount={1}
-                  allowedTypes={['image']}
+                  allowedTypes={["image"]}
                   maxSize={5 * 1024 * 1024} // 5MB
                   variant="button"
                   buttonText="Chọn ảnh đại diện"
@@ -773,20 +774,22 @@ function EditProjectModal({
       }
 
       // Load existing image if available
-      if (project.image && typeof project.image === 'object') {
+      if (project.image && typeof project.image === "object") {
         const imageData = project.image as any;
-        setImageFiles([{
-          id: imageData.id,
-          filename: imageData.filename || imageData.alt || 'Current image',
-          alt: imageData.alt || 'Current image',
-          filesize: imageData.filesize,
-          mimeType: imageData.mimeType,
-          type: 'image' as any,
-          url: imageData.url,
-          uploadStatus: 'done' as const,
-          createdAt: imageData.createdAt,
-          updatedAt: imageData.updatedAt,
-        }]);
+        setImageFiles([
+          {
+            id: imageData.id,
+            filename: imageData.filename || imageData.alt || "Current image",
+            alt: imageData.alt || "Current image",
+            filesize: imageData.filesize,
+            mimeType: imageData.mimeType,
+            type: "image" as any,
+            url: imageData.url,
+            uploadStatus: "done" as const,
+            createdAt: imageData.createdAt,
+            updatedAt: imageData.updatedAt,
+          },
+        ]);
       } else {
         setImageFiles([]);
       }
@@ -1075,7 +1078,7 @@ function EditProjectModal({
                   onChange={setImageFiles}
                   multiple={false}
                   maxCount={1}
-                  allowedTypes={['image']}
+                  allowedTypes={["image"]}
                   maxSize={5 * 1024 * 1024} // 5MB
                   variant="button"
                   buttonText="Chọn ảnh đại diện"
@@ -1180,12 +1183,12 @@ function ViewProjectModal({
           <Descriptions.Item label="Tên dự án" span={2}>
             <Text strong>{project?.name}</Text>
           </Descriptions.Item>
-          {project?.image && typeof project.image === 'object' && (
+          {project?.image && typeof project.image === "object" && (
             <Descriptions.Item label="Ảnh đại diện" span={2}>
               <div className="flex justify-center">
                 <img
-                  src={(project.image as any).url}
-                  alt={project.name || 'Project'}
+                  src={getFullMediaUrl((project.image as any).url)}
+                  alt={project.name || "Project"}
                   className="max-w-full h-48 object-cover rounded-lg border"
                 />
               </div>
@@ -1890,26 +1893,33 @@ export default function MyProjectsPage() {
 
     setActionLoading(true);
     try {
-       // create service tickest
-       let serviceTickets: any[] = [];
-       if (
+      // create service tickest
+      let serviceTickets: any[] = [];
+      if (
         values.service_tickets &&
         Array.isArray(values.service_tickets) &&
         values.service_tickets.length > 0
       ) {
-       const selectedServices = values?.service_tickets?.filter((service: any) => service.service);
-       if (selectedServices.length > 0) {
-        const userAdmin = await getUserByRoleAdmin();
-        const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
-        const userAdminId = userAdminList[0]?.id;
-        // create service tickets by API
-        serviceTickets = selectedServices.map((service: any) => ({
-        service_id: service.service,
-        description: service.description,
-        responsible_user_id: user?.id,
-        implementer_ids: [userAdminId],
-      }));
-      }}
+        const selectedServices = values?.service_tickets?.filter(
+          (service: any) => service.service
+        );
+        if (selectedServices.length > 0) {
+          const userAdmin = await getUserByRoleAdmin();
+          const userAdminList =
+            (userAdmin as any)?.docs ||
+            (userAdmin as any)?.data ||
+            (Array.isArray(userAdmin) ? userAdmin : []) ||
+            [];
+          const userAdminId = userAdminList[0]?.id;
+          // create service tickets by API
+          serviceTickets = selectedServices.map((service: any) => ({
+            service_id: service.service,
+            description: service.description,
+            responsible_user_id: user?.id,
+            implementer_ids: [userAdminId],
+          }));
+        }
+      }
       const obj = {
         ...values,
         end_date: values.end_date
@@ -1923,14 +1933,18 @@ export default function MyProjectsPage() {
       delete obj.service_tickets;
       const result = await createProjectWithServices(obj);
 
-     // Show success toast with details and navigate to technologies page
-     let successMessage = "Tạo dự án thành công!";
+      // Show success toast with details and navigate to technologies page
+      let successMessage = "Tạo dự án thành công!";
 
-     if (serviceTickets.length > 0 && result?.service_tickets && result?.service_tickets.length > 0) {
-       successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ trong dịch vụ của tôi.`;
-     }
+      if (
+        serviceTickets.length > 0 &&
+        result?.service_tickets &&
+        result?.service_tickets.length > 0
+      ) {
+        successMessage += ` Đã tạo ${result.service_tickets.length} phiếu dịch vụ trong dịch vụ của tôi.`;
+      }
 
-     toast.success(successMessage);
+      toast.success(successMessage);
 
       setAddModalOpen(false);
       await fetchList();
@@ -2023,9 +2037,9 @@ export default function MyProjectsPage() {
       width: 80,
       render: (image: any, record: Project) => {
         const getImageUrl = () => {
-          if(image && typeof image === 'object' && image.url) {
+          if (image && typeof image === "object" && image.url) {
             const img = getFullMediaUrl(image.url);
-          return img;
+            return img;
           }
           return undefined;
         };
