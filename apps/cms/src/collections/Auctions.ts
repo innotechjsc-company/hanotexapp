@@ -135,7 +135,7 @@ export const Auctions: CollectionConfig = {
         },
         {
           name: 'file',
-          type: 'upload',
+          type: 'relationship',
           relationTo: 'media',
           required: true,
           label: 'File tài liệu',
