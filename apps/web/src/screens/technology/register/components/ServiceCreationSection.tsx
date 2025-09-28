@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * ServiceCreationSection Component
+ * 
+ * This component uses CMS APIs exclusively via /src/api/services
+ * No calls to /app/api routes are made from this component.
+ */
+
 import React, { forwardRef, useImperativeHandle, useState, useCallback, useEffect } from "react";
 import { Card, CardBody, CardHeader, Button, Chip } from "@heroui/react";
 import { Form, Input, Select, message } from "antd";
@@ -34,10 +41,11 @@ const ServiceCreationSection = forwardRef<ServiceCreationSectionRef, ServiceCrea
     const [availableServices, setAvailableServices] = useState<Service[]>([]);
     const [form] = Form.useForm();
 
-    // Fetch available services
-    const fetchServices = useCallback(async () => {
-      try {
-        const res = await getServices({ search: "" }, { limit: 100, page: 1, sort: "-createdAt" });
+  // Fetch available services (from CMS)
+  const fetchServices = useCallback(async () => {
+    try {
+      console.log('✅ ServiceCreationSection: Fetching services from CMS API');
+      const res = await getServices({ search: "" }, { limit: 100, page: 1, sort: "-createdAt" });
         const list = (res as any)?.docs || (res as any)?.data || (Array.isArray(res) ? res : []) || [];
         setAvailableServices(list as Service[]);
       } catch (err) {

@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * Technology Register Screen
+ * 
+ * This component exclusively uses CMS APIs from /src/api/* modules.
+ * All API calls go directly to PayloadCMS, not to /app/api routes.
+ * 
+ * CMS API endpoints used:
+ * - MediaApi: Direct upload to CMS /api/media
+ * - getAllCategories: CMS /api/categories (trực tiếp)
+ * - createTechnologyWithServices: CMS /technologies/create
+ * - getUserByRoleAdmin: CMS /api/users
+ * - getServices: CMS /api/services (via ServiceCreationSection)
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
@@ -35,8 +49,19 @@ import { createServiceTicket } from "@/api/service-ticket";
 import { useAuth } from "@/store/auth";
 import { getUserByRoleAdmin } from "@/api/user";
 import type { Category } from "@/types/categories";
+import { getPayloadApiBaseUrl } from "@/lib/api-config";
 
 export default function RegisterTechnologyPage({ props }: { props?: any }) {
+  // Validate that we're using CMS API endpoints
+  React.useEffect(() => {
+    const cmsBaseUrl = getPayloadApiBaseUrl();
+    console.log('✅ Technology Register: Using CMS API Base URL:', cmsBaseUrl);
+    
+    // Ensure we're not accidentally using /app/api routes
+    if (cmsBaseUrl.includes('/app/api')) {
+      console.error('❌ WARNING: CMS API URL contains /app/api - this may cause issues!');
+    }
+  }, []);
   const router = useRouter();
   const [confirmUpload, setConfirmUpload] = useState(false);
   const ownersRef = useRef<TechnologyOwnersSectionRef>(null);
@@ -83,10 +108,11 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         setCategoriesLoading(true);
         setCategoriesError(null);
 
+        // Fetch categories directly from CMS /api/categories
         const response = await getAllCategories({ limit: 100 });
-        const normalized = ((response as any)?.docs ??
-          (response as any)?.data ??
-          []) as Category[];
+const normalized = ((response as any)?.docs ??
+  (response as any)?.data ??
+  []) as Category[];
 
         if (isMounted) {
           setCategories(Array.isArray(normalized) ? normalized : []);
@@ -126,13 +152,13 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         const pricingDesired = pricingRef.current?.getData();
         const visibility = visibilityRef.current?.getData();
 
-        // 2. Upload files using MediaApi
-        const mediaApi = new MediaApi();
-        const techMedia = basic?.documents?.length
-          ? await mediaApi.uploadMulti(basic!.documents, {
-              type: MediaType.DOCUMENT,
-            })
-          : [];
+// 2. Upload files using MediaApi (directly to CMS)
+const mediaApi = new MediaApi();
+const techMedia = basic?.documents?.length
+  ? await mediaApi.uploadMulti(basic!.documents, {
+      type: MediaType.DOCUMENT,
+    })
+  : [];
         const legalMedia = legalDetails?.files?.length
           ? await mediaApi.uploadMulti(legalDetails!.files, {
               type: MediaType.DOCUMENT,
@@ -204,13 +230,14 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         // create service tickets
         let serviceTickets: any[] = [];
         if (services.length > 0) {
-          const userAdmin = await getUserByRoleAdmin();
-          const userAdminList =
-            (userAdmin as any)?.docs ||
-            (userAdmin as any)?.data ||
-            (Array.isArray(userAdmin) ? userAdmin : []) ||
-            [];
-          const userAdminId = userAdminList[0]?.id;
+// Get admin user directly from CMS
+const userAdmin = await getUserByRoleAdmin();
+const userAdminList =
+  (userAdmin as any)?.docs ||
+  (userAdmin as any)?.data ||
+  (Array.isArray(userAdmin) ? userAdmin : []) ||
+  [];
+const userAdminId = userAdminList[0]?.id;
           // create service tickets by API
           serviceTickets = services.map((service) => ({
             service_id: service.service,
@@ -253,7 +280,8 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           services: serviceTickets, // add service tickets to payload to create service tickets
         };
 
-        const result = await createTechnologyWithServices(payload);
+// Call the CMS API endpoint directly
+const result = await createTechnologyWithServices(payload);
         console.log("Created technology:", result);
 
         // Log additional information about created records
