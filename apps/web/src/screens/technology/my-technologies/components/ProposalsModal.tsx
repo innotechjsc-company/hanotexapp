@@ -217,7 +217,7 @@ export function ProposalsModal({
       render: (budget: number) => (
         <Space>
           <DollarSign size={16} className="text-gray-400" />
-          <Text strong>{formatCurrency(budget || 0, "vnd")}</Text>
+          <Text strong>{formatCurrency(budget || 0, "VND")}</Text>
         </Space>
       ),
     },

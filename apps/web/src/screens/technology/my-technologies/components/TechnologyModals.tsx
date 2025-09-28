@@ -9,10 +9,10 @@ import type {
   Technology,
   TechnologyStatus,
   PricingType,
-  Currency,
   TechnologyOwner,
   OwnerType,
 } from "@/types/technologies";
+import type { Currency } from "@/types/common";
 import type { Category } from "@/types/categories";
 import { trlLevels } from "@/constants/technology";
 import {
@@ -498,18 +498,18 @@ export function ViewTechnologyModal({
     }
   };
 
-  const formatCurrency = (amount: number, currency: Currency = "vnd") => {
-    if (currency === "vnd") {
+  const formatCurrency = (amount: number, currency: Currency = "VND") => {
+    if (currency === "VND") {
       return new Intl.NumberFormat("vi-VN", {
         style: "currency",
         currency: "VND",
       }).format(amount);
-    } else if (currency === "usd") {
+    } else if (currency === "USD") {
       return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
       }).format(amount);
-    } else if (currency === "eur") {
+    } else if (currency === "EUR") {
       return new Intl.NumberFormat("en-EU", {
         style: "currency",
         currency: "EUR",
@@ -601,12 +601,12 @@ export function ViewTechnologyModal({
               {getPricingTypeLabel(current.pricing.pricing_type)}:{" "}
               {formatCurrency(
                 current.pricing.price_from,
-                current.pricing.currency
+                "VND"
               )}{" "}
               -{" "}
               {formatCurrency(
                 current.pricing.price_to,
-                current.pricing.currency
+                "VND"
               )}
             </div>
           </div>

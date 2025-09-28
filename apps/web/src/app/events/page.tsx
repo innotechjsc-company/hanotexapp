@@ -151,7 +151,7 @@ export default function EventsPage() {
   };
 
   // Helper function to generate Google Maps URL from address
-  const getGoogleMapsUrl = (address: string): string => {
+  const getGoogleMapsUrl = (address: string | null | undefined): string => {
     if (!address || address.trim() === "") {
       return "";
     }
@@ -162,7 +162,7 @@ export default function EventsPage() {
   };
 
   // Helper function to check if address has Google Maps URL
-  const hasValidAddress = (address: string): boolean => {
+  const hasValidAddress = (address: string | null | undefined): boolean => {
     return !!(address && address.trim() !== "");
   };
 
@@ -339,7 +339,7 @@ export default function EventsPage() {
                             size="sm"
                             endContent={<ExternalLink className="h-3 w-3" />}
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
-                            onPress={() => window.open(event.url, "_blank")}
+                            onPress={() => event.url && window.open(event.url, "_blank")}
                           >
                             Xem chi tiết
                           </Button>

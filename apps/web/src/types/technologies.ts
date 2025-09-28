@@ -31,7 +31,7 @@ export type PricingType =
   | "vc_joint_venture"
   | "growth_strategic"; // Kiểu định giá theo TRL
 
-export type Currency = "vnd" | "usd" | "eur"; // Tiền tệ định giá
+// Removed duplicate Currency type - using common Currency from ./common
 
 // Chi tiết chủ sở hữu
 export interface TechnologyOwner {

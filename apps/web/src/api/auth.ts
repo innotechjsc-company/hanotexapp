@@ -3,7 +3,7 @@
  * Các function để xử lý authentication với PayloadCMS
  */
 
-import { payloadApiClient, ApiResponse } from "./client";
+import { payloadApiClient } from "./client";
 import { API_ENDPOINTS } from "./config";
 import { localStorageService } from "../services/localstorage";
 
@@ -68,7 +68,7 @@ export async function login(
   );
 
   // The response is the direct data, not wrapped in response.data
-  const authData = response as any as AuthResponse;
+  const authData = response as unknown as AuthResponse;
 
   // Add defensive checks
   if (!authData) {
@@ -120,7 +120,7 @@ export async function register(userData: RegisterData): Promise<AuthResponse> {
     userData
   );
 
-  return response as any as AuthResponse;
+  return response as unknown as AuthResponse;
 }
 
 /**
@@ -152,7 +152,7 @@ export async function logout(): Promise<void> {
  */
 export async function getCurrentUser(): Promise<AuthResponse> {
   const response = await payloadApiClient.get<User>(API_ENDPOINTS.AUTH.ME);
-  return response as any as AuthResponse;
+  return response as unknown as AuthResponse;
 }
 
 /**
@@ -164,7 +164,7 @@ export async function refreshToken(): Promise<AuthResponse> {
   );
 
   // The response is the direct data, not wrapped in response.data
-  const authData = response as any as AuthResponse;
+  const authData = response as unknown as AuthResponse;
 
   if (authData?.token) {
     payloadApiClient.setToken(authData.token);
@@ -206,7 +206,7 @@ export async function forgotPassword(
     data
   );
 
-  return response as any as { message: string };
+  return response as unknown as { message: string };
 }
 
 /**
@@ -220,7 +220,7 @@ export async function resetPassword(
     data
   );
 
-  return response as any as { message: string };
+  return response as unknown as { message: string };
 }
 
 /**

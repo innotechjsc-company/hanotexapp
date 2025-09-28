@@ -44,7 +44,7 @@ interface NewsArticle {
 }
 
 // Helper function to get proper image URL
-export function getImageUrl(imageData: any): string {
+function getImageUrl(imageData: any): string {
   const fallbackUrl =
     "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop&crop=center";
 

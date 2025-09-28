@@ -6,7 +6,6 @@
 import { Category } from "@/types/categories";
 import { payloadApiClient, ApiResponse } from "./client";
 import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
-import { getStoredToken } from "./auth";
 
 export interface CategoryFilters {
   parent_id?: string;
@@ -28,7 +27,7 @@ export async function getCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
   // Sử dụng payloadApiClient để gọi trực tiếp /api/categories
-  const params: Record<string, any> = {
+  const params: Record<string, unknown> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
@@ -55,12 +54,16 @@ export async function getCategoryById(id: string): Promise<Category> {
   const res = await payloadApiClient.get<Category>(
     `${API_ENDPOINTS.CATEGORIES}/${id}`
   );
-  const anyRes = res as any;
+  const typedRes = res as unknown as {
+    data?: Category;
+    doc?: Category;
+    docs?: Category[];
+  };
   const item =
-    anyRes?.data ??
-    anyRes?.doc ??
-    (Array.isArray(anyRes?.docs) ? anyRes.docs[0] : undefined) ??
-    anyRes;
+    typedRes?.data ??
+    typedRes?.doc ??
+    (Array.isArray(typedRes?.docs) ? typedRes.docs[0] : undefined) ??
+    (res as Category);
   return item as Category;
 }
 
@@ -105,7 +108,7 @@ export async function getAllCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
   // Sử dụng payloadApiClient để gọi trực tiếp /api/categories
-  const params: Record<string, any> = {
+  const params: Record<string, unknown> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",

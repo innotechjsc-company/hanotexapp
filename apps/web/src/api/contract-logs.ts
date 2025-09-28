@@ -29,7 +29,7 @@ export interface ConfirmLogRequest {
 export interface ConfirmLogResponse {
   success: boolean;
   contract_log?: ContractLog;
-  technology_propose?: any;
+  technology_propose?: Record<string, unknown>;
   error?: string;
 }
 
@@ -38,7 +38,7 @@ class ContractLogsApi {
     filters: ContractLogFilters = {},
     pagination: PaginationParams = {}
   ): Promise<ApiResponse<ContractLog[]>> {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       limit: pagination.limit || PAGINATION_DEFAULTS.limit,
       page: pagination.page || PAGINATION_DEFAULTS.page,
       sort: pagination.sort || "createdAt",
@@ -64,7 +64,7 @@ class ContractLogsApi {
       API_ENDPOINTS.CONTRACT_LOGS,
       data
     );
-    return (res as any).doc || (res as any).data || (res as any);
+    return (res as ContractLog) || (res as { doc: ContractLog }).doc || (res as { data: ContractLog }).data;
   }
 
   async update(id: string, data: Partial<ContractLog>): Promise<ContractLog> {
@@ -72,7 +72,7 @@ class ContractLogsApi {
       `${API_ENDPOINTS.CONTRACT_LOGS}/${id}`,
       data
     );
-    return (res as any).doc || (res as any).data || (res as any);
+    return (res as ContractLog) || (res as { doc: ContractLog }).doc || (res as { data: ContractLog }).data;
   }
 
   async confirmLog(data: ConfirmLogRequest): Promise<ConfirmLogResponse> {
@@ -80,7 +80,7 @@ class ContractLogsApi {
       `/contract/confirm-logs`,
       data
     );
-    return res as any as ConfirmLogResponse;
+    return res as unknown as ConfirmLogResponse;
   }
 }
 

@@ -114,11 +114,11 @@ export default function EventDetailPage({
 
     // Determine status based on dates
     const now = new Date();
-    let displayStatus: "upcoming" | "ongoing" | "completed";
+    let displayStatus: "pending" | "in_progress" | "completed" | "cancelled";
     if (now < startDate) {
-      displayStatus = "upcoming";
+      displayStatus = "pending";
     } else if (now >= startDate && now <= endDate) {
-      displayStatus = "ongoing";
+      displayStatus = "in_progress";
     } else {
       displayStatus = "completed";
     }
@@ -426,7 +426,7 @@ export default function EventDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Countdown Timer */}
-            {event.status === "upcoming" && event.date && event.time && (
+            {event.status === "pending" && event.date && event.time && (
               <CountdownTimer
                 targetDate={`${event.date}T${event.time.split(" - ")[0]}:00`}
                 className="mb-6"
@@ -633,7 +633,7 @@ export default function EventDetailPage({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Registration Card */}
-            {event.registration_required && event.status === "upcoming" && (
+            {event.registration_required && event.status === "pending" && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
                   Đăng ký tham gia

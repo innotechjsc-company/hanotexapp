@@ -9,7 +9,7 @@ import { API_ENDPOINTS, PAGINATION_DEFAULTS } from "./config";
 
 export interface AuctionFilters {
   status?: Auction["status"];
-  auction_type?: Auction["auction_type"];
+  category?: Auction["category"];
   technology_id?: string;
   seller_id?: string;
   search?: string;
@@ -46,7 +46,7 @@ export async function getAuctionById(id: string): Promise<Auction> {
     `${API_ENDPOINTS.AUCTIONS}/${id}`
   );
   // PayloadCMS returns direct object for single document, not wrapped in data property
-  return (response as any) || response.data!;
+  return (response as Auction) || response.data!;
 }
 
 /**
@@ -57,7 +57,7 @@ export async function createAuction(data: Partial<Auction>): Promise<Auction> {
     API_ENDPOINTS.AUCTIONS,
     data
   );
-  return (response as any) || response.data!;
+  return (response as Auction) || response.data!;
 }
 
 /**
@@ -71,7 +71,7 @@ export async function updateAuction(
     `${API_ENDPOINTS.AUCTIONS}/${id}`,
     data
   );
-  return (response as any) || response.data!;
+  return (response as Auction) || response.data!;
 }
 
 /**
@@ -87,7 +87,7 @@ export async function deleteAuction(id: string): Promise<void> {
 export async function getActiveAuctions(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Auction[]>> {
-  return getAuctions({ status: "ACTIVE" }, pagination);
+  return getAuctions({ status: "active" }, pagination);
 }
 
 /**
@@ -133,7 +133,7 @@ export async function getEndingSoonAuctions(
 
   return getAuctions(
     {
-      status: "ACTIVE",
+      status: "active",
       // Note: You might need to implement date filtering in PayloadCMS
     },
     { ...pagination, sort: "end_time" }

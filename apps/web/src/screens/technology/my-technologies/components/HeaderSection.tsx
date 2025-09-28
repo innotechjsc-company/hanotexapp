@@ -3,6 +3,7 @@
 import { Button } from "antd";
 import { Zap, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface HeaderSectionProps {
   selectedCount: number;
@@ -19,7 +20,6 @@ export function HeaderSection({
 
   const handleAddTechnology = () => {
     if (!user) {
-      const toast = require("react-hot-toast").default;
       toast.error("Vui lòng đăng nhập để tiếp tục");
       router.push("/auth/login");
       return;

@@ -42,17 +42,31 @@ export async function getBids(
   const response = await payloadApiClient.get<Bid>(API_ENDPOINTS.BIDS, params);
   
   // Handle response format that has success, data, pagination structure
-  if ((response as any).success && (response as any).data) {
+  const typedResponse = response as unknown as {
+    success: boolean;
+    data: Bid[];
+    pagination: {
+      total: number;
+      limit: number;
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+      nextPage: number;
+      prevPage: number;
+    };
+  };
+  if (typedResponse.success && typedResponse.data) {
     return {
-      docs: (response as any).data,
-      totalDocs: (response as any).pagination?.total,
-      limit: (response as any).pagination?.limit,
-      page: (response as any).pagination?.page,
-      totalPages: (response as any).pagination?.totalPages,
-      hasNextPage: (response as any).pagination?.hasNextPage,
-      hasPrevPage: (response as any).pagination?.hasPrevPage,
-      nextPage: (response as any).pagination?.nextPage,
-      prevPage: (response as any).pagination?.prevPage,
+      docs: typedResponse.data,
+      totalDocs: typedResponse.pagination?.total,
+      limit: typedResponse.pagination?.limit,
+      page: typedResponse.pagination?.page,
+      totalPages: typedResponse.pagination?.totalPages,
+      hasNextPage: typedResponse.pagination?.hasNextPage,
+      hasPrevPage: typedResponse.pagination?.hasPrevPage,
+      nextPage: typedResponse.pagination?.nextPage,
+      prevPage: typedResponse.pagination?.prevPage,
     };
   }
   
@@ -66,7 +80,7 @@ export async function getBidById(id: string): Promise<Bid> {
   const response = await payloadApiClient.get<Bid>(
     `${API_ENDPOINTS.BIDS}/${id}`
   );
-  return (response as any) || response.data!;
+  return (response as Bid) || response.data!;
 }
 
 /**
@@ -77,7 +91,7 @@ export async function createBid(data: CreateBidData): Promise<Bid> {
     API_ENDPOINTS.BIDS,
     data
   );
-  return (response as any) || response.data!;
+  return (response as Bid) || response.data!;
 }
 
 /**
@@ -89,17 +103,31 @@ export async function getBidsByAuction(
 ): Promise<ApiResponse<Bid>> {
   const response = await getBids({ auction_id: auctionId }, pagination);
   // Handle response format that has success, data, pagination structure
-  if ((response as any).success && (response as any).data) {
+  const typedBidResponse = response as unknown as {
+    success: boolean;
+    data: Bid[];
+    pagination: {
+      total: number;
+      limit: number;
+      page: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+      nextPage: number;
+      prevPage: number;
+    };
+  };
+  if (typedBidResponse.success && typedBidResponse.data) {
     return {
-      docs: (response as any).data,
-      totalDocs: (response as any).pagination?.total,
-      limit: (response as any).pagination?.limit,
-      page: (response as any).pagination?.page,
-      totalPages: (response as any).pagination?.totalPages,
-      hasNextPage: (response as any).pagination?.hasNextPage,
-      hasPrevPage: (response as any).pagination?.hasPrevPage,
-      nextPage: (response as any).pagination?.nextPage,
-      prevPage: (response as any).pagination?.prevPage,
+      docs: typedBidResponse.data,
+      totalDocs: typedBidResponse.pagination?.total,
+      limit: typedBidResponse.pagination?.limit,
+      page: typedBidResponse.pagination?.page,
+      totalPages: typedBidResponse.pagination?.totalPages,
+      hasNextPage: typedBidResponse.pagination?.hasNextPage,
+      hasPrevPage: typedBidResponse.pagination?.hasPrevPage,
+      nextPage: typedBidResponse.pagination?.nextPage,
+      prevPage: typedBidResponse.pagination?.prevPage,
     };
   }
   return response;

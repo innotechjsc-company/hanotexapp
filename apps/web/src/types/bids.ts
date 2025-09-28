@@ -1,8 +1,5 @@
 import { Auction } from "./auctions";
-import { ID, DateTimeString } from "./common";
-
-// Loại tiền tệ
-export type Currency = "VND" | "USD" | "EUR";
+import { ID, DateTimeString, Currency } from "./common";
 
 // Loại đấu giá
 export type BidType = "MANUAL" | "AUTOMATIC";
