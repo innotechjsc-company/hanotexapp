@@ -40,7 +40,7 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'document',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       label: 'Tài liệu',
     },

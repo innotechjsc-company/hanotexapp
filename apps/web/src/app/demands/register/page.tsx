@@ -71,6 +71,10 @@ export default function RegisterDemandPage() {
     end_date: null,
   });
 
+  // State for main image
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<Media | null>(null);
+
   // Redirect if not authenticated
   if (!isAuthenticated) {
     router.push("/auth/login");
@@ -98,7 +102,29 @@ export default function RegisterDemandPage() {
         return;
       }
 
-      // Step 1: Upload selected files first
+      // Step 1: Upload main image first
+      let mainImageMedia: Media | null = null;
+      if (selectedImage) {
+        console.log("Uploading main image before creating demand...");
+        setUploadingFiles(true);
+
+        try {
+          mainImageMedia = await uploadFile(selectedImage, {
+            alt: selectedImage.name,
+            type: MediaType.IMAGE,
+            caption: `Ảnh đại diện: ${selectedImage.name}`,
+          });
+          console.log("Main image uploaded successfully:", mainImageMedia.id);
+        } catch (err: any) {
+          console.error("Error uploading main image:", err);
+          setError(`Lỗi tải ảnh chính: ${err.message || "Vui lòng thử lại"}`);
+          return;
+        } finally {
+          setUploadingFiles(false);
+        }
+      }
+
+      // Step 2: Upload selected files
       let uploadedMediaData: Media[] = [];
 
       if (selectedFiles.length > 0) {
@@ -143,7 +169,7 @@ export default function RegisterDemandPage() {
         }
       }
 
-      // Step 2: Prepare demand data with uploaded media IDs
+      // Step 3: Prepare demand data with uploaded media IDs
       const documentIds = uploadedMediaData.map((media) => media.id);
 
       const demandData: Partial<Demand> = {
@@ -159,6 +185,7 @@ export default function RegisterDemandPage() {
         to_price: formData.to_price || 0,
         cooperation: formData.cooperation || "",
         documents: documentIds as any, // Send uploaded media IDs
+        image: mainImageMedia ? mainImageMedia.id.toString() : undefined, // Send main image ID
         start_date: formData.start_date
           ? formData.start_date.toISOString()
           : undefined,
@@ -297,6 +324,31 @@ export default function RegisterDemandPage() {
     });
   };
 
+  const handleImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Vui lòng chọn file hình ảnh hợp lệ");
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Kích thước file không được vượt quá 10MB");
+      return;
+    }
+
+    setError("");
+    setSelectedImage(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setUploadedImage(null);
+  };
+
   // No longer need handleRemoveDocument since we only work with selected files before upload
 
   // Get file size in readable format
@@ -356,7 +408,7 @@ export default function RegisterDemandPage() {
                     </h3>
                     <p className="text-sm text-gray-500">
                       {uploadingFiles
-                        ? `Đang xử lý ${selectedFiles.length} file`
+                        ? `Đang xử lý ${selectedImage ? "ảnh chính" : ""}${selectedImage && selectedFiles.length > 0 ? " và " : ""}${selectedFiles.length > 0 ? `${selectedFiles.length} tài liệu` : ""}`
                         : "Vui lòng chờ trong giây lát"}
                     </p>
                   </div>
@@ -710,6 +762,93 @@ export default function RegisterDemandPage() {
                     placeholder="Mô tả các quy tắc, tiêu chuẩn cần tuân thủ"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Ảnh đại diện */}
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Ảnh đại diện
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Thêm ảnh đại diện cho nhu cầu của bạn (JPG, PNG, GIF)
+                </p>
+              </div>
+              <div className="p-6 space-y-4">
+                {/* Image Upload Area */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                  <input
+                    type="file"
+                    id="image-upload"
+                    accept="image/*"
+                    onChange={handleImageSelection}
+                    className="hidden"
+                    disabled={uploadingFiles}
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className={`cursor-pointer flex flex-col items-center space-y-2 ${
+                      uploadingFiles ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    <Upload className="h-12 w-12 text-gray-400" />
+                    <div className="text-sm text-gray-600">
+                      {uploadingFiles ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          <span>Đang tải ảnh...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="font-medium text-blue-600 hover:text-blue-500">
+                            Nhấn để chọn ảnh
+                          </span>{" "}
+                          hoặc kéo thả ảnh vào đây
+                        </>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Hỗ trợ: JPG, PNG, GIF (tối đa 10MB)
+                    </div>
+                  </label>
+                </div>
+
+                {/* Selected Image Preview */}
+                {selectedImage && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-medium text-gray-700">
+                      Ảnh đã chọn
+                    </h3>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <img
+                            src={URL.createObjectURL(selectedImage)}
+                            alt="Preview"
+                            className="h-16 w-16 object-cover rounded-lg"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {selectedImage.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {formatFileSize(selectedImage.size)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="flex-shrink-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
+                        disabled={uploadingFiles}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
