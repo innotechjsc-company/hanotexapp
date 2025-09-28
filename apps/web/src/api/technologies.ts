@@ -34,6 +34,7 @@ export interface TechnologyFilters {
   trl_level?: number;
   pricing_type?: PricingType;
   search?: string;
+  submitter?: string;
 }
 
 export interface PaginationParams {

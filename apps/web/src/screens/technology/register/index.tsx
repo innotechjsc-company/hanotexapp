@@ -19,7 +19,7 @@ import {
   ServiceCreationSection,
   ServiceCreationSectionRef,
 } from "./components";
-import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { Card, CardBody, CardHeader, Button, Spinner } from "@heroui/react";
 import { TechnologyOwnersSectionRef } from "./components/TechnologyOwnersSection";
 import { IPSectionRef } from "./components/IPSection";
 import type { BasicInfoSectionRef } from "./components/BasicInfoSection";
@@ -28,11 +28,13 @@ import {
   createTechnologyWithServices,
   type CreateTechnologyPayload,
 } from "@/api/technologies";
+import { getAllCategories } from "@/api/categories";
 import { MediaType } from "@/types/media1";
 import { ServiceTicket } from "@/types";
 import { createServiceTicket } from "@/api/service-ticket";
 import { useAuth } from "@/store/auth";
 import { getUserByRoleAdmin } from "@/api/user";
+import type { Category } from "@/types/categories";
 
 export default function RegisterTechnologyPage({ props }: { props?: any }) {
   const router = useRouter();
@@ -46,8 +48,69 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
   const visibilityRef = useRef<VisibilityNDASectionRef>(null);
   const serviceCreationRef = useRef<ServiceCreationSectionRef>(null);
   const [services, setServices] = useState<ServiceTicket[]>([]);
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState<boolean>(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Authentication check effect
+  useEffect(() => {
+    // Wait for auth state to be determined
+    if (!isLoading) {
+      setAuthChecked(true);
+
+      // If not authenticated, redirect to login
+      if (!isAuthenticated) {
+        toast.error("Vui lòng đăng nhập để tiếp tục");
+        router.push("/auth/login");
+        return;
+      }
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    // Only fetch categories if user is authenticated
+    if (!authChecked || !isAuthenticated) {
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError(null);
+
+        const response = await getAllCategories({ limit: 100 });
+        const normalized = ((response as any)?.docs ??
+          (response as any)?.data ??
+          []) as Category[];
+
+        if (isMounted) {
+          setCategories(Array.isArray(normalized) ? normalized : []);
+        }
+      } catch (error) {
+        console.error("Fetch categories error:", error);
+        if (isMounted) {
+          setCategories([]);
+          setCategoriesError("Không thể tải danh sách lĩnh vực");
+          toast.error("Không thể tải danh sách lĩnh vực");
+        }
+      } finally {
+        if (isMounted) {
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authChecked, isAuthenticated]);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -129,19 +192,23 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           throw new Error("Thông tin định giá là bắt buộc");
         }
 
-         // create service tickets
-         let serviceTickets: any[] = [];
-         if (services.length > 0) {
+        // create service tickets
+        let serviceTickets: any[] = [];
+        if (services.length > 0) {
           const userAdmin = await getUserByRoleAdmin();
-          const userAdminList = (userAdmin as any)?.docs || (userAdmin as any)?.data || (Array.isArray(userAdmin) ? userAdmin : []) || [];
+          const userAdminList =
+            (userAdmin as any)?.docs ||
+            (userAdmin as any)?.data ||
+            (Array.isArray(userAdmin) ? userAdmin : []) ||
+            [];
           const userAdminId = userAdminList[0]?.id;
           // create service tickets by API
           serviceTickets = services.map((service) => ({
-          service_id: service.service,
-          description: service.description,
-          responsible_user_id: user?.id,
-          implementer_ids: [userAdminId],
-        }));
+            service_id: service.service,
+            description: service.description,
+            responsible_user_id: user?.id,
+            implementer_ids: [userAdminId],
+          }));
         }
 
         // Aggregate payload for our custom API endpoint
@@ -179,7 +246,6 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
         const result = await createTechnologyWithServices(payload);
         console.log("Created technology:", result);
 
-       
         // Log additional information about created records
         if (
           result.intellectual_property_records &&
@@ -221,6 +287,23 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
     })();
   };
 
+  // Show loading screen while checking authentication
+  if (!authChecked || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Spinner size="lg" color="primary" />
+          <p className="mt-4 text-gray-600">Đang kiểm tra xác thực...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render anything (redirect will happen)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
@@ -257,6 +340,9 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
               <BasicInfoSection
                 ref={basicRef}
                 onChange={(data) => console.log("Changed:", data)} // optional
+                categories={categories}
+                categoriesLoading={categoriesLoading}
+                categoriesError={categoriesError}
               />
 
               {/* 2. Technology Owners */}

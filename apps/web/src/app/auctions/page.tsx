@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Clock,
@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import AnimatedIcon from "@/components/ui/AnimatedIcon";
 import AuctionImagePlaceholder from "@/components/auction/AuctionImagePlaceholder";
+import { useAuth } from "@/store/auth";
+import { Spinner } from "@heroui/react";
+import toast from "react-hot-toast";
 
 interface Auction {
   id: string;
@@ -31,13 +34,36 @@ interface Auction {
 
 export default function AuctionsPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Authentication check effect
+  useEffect(() => {
+    // Wait for auth state to be determined
+    if (!isLoading) {
+      setAuthChecked(true);
+
+      // If not authenticated, redirect to login
+      if (!isAuthenticated) {
+        toast.error("Vui lòng đăng nhập để xem danh sách đấu giá");
+        router.push("/auth/login");
+        return;
+      }
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
+    // Only proceed if user is authenticated
+    if (!authChecked || !isAuthenticated) {
+      return;
+    }
+
     // Read URL parameters
     const status = searchParams.get("status");
     if (status) {
@@ -50,34 +76,44 @@ export default function AuctionsPage() {
       }
     }
     fetchAuctions();
-  }, [searchParams]);
+  }, [searchParams, authChecked, isAuthenticated]);
 
   // Real-time updates - refresh auction list every 30 seconds
   useEffect(() => {
+    // Only set up interval if user is authenticated
+    if (!authChecked || !isAuthenticated) {
+      return;
+    }
+
     const interval = setInterval(() => {
       fetchAuctions();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [authChecked, isAuthenticated]);
 
   // Listen for localStorage changes (when user places bids)
   useEffect(() => {
+    // Only set up listeners if user is authenticated
+    if (!authChecked || !isAuthenticated) {
+      return;
+    }
+
     const handleStorageChange = () => {
       // Refetch auctions when localStorage changes (bid placed)
       fetchAuctions();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
+    window.addEventListener("storage", handleStorageChange);
+
     // Also listen for custom events from bid placement
-    window.addEventListener('bidPlaced', handleStorageChange);
+    window.addEventListener("bidPlaced", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('bidPlaced', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("bidPlaced", handleStorageChange);
     };
-  }, []);
+  }, [authChecked, isAuthenticated]);
 
   const fetchAuctions = async () => {
     try {
@@ -87,7 +123,7 @@ export default function AuctionsPage() {
         throw new Error("Không thể tải danh sách đấu giá");
       }
       const data = await response.json();
-      
+
       // Update auctions with localStorage bid data
       const updatedAuctions = data.map((auction: Auction) => {
         const storedBids = localStorage.getItem(`auction_bids_${auction.id}`);
@@ -103,12 +139,15 @@ export default function AuctionsPage() {
               };
             }
           } catch (e) {
-            console.warn(`Failed to parse stored bids for auction ${auction.id}:`, e);
+            console.warn(
+              `Failed to parse stored bids for auction ${auction.id}:`,
+              e
+            );
           }
         }
         return auction;
       });
-      
+
       setAuctions(updatedAuctions);
     } catch (error) {
       console.error("Error fetching auctions:", error);
@@ -144,6 +183,23 @@ export default function AuctionsPage() {
     "Công nghệ năng lượng",
     "Công nghệ vật liệu",
   ];
+
+  // Show loading screen while checking authentication
+  if (!authChecked || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Spinner size="lg" color="primary" />
+          <p className="mt-4 text-gray-600">Đang kiểm tra xác thực...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, don't render anything (redirect will happen)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -261,22 +317,23 @@ export default function AuctionsPage() {
                       className="w-full h-48 object-cover"
                       onError={(e) => {
                         // Hide the broken image and show placeholder
-                        e.currentTarget.style.display = 'none';
-                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                        e.currentTarget.style.display = "none";
+                        const placeholder = e.currentTarget
+                          .nextElementSibling as HTMLElement;
                         if (placeholder) {
-                          placeholder.style.display = 'block';
+                          placeholder.style.display = "block";
                         }
                       }}
                     />
                   ) : null}
-                  
+
                   {/* Placeholder - always rendered but hidden when image exists */}
-                  <div 
-                    className={`w-full h-48 ${auction.image ? 'hidden' : 'block'}`}
-                    style={{ display: auction.image ? 'none' : 'block' }}
+                  <div
+                    className={`w-full h-48 ${auction.image ? "hidden" : "block"}`}
+                    style={{ display: auction.image ? "none" : "block" }}
                   >
-                    <AuctionImagePlaceholder 
-                      category={auction.category} 
+                    <AuctionImagePlaceholder
+                      category={auction.category}
                       title={auction.title}
                       className="w-full h-48"
                     />

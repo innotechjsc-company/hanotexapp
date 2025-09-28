@@ -26,28 +26,50 @@ export async function getCategories(
   filters: CategoryFilters = {},
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  const params = {
-    ...filters,
-    limit: pagination.limit || PAGINATION_DEFAULTS.limit,
-    page: pagination.page || PAGINATION_DEFAULTS.page,
-    sort: pagination.sort || "sort_order",
-  };
+  const queryParams = new URLSearchParams();
+  
+  if (filters.search) queryParams.set('search', filters.search);
+  if (filters.parent_id) queryParams.set('parent_id', filters.parent_id);
+  if (filters.is_active !== undefined) queryParams.set('is_active', filters.is_active.toString());
+  if (pagination.limit) queryParams.set('limit', pagination.limit.toString());
+  if (pagination.page) queryParams.set('page', pagination.page.toString());
+  if (pagination.sort) queryParams.set('sort', pagination.sort);
 
-  return payloadApiClient.get<Category[]>(API_ENDPOINTS.CATEGORIES, params);
+  const response = await fetch(`/api/master-data/categories?${queryParams.toString()}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
 }
 
 /**
  * Get category by ID
  */
 export async function getCategoryById(id: string): Promise<Category> {
-  const response = await payloadApiClient.get<Category>(
-    `${API_ENDPOINTS.CATEGORIES}/${id}`
-  );
-  return response.data!;
+  const response = await fetch(`/api/master-data/categories/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.data || data;
 }
 
 /**
- * Create new category
+ * Create new category (Admin only - uses direct CMS API)
  */
 export async function createCategory(
   data: Partial<Category>
@@ -60,7 +82,7 @@ export async function createCategory(
 }
 
 /**
- * Update category
+ * Update category (Admin only - uses direct CMS API)
  */
 export async function updateCategory(
   id: string,
@@ -74,7 +96,7 @@ export async function updateCategory(
 }
 
 /**
- * Delete category
+ * Delete category (Admin only - uses direct CMS API)
  */
 export async function deleteCategory(id: string): Promise<void> {
   await payloadApiClient.delete(`${API_ENDPOINTS.CATEGORIES}/${id}`);
@@ -86,8 +108,14 @@ export async function deleteCategory(id: string): Promise<void> {
 export async function getAllCategories(
   pagination: PaginationParams = {}
 ): Promise<ApiResponse<Category[]>> {
-  // Use the web API route which fetches from CMS
-  const response = await fetch('/api/categories', {
+  const queryParams = new URLSearchParams();
+  
+  if (pagination.limit) queryParams.set('limit', pagination.limit.toString());
+  if (pagination.page) queryParams.set('page', pagination.page.toString());
+  if (pagination.sort) queryParams.set('sort', pagination.sort);
+
+  // Use the updated web API route which fetches from CMS
+  const response = await fetch(`/api/master-data/categories?${queryParams.toString()}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

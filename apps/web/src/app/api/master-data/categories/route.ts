@@ -1,22 +1,65 @@
 import { NextResponse } from 'next/server';
+import { getPayloadApiUrl } from '@/lib/api-config';
 
-// Master data cho các danh mục
-const categories = [
-  { value: '550e8400-e29b-41d4-a716-446655440001', label: 'Công nghệ thông tin & Truyền thông' },
-  { value: '550e8400-e29b-41d4-a716-446655440002', label: 'Công nghệ sinh học & Y dược' },
-  { value: '550e8400-e29b-41d4-a716-446655440003', label: 'Vật liệu mới & Công nghệ vật liệu' },
-  { value: '550e8400-e29b-41d4-a716-446655440004', label: 'Cơ khí & Tự động hóa' },
-  { value: '550e8400-e29b-41d4-a716-446655440005', label: 'Năng lượng & Môi trường' },
-  { value: '550e8400-e29b-41d4-a716-446655440006', label: 'Nông nghiệp & Thực phẩm' },
-  { value: '550e8400-e29b-41d4-a716-446655440007', label: 'Giao thông vận tải' },
-  { value: '550e8400-e29b-41d4-a716-446655440008', label: 'Xây dựng & Kiến trúc' },
-  { value: '550e8400-e29b-41d4-a716-446655440009', label: 'Khoa học xã hội & Nhân văn' },
-  { value: '550e8400-e29b-41d4-a716-446655440010', label: 'Liên ngành & Khác' }
-];
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const limit = searchParams.get('limit') || '100';
+    const page = searchParams.get('page') || '1';
+    const sort = searchParams.get('sort') || 'name';
 
-export async function GET() {
-  return NextResponse.json({
-    success: true,
-    data: categories
-  });
+    // Fetch categories from CMS
+    const cmsUrl = getPayloadApiUrl(`/categories?limit=${limit}&page=${page}&sort=${sort}`);
+    
+    const response = await fetch(cmsUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`CMS API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Transform the data to match the expected format
+    const categories = (data.docs || []).map((category: any) => ({
+      value: category.id,
+      label: category.name,
+      id: category.id,
+      name: category.name,
+      code_intl: category.code_intl,
+      code_vn: category.code_vn,
+      parent: category.parent,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    }));
+
+    return NextResponse.json({
+      success: true,
+      data: categories,
+      docs: categories,
+      totalDocs: data.totalDocs || categories.length,
+      limit: data.limit || parseInt(limit),
+      totalPages: data.totalPages || 1,
+      page: data.page || parseInt(page),
+      pagingCounter: data.pagingCounter || 1,
+      hasPrevPage: data.hasPrevPage || false,
+      hasNextPage: data.hasNextPage || false,
+      prevPage: data.prevPage || null,
+      nextPage: data.nextPage || null,
+    });
+  } catch (error) {
+    console.error('Error fetching categories from CMS:', error);
+    
+    // Fallback to empty data if CMS is unavailable
+    return NextResponse.json({
+      success: false,
+      data: [],
+      docs: [],
+      error: 'Unable to fetch categories from CMS',
+    }, { status: 500 });
+  }
 }

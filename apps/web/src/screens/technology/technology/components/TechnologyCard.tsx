@@ -1,22 +1,30 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Chip,
-} from "@heroui/react";
+import { Card, Button, Tag, Typography, Space, Tooltip } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
+
+const { Text, Paragraph } = Typography;
 
 interface TechnologyCardProps {
   item: Technology;
   viewMode: ViewMode;
   trlChipColor: (level?: number) => "default" | "warning" | "success";
   statusChipColor: (status?: string) => "success" | "warning" | "default";
+}
+
+// Helper function to convert chip colors to Ant Design Tag colors
+function getAntdTagColor(color: "default" | "warning" | "success"): string {
+  switch (color) {
+    case "success":
+      return "green";
+    case "warning":
+      return "orange";
+    case "default":
+    default:
+      return "blue";
+  }
 }
 
 function getCategoryName(item: any): string | undefined {
@@ -117,107 +125,123 @@ export default function TechnologyCard({
   if (viewMode === "list") {
     return (
       <Card
-        shadow="sm"
-        className="w-full overflow-hidden hover:shadow-lg transition-all"
+        hoverable
+        className="w-full overflow-hidden"
+        bodyStyle={{ padding: 16 }}
       >
-        <div className="flex flex-col sm:flex-row">
-          {/* Content */}
-          <div className="p-4 flex flex-col flex-1">
-            {/* Header with chips - improved layout */}
-            <div className="flex flex-col gap-2 mb-3">
-              {/* First row: Category only */}
-              <div className="flex justify-start">
-                {categoryName && (
-                  <Chip 
-                    size="sm" 
-                    variant="flat" 
-                    color="primary"
-                    className="max-w-full"
-                  >
-                    <span className="truncate block" title={categoryName}>
-                      {categoryName}
-                    </span>
-                  </Chip>
-                )}
-              </div>
-              
-              {/* Second row: Status, TRL and Owner info */}
-              <div className="flex justify-between items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Chip
-                    size="sm"
-                    variant="flat"
-                    color={statusChipColor(item.status)}
-                    className="whitespace-nowrap"
-                  >
-                    {StatusLabel}
-                  </Chip>
-                  {item.trl_level && (
-                    <Chip
-                      size="sm"
-                      variant="flat"
-                      color={trlChipColor(Number(item.trl_level))}
+        <Space direction="vertical" size="middle" className="w-full">
+          {/* Tags Row */}
+          <div className="flex flex-col gap-2">
+            {/* Category Tag */}
+            <div className="flex justify-start">
+              {categoryName && (
+                <Tooltip title={categoryName}>
+                  <Tag color="blue" className="max-w-full">
+                    <Text
+                      ellipsis={{ tooltip: true }}
+                      style={{ maxWidth: 200, margin: 0 }}
                     >
-                      TRL {item.trl_level}
-                    </Chip>
-                  )}
-                  {ownerType && (
-                    <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
-                      {ownerType}
-                    </span>
-                  )}
-                </div>
-                {ownerName && (
-                  <span className="text-xs text-default-600 truncate max-w-[150px]" title={ownerName}>
-                    {ownerName}
-                  </span>
-                )}
-              </div>
+                      {categoryName}
+                    </Text>
+                  </Tag>
+                </Tooltip>
+              )}
             </div>
-
-            <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
-              <Link
-                href={href}
-                className="hover:text-primary transition-colors"
-              >
-                {item.title}
-              </Link>
-            </h3>
-
-            {item.description && (
-              <p className="text-sm text-default-600 mb-3 line-clamp-2">
-                {item.description}
-              </p>
-            )}
-
-            {/* Territory information */}
-            {territoryInfo && (
-              <div className="mb-3">
-                <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
-                <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
-                  {territoryInfo}
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-end justify-between mt-auto">
-              <div className="min-w-0">
-                {formattedPrice ? (
-                  <p className="font-bold text-primary truncate">
-                    {formattedPrice} {currency}
-                  </p>
-                ) : (
-                  <p className="text-sm font-medium text-default-600">
-                    Thương lượng
-                  </p>
+            
+            {/* Status, TRL and Owner Tags */}
+            <div className="flex justify-between items-center gap-2">
+              <Space wrap>
+                <Tag color={getAntdTagColor(statusChipColor(item.status))}>
+                  {StatusLabel}
+                </Tag>
+                {item.trl_level && (
+                  <Tag color={getAntdTagColor(trlChipColor(Number(item.trl_level)))}>
+                    TRL {item.trl_level}
+                  </Tag>
                 )}
-              </div>
-              <Button as={Link} href={href} color="primary" size="sm">
-                Xem chi tiết
-              </Button>
+                {ownerType && (
+                  <Tag color="default">
+                    {ownerType}
+                  </Tag>
+                )}
+              </Space>
+              {ownerName && (
+                <Tooltip title={ownerName}>
+                  <Text
+                    type="secondary"
+                    style={{ fontSize: 12, maxWidth: 150 }}
+                    ellipsis
+                  >
+                    {ownerName}
+                  </Text>
+                </Tooltip>
+              )}
             </div>
           </div>
-        </div>
+
+          {/* Title */}
+          <Text strong style={{ fontSize: 16, lineHeight: '1.4' }}>
+            <Link href={href} className="hover:text-blue-600 transition-colors">
+              <Tooltip title={item.title}>
+                <Text
+                  ellipsis={{ rows: 2, tooltip: true }}
+                  style={{ margin: 0, fontWeight: 600 }}
+                >
+                  {item.title}
+                </Text>
+              </Tooltip>
+            </Link>
+          </Text>
+
+          {/* Description */}
+          {item.description && (
+            <Paragraph
+              type="secondary"
+              ellipsis={{ rows: 2, tooltip: true }}
+              style={{ marginBottom: 8 }}
+            >
+              {item.description}
+            </Paragraph>
+          )}
+
+          {/* Territory Information */}
+          {territoryInfo && (
+            <div>
+              <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                Phạm vi áp dụng:
+              </Text>
+              <Tooltip title={territoryInfo}>
+                <Text
+                  type="secondary"
+                  style={{ fontSize: 12 }}
+                  ellipsis
+                >
+                  {territoryInfo}
+                </Text>
+              </Tooltip>
+            </div>
+          )}
+
+          {/* Price and Action */}
+          <div className="flex items-center justify-between">
+            <div>
+              {formattedPrice ? (
+                <Text strong style={{ color: '#1890ff' }}>
+                  {formattedPrice} {currency}
+                </Text>
+              ) : (
+                <Text type="secondary">
+                  Thương lượng
+                </Text>
+              )}
+            </div>
+            <Link href={href}>
+              <Button type="primary" size="small">
+                Xem chi tiết
+              </Button>
+            </Link>
+          </div>
+        </Space>
       </Card>
     );
   }
@@ -225,104 +249,180 @@ export default function TechnologyCard({
   // Grid mode
   return (
     <Card
-      shadow="sm"
-      className="h-full overflow-hidden hover:shadow-lg transition-all flex flex-col"
+      hoverable
+      className="h-full overflow-hidden"
+      style={{ 
+        height: 380, // Fixed height for consistent card layout
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+      bodyStyle={{
+        padding: 0,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
     >
-      <CardBody className="p-4 flex-1">
-        {/* Header with chips - improved layout */}
+      {/* Main Content Area */}
+      <div 
+        style={{
+          padding: 16,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Tags Section */}
         <div className="flex flex-col gap-2 mb-3">
-          {/* First row: Category and Status */}
-          <div className="flex justify-between items-start gap-3">
-            <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 90px)' }}>
+          {/* Category and Status Row */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
               {categoryName && (
-                <Chip
-                  size="sm"
-                  variant="flat"
-                  color="primary"
-                  className="w-full"
-                >
-                  <span className="truncate block" title={categoryName}>
-                    {categoryName}
-                  </span>
-                </Chip>
+                <Tooltip title={categoryName}>
+                  <Tag color="blue" className="w-full text-center">
+                    <Text
+                      ellipsis={{ tooltip: true }}
+                      style={{ maxWidth: '100%', margin: 0 }}
+                    >
+                      {categoryName}
+                    </Text>
+                  </Tag>
+                </Tooltip>
               )}
             </div>
-            <div className="flex-shrink-0" style={{ minWidth: '70px' }}>
-              <Chip
-                size="sm"
-                variant="flat"
-                color={statusChipColor(item.status)}
-                className="whitespace-nowrap w-full"
-              >
+            <div className="flex-shrink-0">
+              <Tag color={getAntdTagColor(statusChipColor(item.status))}>
                 {StatusLabel}
-              </Chip>
+              </Tag>
             </div>
           </div>
           
-          {/* Second row: TRL and Owner info */}
-          <div className="flex justify-between items-center gap-2">
-            <div className="flex items-center gap-2">
+          {/* TRL and Owner Type Row */}
+          <div className="flex justify-start items-center gap-2">
+            <Space size="small" wrap>
               {item.trl_level && (
-                <Chip size="sm" variant="flat" color={trlChipColor(item.trl_level)}>
+                <Tag color={getAntdTagColor(trlChipColor(item.trl_level))}>
                   TRL {item.trl_level}
-                </Chip>
+                </Tag>
               )}
               {ownerType && (
-                <span className="text-xs text-default-500 bg-default-100 px-2 py-1 rounded">
+                <Tag color="default">
                   {ownerType}
-                </span>
+                </Tag>
               )}
-            </div>
+            </Space>
           </div>
         </div>
 
-        <h3 className="font-semibold text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
-          <Link href={href} className="hover:text-primary transition-colors">
-            {item.title}
+        {/* Title */}
+        <div style={{ minHeight: 48, marginBottom: 12 }}>
+          <Link href={href} className="hover:text-blue-600 transition-colors">
+            <Tooltip title={item.title}>
+              <Text
+                strong
+                style={{ 
+                  fontSize: 16,
+                  lineHeight: '1.4',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  margin: 0
+                }}
+              >
+                {item.title}
+              </Text>
+            </Tooltip>
           </Link>
-        </h3>
+        </div>
 
-        {item.description && (
-          <p className="text-sm text-default-600 mb-3 line-clamp-2">
-            {item.description}
-          </p>
-        )}
-
-        {/* Additional info */}
-        <div className="space-y-2 mb-3">
-          {ownerName && (
-            <div>
-              <p className="text-xs text-default-500 mb-1">Đơn vị sở hữu:</p>
-              <p className="text-xs text-default-600 truncate" title={ownerName}>
-                {ownerName}
-              </p>
-            </div>
-          )}
-          
-          {territoryInfo && (
-            <div>
-              <p className="text-xs text-default-500 mb-1">Phạm vi áp dụng:</p>
-              <p className="text-xs text-default-600 line-clamp-1" title={territoryInfo}>
-                {territoryInfo}
-              </p>
-            </div>
+        {/* Description - Flexible height */}
+        <div style={{ flex: 1, marginBottom: 12 }}>
+          {item.description && (
+            <Paragraph
+              type="secondary"
+              ellipsis={{ rows: 3, tooltip: true }}
+              style={{ marginBottom: 0, fontSize: 14 }}
+            >
+              {item.description}
+            </Paragraph>
           )}
         </div>
-      </CardBody>
-      <CardFooter className="p-4 flex items-center justify-between bg-content2">
-        <div className="min-w-0">
+
+        {/* Additional Information */}
+        <div style={{ minHeight: 40 }}>
+          <Space direction="vertical" size="small" className="w-full">
+            {ownerName && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                  Đơn vị sở hữu:
+                </Text>
+                <Tooltip title={ownerName}>
+                  <Text
+                    style={{ fontSize: 12 }}
+                    ellipsis
+                  >
+                    {ownerName}
+                  </Text>
+                </Tooltip>
+              </div>
+            )}
+            
+            {territoryInfo && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                  Phạm vi áp dụng:
+                </Text>
+                <Tooltip title={territoryInfo}>
+                  <Text
+                    style={{ fontSize: 12 }}
+                    ellipsis
+                  >
+                    {territoryInfo}
+                  </Text>
+                </Tooltip>
+              </div>
+            )}
+          </Space>
+        </div>
+      </div>
+
+      {/* Fixed Footer with Price and Action - Always at bottom */}
+      <div 
+        style={{
+          padding: '12px 16px',
+          borderTop: '1px solid #f0f0f0',
+          backgroundColor: '#fafafa',
+          marginTop: 'auto'
+        }}
+        className="flex items-center justify-between"
+      >
+        <div className="min-w-0 flex-1">
           {formattedPrice ? (
-            <p className="font-bold text-primary truncate">
-              {formattedPrice} {currency}
-            </p>
+            <Text strong style={{ color: '#1890ff' }}>
+              <Tooltip title={`${formattedPrice} ${currency}`}>
+                <span style={{ 
+                  display: 'block',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {formattedPrice} {currency}
+                </span>
+              </Tooltip>
+            </Text>
           ) : (
-            <p className="text-sm font-medium text-default-600">Thương lượng</p>
+            <Text type="secondary">
+              Thương lượng
+            </Text>
           )}
         </div>
-        <Button as={Link} href={href} color="primary" size="sm">
-          Chi tiết
-        </Button>
-      </CardFooter>
+        <Link href={href}>
+          <Button type="primary" size="small">
+            Chi tiết
+          </Button>
+        </Link>
+      </div>
     </Card>
   );
 }

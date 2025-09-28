@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAllCategories } from "@/api/categories";
 import { Category } from "@/types/categories";
 
@@ -9,16 +9,28 @@ export interface UseCategoriesReturn {
   refetch: () => Promise<void>;
 }
 
+export interface UseCategoriesOptions {
+  /**
+   * Điều khiển việc tự động fetch khi hook được khởi tạo.
+   * Mặc định là true để giữ nguyên hành vi cũ.
+   */
+  enabled?: boolean;
+}
+
 /**
  * Custom hook to fetch and format categories for form select fields
  * Fetches active categories and formats them for use in select components
  */
-export const useCategories = (): UseCategoriesReturn => {
+export const useCategories = (
+  options: UseCategoriesOptions = {}
+): UseCategoriesReturn => {
+  const { enabled = true } = options;
+
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(enabled);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -46,11 +58,16 @@ export const useCategories = (): UseCategoriesReturn => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     fetchCategories();
-  }, []);
+  }, [enabled, fetchCategories]);
 
   return {
     categories,
