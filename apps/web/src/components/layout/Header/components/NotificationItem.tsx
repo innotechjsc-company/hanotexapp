@@ -66,11 +66,11 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     let targetUrl: string;
     if (isProduction) {
       // Production: use env variable
-      const baseUrl = "http://localhost:3000";
+      const baseUrl = "https://hanotex.vn";
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     } else {
       // Development: use env variable
-      const baseUrl = "http://localhost:3000";
+      const baseUrl = "https://hanotex.vn";
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 
