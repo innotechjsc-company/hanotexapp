@@ -48,6 +48,7 @@ export interface ProposeContext {
   proposeOwnerId: string
   entityOwnerId?: string
   entityTitle?: string
+  entityId?: string
   price?: number
   message?: string
 }
@@ -77,6 +78,7 @@ export interface NegotiationContext {
   acceptorId: string
   price: number
   message?: string
+  technologyId?: string
 }
 
 export interface RoomMessageContext {
@@ -196,22 +198,11 @@ export class NotificationManager {
         context.message ||
         `Đề xuất của bạn cho "${context.entityTitle || 'dự án'}" đã được chấp nhận và sẵn sàng đàm phán.`,
       type: 'success',
-      action_url: `my-proposes`,
+      action_url: context.entityId
+        ? `technologies/${context.entityId}`
+        : `technologies/negotiations/${context.proposeId}`,
       priority: 'high',
     })
-
-    // Notification cho chủ sở hữu entity (nếu khác người đề xuất)
-    if (context.entityOwnerId && context.entityOwnerId !== context.proposeOwnerId) {
-      notifications.push({
-        user: context.entityOwnerId,
-        title: `Bạn đã chấp nhận một đề xuất`,
-        message:
-          context.message || `Bạn đã chấp nhận đề xuất cho "${context.entityTitle || 'dự án'}".`,
-        type: 'info',
-        action_url: `my-${context.proposeType === 'technology-propose' ? 'technologies' : context.proposeType === 'project-propose' ? 'projects' : 'demands'}`,
-        priority: 'normal',
-      })
-    }
 
     return await this.createBatchNotifications(notifications)
   }
@@ -265,7 +256,9 @@ export class NotificationManager {
         context.message ||
         `Offer của bạn với giá ${context.price.toLocaleString()} VNĐ đã được chấp nhận.`,
       type: 'success',
-      action_url: `negotiations/${context.negotiationId}`,
+      action_url: context.technologyId
+        ? `technologies/${context.technologyId}`
+        : `negotiations/${context.negotiationId}`,
       priority: 'high',
     })
 
@@ -276,7 +269,9 @@ export class NotificationManager {
       message:
         context.message || `Bạn đã chấp nhận offer với giá ${context.price.toLocaleString()} VNĐ.`,
       type: 'info',
-      action_url: `negotiations/${context.negotiationId}`,
+      action_url: context.technologyId
+        ? `technologies/${context.technologyId}`
+        : `negotiations/${context.negotiationId}`,
       priority: 'normal',
     })
 
