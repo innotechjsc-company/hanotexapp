@@ -26,6 +26,7 @@ type SeedItem = {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic'
     price_from: number
     price_to: number
+    price_type: 'indicative' | 'floor' | 'firm'
     currency: 'vnd' | 'usd' | 'eur'
   }
 }
@@ -53,6 +54,21 @@ export async function POST(req: NextRequest) {
   // Use provided submitter ID
   const submitterId = '68d1766332f95be78613b481'
 
+  // Get a default image ID (you may need to create a default image in media collection)
+  let defaultImageId: string | null = null
+  try {
+    const mediaResult = await payload.find({
+      collection: 'media',
+      limit: 1,
+      overrideAccess: true,
+    })
+    if (mediaResult?.docs?.length) {
+      defaultImageId = mediaResult.docs[0].id
+    }
+  } catch (e) {
+    console.warn('Could not find default image:', e)
+  }
+
   // Load seed JSON
   const seedPath = path.resolve(process.cwd(), 'src/seed/technologies.json')
   let items: SeedItem[] = []
@@ -63,7 +79,10 @@ export async function POST(req: NextRequest) {
     items = parsed
   } catch (e: unknown) {
     return Response.json(
-      { success: false, error: `Failed to read seed JSON: ${e instanceof Error ? e.message : String(e)}` },
+      {
+        success: false,
+        error: `Failed to read seed JSON: ${e instanceof Error ? e.message : String(e)}`,
+      },
       { status: 500 },
     )
   }
@@ -117,7 +136,11 @@ export async function POST(req: NextRequest) {
           legal_certification: item.legal_certification || {},
           investment_desire: item.investment_desire || [],
           transfer_type: item.transfer_type || [],
-          pricing: item.pricing,
+          image: defaultImageId || '', // Use default image or empty string
+          pricing: {
+            ...item.pricing,
+            price_type: item.pricing.price_type || 'indicative', // Default to 'indicative' if not provided
+          },
           submitter: submitterId || '',
           status: 'approved',
           visibility_mode: 'public',
@@ -130,7 +153,11 @@ export async function POST(req: NextRequest) {
       results.details.push({ title: item.title, action: 'created', id: (created as Technology).id })
     } catch (e: unknown) {
       results.errors += 1
-      results.details.push({ title: item.title, action: 'error', error: e instanceof Error ? e.message : String(e) })
+      results.details.push({
+        title: item.title,
+        action: 'error',
+        error: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 

@@ -1,4 +1,4 @@
-import {  NextRequest, NextResponse  } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -300,15 +300,13 @@ export async function POST(request: NextRequest) {
     }
 
     return corsResponse({
-        success: true,
-        data: createdTechnology,
-        doc: createdTechnology, // For compatibility with existing frontend code
-        intellectual_property_records: createdIPRecords,
-        service_tickets: createdServiceTickets,
-        message: 'Technology created successfully',
-      },
-      { headers: corsHeaders },
-    )
+      success: true,
+      data: createdTechnology,
+      doc: createdTechnology, // For compatibility with existing frontend code
+      intellectual_property_records: createdIPRecords,
+      service_tickets: createdServiceTickets,
+      message: 'Technology created successfully',
+    })
   } catch (error) {
     console.error('Create technology error:', error)
 
