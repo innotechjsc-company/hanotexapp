@@ -95,7 +95,7 @@ export const Auctions: CollectionConfig = {
     },
     {
       name: 'image',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       label: 'Hình ảnh',
     },

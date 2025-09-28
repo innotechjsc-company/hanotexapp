@@ -301,7 +301,7 @@ export default function EventsPage() {
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-8 w-8 min-w-0 visible opacity-100 z-10 relative flex-shrink-0"
                             onPress={() =>
                               window.open(
-                                getGoogleMapsUrl(event.location),
+                                getGoogleMapsUrl(event?.location || ""),
                                 "_blank"
                               )
                             }
@@ -339,7 +339,9 @@ export default function EventsPage() {
                             size="sm"
                             endContent={<ExternalLink className="h-3 w-3" />}
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
-                            onPress={() => window.open(event.url, "_blank")}
+                            onPress={() =>
+                              window.open(event?.url || "", "_blank")
+                            }
                           >
                             Xem chi tiết
                           </Button>
