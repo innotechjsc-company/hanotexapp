@@ -22,7 +22,7 @@ export const Events: CollectionConfig = {
     },
     {
       name: 'image',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
       required: true,
       label: 'Ảnh đại diện',

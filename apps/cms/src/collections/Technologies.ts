@@ -22,14 +22,23 @@ export const Technologies: CollectionConfig = {
         if (operation !== 'create') return data
 
         // Skip authentication check for seed operations (when submitter is already provided)
-        if (data && typeof data === 'object' && 'submitter' in data && (data as { submitter?: unknown }).submitter) {
+        if (
+          data &&
+          typeof data === 'object' &&
+          'submitter' in data &&
+          (data as { submitter?: unknown }).submitter
+        ) {
           // Store IP data in req context for later use
           const ipObj = data as { intellectual_property?: unknown; intellectualProperty?: unknown }
           const ipInput = ipObj?.intellectual_property ?? ipObj?.intellectualProperty
           if (ipInput) {
             ;(req as unknown as { ipData?: unknown }).ipData = ipInput
             // Remove from main data to avoid validation issues
-            const { intellectual_property: _intellectual_property, intellectualProperty: _intellectualProperty, ...cleanData } = (data as Record<string, unknown>)
+            const {
+              intellectual_property: _intellectual_property,
+              intellectualProperty: _intellectualProperty,
+              ...cleanData
+            } = data as Record<string, unknown>
             data = cleanData as typeof data
           }
           return data
@@ -55,14 +64,21 @@ export const Technologies: CollectionConfig = {
         }
 
         // Store IP data in req context for later use
-        const ipInput = (data && typeof data === 'object'
-          ? (data as { intellectual_property?: unknown; intellectualProperty?: unknown }).intellectual_property ??
-            (data as { intellectual_property?: unknown; intellectualProperty?: unknown }).intellectualProperty
-          : undefined)
+        const ipInput =
+          data && typeof data === 'object'
+            ? ((data as { intellectual_property?: unknown; intellectualProperty?: unknown })
+                .intellectual_property ??
+              (data as { intellectual_property?: unknown; intellectualProperty?: unknown })
+                .intellectualProperty)
+            : undefined
         if (ipInput) {
           ;(req as unknown as { ipData?: unknown }).ipData = ipInput
           // Remove from main data to avoid validation issues
-          const { intellectual_property: _intellectual_property2, intellectualProperty: _intellectualProperty2, ...cleanData } = (data as Record<string, unknown>)
+          const {
+            intellectual_property: _intellectual_property2,
+            intellectualProperty: _intellectualProperty2,
+            ...cleanData
+          } = data as Record<string, unknown>
           data = cleanData as typeof data
         }
 
@@ -88,8 +104,10 @@ export const Technologies: CollectionConfig = {
             try {
               const code = (item as { code?: string | null })?.code
               if (typeof code !== 'string' || code.trim() === '') return null
-              const type = (item as { type?: string | null })?.type as import('@/payload-types').IntellectualProperty['type']
-              const status = (item as { status?: string | null })?.status as import('@/payload-types').IntellectualProperty['status']
+              const type = (item as { type?: string | null })
+                ?.type as import('@/payload-types').IntellectualProperty['type']
+              const status = (item as { status?: string | null })
+                ?.status as import('@/payload-types').IntellectualProperty['status']
 
               return await payload.create({
                 collection: 'intellectual_property',
@@ -101,7 +119,9 @@ export const Technologies: CollectionConfig = {
                 },
               })
             } catch (err: unknown) {
-              console.error(`Failed to create IP record: ${err instanceof Error ? err.message : String(err)}`)
+              console.error(
+                `Failed to create IP record: ${err instanceof Error ? err.message : String(err)}`,
+              )
               return null
             }
           })
@@ -339,15 +359,22 @@ export const Technologies: CollectionConfig = {
           label: 'Giá đến',
         },
         {
-          name: 'currency',
+          name: 'price_type',
           type: 'select',
           required: true,
-          defaultValue: 'vnd',
+          defaultValue: 'indicative',
           options: [
-            { label: 'Đồng Việt Nam (VND)', value: 'vnd' },
-            { label: 'Đô la Mỹ (USD)', value: 'usd' },
-            { label: 'Euro (EUR)', value: 'eur' },
+            { label: 'Indicative', value: 'indicative' },
+            { label: 'Floor', value: 'floor' },
+            { label: 'Firm', value: 'firm' },
           ],
+        },
+        {
+          name: 'image',
+          type: 'relationship',
+          relationTo: 'media',
+          required: true,
+          label: 'Ảnh đại diện',
         },
       ],
     },

@@ -82,6 +82,13 @@ export const Demand: CollectionConfig = {
       label: 'Thời gian dự kiến bắt đầu',
     },
     {
+      name: 'image',
+      type: 'relationship',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'end_date',
       type: 'text',
       label: 'Thời gian dự kiến kết thúc',

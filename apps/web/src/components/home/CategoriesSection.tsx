@@ -13,10 +13,35 @@ import {
   Heart,
   Wheat,
   Wind,
+  Microscope,
+  Rocket,
+  Database,
+  Smartphone,
+  Globe,
+  Wrench,
 } from "lucide-react";
 import { Category } from "@/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getAllCategories } from "@/api/categories";
+
+// Array of 6 different icons for categories
+const categoryIconList = [
+  Brain, // AI & Machine Learning
+  FlaskConical, // Biotechnology
+  Cpu, // Information Technology
+  Heart, // Healthcare & Medical
+  Leaf, // Environmental Technology
+  Zap, // Energy Technology
+  Shield, // Security Technology
+  Microscope, // Research & Development
+  Rocket, // Aerospace Technology
+  Database, // Data Science
+  Smartphone, // Mobile Technology
+  Globe, // Global Technology
+  Wind, // Renewable Energy
+  Wheat, // Agricultural Technology
+  Wrench, // Manufacturing Technology
+];
 
 const categoryIcons: Record<string, any> = {
   AI: Brain,
@@ -39,12 +64,17 @@ export default function CategoriesSection() {
     const fetchCategories = async () => {
       try {
         // Prefer server sort by custom order, limit to 6 for homepage
-        const response = await getAllCategories({ limit: 6, sort: "sort_order" });
-        const list = (Array.isArray((response as any).data)
-          ? (response as any).data
-          : Array.isArray((response as any).docs)
-          ? (response as any).docs
-          : []) as Category[];
+        const response = await getAllCategories({
+          limit: 6,
+          sort: "sort_order",
+        });
+        const list = (
+          Array.isArray((response as any).data)
+            ? (response as any).data
+            : Array.isArray((response as any).docs)
+              ? (response as any).docs
+              : []
+        ) as Category[];
         setCategories(list.slice(0, 6));
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -84,31 +114,35 @@ export default function CategoriesSection() {
 
         {/* Categories Grid */}
         {categories.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 items-stretch">
             {categories.map((category, index) => {
+              // Use index to cycle through different icons, or fallback to category name mapping
               const IconComponent =
-                categoryIcons[category.name] || FlaskConical;
+                categoryIcons[category.name] ||
+                categoryIconList[index % categoryIconList.length];
 
               return (
-                <div key={category.id}>
+                <div key={category.id} className="h-full">
                   <Link
                     href={`/technologies?category_id=${category.id}`}
-                    className="block bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                    className="block h-full bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
                   >
-                    <div className="px-6 py-4 text-center">
-                      {/* Icon */}
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <IconComponent className="h-8 w-8" />
+                    <div className="h-full px-6 py-4 text-center flex flex-col">
+                      {/* Icon - Centered */}
+                      <div className="flex justify-center mb-4">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          <IconComponent className="h-8 w-8" />
+                        </div>
                       </div>
 
                       {/* Category Name */}
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors overflow-hidden text-ellipsis whitespace-nowrap">
                         {category.name}
                       </h3>
 
                       {/* Description */}
                       <p
-                        className="text-gray-600 mb-4 overflow-hidden"
+                        className="text-gray-600 mb-4 overflow-hidden flex-1"
                         style={{
                           display: "-webkit-box",
                           WebkitLineClamp: 2,
@@ -124,7 +158,7 @@ export default function CategoriesSection() {
                       </div>
 
                       {/* Arrow */}
-                      <div className="flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform">
+                      <div className="flex items-center justify-center text-blue-600 group-hover:translate-x-1 transition-transform mt-auto">
                         <span className="text-sm font-medium mr-1">
                           Khám phá
                         </span>
@@ -147,17 +181,6 @@ export default function CategoriesSection() {
             </p>
           </div>
         )}
-
-        {/* View All Categories Button */}
-        <div className="text-center">
-          <Link
-            href="/categories"
-            className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-500 group"
-          >
-            Xem tất cả danh mục
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
       </div>
     </section>
   );

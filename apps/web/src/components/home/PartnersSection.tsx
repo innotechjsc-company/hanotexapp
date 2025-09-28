@@ -1,14 +1,26 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Building2, TrendingUp, Users, Globe, Award, ArrowRight } from 'lucide-react';
-import { getCompanies } from '@/api/company';
-import { getResearchInstitutions } from '@/api/research-institution';
-import { getInvestmentFunds } from '@/api/investment-fund';
-import { useRouter } from 'next/navigation';
-import { log } from 'console';
+import { useEffect, useState } from "react";
+import {
+  Building2,
+  TrendingUp,
+  Users,
+  Globe,
+  Award,
+  ArrowRight,
+} from "lucide-react";
+import { getCompanies } from "@/api/company";
+import { getResearchInstitutions } from "@/api/research-institution";
+import { getInvestmentFunds } from "@/api/investment-fund";
+import { useRouter } from "next/navigation";
+import { log } from "console";
 
-type PartnerItem = { name: string; type: string; description?: string; url?: string };
+type PartnerItem = {
+  name: string;
+  type: string;
+  description?: string;
+  url?: string;
+};
 type FundItem = { name: string; description?: string };
 
 export default function PartnersSection() {
@@ -25,33 +37,39 @@ export default function PartnersSection() {
           getInvestmentFunds({}, { limit: 4 }),
         ]);
 
-        const companies = (Array.isArray((companiesRes as any).data)
-          ? (companiesRes as any).data
-          : Array.isArray((companiesRes as any).docs)
-          ? (companiesRes as any).docs
-          : []) as any[];
-        const institutions = (Array.isArray((institutionsRes as any).data)
-          ? (institutionsRes as any).data
-          : Array.isArray((institutionsRes as any).docs)
-          ? (institutionsRes as any).docs
-          : []) as any[];
-        const fundsList = (Array.isArray((fundsRes as any).data)
-          ? (fundsRes as any).data
-          : Array.isArray((fundsRes as any).docs)
-          ? (fundsRes as any).docs
-          : []) as any[];
+        const companies = (
+          Array.isArray((companiesRes as any).data)
+            ? (companiesRes as any).data
+            : Array.isArray((companiesRes as any).docs)
+              ? (companiesRes as any).docs
+              : []
+        ) as any[];
+        const institutions = (
+          Array.isArray((institutionsRes as any).data)
+            ? (institutionsRes as any).data
+            : Array.isArray((institutionsRes as any).docs)
+              ? (institutionsRes as any).docs
+              : []
+        ) as any[];
+        const fundsList = (
+          Array.isArray((fundsRes as any).data)
+            ? (fundsRes as any).data
+            : Array.isArray((fundsRes as any).docs)
+              ? (fundsRes as any).docs
+              : []
+        ) as any[];
 
         const partnerItems: PartnerItem[] = [
           ...companies.map((c: any) => ({
             name: c.company_name,
-            type: 'Doanh nghiệp',
-            description: c.website || c.legal_representative || '', 
+            type: "Doanh nghiệp",
+            description: c.website || c.legal_representative || "",
             url: c.website,
           })),
           ...institutions.map((i: any) => ({
             name: i.institution_name,
             type: mapInstitutionType(i.institution_type),
-            description: i.contact_info?.website || i.governing_body || '',
+            description: i.contact_info?.website || i.governing_body || "",
             url: i.contact_info?.website,
           })),
         ].slice(0, 6);
@@ -64,7 +82,7 @@ export default function PartnersSection() {
         }));
         setFunds(fundItems);
       } catch (e) {
-        console.error('Error fetching partners/funds:', e);
+        console.error("Error fetching partners/funds:", e);
       } finally {
         setLoading(false);
       }
@@ -82,7 +100,8 @@ export default function PartnersSection() {
             Đối tác & Quỹ đầu tư
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Hệ thống đối tác uy tín và các quỹ đầu tư chuyên nghiệp hỗ trợ phát triển hệ sinh thái khoa học công nghệ
+            Hệ thống đối tác uy tín và các quỹ đầu tư chuyên nghiệp hỗ trợ phát
+            triển hệ sinh thái khoa học công nghệ
           </p>
         </div>
 
@@ -105,7 +124,7 @@ export default function PartnersSection() {
                 onClick={() => {
                   console.log(partner.url);
                   if (partner.url) {
-                    window.open(partner.url, '_blank');
+                    window.open(partner.url, "_blank");
                   }
                 }}
               >
@@ -161,17 +180,9 @@ export default function PartnersSection() {
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4">{fund.description || ""}</p>
-
-                <div className="flex items-center justify-between">
-                  <button className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
-                    Tìm hiểu thêm
-                    <ArrowRight className="ml-1 h-3 w-3" />
-                  </button>
-                  <button className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
-                    Liên hệ
-                  </button>
-                </div>
+                <p className="text-gray-600 text-sm mb-4">
+                  {fund.description || ""}
+                </p>
               </div>
             ))}
           </div>
@@ -184,10 +195,14 @@ export default function PartnersSection() {
               Trở thành đối tác của HANOTEX
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Tham gia mạng lưới đối tác để cùng phát triển hệ sinh thái khoa học công nghệ Hà Nội
+              Tham gia mạng lưới đối tác để cùng phát triển hệ sinh thái khoa
+              học công nghệ Hà Nội
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => router.push('/auth/register')} className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+              <button
+                onClick={() => router.push("/contact")}
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              >
                 <Users className="mr-2 h-5 w-5" />
                 Trở thành đối tác
               </button>
@@ -205,17 +220,17 @@ export default function PartnersSection() {
 
 function mapInstitutionType(type?: string): string {
   switch (type) {
-    case 'UNIVERSITY':
-      return 'Trường đại học';
-    case 'RESEARCH_INSTITUTE':
-      return 'Viện nghiên cứu';
-    case 'GOVERNMENT_LAB':
-      return 'Phòng thí nghiệm nhà nước';
-    case 'PRIVATE_RND':
-      return 'R&D tư nhân';
-    case 'INTERNATIONAL_ORG':
-      return 'Tổ chức quốc tế';
+    case "UNIVERSITY":
+      return "Trường đại học";
+    case "RESEARCH_INSTITUTE":
+      return "Viện nghiên cứu";
+    case "GOVERNMENT_LAB":
+      return "Phòng thí nghiệm nhà nước";
+    case "PRIVATE_RND":
+      return "R&D tư nhân";
+    case "INTERNATIONAL_ORG":
+      return "Tổ chức quốc tế";
     default:
-      return 'Đối tác';
+      return "Đối tác";
   }
 }

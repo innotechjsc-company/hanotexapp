@@ -40,7 +40,7 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notificationTab, setNotificationTab] = useState<"system" | "other">(
-    "system"
+    "other"
   );
 
   const user = useUser();
