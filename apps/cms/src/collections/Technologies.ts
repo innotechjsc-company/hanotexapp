@@ -331,6 +331,13 @@ export const Technologies: CollectionConfig = {
     },
     // Pricing Information
     {
+      name: 'image',
+      type: 'relationship',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+    },
+    {
       name: 'pricing',
       type: 'group',
       label: 'Thông tin Định giá',
@@ -368,13 +375,6 @@ export const Technologies: CollectionConfig = {
             { label: 'Floor', value: 'floor' },
             { label: 'Firm', value: 'firm' },
           ],
-        },
-        {
-          name: 'image',
-          type: 'relationship',
-          relationTo: 'media',
-          required: true,
-          label: 'Ảnh đại diện',
         },
       ],
     },

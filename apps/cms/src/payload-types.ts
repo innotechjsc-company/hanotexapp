@@ -479,12 +479,12 @@ export interface Technology {
     transfer_option?: string | null;
     id?: string | null;
   }[];
+  image: string | Media;
   pricing: {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
     price_to: number;
     price_type: 'indicative' | 'floor' | 'firm';
-    image: string | Media;
   };
   additional_data?: {
     test_results?: {
@@ -1624,6 +1624,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
         transfer_option?: T;
         id?: T;
       };
+  image?: T;
   pricing?:
     | T
     | {
@@ -1631,7 +1632,6 @@ export interface TechnologiesSelect<T extends boolean = true> {
         price_from?: T;
         price_to?: T;
         price_type?: T;
-        image?: T;
       };
   additional_data?:
     | T

@@ -139,6 +139,15 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
             })
           : [];
 
+        // Upload main image if provided
+        let mainImageMedia = null;
+        if (basic?.image) {
+          const imageUploadResult = await mediaApi.uploadMulti([basic.image], {
+            type: MediaType.IMAGE,
+          });
+          mainImageMedia = imageUploadResult[0];
+        }
+
         // 3. Validate and prepare payload
         const trlLevelNum = basic?.trl_level ? Number(basic.trl_level) : 0;
         const trlLevel = trlLevelNum === 0 ? 1 : trlLevelNum; // Default to 1 if 0 or invalid
@@ -220,6 +229,7 @@ export default function RegisterTechnologyPage({ props }: { props?: any }) {
           confidential_detail: basic.confidential_detail.trim(),
           // Relationship fields in Payload expect IDs
           documents: techMedia.map((m) => m.id.toString()),
+          image: mainImageMedia ? mainImageMedia.id.toString() : undefined,
           owners,
           legal_certification: legalDetails
             ? {

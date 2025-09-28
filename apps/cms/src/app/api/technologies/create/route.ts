@@ -24,6 +24,7 @@ interface TechnologyCreatePayload {
   trl_level: number
   description: string
   confidential_detail: string
+  image?: string // Main image Media
   documents?: string[] // Media IDs
   owners?: Array<{
     owner_type: 'individual' | 'company' | 'research_institution'
@@ -41,7 +42,7 @@ interface TechnologyCreatePayload {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic'
     price_from: number
     price_to: number
-    currency: 'vnd' | 'usd' | 'eur'
+    price_type: 'indicative' | 'floor' | 'firm'
   }
   intellectual_property?: Array<{
     code: string
@@ -170,6 +171,10 @@ export async function POST(request: NextRequest) {
     // Add optional fields if provided
     if (body.documents && body.documents.length > 0) {
       technologyData.documents = body.documents
+    }
+
+    if (body.image) {
+      technologyData.image = body.image
     }
 
     // Required fields (already validated above)

@@ -134,6 +134,7 @@ export interface CreateTechnologyPayload {
   description: string;
   confidential_detail: string;
   documents?: string[]; // Media IDs
+  image?: string; // Main image Media ID
   owners?: Array<{
     owner_type: "individual" | "company" | "research_institution";
     owner_name: string;
@@ -150,7 +151,7 @@ export interface CreateTechnologyPayload {
     pricing_type: "grant_seed" | "vc_joint_venture" | "growth_strategic";
     price_from: number;
     price_to: number;
-    currency: "vnd" | "usd" | "eur";
+    price_type: "indicative" | "floor" | "firm";
   };
   intellectual_property?: Array<{
     code: string;
