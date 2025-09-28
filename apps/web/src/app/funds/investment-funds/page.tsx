@@ -6,6 +6,7 @@ import { getInvestmentFunds } from "@/api/investment-fund";
 import type { InvestmentFund } from "@/types/investment_fund";
 import { getProjects } from "@/api/projects";
 import type { Project } from "@/types/project";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 // Local helper functions to call APIs
 async function fetchFunds(): Promise<{
@@ -253,7 +254,11 @@ export default function InvestmentFundsPage() {
                   className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                   onClick={() => router.push(`/funds/investment-funds/${(fund as any).id}`)}
                 >
-                  <div className="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
+                  {/* image */}
+                  {fund.image && typeof fund.image === 'object' && fund.image.url ? (
+                    <img src={getFullMediaUrl(fund.image.url)} alt={fund.name} className="object-contain w-full h-48" />
+                  ) : (
+                    <div className="h-48 bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
                     <svg
                       className="w-16 h-16 text-white"
                       fill="none"
@@ -268,6 +273,8 @@ export default function InvestmentFundsPage() {
                       />
                     </svg>
                   </div>
+                  )}
+                  
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
                       <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">

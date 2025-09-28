@@ -5,6 +5,7 @@ import { getActiveProjectsAll } from "@/api/projects";
 import { Project } from "@/types/project";
 import { Chip } from "@heroui/react";
 import Image from "next/image";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 // Helper function to get status label
 const getStatusLabel = (status: string) => {
@@ -202,15 +203,24 @@ export default function FundraisingPage() {
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => router.push(`/funds/fundraising/${proj.id}`)}
               >
-                <div className="h-40 bg-gradient-to-r from-green-500 to-teal-600 relative flex items-center justify-center">
-                  <Image
-                    src="/logo.png"
-                    alt="Hanotex"
-                    width={150}
-                    height={150}
-                    className="object-contain object-center p-4 absolute left-0 right-0 top-0 bottom-0"
-                    priority={false}
-                  />
+                <div className="h-40 relative overflow-hidden bg-gray-200">
+                {proj.image && typeof proj.image === 'object' && proj.image.url ? (
+                    <Image
+                      src={getFullMediaUrl(proj.image.url)}
+                      alt={proj.name || "Project image"}
+                      fill
+                      className="object-contain"
+                      priority={false}
+                    />
+                  ) : (
+                    <Image
+                      src="/logo.png"
+                      alt="Hanotex"
+                      fill
+                      className="object-contain"
+                      priority={false}
+                    />
+                  )}
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">

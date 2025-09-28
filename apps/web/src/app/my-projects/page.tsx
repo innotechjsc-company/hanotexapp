@@ -67,6 +67,7 @@ import { getUserByRoleAdmin } from "@/api/user";
 import type { ServiceTicket } from "@/types/service-ticket";
 import { FileUpload, type FileUploadItem } from "@/components/input";
 import downloadService from "@/services/downloadService";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -2022,10 +2023,11 @@ export default function MyProjectsPage() {
       width: 80,
       render: (image: any, record: Project) => {
         const getImageUrl = () => {
-          if (image && typeof image === 'object') {
-            return image.url;
+          if(image && typeof image === 'object' && image.url) {
+            const img = getFullMediaUrl(image.url);
+          return img;
           }
-          return null;
+          return undefined;
         };
 
         return (

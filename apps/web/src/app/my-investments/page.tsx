@@ -40,6 +40,7 @@ import type { InvestmentFund } from "@/types/investment_fund";
 import { Toaster, toast } from "react-hot-toast";
 import { useAuthStore, useUser } from "@/store/auth";
 import { FileUpload, type FileUploadItem } from "@/components/input";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 type EditableFund = Partial<InvestmentFund> & { id?: string };
 
@@ -59,7 +60,7 @@ function AddFundModal({
   disclosure: DisclosureLike;
   current: EditableFund | null;
   setCurrent: React.Dispatch<React.SetStateAction<EditableFund | null>>;
-  onCreate: () => Promise<void> | void;
+  onCreate: (data?: EditableFund) => Promise<void> | void;
   loading?: boolean;
 }) {
   const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
@@ -70,11 +71,14 @@ function AddFundModal({
     // Get image ID from uploaded files
     const imageId = imageFiles.length > 0 ? String(imageFiles[0].id) : undefined;
     
-    // Update current with image
-    setCurrent((p) => ({ ...(p || {}), image: imageId }));
+    // Create the data object with image
+    const fundData = {
+      ...current,
+      image: imageId
+    };
     
-    // Call the original onCreate function
-    await onCreate();
+    // Call onCreate with the complete data
+    await onCreate(fundData);
     
     // Reset image files
     setImageFiles([]);
@@ -160,7 +164,7 @@ function EditFundModal({
   disclosure: DisclosureLike;
   current: EditableFund | null;
   setCurrent: React.Dispatch<React.SetStateAction<EditableFund | null>>;
-  onUpdate: () => Promise<void> | void;
+  onUpdate: (data?: EditableFund) => Promise<void> | void;
   loading?: boolean;
 }) {
   const [imageFiles, setImageFiles] = useState<FileUploadItem[]>([]);
@@ -194,11 +198,14 @@ function EditFundModal({
     // Get image ID from uploaded files
     const imageId = imageFiles.length > 0 ? String(imageFiles[0].id) : undefined;
     
-    // Update current with image
-    setCurrent((p) => ({ ...(p || {}), image: imageId }));
+    // Create the data object with image
+    const fundData = {
+      ...current,
+      image: imageId
+    };
     
-    // Call the original onUpdate function
-    await onUpdate();
+    // Call onUpdate with the complete data
+    await onUpdate(fundData);
     
     // Reset image files
     setImageFiles([]);
@@ -283,9 +290,9 @@ function ViewFundModal({
 }) {
   const getImageUrl = () => {
     if (current?.image && typeof current.image === 'object') {
-      return (current.image as any).url;
+      return getFullMediaUrl(current.image.url as string);
     }
-    return null;
+    return undefined;
   };
 
   return (
@@ -460,16 +467,17 @@ export default function MyInvestmentsPage() {
     fetchList();
   }, [page, limit, search, user]);
 
-  const handleCreate = async () => {
-    if (!current?.name || !current?.description) return;
+  const handleCreate = async (data?: EditableFund) => {
+    const fundData = data || current;
+    if (!fundData?.name || !fundData?.description) return;
     setActionLoading(true);
     try {
       if (!user) return;
       await createInvestmentFund({
-        name: current.name,
-        description: current.description,
+        name: fundData.name,
+        description: fundData.description,
         user: user,
-        image: current.image, // Include image field
+        image: fundData.image, // Include image field
       });
       toast.success("Tạo quỹ thành công");
       setCurrent(null);
@@ -482,17 +490,18 @@ export default function MyInvestmentsPage() {
     }
   };
 
-  const handleUpdate = async () => {
-    if (!current?.name || !current?.description || !(current as any).id) return;
-    const id = (current as any).id as string;
+  const handleUpdate = async (data?: EditableFund) => {
+    const fundData = data || current;
+    if (!fundData?.name || !fundData?.description || !(fundData as any).id) return;
+    const id = (fundData as any).id as string;
     setActionLoading(true);
     try {
       if (!user) return;
       await updateInvestmentFund(id, {
-        name: current.name,
-        description: current.description,
+        name: fundData.name,
+        description: fundData.description,
         user: user,
-        image: current.image, // Include image field
+        image: fundData.image, // Include image field
       });
       toast.success("Cập nhật quỹ thành công");
       setCurrent(null);
@@ -694,9 +703,9 @@ export default function MyInvestmentsPage() {
                     {(item: any) => {
                       const getImageUrl = () => {
                         if (item.image && typeof item.image === 'object') {
-                          return item.image.url;
+                          return getFullMediaUrl(item.image.url as string);
                         }
-                        return null;
+                        return undefined;
                       };
 
                       return (

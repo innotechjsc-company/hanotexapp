@@ -58,6 +58,7 @@ import { useUser } from "@/store/auth";
 import toastService from "@/services/toastService";
 import { FileUpload, type FileUploadItem } from "@/components/input";
 import downloadService from "@/services/downloadService";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -315,7 +316,7 @@ export default function FundraisingProjectDetailPage() {
         investment_ratio: values.investment_ratio ?? project.share_percentage,
         investment_type: values.investment_type,
         investment_benefits: values.investment_benefits,
-        documents: fileAttachments,
+        documents: fileAttachments?.length > 0 ? fileAttachments : undefined,
         status: ProjectProposeStatus.Pending,
       } as any);
       // Show success toast
@@ -370,7 +371,14 @@ export default function FundraisingProjectDetailPage() {
       {/* Project Header and Key Statistics */}
       <Card className="mb-6 shadow-sm gap-6">
         <div className="text-center mb-6">
-          <TrendingUp className="w-16 h-16 mx-auto mb-4 text-green-600" />
+         {/* image */}
+         {project.image && typeof project.image === 'object' && project.image.url ? (
+          <img src={getFullMediaUrl(project.image.url)} alt={project.name} className="object-cover w-full h-64 mb-4" />
+         ) : (
+          <div className="h-64 bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center">
+            <TrendingUp className="w-16 h-16 mx-auto mb-4 text-green-600" />
+            </div>
+         )}
           <Title level={1}>{project.name}</Title>
           <Paragraph className="text-lg text-gray-600 max-w-3xl mx-auto">
             {project.description}
