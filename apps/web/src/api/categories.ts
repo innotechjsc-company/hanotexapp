@@ -56,7 +56,11 @@ export async function getCategoryById(id: string): Promise<Category> {
     `${API_ENDPOINTS.CATEGORIES}/${id}`
   );
   const anyRes = res as any;
-  const item = anyRes?.data ?? anyRes?.doc ?? (Array.isArray(anyRes?.docs) ? anyRes.docs[0] : undefined) ?? anyRes;
+  const item =
+    anyRes?.data ??
+    anyRes?.doc ??
+    (Array.isArray(anyRes?.docs) ? anyRes.docs[0] : undefined) ??
+    anyRes;
   return item as Category;
 }
 
