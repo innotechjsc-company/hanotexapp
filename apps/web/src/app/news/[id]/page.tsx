@@ -20,6 +20,7 @@ import Link from "next/link";
 import { getNewsById, getNews } from "@/api/news";
 import { News } from "@/types/news";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import LikeButton from "@/components/ui/LikeButton";
 import ShareModal from "@/components/ui/ShareModal";
@@ -48,33 +49,11 @@ function getImageUrl(imageData: any): string {
     "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop&crop=center";
 
   if (!imageData?.url) {
-    console.log("No image found in news data, using fallback");
     return fallbackUrl;
   }
 
-  const originalUrl = imageData.url;
-  console.log("Original image URL from API:", originalUrl);
-  console.log("PAYLOAD_API_BASE_URL:", PAYLOAD_API_BASE_URL);
-
-  // Check if URL is already absolute (starts with http/https)
-  if (originalUrl.startsWith("http")) {
-    console.log("Using absolute URL:", originalUrl);
-    return originalUrl;
-  }
-
-  // For relative URLs, construct proper URL
-  const baseUrl = PAYLOAD_API_BASE_URL?.replace("/api", ""); // Remove /api from base URL
-
-  // Handle different URL formats
-  let cleanUrl = originalUrl;
-  if (!cleanUrl.startsWith("/")) {
-    cleanUrl = `/${cleanUrl}`;
-  }
-
-  const constructedUrl = `${baseUrl}${cleanUrl}`;
-  console.log("Constructed relative URL:", constructedUrl);
-
-  return constructedUrl;
+  // Always normalize via CMS-aware helper
+  return getFullMediaUrl(imageData.url);
 }
 
 // Helper function to convert News to display format
@@ -232,6 +211,25 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
     );
   }
 
+  // Split HTML content roughly in the middle by paragraph boundaries
+  const splitHtmlContent = (
+    html: string
+  ): { first: string; second: string } => {
+    if (!html) return { first: "", second: "" };
+    const parts = html.split(/<\/p>/i);
+    if (parts.length <= 1) {
+      const midpoint = Math.ceil(html.length / 2);
+      return { first: html.slice(0, midpoint), second: html.slice(midpoint) };
+    }
+    const midpoint = Math.ceil(parts.length / 2);
+    const first = parts.slice(0, midpoint).join("</p>");
+    const second = parts.slice(midpoint).join("</p>");
+    return { first, second };
+  };
+
+  const { first: contentFirstHalf, second: contentSecondHalf } =
+    splitHtmlContent(article.content);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -331,7 +329,17 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
         {/* Article Content */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <div className="prose prose-lg max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            <div dangerouslySetInnerHTML={{ __html: contentFirstHalf }} />
+            {article.featured_image && (
+              <div className="my-6">
+                <ImageWithFallback
+                  src={article.featured_image}
+                  alt={article.title}
+                  className="w-full rounded-xl object-cover"
+                />
+              </div>
+            )}
+            <div dangerouslySetInnerHTML={{ __html: contentSecondHalf }} />
           </div>
         </div>
       </div>

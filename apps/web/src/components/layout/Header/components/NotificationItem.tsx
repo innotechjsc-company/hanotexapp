@@ -70,7 +70,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     } else {
       // Development: use env variable
-      const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL;
+      const baseUrl = "https://hanotex.vn";
       targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 
