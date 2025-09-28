@@ -337,16 +337,6 @@ export const useAuth = () => {
 export const useUser = () => {
   const user = useAuthStore((state) => state.user);
 
-  // Debug logging for user state changes
-  if (process.env.NODE_ENV === "development") {
-    console.log("useUser - current user:", {
-      id: user?.id,
-      email: user?.email,
-      hasUser: !!user,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
   return user;
 };
 
