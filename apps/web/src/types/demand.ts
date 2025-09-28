@@ -10,13 +10,15 @@ export interface Demand {
   user: string | User;
   trl_level: number;
   option: string;
-  start_date: string;
-  end_date: string;
   option_technology: string;
   option_rule: string;
   from_price: number;
   to_price: number;
   cooperation: string;
+  start_date: string;
+  end_date: string;
+  image: string | Media;
+  status: "pending" | "approved" | "rejected" | "active" | "inactive";
   documents: Media[];
   createdAt?: string;
   updatedAt?: string;

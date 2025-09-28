@@ -10,9 +10,16 @@ import {
   ArrowRight,
   Clock,
   ExternalLink,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
 import { getNews } from "@/api/news";
-import { getUpcomingEvents } from "@/api/events";
+import {
+  getUpcomingEvents,
+  registerForEvent,
+  checkUserRegistration,
+} from "@/api/events";
+import { useAuth } from "@/store/auth";
 
 type EventItem = {
   id: string | number;
@@ -28,6 +35,7 @@ type EventItem = {
 
 export default function NewsEventsSection() {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const [news, setNews] = useState<
     Array<{
       id: string | number;
@@ -39,6 +47,14 @@ export default function NewsEventsSection() {
     }>
   >([]);
   const [events, setEvents] = useState<EventItem[]>([]);
+  const [eventRegistrations, setEventRegistrations] = useState<
+    Record<string, boolean>
+  >({});
+  const [registering, setRegistering] = useState<Record<string, boolean>>({});
+  const [showRegisterModal, setShowRegisterModal] = useState<{
+    eventId: string | null;
+    show: boolean;
+  }>({ eventId: null, show: false });
 
   const estimateReadTime = (content: string): string => {
     if (!content) return "1 phút";
@@ -140,6 +156,69 @@ export default function NewsEventsSection() {
     };
     fetchLatestEvents();
   }, []);
+
+  // Check registration status for all events
+  useEffect(() => {
+    if (isAuthenticated && user?.id && events.length > 0) {
+      const checkAllRegistrations = async () => {
+        const registrations: Record<string, boolean> = {};
+        for (const event of events) {
+          try {
+            const isRegistered = await checkUserRegistration(
+              event.id.toString(),
+              user.id
+            );
+            registrations[event.id.toString()] = isRegistered;
+          } catch (error) {
+            console.error(
+              `Error checking registration for event ${event.id}:`,
+              error
+            );
+            registrations[event.id.toString()] = false;
+          }
+        }
+        setEventRegistrations(registrations);
+      };
+      checkAllRegistrations();
+    }
+  }, [isAuthenticated, user?.id, events]);
+
+  // Handle registration
+  const handleRegister = (eventId: string) => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    setShowRegisterModal({ eventId, show: true });
+  };
+
+  // Confirm registration
+  const confirmRegister = async () => {
+    if (!user?.id || !showRegisterModal.eventId) return;
+
+    try {
+      setRegistering((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: true,
+      }));
+      await registerForEvent(showRegisterModal.eventId, user.id);
+
+      setEventRegistrations((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: true,
+      }));
+
+      setShowRegisterModal({ eventId: null, show: false });
+    } catch (err) {
+      console.error("Error registering for event:", err);
+      alert("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+    } finally {
+      setRegistering((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: false,
+      }));
+    }
+  };
 
   return (
     <section className="py-20 bg-white">
@@ -288,21 +367,33 @@ export default function NewsEventsSection() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center text-blue-600 font-medium text-sm">
+                    <Link
+                      href={`/events/${event.id}`}
+                      className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    >
                       Chi tiết sự kiện
                       <ArrowRight className="ml-1 h-3 w-3" />
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // Navigate to event detail page
-                        router.push(`/events/${event.id}`);
-                      }}
-                      className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-                    >
-                      Đăng ký tham gia
-                    </button>
+                    </Link>
+                    {eventRegistrations[event.id.toString()] ? (
+                      <div className="flex items-center text-green-600 text-sm">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <span>Đã đăng ký</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleRegister(event.id.toString());
+                        }}
+                        disabled={registering[event.id.toString()]}
+                        className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        {registering[event.id.toString()]
+                          ? "Đang đăng ký..."
+                          : "Đăng ký tham gia"}
+                      </button>
+                    )}
                   </div>
                 </Link>
               ))}
@@ -333,6 +424,50 @@ export default function NewsEventsSection() {
           </div>
         </div>
       </div>
+
+      {/* Register Confirmation Modal */}
+      {showRegisterModal.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Xác nhận đăng ký
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn tham gia sự kiện này không?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    setShowRegisterModal({ eventId: null, show: false })
+                  }
+                  disabled={registering[showRegisterModal.eventId || ""]}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                >
+                  Thoát
+                </button>
+                <button
+                  onClick={confirmRegister}
+                  disabled={registering[showRegisterModal.eventId || ""]}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  {registering[showRegisterModal.eventId || ""] ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    "Xác nhận"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
