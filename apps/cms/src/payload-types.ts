@@ -479,11 +479,12 @@ export interface Technology {
     transfer_option?: string | null;
     id?: string | null;
   }[];
+  image: string | Media;
   pricing: {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
     price_to: number;
-    currency: 'vnd' | 'usd' | 'eur';
+    price_type: 'indicative' | 'floor' | 'firm';
   };
   additional_data?: {
     test_results?: {
@@ -883,6 +884,7 @@ export interface Demand {
   to_price?: number | null;
   cooperation?: string | null;
   start_date?: string | null;
+  image: string | Media;
   end_date?: string | null;
   status?: ('pending' | 'approved' | 'rejected' | 'active' | 'inactive') | null;
   documents?: (string | Media)[] | null;
@@ -1627,13 +1629,14 @@ export interface TechnologiesSelect<T extends boolean = true> {
         transfer_option?: T;
         id?: T;
       };
+  image?: T;
   pricing?:
     | T
     | {
         pricing_type?: T;
         price_from?: T;
         price_to?: T;
-        currency?: T;
+        price_type?: T;
       };
   additional_data?:
     | T
@@ -1828,6 +1831,7 @@ export interface DemandSelect<T extends boolean = true> {
   to_price?: T;
   cooperation?: T;
   start_date?: T;
+  image?: T;
   end_date?: T;
   status?: T;
   documents?: T;

@@ -52,18 +52,35 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   const extractRoutePath = (actionUrl: string): string | null => {
     if (!actionUrl) return null;
 
-    // If actionUrl is already a relative path starting with '/', use it directly
-    if (actionUrl.startsWith('/')) {
-      return actionUrl;
+    // Remove leading slash if present to avoid double slashes
+    const cleanActionUrl = actionUrl.startsWith("/")
+      ? actionUrl.slice(1)
+      : actionUrl;
+
+    // Check if we're in production environment
+    const isProduction = process.env.NODE_ENV === "production";
+
+    // Get current domain to check if we need external navigation
+    const currentDomain = window.location.origin;
+
+    let targetUrl: string;
+    if (isProduction) {
+      // Production: use env variable
+      const baseUrl = "https://hanotex.vn";
+      targetUrl = `${baseUrl}/${cleanActionUrl}`;
+    } else {
+      // Development: use env variable
+      const baseUrl = "https://hanotex.vn";
+      targetUrl = `${baseUrl}/${cleanActionUrl}`;
     }
 
     // If actionUrl is a complete URL, extract the pathname
-    if (actionUrl.startsWith('http://') || actionUrl.startsWith('https://')) {
+    if (actionUrl.startsWith("http://") || actionUrl.startsWith("https://")) {
       try {
         const url = new URL(actionUrl);
         return url.pathname;
       } catch (error) {
-        console.error('Invalid URL format:', actionUrl);
+        console.error("Invalid URL format:", actionUrl);
         return null;
       }
     }

@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Calendar, MapPin, Users, ArrowRight, Clock, ExternalLink } from 'lucide-react';
-import { getAuctions } from '@/api/auctions';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  ArrowRight,
+  Clock,
+  ExternalLink,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { getNews } from "@/api/news";
+import {
+  getUpcomingEvents,
+  registerForEvent,
+  checkUserRegistration,
+} from "@/api/events";
+import { useAuth } from "@/store/auth";
 
 type EventItem = {
   id: string | number;
@@ -18,70 +34,191 @@ type EventItem = {
 };
 
 export default function NewsEventsSection() {
-  // Mock data for news and events
-  const news = [
-    {
-      id: 1,
-      title: 'HANOTEX chính thức ra mắt sàn giao dịch công nghệ',
-      excerpt: 'Sàn giao dịch công nghệ HANOTEX đã chính thức đi vào hoạt động, kết nối các bên trong hệ sinh thái khoa học công nghệ Hà Nội...',
-      date: '15/01/2025',
-      category: 'Tin tức',
-      image: '/images/news-1.jpg',
-      readTime: '3 phút'
-    },
-    {
-      id: 2,
-      title: 'Hội thảo "Xu hướng công nghệ 2025" tại Hà Nội',
-      excerpt: 'Hội thảo quy tụ các chuyên gia hàng đầu trong lĩnh vực AI, IoT và công nghệ sinh học để thảo luận về xu hướng phát triển...',
-      date: '12/01/2025',
-      category: 'Sự kiện',
-      image: '/images/news-2.jpg',
-      readTime: '5 phút'
-    },
-    {
-      id: 3,
-      title: 'Chính sách hỗ trợ doanh nghiệp khởi nghiệp công nghệ',
-      excerpt: 'Thành phố Hà Nội ban hành chính sách mới hỗ trợ doanh nghiệp khởi nghiệp trong lĩnh vực khoa học công nghệ...',
-      date: '10/01/2025',
-      category: 'Chính sách',
-      image: '/images/news-3.jpg',
-      readTime: '4 phút'
-    }
-  ];
-
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const [news, setNews] = useState<
+    Array<{
+      id: string | number;
+      title: string;
+      excerpt: string;
+      date: string;
+      category: string;
+      readTime: string;
+    }>
+  >([]);
   const [events, setEvents] = useState<EventItem[]>([]);
+  const [eventRegistrations, setEventRegistrations] = useState<
+    Record<string, boolean>
+  >({});
+  const [registering, setRegistering] = useState<Record<string, boolean>>({});
+  const [showRegisterModal, setShowRegisterModal] = useState<{
+    eventId: string | null;
+    show: boolean;
+  }>({ eventId: null, show: false });
+
+  const estimateReadTime = (content: string): string => {
+    if (!content) return "1 phút";
+    const words = content
+      .replace(/<[^>]+>/g, " ")
+      .split(/\s+/)
+      .filter(Boolean).length;
+    const minutes = Math.max(1, Math.round(words / 200));
+    return `${minutes} phút`;
+  };
 
   useEffect(() => {
-    const fetchAuctionsAsEvents = async () => {
+    const fetchLatestNews = async () => {
       try {
-        const res = await getAuctions({ status: 'SCHEDULED' }, { limit: 3, sort: 'start_time' });
-        const list = (Array.isArray((res as any).data)
-          ? (res as any).data
-          : Array.isArray((res as any).docs)
-          ? (res as any).docs
-          : []) as any[];
-        const mapped: EventItem[] = list.map((a: any) => {
-          const start = a.start_time ? new Date(a.start_time) : undefined;
-          const end = a.end_time ? new Date(a.end_time) : undefined;
+        // Fetch only 5 latest news items
+        const res = await getNews(
+          {},
+          { limit: 5, page: 1, sort: "-createdAt" }
+        );
+        const list = (
+          Array.isArray((res as any).data)
+            ? (res as any).data
+            : Array.isArray((res as any).docs)
+              ? (res as any).docs
+              : []
+        ) as any[];
+
+        const mapped = list.map((n: any) => ({
+          id: n.id || n._id,
+          title: n.title,
+          excerpt: n.content
+            ? n.content.length > 160
+              ? n.content.substring(0, 160) + "..."
+              : n.content
+            : "",
+          date: n.createdAt
+            ? new Date(n.createdAt).toLocaleDateString("vi-VN")
+            : "",
+          category: "Tin tức",
+          readTime: estimateReadTime(n.content || ""),
+        }));
+        setNews(mapped);
+      } catch (e) {
+        console.error("Error fetching news:", e);
+        setNews([]);
+      }
+    };
+
+    fetchLatestNews();
+
+    const fetchLatestEvents = async () => {
+      try {
+        // Fetch 5 upcoming events
+        const res = await getUpcomingEvents({ limit: 5, sort: "start_date" });
+        const list = (
+          Array.isArray((res as any).data)
+            ? (res as any).data
+            : Array.isArray((res as any).docs)
+              ? (res as any).docs
+              : []
+        ) as any[];
+
+        const mapped: EventItem[] = list.map((event: any) => {
+          const start = event.start_date
+            ? new Date(event.start_date)
+            : undefined;
+          const end = event.end_date ? new Date(event.end_date) : undefined;
           return {
-            id: a.id || a._id || Math.random(),
-            title: `Phiên đấu giá: ${typeof a.technology === 'object' ? a.technology?.title || 'Công nghệ' : 'Công nghệ'}`,
-            description: `Phiên đấu giá kiểu ${a.auction_type || ''}`.trim(),
-            date: start ? start.toLocaleDateString('vi-VN') : undefined,
-            time: start && end ? `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : undefined,
-            location: 'Trực tuyến',
-            attendees: undefined,
-            type: 'Đấu giá',
-            status: 'Sắp diễn ra',
+            id: event.id || event._id || Math.random(),
+            title: event.title || "Sự kiện",
+            description: event.content
+              ? event.content.length > 100
+                ? event.content.substring(0, 100) + "..."
+                : event.content
+              : undefined,
+            date: start ? start.toLocaleDateString("vi-VN") : undefined,
+            time:
+              start && end
+                ? `${start.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} - ${end.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`
+                : start
+                  ? start.toLocaleTimeString("vi-VN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : undefined,
+            location: event.location || "TBA",
+            attendees: event.max_attendees
+              ? `${event.max_attendees} người`
+              : undefined,
+            type: "Sự kiện",
+            status: "Sắp diễn ra",
           };
         });
         setEvents(mapped);
       } catch (e) {
-        console.error('Error fetching events:', e);
+        console.error("Error fetching events:", e);
+        setEvents([]);
       }
     };
-    fetchAuctionsAsEvents();
+    fetchLatestEvents();
   }, []);
+
+  // Check registration status for all events
+  useEffect(() => {
+    if (isAuthenticated && user?.id && events.length > 0) {
+      const checkAllRegistrations = async () => {
+        const registrations: Record<string, boolean> = {};
+        for (const event of events) {
+          try {
+            const isRegistered = await checkUserRegistration(
+              event.id.toString(),
+              user.id
+            );
+            registrations[event.id.toString()] = isRegistered;
+          } catch (error) {
+            console.error(
+              `Error checking registration for event ${event.id}:`,
+              error
+            );
+            registrations[event.id.toString()] = false;
+          }
+        }
+        setEventRegistrations(registrations);
+      };
+      checkAllRegistrations();
+    }
+  }, [isAuthenticated, user?.id, events]);
+
+  // Handle registration
+  const handleRegister = (eventId: string) => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+    setShowRegisterModal({ eventId, show: true });
+  };
+
+  // Confirm registration
+  const confirmRegister = async () => {
+    if (!user?.id || !showRegisterModal.eventId) return;
+
+    try {
+      setRegistering((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: true,
+      }));
+      await registerForEvent(showRegisterModal.eventId, user.id);
+
+      setEventRegistrations((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: true,
+      }));
+
+      setShowRegisterModal({ eventId: null, show: false });
+    } catch (err) {
+      console.error("Error registering for event:", err);
+      alert("Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
+    } finally {
+      setRegistering((prev) => ({
+        ...prev,
+        [showRegisterModal.eventId!]: false,
+      }));
+    }
+  };
 
   return (
     <section className="py-20 bg-white">
@@ -92,7 +229,8 @@ export default function NewsEventsSection() {
             Tin tức & Sự kiện
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Cập nhật những thông tin mới nhất về khoa học công nghệ và các sự kiện quan trọng
+            Cập nhật những thông tin mới nhất về khoa học công nghệ và các sự
+            kiện quan trọng
           </p>
         </div>
 
@@ -114,9 +252,10 @@ export default function NewsEventsSection() {
 
             <div className="space-y-6">
               {news.map((article) => (
-                <article
+                <Link
                   key={article.id}
-                  className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  href={`/news/${article.id}`}
+                  className="block bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
@@ -142,16 +281,13 @@ export default function NewsEventsSection() {
                         <Calendar className="h-4 w-4 mr-1" />
                         <span>{article.date}</span>
                       </div>
-                      <Link
-                        href={`/news/${article.id}`}
-                        className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm"
-                      >
+                      <span className="inline-flex items-center text-blue-600 font-medium text-sm">
                         Đọc thêm
                         <ExternalLink className="ml-1 h-3 w-3" />
-                      </Link>
+                      </span>
                     </div>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           </div>
@@ -173,9 +309,10 @@ export default function NewsEventsSection() {
 
             <div className="space-y-6">
               {events.map((event) => (
-                <div
+                <Link
                   key={event.id}
-                  className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
+                  href={`/events/${event.id}`}
+                  className="block bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
@@ -237,11 +374,28 @@ export default function NewsEventsSection() {
                       Chi tiết sự kiện
                       <ArrowRight className="ml-1 h-3 w-3" />
                     </Link>
-                    <button className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
-                      Đăng ký tham gia
-                    </button>
+                    {eventRegistrations[event.id.toString()] ? (
+                      <div className="flex items-center text-green-600 text-sm">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <span>Đã đăng ký</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleRegister(event.id.toString());
+                        }}
+                        disabled={registering[event.id.toString()]}
+                        className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        {registering[event.id.toString()]
+                          ? "Đang đăng ký..."
+                          : "Đăng ký tham gia"}
+                      </button>
+                    )}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -254,7 +408,8 @@ export default function NewsEventsSection() {
               Đăng ký nhận thông báo
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Nhận thông báo về tin tức mới nhất và sự kiện sắp diễn ra trong lĩnh vực khoa học công nghệ
+              Nhận thông báo về tin tức mới nhất và sự kiện sắp diễn ra trong
+              lĩnh vực khoa học công nghệ
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input
@@ -269,6 +424,50 @@ export default function NewsEventsSection() {
           </div>
         </div>
       </div>
+
+      {/* Register Confirmation Modal */}
+      {showRegisterModal.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Xác nhận đăng ký
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn tham gia sự kiện này không?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    setShowRegisterModal({ eventId: null, show: false })
+                  }
+                  disabled={registering[showRegisterModal.eventId || ""]}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                >
+                  Thoát
+                </button>
+                <button
+                  onClick={confirmRegister}
+                  disabled={registering[showRegisterModal.eventId || ""]}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400 transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  {registering[showRegisterModal.eventId || ""] ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    "Xác nhận"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

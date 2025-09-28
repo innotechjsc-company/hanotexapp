@@ -51,7 +51,7 @@ export interface PricingInfo {
   pricing_type: PricingType // Kiểu định giá
   price_from: number // Giá từ
   price_to: number // Giá đến
-  currency: Currency // Đơn vị tiền tệ
+  price_type: 'indicative' | 'floor' | 'firm' // Loại giá
 }
 
 // Dữ liệu bổ sung
@@ -66,6 +66,7 @@ export interface Technology {
   id?: ID // ID duy nhất của công nghệ
   title: string // Tiêu đề công nghệ
   documents?: Media[] // Danh sách ID tài liệu/media liên quan
+  image?: Media // Ảnh đại diện công nghệ
   category?: ID | Category // ID danh mục/lĩnh vực
   trl_level: ID | TRL // ID mức TRL
   description?: string // Tóm tắt công khai

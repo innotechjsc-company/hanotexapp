@@ -55,7 +55,7 @@ export const ContractLogs: CollectionConfig = {
         // Chỉ tạo notification khi contract log được tạo mới
         if (operation === 'create') {
           try {
-            console.log('🎯 Creating notifications for contract log:', doc.id)
+            console.log('🎯 Creating notifications for contract log:', doc)
 
             // Lấy thông tin contract với depth để populate user data
             const contract = await req.payload.findByID({
@@ -126,7 +126,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `technologies/negotiations/${technologyId}`,
+                action_url: `technologies/negotiations/${doc?.technology_propose?.id}`,
                 priority: 'normal',
               })
             }
@@ -138,7 +138,7 @@ export const ContractLogs: CollectionConfig = {
                 title: `Cập nhật tiến độ hợp đồng`,
                 message: `${senderName} đã cập nhật tiến độ hợp đồng: "${logContent}"`,
                 type: 'contract',
-                action_url: `technologies/negotiations/${technologyId}`,
+                action_url: `technologies/negotiations/${doc?.technology_propose?.id}`,
                 priority: 'normal',
               })
             }

@@ -4,6 +4,8 @@ import { Button, Card, Tag, Avatar, Typography, Space } from "antd";
 import Link from "next/link";
 import type { ViewMode } from "../hooks/useTechnologyList";
 import { Technology } from "@/types";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
+import { useEffect } from "react";
 
 const { Text, Paragraph } = Typography;
 
@@ -86,16 +88,6 @@ function getPricing(item: any) {
   };
 }
 
-function getThumb(item: any): string | undefined {
-  // Try common fields: cover, image, documents[0]
-  const cover = item?.cover?.url || item?.cover?.src;
-  const image = item?.image?.url || item?.image?.src;
-  const doc0 = Array.isArray(item?.documents)
-    ? item.documents[0]?.url || item.documents[0]?.src
-    : undefined;
-  return (cover || image || doc0) as string | undefined;
-}
-
 // Helper function to get Vietnamese status label
 function getVietnameseStatusLabel(status?: string): string {
   if (!status) return "";
@@ -124,7 +116,7 @@ export default function TechnologyCard({
   const ownerType = getOwnerType(item);
   const territoryInfo = getTerritoryInfo(item);
   const { price, currency } = getPricing(item);
-  const thumb = getThumb(item);
+  const thumb = getFullMediaUrl(item?.image?.url as string);
   const href = item?.id ? `/technologies/${item.id}` : "#";
 
   const StatusLabel = getVietnameseStatusLabel(item?.status);

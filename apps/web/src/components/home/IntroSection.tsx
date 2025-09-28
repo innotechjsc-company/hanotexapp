@@ -1,30 +1,35 @@
-'use client';
+"use client";
 
-import { Building2, Target, Users, Lightbulb } from 'lucide-react';
-import AnimatedIcon from '@/components/ui/AnimatedIcon';
+import { Building2, Target, Users, Lightbulb } from "lucide-react";
+import AnimatedIcon from "@/components/ui/AnimatedIcon";
+import Link from "next/link";
 
 export default function IntroSection() {
   const features = [
     {
       icon: Building2,
-      title: 'HANOTEX là gì?',
-      description: 'Sàn giao dịch công nghệ trực tuyến của thành phố Hà Nội, kết nối các bên trong hệ sinh thái khoa học công nghệ.'
+      title: "HANOTEX là gì?",
+      description:
+        "Sàn giao dịch công nghệ trực tuyến của thành phố Hà Nội, kết nối các bên trong hệ sinh thái khoa học công nghệ.",
     },
     {
       icon: Target,
-      title: 'Mục tiêu',
-      description: 'Thúc đẩy chuyển giao công nghệ, thương mại hóa kết quả nghiên cứu và tạo cầu nối giữa cung - cầu công nghệ.'
+      title: "Mục tiêu",
+      description:
+        "Thúc đẩy chuyển giao công nghệ, thương mại hóa kết quả nghiên cứu và tạo cầu nối giữa cung - cầu công nghệ.",
     },
     {
       icon: Users,
-      title: 'Đối tượng',
-      description: 'Doanh nghiệp, viện nghiên cứu, trường đại học, cá nhân nghiên cứu và các tổ chức khoa học công nghệ.'
+      title: "Đối tượng",
+      description:
+        "Doanh nghiệp, viện nghiên cứu, trường đại học, cá nhân nghiên cứu và các tổ chức khoa học công nghệ.",
     },
     {
       icon: Lightbulb,
-      title: 'Lợi ích',
-      description: 'Tăng cường hiệu quả chuyển giao công nghệ, mở rộng thị trường và tạo cơ hội hợp tác đổi mới sáng tạo.'
-    }
+      title: "Lợi ích",
+      description:
+        "Tăng cường hiệu quả chuyển giao công nghệ, mở rộng thị trường và tạo cơ hội hợp tác đổi mới sáng tạo.",
+    },
   ];
 
   return (
@@ -35,27 +40,43 @@ export default function IntroSection() {
             Về HANOTEX
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Nền tảng kết nối toàn diện cho hệ sinh thái khoa học công nghệ Hà Nội
+            Nền tảng kết nối toàn diện cho hệ sinh thái khoa học công nghệ Hà
+            Nội
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all duration-300 group"
+              className="h-72 md:h-80 text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all duration-300 group"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4 group-hover:shadow-lg transition-shadow duration-300">
-                <AnimatedIcon animation="bounce" delay={index * 200} size="lg">
-                  <feature.icon className="h-8 w-8" />
-                </AnimatedIcon>
+              <div className="flex flex-col h-full">
+                <div className="inline-flex self-center items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4 group-hover:shadow-lg transition-shadow duration-300">
+                  <AnimatedIcon
+                    animation="bounce"
+                    delay={index * 200}
+                    size="lg"
+                  >
+                    <feature.icon className="h-8 w-8" />
+                  </AnimatedIcon>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden text-ellipsis whitespace-nowrap">
+                  {feature.title}
+                </h3>
+                <p
+                  className="text-gray-600 leading-relaxed"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {feature.description}
+                </p>
+                <div className="mt-auto" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {feature.description}
-              </p>
             </div>
           ))}
         </div>
@@ -67,16 +88,23 @@ export default function IntroSection() {
               Tham gia ngay để kết nối và phát triển
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Hãy trở thành một phần của hệ sinh thái khoa học công nghệ Hà Nội. 
-              Đăng ký tài khoản miễn phí và bắt đầu hành trình đổi mới sáng tạo của bạn.
+              Hãy trở thành một phần của hệ sinh thái khoa học công nghệ Hà Nội.
+              Đăng ký tài khoản miễn phí và bắt đầu hành trình đổi mới sáng tạo
+              của bạn.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500">
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              >
                 Đăng ký miễn phí
-              </button>
-              <button className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500">
+              </Link>
+              <Link
+                href="/about"
+                className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 focus:ring-blue-500"
+              >
                 Tìm hiểu thêm
-              </button>
+              </Link>
             </div>
           </div>
         </div>

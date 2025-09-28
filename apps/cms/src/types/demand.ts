@@ -3,6 +3,7 @@ import { Category } from './categories'
 import { User } from './users'
 
 export interface Demand {
+  id?: string
   title: string
   description: string
   category: string | Category
@@ -16,5 +17,9 @@ export interface Demand {
   cooperation: string
   start_date: string
   end_date: string
+  image: string | Media
+  status: 'pending' | 'approved' | 'rejected' | 'active' | 'inactive'
   documents: Media[]
+  createdAt?: string
+  updatedAt?: string
 }

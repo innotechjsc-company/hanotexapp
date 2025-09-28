@@ -12,7 +12,7 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import type { PricingInfo, Currency, PricingType } from "@/types/technologies";
+import type { PricingInfo, PricingType } from "@/types/technologies";
 
 interface PricingDesiredInitialData {
   pricing?: Partial<PricingInfo>;
@@ -46,8 +46,8 @@ export const PricingDesiredSection = forwardRef<
       ? String(initialData.pricing.price_to)
       : ""
   );
-  const [currency, setCurrency] = useState<Currency>(
-    initialData?.pricing?.currency || ("vnd" as Currency)
+  const [priceType, setPriceType] = useState<"indicative" | "floor" | "firm">(
+    (initialData?.pricing as any)?.price_type || "indicative"
   );
 
   useImperativeHandle(ref, () => ({
@@ -55,12 +55,12 @@ export const PricingDesiredSection = forwardRef<
       pricing_type: pricingType,
       price_from: priceFrom ? Number(priceFrom) : 0,
       price_to: priceTo ? Number(priceTo) : 0,
-      currency,
+      price_type: priceType,
     }),
     reset: () => {
       setPriceFrom("");
       setPriceTo("");
-      setCurrency("vnd");
+      setPriceType("indicative");
     },
   }));
 
@@ -71,10 +71,10 @@ export const PricingDesiredSection = forwardRef<
         pricing_type: pricingType,
         price_from: priceFrom ? Number(priceFrom) : 0,
         price_to: priceTo ? Number(priceTo) : 0,
-        currency,
+        price_type: priceType,
       },
     });
-  }, [onChange, pricingType, priceFrom, priceTo, currency]);
+  }, [onChange, pricingType, priceFrom, priceTo, priceType]);
 
   // Options
   const investmentStages = [
@@ -83,10 +83,10 @@ export const PricingDesiredSection = forwardRef<
     { value: "growth_strategic", label: "Growth/Strategic (TRL 7–9)" },
   ];
 
-  const currencies = [
-    { value: "vnd", label: "VND" },
-    { value: "usd", label: "USD" },
-    { value: "eur", label: "EUR" },
+  const priceTypes = [
+    { value: "indicative", label: "Indicative" },
+    { value: "floor", label: "Floor" },
+    { value: "firm", label: "Firm" },
   ];
 
   return (
@@ -141,14 +141,16 @@ export const PricingDesiredSection = forwardRef<
               classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
             />
             <Select
-              label="Tiền tệ"
-              selectedKeys={currency ? [currency] : []}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
+              label="Loại giá"
+              selectedKeys={priceType ? [priceType] : []}
+              onChange={(e) =>
+                setPriceType(e.target.value as "indicative" | "floor" | "firm")
+              }
               variant="bordered"
               classNames={{ label: "text-sm font-medium text-gray-700 mb-1" }}
             >
-              {currencies.map((c) => (
-                <SelectItem key={c.value}>{c.label}</SelectItem>
+              {priceTypes.map((pt) => (
+                <SelectItem key={pt.value}>{pt.label}</SelectItem>
               ))}
             </Select>
           </div>

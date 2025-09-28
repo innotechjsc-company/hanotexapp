@@ -3,6 +3,7 @@
 import { Button, Card, Tag, Space, Tooltip } from "antd";
 import { Eye, Edit, Trash2, FileText } from "lucide-react";
 import { Demand } from "@/types/demand";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 interface DemandCardProps {
   demand: Demand;
@@ -48,7 +49,7 @@ export default function DemandCard({
 }: DemandCardProps) {
   const categoryName = getCategoryName(demand);
   const priceRange = getPriceRange(demand);
-  const thumb = getThumb(demand);
+  const thumb = getFullMediaUrl(demand.image as string);
   const createdAt = demand.createdAt
     ? new Date(demand.createdAt).toLocaleDateString("vi-VN")
     : "—";
