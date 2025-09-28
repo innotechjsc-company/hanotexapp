@@ -24,6 +24,7 @@ import {
   CheckCircle,
   X as XIcon,
 } from "lucide-react";
+import downloadService from "@/services/downloadService";
 import { contractLogsApi } from "@/api/contract-logs";
 import { contractsApi } from "@/api/contracts";
 import { useUser } from "@/store/auth";
@@ -426,13 +427,16 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
                             <Button
                               type="text"
                               icon={<Download size={14} />}
-                              onClick={() => {
-                                const a = document.createElement("a");
-                                a.href = docUrl;
-                                a.download = fileName || "document";
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
+                              onClick={async () => {
+                                try {
+                                  await downloadService.downloadByUrl(
+                                    docUrl,
+                                    fileName || "document"
+                                  );
+                                } catch (error) {
+                                  console.error("Download failed:", error);
+                                  message.error("Không thể tải xuống file");
+                                }
                               }}
                             >
                               Tải xuống

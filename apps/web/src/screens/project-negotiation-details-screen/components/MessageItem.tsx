@@ -14,6 +14,7 @@ import { negotiatingMessageApi } from "@/api/negotiating-messages";
 import type { Media } from "@/types/media1";
 import { useUser } from "@/store/auth";
 import { OfferStatus } from "@/types/offer";
+import downloadService from "@/services/downloadService";
 
 const { Text } = Typography;
 
@@ -131,17 +132,15 @@ const FileAttachment: React.FC<{
     return "📎";
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const url = getFileUrl();
     if (url && url !== "#") {
-      // Create a temporary link element to trigger download
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = getFileName();
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        await downloadService.downloadByUrl(url, getFileName());
+      } catch (error) {
+        console.error("Download failed:", error);
+        antdMessage.error("Không thể tải xuống file");
+      }
     }
   };
 

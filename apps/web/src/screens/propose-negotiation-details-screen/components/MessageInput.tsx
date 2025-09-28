@@ -40,9 +40,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {/* File Attachments Preview */}
         {attachments.length > 0 && (
           <div className="mb-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <Text className="text-xs font-semibold text-gray-600 mb-2 block uppercase tracking-wide">
-              File đính kèm ({attachments.length})
-            </Text>
+            <div className="flex items-center justify-between mb-2">
+              <Text className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                File đính kèm ({attachments.length}/10)
+              </Text>
+              {uploadingFiles && (
+                <Text className="text-xs text-blue-600 font-medium">
+                  Đang tải lên...
+                </Text>
+              )}
+            </div>
             <div className="space-y-2">
               {attachments.map((file, index) => (
                 <div
@@ -83,12 +90,28 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               beforeUpload={onFileUpload}
               showUploadList={false}
               multiple
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
+              disabled={uploadingFiles || sendingMessage || attachments.length >= 10}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.odt,.ods,.odp,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.ico,.mp4,.avi,.mov,.wmv,.flv,.webm,.mkv,.m4v"
             >
               <Button
                 type="text"
                 icon={<Paperclip size={16} />}
-                className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 border-none rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                disabled={uploadingFiles || sendingMessage || attachments.length >= 10}
+                title={
+                  uploadingFiles 
+                    ? "Đang tải lên file..."
+                    : attachments.length >= 10
+                      ? "Chỉ có thể đính kèm tối đa 10 file"
+                      : "Chọn file để đính kèm (tối đa 50MB mỗi file)"
+                }
+                className={`
+                  border-none rounded-full w-10 h-10 flex items-center justify-center transition-colors
+                  ${
+                    uploadingFiles || sendingMessage || attachments.length >= 10
+                      ? "text-gray-300 bg-gray-100 cursor-not-allowed"
+                      : "text-gray-500 hover:text-blue-500 hover:bg-blue-50"
+                  }
+                `}
               />
             </Upload>
 
@@ -144,7 +167,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         {hasPendingOffer && isProposalCreator && (
           <div className="px-3 pb-2">
             <Text className="text-xs text-amber-600">
-              Bạn đã gửi đề xuất, vui lòng chờ bên bán xác nhận
+              Bạn đã gử̉i đề xuất, vui lòng chờ bên bán xác nhận
+            </Text>
+          </div>
+        )}
+        
+        {/* File upload guidelines */}
+        {attachments.length === 0 && !uploadingFiles && (
+          <div className="px-3 pb-2">
+            <Text className="text-xs text-gray-500">
+              📎 Hỗ trợ: PDF, Word, Excel, PowerPoint, hình ảnh, video (tối đa 50MB/file, 10 file/tin nhắn)
             </Text>
           </div>
         )}

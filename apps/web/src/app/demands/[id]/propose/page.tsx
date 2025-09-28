@@ -34,11 +34,12 @@ import { createPropose } from "@/api/propose";
 import { createNotification } from "@/api/noti";
 import { uploadFile } from "@/api/media";
 import { getDemandById } from "@/api/demands";
-import { getTechnologies } from "@/api/technologies";
+import { getTechnologies, getTechnologiesByUser } from "@/api/technologies";
 import { Media, MediaType } from "@/types/media1";
 import { Technology } from "@/types/technologies";
 import { Demand } from "@/types/demand";
 import { de } from "date-fns/locale";
+import toastService from "@/services/toastService";
 
 // Interface for form data (before submission)
 // This is different from Propose interface which is for API data
@@ -101,25 +102,49 @@ function ProposeSolutionPage() {
     const fetchTechnologies = async () => {
       if (!user?.id) {
         console.log("User not authenticated, skipping technology fetch");
+        setUserTechnologies([]);
+        setLoadingTechnologies(false);
+        return;
+      }
+
+      // Validate user ID is a valid string
+      if (typeof user.id !== 'string' || user.id.trim() === '') {
+        console.error("Invalid user ID:", user.id);
+        setError("ID ngườđi dùng không hợp lệ");
+        setUserTechnologies([]);
         setLoadingTechnologies(false);
         return;
       }
 
       setLoadingTechnologies(true);
       try {
-        const response = await getTechnologies(
-          {
-            status: "approved", // Only get approved technologies
-            submitter: user.id, // Only get technologies submitted by current user
-          },
-          { limit: 100 } // Get up to 100 technologies
+        console.log("Fetching technologies for user:", user.id);
+        
+        // Get all technologies by current user
+        const response = await getTechnologiesByUser(
+          user.id,
+          { limit: 100, sort: "-createdAt" }
         );
 
+        console.log("Technologies response:", response);
+        
+        let allTechnologies: Technology[] = [];
         if (response.docs) {
-          setUserTechnologies(response.docs as any as Technology[]);
-        } else {
-          setUserTechnologies([]);
+          allTechnologies = response.docs as any as Technology[];
+        } else if (response.data) {
+          allTechnologies = response.data as any as Technology[];
         }
+        
+        console.log("All user technologies:", allTechnologies);
+        
+        // Filter to only include approved technologies
+        const approvedTechnologies = allTechnologies.filter(
+          (tech: Technology) => tech.status === "approved"
+        );
+        
+        console.log("Approved technologies:", approvedTechnologies);
+        
+        setUserTechnologies(approvedTechnologies);
       } catch (error) {
         console.error("Error fetching technologies:", error);
         setError("Không thể tải danh sách công nghệ. Vui lòng thử lại.");
@@ -207,6 +232,15 @@ function ProposeSolutionPage() {
       }
 
       const createdProposeResponse = await createPropose(proposeData);
+      
+      // Show success notification
+      toastService.success(
+        "Gửi đề xuất thành công!",
+        "Đề xuất của bạn đã được gửi thành công. Chúng tôi sẽ thông báo khi có phản hồi."
+      );
+      
+      // Navigate to demands list
+      router.push("/demands");
     } catch (error: any) {
       console.error("Error submitting proposal:", error);
       setError(
@@ -451,8 +485,8 @@ function ProposeSolutionPage() {
                     loadingTechnologies
                       ? "Đang tải danh sách công nghệ của bạn..."
                       : userTechnologies.length > 0
-                        ? `Có ${userTechnologies.length} công nghệ đã được duyệt của bạn`
-                        : "Bạn chưa có công nghệ nào được duyệt"
+                        ? `Tìm thấy ${userTechnologies.length} công nghệ đã được duyệt thuộc sở hữu của bạn`
+                        : "Bạn chưa có công nghệ nào được duyệt để đề xuất. Hãy tạo và chờ duyệt công nghệ trước khi đề xuất."
                   }
                   startContent={
                     loadingTechnologies ? (
@@ -467,8 +501,8 @@ function ProposeSolutionPage() {
                   ) : (
                     <SelectItem key="no-tech" isDisabled>
                       {loadingTechnologies
-                        ? "Đang tải..."
-                        : "Không có công nghệ đã duyệt nào"}
+                        ? "Đang tải danh sách công nghệ..."
+                        : "Không có công nghệ đã duyệt nào của bạn"}
                     </SelectItem>
                   )}
                 </Select>

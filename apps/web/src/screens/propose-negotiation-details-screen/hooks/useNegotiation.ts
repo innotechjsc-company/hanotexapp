@@ -327,61 +327,124 @@ export const useNegotiation = ({
       if (pendingMessage.attachments.length > 0) {
         try {
           setUploadingFiles(true);
-          console.log("Uploading files:", pendingMessage.attachments.length);
+          console.log("Starting file upload process:", {
+            fileCount: pendingMessage.attachments.length,
+            files: pendingMessage.attachments.map(f => ({ name: f.name, size: f.size, type: f.type }))
+          });
 
           // Show progress message
-          message.loading("Đang tải lên file đính kèm...", 0);
+          const loadingMessage = message.loading(
+            `Đang tải lên ${pendingMessage.attachments.length} file...`, 
+            0
+          );
 
-          // Upload files individually with proper type detection
-          const uploadPromises = pendingMessage.attachments.map(
-            async (file) => {
-              const fileType = detectFileType(file);
-              const fileName = file.name;
+          // Upload files individually with detailed error handling
+          const uploadResults = [];
+          
+          for (let i = 0; i < pendingMessage.attachments.length; i++) {
+            const file = pendingMessage.attachments[i];
+            const fileType = detectFileType(file);
+            const fileName = file.name;
+            
+            try {
+              console.log(`Uploading file ${i + 1}/${pendingMessage.attachments.length}: ${fileName} as ${fileType}`);
+              
+              // Update progress message
+              loadingMessage();
+              message.loading(
+                `Đang tải lên file ${i + 1}/${pendingMessage.attachments.length}: ${fileName}`, 
+                0
+              );
 
-              console.log(`Uploading ${fileName} as ${fileType}`);
-
-              // Generate appropriate alt text based on file type
+              // Generate appropriate alt text and caption based on file type
               let altText = "";
+              let caption = "";
+              
               switch (fileType) {
                 case MediaType.IMAGE:
                   altText = `Hình ảnh đính kèm: ${fileName}`;
+                  caption = `Hình ảnh được đính kèm trong tin nhắn đàm phán`;
                   break;
                 case MediaType.VIDEO:
                   altText = `Video đính kèm: ${fileName}`;
+                  caption = `Video được đính kèm trong tin nhắn đàm phán`;
                   break;
                 case MediaType.DOCUMENT:
                   altText = `Tài liệu đính kèm: ${fileName}`;
+                  caption = `Tài liệu được đính kèm trong tin nhắn đàm phán`;
                   break;
                 default:
                   altText = `File đính kèm: ${fileName}`;
+                  caption = `File được đính kèm trong tin nhắn đàm phán`;
               }
 
-              return await uploadFile(file, {
+              const uploadedMedia = await uploadFile(file, {
                 type: fileType,
                 alt: altText,
+                caption: caption
               });
+              
+              uploadResults.push({
+                file: fileName,
+                media: uploadedMedia,
+                success: true
+              });
+              
+              console.log(`Successfully uploaded: ${fileName}`, uploadedMedia);
+              
+            } catch (fileError) {
+              console.error(`Failed to upload file: ${fileName}`, fileError);
+              uploadResults.push({
+                file: fileName,
+                error: fileError,
+                success: false
+              });
+              
+              // Continue with other files instead of stopping completely
             }
-          );
-
-          const uploadedMedia = await Promise.all(uploadPromises);
-
-          // Extract IDs from uploaded media
+          }
+          
+          // Process upload results
+          const successfulUploads = uploadResults.filter(r => r.success);
+          const failedUploads = uploadResults.filter(r => !r.success);
+          
+          if (successfulUploads.length === 0) {
+            throw new Error("Không có file nào được tải lên thành công");
+          }
+          
+          // Extract IDs from successful uploads
           documentIds.push(
-            ...uploadedMedia.map((media) => media.id.toString())
+            ...successfulUploads.map((result) => (result as any).media.id.toString())
           );
 
-          console.log("Files uploaded successfully:", {
-            count: uploadedMedia.length,
-            ids: documentIds,
+          console.log("Upload process completed:", {
+            total: uploadResults.length,
+            successful: successfulUploads.length,
+            failed: failedUploads.length,
+            documentIds: documentIds
           });
 
           // Hide loading message
           message.destroy();
-          message.success(`Đã tải lên ${uploadedMedia.length} file thành công`);
+          
+          // Show appropriate success/warning message
+          if (failedUploads.length === 0) {
+            message.success(`Đã tải lên thành công ${successfulUploads.length} file`);
+          } else {
+            message.warning(
+              `Đã tải lên ${successfulUploads.length}/${uploadResults.length} file. ` +
+              `${failedUploads.length} file không thể tải lên.`
+            );
+            console.warn("Failed uploads:", failedUploads);
+          }
+          
         } catch (uploadError) {
-          console.error("Failed to upload files:", uploadError);
+          console.error("File upload process failed:", uploadError);
           message.destroy();
-          message.error("Không thể tải lên file đính kèm");
+          const errorMessage = uploadError instanceof Error 
+            ? uploadError.message 
+            : "Lỗi không xác định khi tải file";
+          message.error(`Không thể tải lên file đính kèm: ${errorMessage}`);
           return; // Stop execution if file upload fails
         } finally {
           setUploadingFiles(false);
@@ -390,35 +453,130 @@ export const useNegotiation = ({
 
       // Check if user is authenticated
       if (!currentUser?.id) {
-        throw new Error("User not authenticated");
+        throw new Error("Ngườđi dùng chưa đăng nhập");
       }
+
+      // Validate proposal ID
+      if (!proposalId) {
+        throw new Error("Không tìm thấy thông tin đề xuất");
+      }
+
+      console.log("Sending negotiation message:", {
+        userId: currentUser.id,
+        messageLength: pendingMessage.message.length,
+        documentsCount: documentIds.length,
+        proposalId: proposalId
+      });
 
       // Send negotiation using API
       const payload: any = {
         user: currentUser.id,
-        message: pendingMessage.message,
+        message: pendingMessage.message.trim(),
         documents: documentIds,
         propose: proposalId,
       };
-      await negotiatingMessageApi.sendMessage(payload);
+      
+      console.log("API payload:", payload);
+      
+      const sendResult = await negotiatingMessageApi.sendMessage(payload);
+      console.log("Message sent successfully:", sendResult);
 
       // Refresh negotiation data to get the latest data from server
+      console.log("Refreshing messages...");
       await fetchNegotiationMessages();
 
+      // Clean up state
       setAttachments([]);
       setShowConfirmModal(false);
       setPendingMessage({ message: "", attachments: [] });
-      message.success("Đã gửi đàm phán");
+      
+      const messageText = documentIds.length > 0 
+        ? `Đã gử̉i đàm phán với ${documentIds.length} file đính kèm`
+        : "Đã gử̉i đàm phán";
+        
+      message.success(messageText);
     } catch (err) {
       console.error("Failed to send negotiation:", err);
-      message.error("Không thể gửi đàm phán");
+      
+      // Provide more specific error messages
+      let errorMessage = "Không thể gử̉i đàm phán";
+      
+      if (err instanceof Error) {
+        if (err.message.includes("network") || err.message.includes("timeout")) {
+          errorMessage = "Lỗi kết nối mạng. Vui lòng kiểm tra kết nối và thử lại.";
+        } else if (err.message.includes("unauthorized") || err.message.includes("401")) {
+          errorMessage = "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.";
+        } else if (err.message.includes("forbidden") || err.message.includes("403")) {
+          errorMessage = "Bạn không có quyền thực hiện hành động này.";
+        } else if (err.message.includes("validation")) {
+          errorMessage = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.";
+        } else {
+          errorMessage = `Lỗi: ${err.message}`;
+        }
+      }
+      
+      message.error(errorMessage);
+      
+      // Reset upload state if error occurs
+      if (uploadingFiles) {
+        setUploadingFiles(false);
+        message.destroy(); // Clear any loading messages
+      }
     } finally {
       setSendingMessage(false);
+      setUploadingFiles(false);
     }
   };
 
   const handleFileUpload = (file: File) => {
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+    if (file.size > maxSize) {
+      message.error(`File "${file.name}" quá lớn. Kích thước tối đa cho phép là 50MB.`);
+      return false;
+    }
+
+    // Validate file type
+    const allowedExtensions = [
+      '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.rtf',
+      '.csv', '.odt', '.ods', '.odp', '.jpg', '.jpeg', '.png', '.gif', '.bmp', 
+      '.webp', '.svg', '.ico', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', 
+      '.mkv', '.m4v'
+    ];
+    
+    const fileName = file.name.toLowerCase();
+    const isValidType = allowedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!isValidType) {
+      message.error(`Loại file "${file.name}" không được hỗ trợ. Vui lòng chọn file PDF, Word, Excel, PowerPoint, hình ảnh hoặc video.`);
+      return false;
+    }
+
+    // Check for duplicate files
+    const isDuplicate = attachments.some(existing => 
+      existing.name === file.name && existing.size === file.size
+    );
+    
+    if (isDuplicate) {
+      message.warning(`File "${file.name}" đã được thêm vào danh sách đính kèm.`);
+      return false;
+    }
+
+    // Limit number of attachments
+    if (attachments.length >= 10) {
+      message.error('Chỉ có thể đính kèm tối đa 10 file.');
+      return false;
+    }
+
+    console.log('Adding file to attachments:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      detectedType: detectFileType(file)
+    });
+
     setAttachments((prev) => [...prev, file]);
+    message.success(`Đã thêm file "${file.name}" vào danh sách đính kèm.`);
     return false; // Prevent auto upload
   };
 

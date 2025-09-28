@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       description: body.description,
       confidential_detail: body.confidential_detail,
       submitter: user.id,
-      status: body.status || 'pending',
+      status: 'approved',
       visibility_mode: body.visibility_mode || 'public',
     }
 

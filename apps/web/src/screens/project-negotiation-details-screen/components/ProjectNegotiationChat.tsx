@@ -3,6 +3,7 @@ import { Empty, Typography } from "antd";
 import type { ApiNegotiatingMessage } from "@/api/negotiating-messages";
 import { MessageItem } from "./MessageItem";
 import { FileText } from "lucide-react";
+import downloadService from "@/services/downloadService";
 
 const { Text } = Typography;
 
