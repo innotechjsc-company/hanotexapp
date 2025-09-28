@@ -79,7 +79,41 @@ export default function RegisterDemandPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadedImage, setUploadedImage] = useState<Media | null>(null);
 
-  // Redirect if not authenticated
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError("");
+        const response = await getAllCategories();
+        console.log("Categories API response:", response);
+        // Handle the response structure where categories are in 'docs' array
+        const categoriesData = response.docs || response.data || [];
+        console.log("Categories data:", categoriesData);
+        // Ensure we have a flat array of categories
+        setCategories(categoriesData as Category[]);
+      } catch (error: any) {
+        console.error("Error fetching categories:", error);
+        setCategoriesError("Không thể tải danh mục. Vui lòng thử lại.");
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    // Update formData user field when user changes
+    if (user?.id) {
+      setFormData((prev) => ({
+        ...prev,
+        user: user.id as string,
+      }));
+    }
+  }, [user]);
+
+  // Redirect if not authenticated - MOVED AFTER HOOKS
   if (!isAuthenticated) {
     router.push("/auth/login");
     return null;
@@ -260,40 +294,6 @@ export default function RegisterDemandPage() {
       setLoading(false);
     }
   };
-
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        setCategoriesError("");
-        const response = await getAllCategories();
-        console.log("Categories API response:", response);
-        // Handle the response structure where categories are in 'docs' array
-        const categoriesData = response.docs || response.data || [];
-        console.log("Categories data:", categoriesData);
-        // Ensure we have a flat array of categories
-        setCategories(categoriesData as Category[]);
-      } catch (error: any) {
-        console.error("Error fetching categories:", error);
-        setCategoriesError("Không thể tải danh mục. Vui lòng thử lại.");
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    // Update formData user field when user changes
-    if (user?.id) {
-      setFormData((prev) => ({
-        ...prev,
-        user: user.id as string,
-      }));
-    }
-  }, [user]);
 
   // No longer need cleanup since files are only uploaded on successful form submission
 

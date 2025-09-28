@@ -1,4 +1,4 @@
-import {  NextRequest, NextResponse  } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -150,15 +150,13 @@ export async function POST(request: NextRequest) {
     })
 
     return corsResponse({
-        success: true,
-        propose: updatedPropose,
-        propose_type: proposeType,
-        negotiating_message: negotiatingMessage,
-        offer,
-        message: 'Proposal accepted and negotiation started successfully',
-      },
-      { headers: corsHeaders },
-    )
+      success: true,
+      propose: updatedPropose,
+      propose_type: proposeType,
+      negotiating_message: negotiatingMessage,
+      offer,
+      message: 'Proposal accepted and negotiation started successfully',
+    })
   } catch (error) {
     console.error('Accept proposal error:', error)
     return NextResponse.json(

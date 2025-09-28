@@ -7,11 +7,12 @@ import { useAuthActions } from "@/store/auth";
 
 export default function AdminHeader() {
   const user = useUser();
+  const { logout } = useAuthActions();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const handleSignOut = () => {
-    useAuthActions().logout();
+    logout();
   };
 
   return (

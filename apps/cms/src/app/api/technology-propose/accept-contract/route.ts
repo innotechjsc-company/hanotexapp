@@ -1,4 +1,4 @@
-import {  NextRequest, NextResponse  } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -226,15 +226,13 @@ export async function POST(request: NextRequest) {
     }
 
     return corsResponse({
-        success: true,
-        contract: updatedContract,
-        bothAccepted,
-        message: bothAccepted
-          ? 'Contract completed! Both parties have accepted.'
-          : 'Contract acceptance recorded. Waiting for other party.',
-      },
-      { headers: corsHeaders },
-    )
+      success: true,
+      contract: updatedContract,
+      bothAccepted,
+      message: bothAccepted
+        ? 'Contract completed! Both parties have accepted.'
+        : 'Contract acceptance recorded. Waiting for other party.',
+    })
   } catch (error) {
     console.error('Contract acceptance error:', error)
     return NextResponse.json(

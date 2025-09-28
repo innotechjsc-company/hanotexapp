@@ -42,9 +42,8 @@ export async function getCompanyById(id: string): Promise<Company> {
   const response = await payloadApiClient.get<Company>(
     `${API_ENDPOINTS.COMPANIES}/${id}`
   );
-  return (
-    (response as any as { data: Company }).data ?? (response as any as Company)
-  );
+  // PayloadCMS returns direct object for single document, not wrapped in data property
+  return (response as Company) || (response as { data: Company }).data;
 }
 
 /**
@@ -55,9 +54,7 @@ export async function createCompany(data: Partial<Company>): Promise<Company> {
     API_ENDPOINTS.COMPANIES,
     data
   );
-  return (
-    (response as any as { data: Company }).data ?? (response as any as Company)
-  );
+  return (response as Company) || (response as { data: Company }).data;
 }
 
 /**
@@ -71,9 +68,7 @@ export async function updateCompany(
     `${API_ENDPOINTS.COMPANIES}/${id}`,
     data
   );
-  return (
-    (response as any as { data: Company }).data ?? (response as any as Company)
-  );
+  return (response as Company) || (response as { data: Company }).data;
 }
 
 /**

@@ -135,7 +135,7 @@ export default function FeaturedTechnologies() {
                     <div className="text-lg font-bold text-primary-600 mb-4">
                       {formatCurrency(
                         tech.pricing.price_from,
-                        tech.pricing.currency
+                        "VND"
                       )}
                     </div>
                   )}

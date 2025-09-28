@@ -114,11 +114,11 @@ export default function EventDetailPage({
 
     // Determine status based on dates
     const now = new Date();
-    let displayStatus: "upcoming" | "ongoing" | "completed";
+    let displayStatus: "pending" | "in_progress" | "completed" | "cancelled";
     if (now < startDate) {
-      displayStatus = "upcoming";
+      displayStatus = "pending";
     } else if (now >= startDate && now <= endDate) {
-      displayStatus = "ongoing";
+      displayStatus = "in_progress";
     } else {
       displayStatus = "completed";
     }

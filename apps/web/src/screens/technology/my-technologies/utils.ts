@@ -1,24 +1,25 @@
 import type {
   TechnologyStatus,
-  Currency,
   PricingType,
 } from "@/types/technologies";
+import type { Currency } from "@/types/common";
+import toast from "react-hot-toast";
 
 /**
  * Helper function to format currency
  */
-export const formatCurrency = (amount: number, currency: Currency = "vnd") => {
-  if (currency === "vnd") {
+export const formatCurrency = (amount: number, currency: Currency = "VND") => {
+  if (currency === "VND") {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
-  } else if (currency === "usd") {
+  } else if (currency === "USD") {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(amount);
-  } else if (currency === "eur") {
+  } else if (currency === "EUR") {
     return new Intl.NumberFormat("en-EU", {
       style: "currency",
       currency: "EUR",
@@ -104,7 +105,6 @@ export const getPricingTypeLabel = (type: PricingType) => {
  */
 export const checkUserAuth = (user: any, router: any) => {
   if (!user) {
-    const toast = require("react-hot-toast").default;
     toast.error("Vui lòng đăng nhập để tiếp tục");
     router.push("/auth/login");
     return false;

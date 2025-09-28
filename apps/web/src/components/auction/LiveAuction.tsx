@@ -37,8 +37,8 @@ export default function LiveAuction({
 
   // Calculate time remaining
   useEffect(() => {
-    if (auction.end_time) {
-      const endTime = new Date(auction.end_time).getTime();
+    if (auction.endTime) {
+      const endTime = new Date(auction.endTime).getTime();
       const now = new Date().getTime();
       const difference = endTime - now;
 
@@ -66,14 +66,14 @@ export default function LiveAuction({
         }
       }
     }
-  }, [auction.end_time, onAuctionEnd, auction]);
+  }, [auction.endTime, onAuctionEnd, auction]);
 
   // Set minimum bid amount
   useEffect(() => {
     const minBid =
-      currentPrice > 0 ? currentPrice + 1000 : auction.start_price || 0;
+      currentPrice > 0 ? currentPrice + 1000 : auction.startingPrice || 0;
     setBidAmount(minBid);
-  }, [currentPrice, auction.start_price]);
+  }, [currentPrice, auction.startingPrice]);
 
   const handlePlaceBid = async () => {
     if (!user) {
@@ -104,8 +104,13 @@ export default function LiveAuction({
       const newBid: Bid = {
         id: Date.now().toString(),
         auction: auction.id,
-        bidder: user,
+        bidder: user.id || "",
+        bidder_name: user.full_name || user.email || "",
+        bidder_email: user.email || "",
         bid_amount: bidAmount,
+        currency: "VND",
+        bid_type: "MANUAL",
+        status: "ACTIVE",
         bid_time: new Date().toISOString(),
         is_winning: true,
         createdAt: new Date().toISOString(),
@@ -194,12 +199,7 @@ export default function LiveAuction({
                 <p className="text-4xl font-bold text-green-600">
                   ${currentPrice.toLocaleString()}
                 </p>
-                {auction.reserve_price &&
-                  currentPrice < auction.reserve_price && (
-                    <p className="text-sm text-orange-600 mt-2">
-                      Reserve: ${auction.reserve_price.toLocaleString()}
-                    </p>
-                  )}
+                {/* Reserve price functionality would go here if needed */}
               </div>
             </div>
 
@@ -341,13 +341,13 @@ export default function LiveAuction({
           <div>
             <p className="font-medium text-gray-900">Auction Type</p>
             <p className="text-gray-600 capitalize">
-              {auction.auction_type?.toLowerCase().replace("_", " ") || "Standard"}
+              Standard
             </p>
           </div>
           <div>
             <p className="font-medium text-gray-900">Starting Price</p>
             <p className="text-gray-600">
-              ${auction.start_price?.toLocaleString() || "0"}
+              ${auction.startingPrice?.toLocaleString() || "0"}
             </p>
           </div>
         </div>

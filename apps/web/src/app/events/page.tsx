@@ -151,7 +151,7 @@ export default function EventsPage() {
   };
 
   // Helper function to generate Google Maps URL from address
-  const getGoogleMapsUrl = (address: string): string => {
+  const getGoogleMapsUrl = (address: string | null | undefined): string => {
     if (!address || address.trim() === "") {
       return "";
     }
@@ -162,7 +162,7 @@ export default function EventsPage() {
   };
 
   // Helper function to check if address has Google Maps URL
-  const hasValidAddress = (address: string): boolean => {
+  const hasValidAddress = (address: string | null | undefined): boolean => {
     return !!(address && address.trim() !== "");
   };
 
