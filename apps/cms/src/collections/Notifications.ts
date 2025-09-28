@@ -51,6 +51,7 @@ export const Notifications: CollectionConfig = {
         { label: 'Giao dịch', value: 'transaction' },
         { label: 'Công nghệ', value: 'technology' },
         { label: 'Hệ thống', value: 'system' },
+        { label: 'Hợp đồng', value: 'contract' },
       ],
       label: 'Loại thông báo',
       admin: {
