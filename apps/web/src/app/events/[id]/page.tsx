@@ -128,7 +128,11 @@ export default function EventDetailPage({
       description: apiEvent.content,
       date,
       time,
-      status: displayStatus,
+      status: displayStatus as
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "cancelled",
       // Add default location details if location exists
       location_details: apiEvent.location
         ? {
@@ -391,7 +395,7 @@ export default function EventDetailPage({
       <div
         className="relative bg-cover bg-center text-white py-12 md:py-24 lg:py-32"
         style={{
-          backgroundImage: `url(${PAYLOAD_API_BASE_URL?.replace("/api", "")}${event.image_url})`,
+          backgroundImage: `url(https://api.hanotex.vn/${event.image_url})`,
         }}
       >
         {/* Overlay for text readability */}
@@ -426,12 +430,25 @@ export default function EventDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Countdown Timer */}
-            {event.status === "pending" && event.date && event.time && (
-              <CountdownTimer
-                targetDate={`${event.date}T${event.time.split(" - ")[0]}:00`}
-                className="mb-6"
-              />
-            )}
+            {event.date &&
+              event.time &&
+              (() => {
+                const eventStartTime = new Date(
+                  `${event.date}T${event.time.split(" - ")[0]}:00`
+                );
+                const currentTime = new Date();
+                // Chỉ hiển thị countdown nếu sự kiện chưa bắt đầu
+                const shouldShowCountdown = eventStartTime > currentTime;
+
+                return (
+                  shouldShowCountdown && (
+                    <CountdownTimer
+                      targetDate={`${event.date}T${event.time.split(" - ")[0]}:00`}
+                      className="mb-6"
+                    />
+                  )
+                );
+              })()}
 
             {/* Địa điểm với bản đồ */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -633,62 +650,79 @@ export default function EventDetailPage({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Registration Card */}
-            {event.registration_required && event.status === "pending" && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Đăng ký tham gia
-                </h3>
+            {event.registration_required &&
+              (() => {
+                // Kiểm tra thời gian hiện tại có nhỏ hơn thời gian bắt đầu sự kiện không
+                const canRegister =
+                  event.date && event.time
+                    ? (() => {
+                        const eventStartTime = new Date(
+                          `${event.date}T${event.time.split(" - ")[0]}:00`
+                        );
+                        const currentTime = new Date();
+                        return currentTime < eventStartTime;
+                      })()
+                    : true; // Nếu không có thời gian thì cho phép đăng ký
 
-                {event.registration_deadline && (
-                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center">
-                      <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
-                      <p className="text-sm text-yellow-800">
-                        Hạn đăng ký:{" "}
-                        {formatDateTime(event.registration_deadline)}
-                      </p>
+                return (
+                  canRegister && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        Đăng ký tham gia
+                      </h3>
+
+                      {event.registration_deadline && (
+                        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                          <div className="flex items-center">
+                            <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                            <p className="text-sm text-yellow-800">
+                              Hạn đăng ký:{" "}
+                              {formatDateTime(event.registration_deadline)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {!isAuthenticated ? (
+                        <div className="text-center">
+                          <p className="text-gray-600 mb-4">
+                            Bạn cần đăng nhập để đăng ký tham gia sự kiện
+                          </p>
+                          <Link
+                            href="/auth/login"
+                            className="inline-block bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200"
+                          >
+                            Đăng nhập
+                          </Link>
+                        </div>
+                      ) : isRegistered ? (
+                        <div className="text-center">
+                          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                          <p className="text-green-600 font-medium">
+                            Đã đăng ký thành công!
+                          </p>
+
+                          <button
+                            onClick={handleUnregister}
+                            disabled={registering}
+                            className="bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                          >
+                            {registering ? "Đang xử lý..." : "Hủy đăng ký"}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleRegister}
+                          disabled={registering}
+                          className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
+                        >
+                          {registering ? "Đang đăng ký..." : "Đăng ký ngay"}
+                        </button>
+                      )}
                     </div>
-                  </div>
-                )}
-
-                {!isAuthenticated ? (
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-4">
-                      Bạn cần đăng nhập để đăng ký tham gia sự kiện
-                    </p>
-                    <Link
-                      href="/auth/login"
-                      className="inline-block bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 transition-colors duration-200"
-                    >
-                      Đăng nhập
-                    </Link>
-                  </div>
-                ) : isRegistered ? (
-                  <div className="text-center">
-                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                    <p className="text-green-600 font-medium">
-                      Đã đăng ký thành công!
-                    </p>
-
-                    <button
-                      onClick={handleUnregister}
-                      disabled={registering}
-                      className="bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                      {registering ? "Đang xử lý..." : "Hủy đăng ký"}
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleRegister}
-                    disabled={registering}
-                    className="w-full bg-primary-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
-                  >
-                    {registering ? "Đang đăng ký..." : "Đăng ký ngay"}
-                  </button>
-                )}
-              </div>
-            )}
+                  )
+                );
+              })()}
 
             {/* Attendees Info */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

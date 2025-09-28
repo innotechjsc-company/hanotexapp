@@ -32,23 +32,26 @@ interface AuctionDisplay {
   isActive: boolean;
   image?: string;
   category: string;
+  startTime: Date;
   endTime: Date;
-  status?: string;
+  status: "upcoming" | "active" | "ended" | "cancelled";
   startingPrice?: number;
 }
 
 // Tính thời gian còn lại
 const calculateTimeLeft = (endTime: string | Date | undefined): string => {
-  if (!endTime) return 'Không xác định';
-  
+  if (!endTime) return "Không xác định";
+
   const now = new Date().getTime();
   const end = new Date(endTime).getTime();
   const timeLeft = end - now;
 
-  if (timeLeft <= 0) return 'Đã kết thúc';
+  if (timeLeft <= 0) return "Đã kết thúc";
 
   const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const hours = Math.floor(
+    (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
   const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
 
   if (days > 0) {
@@ -58,6 +61,91 @@ const calculateTimeLeft = (endTime: string | Date | undefined): string => {
   } else {
     return `${minutes} phút`;
   }
+};
+
+// Tính trạng thái đấu giá dựa trên thời gian
+const calculateAuctionStatus = (
+  startTime: string | Date | undefined,
+  endTime: string | Date | undefined
+): "upcoming" | "active" | "ended" | "cancelled" => {
+  if (!startTime || !endTime) return "cancelled";
+
+  const now = new Date().getTime();
+  const start = new Date(startTime).getTime();
+  const end = new Date(endTime).getTime();
+
+  if (now < start) {
+    return "upcoming";
+  } else if (now >= start && now < end) {
+    return "active";
+  } else {
+    return "ended";
+  }
+};
+
+// Lấy nhãn trạng thái tiếng Việt
+const getStatusLabel = (
+  status: "upcoming" | "active" | "ended" | "cancelled"
+): string => {
+  switch (status) {
+    case "upcoming":
+      return "Sắp diễn ra";
+    case "active":
+      return "Đang diễn ra";
+    case "ended":
+      return "Đã kết thúc";
+    case "cancelled":
+      return "Đã hủy";
+    default:
+      return "Không xác định";
+  }
+};
+
+// Lấy màu sắc cho trạng thái
+const getStatusColor = (
+  status: "upcoming" | "active" | "ended" | "cancelled"
+): string => {
+  switch (status) {
+    case "upcoming":
+      return "bg-blue-100 text-blue-800";
+    case "active":
+      return "bg-green-100 text-green-800";
+    case "ended":
+      return "bg-gray-100 text-gray-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+// Lấy hình ảnh ngẫu nhiên cho đấu giá - 7 ảnh bất kỳ với nội dung đa dạng
+const getRandomAuctionImage = (auctionId: string): string => {
+  const images = [
+    // Ảnh 1: Cảnh thiên nhiên - Mountain landscape
+    "https://picsum.photos/400/300?random=1",
+    // Ảnh 2: Thành phố hiện đại - City skyline
+    "https://picsum.photos/400/300?random=2",
+    // Ảnh 3: Đồ ăn ngon - Food
+    "https://picsum.photos/400/300?random=3",
+    // Ảnh 4: Nghệ thuật trừu tượng - Abstract art
+    "https://picsum.photos/400/300?random=4",
+    // Ảnh 5: Thể thao - Sports
+    "https://picsum.photos/400/300?random=5",
+    // Ảnh 6: Du lịch - Travel
+    "https://picsum.photos/400/300?random=6",
+    // Ảnh 7: Âm nhạc - Music
+    "https://picsum.photos/400/300?random=7",
+  ];
+
+  // Sử dụng auction ID để tạo seed ngẫu nhiên nhất quán
+  const hash = auctionId.split("").reduce((a, b) => {
+    a = (a << 5) - a + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const index = Math.abs(hash) % images.length;
+  return images[index];
 };
 
 export default function AuctionsPage() {
@@ -83,9 +171,9 @@ export default function AuctionsPage() {
         router.push("/auth/login");
         return;
       }
-      
+
       // Setup API client authentication
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       if (token && isAuthenticated) {
         payloadApiClient.setToken(token);
       }
@@ -112,7 +200,7 @@ export default function AuctionsPage() {
     fetchAuctions();
   }, [searchParams, authChecked, isAuthenticated]);
 
-  // Real-time updates - refresh auction list every 30 seconds
+  // Real-time updates - refresh auction list every 30 seconds and update status every minute
   useEffect(() => {
     // Only set up interval if user is authenticated
     if (!authChecked || !isAuthenticated) {
@@ -123,7 +211,29 @@ export default function AuctionsPage() {
       fetchAuctions();
     }, 30000);
 
-    return () => clearInterval(interval);
+    // Update status every minute without refetching data
+    const statusInterval = setInterval(() => {
+      setAuctions((prevAuctions) =>
+        prevAuctions.map((auction) => {
+          const newStatus = calculateAuctionStatus(
+            auction.startTime,
+            auction.endTime
+          );
+
+          return {
+            ...auction,
+            status: newStatus,
+            isActive: newStatus === "active",
+            timeLeft: calculateTimeLeft(auction.endTime),
+          };
+        })
+      );
+    }, 60000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(statusInterval);
+    };
   }, [authChecked, isAuthenticated]);
 
   // Listen for bid placement events
@@ -135,7 +245,7 @@ export default function AuctionsPage() {
 
     const handleBidPlaced = () => {
       // Refetch auctions when a bid is placed
-      console.log('Bid placed event received, refreshing auctions...');
+      console.log("Bid placed event received, refreshing auctions...");
       fetchAuctions();
     };
 
@@ -152,12 +262,12 @@ export default function AuctionsPage() {
   const fetchAuctions = async () => {
     try {
       setLoading(true);
-      
+
       // Set token for API client if available
       if (token) {
         payloadApiClient.setToken(token);
       }
-      
+
       // Fetch auctions using CMS API client
       const response = await getAuctions({}, { limit: 50, sort: "-createdAt" });
       const auctionsList = response.docs || [];
@@ -167,17 +277,39 @@ export default function AuctionsPage() {
         auctionsList.map(async (auction: any) => {
           try {
             // Fetch bid count for each auction using CMS API client
-            const bidResponse = await getBidsByAuction(auction.id, { limit: 1 });
+            const bidResponse = await getBidsByAuction(auction.id, {
+              limit: 1,
+            });
             let bidCount = bidResponse.totalDocs || 0;
-            let currentBid = auction.currentBid || auction.current_price || auction.startingPrice || auction.start_price || 0;
-            
+            let currentBid =
+              auction.currentBid ||
+              auction.current_price ||
+              auction.startingPrice ||
+              auction.start_price ||
+              0;
+
             // If there are bids, get the highest bid amount
-            if (bidCount > 0 && bidResponse.docs && bidResponse.docs.length > 0) {
-              const highestBid = Math.max(...bidResponse.docs.map((bid: any) => bid.amount || bid.bid_amount || 0));
+            if (
+              bidCount > 0 &&
+              bidResponse.docs &&
+              bidResponse.docs.length > 0
+            ) {
+              const highestBid = Math.max(
+                ...bidResponse.docs.map(
+                  (bid: any) => bid.amount || bid.bid_amount || 0
+                )
+              );
               currentBid = Math.max(currentBid, highestBid);
             }
-            
-            const endTime = new Date(auction.endTime || auction.end_time || Date.now());
+
+            const startTime = new Date(
+              auction.startTime || auction.start_time || Date.now()
+            );
+            const endTime = new Date(
+              auction.endTime || auction.end_time || Date.now()
+            );
+            const calculatedStatus = calculateAuctionStatus(startTime, endTime);
+
             return {
               id: auction.id,
               title: auction.title || "Không có tiêu đề",
@@ -185,28 +317,45 @@ export default function AuctionsPage() {
               bidCount,
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
-              isActive: auction.status === 'ACTIVE',
-              image: auction.image?.url || undefined,
+              isActive: calculatedStatus === "active",
+              image: getRandomAuctionImage(auction.id),
               category: auction.category || "Không phân loại",
+              startTime: startTime,
               endTime: endTime,
-              status: auction.status,
+              status: calculatedStatus,
               startingPrice: auction.startingPrice || auction.start_price || 0,
             };
           } catch (error) {
-            console.warn(`Failed to fetch bids for auction ${auction.id}:`, error);
-            const endTime = new Date(auction.endTime || auction.end_time || Date.now());
+            console.warn(
+              `Failed to fetch bids for auction ${auction.id}:`,
+              error
+            );
+            const startTime = new Date(
+              auction.startTime || auction.start_time || Date.now()
+            );
+            const endTime = new Date(
+              auction.endTime || auction.end_time || Date.now()
+            );
+            const calculatedStatus = calculateAuctionStatus(startTime, endTime);
+
             return {
               id: auction.id,
               title: auction.title || "Không có tiêu đề",
-              currentBid: auction.currentBid || auction.current_price || auction.startingPrice || auction.start_price || 0,
+              currentBid:
+                auction.currentBid ||
+                auction.current_price ||
+                auction.startingPrice ||
+                auction.start_price ||
+                0,
               bidCount: 0,
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
-              isActive: auction.status === 'ACTIVE',
-              image: auction.image?.url || undefined,
+              isActive: calculatedStatus === "active",
+              image: getRandomAuctionImage(auction.id),
               category: auction.category || "Không phân loại",
+              startTime: startTime,
               endTime: endTime,
-              status: auction.status,
+              status: calculatedStatus,
               startingPrice: auction.startingPrice || auction.start_price || 0,
             };
           }
@@ -215,8 +364,10 @@ export default function AuctionsPage() {
 
       // Filter successful results
       const successfulAuctions = auctionsWithBids
-        .filter((result) => result.status === 'fulfilled')
-        .map(result => (result as PromiseFulfilledResult<AuctionDisplay>).value);
+        .filter((result) => result.status === "fulfilled")
+        .map(
+          (result) => (result as PromiseFulfilledResult<AuctionDisplay>).value
+        );
 
       setAuctions(successfulAuctions);
     } catch (error) {
@@ -240,9 +391,9 @@ export default function AuctionsPage() {
 
     const matchesStatus =
       statusFilter === "all" ||
-      (statusFilter === "active" && auction.isActive) ||
-      (statusFilter === "upcoming" && auction.isActive) || // For now, treat upcoming same as active
-      (statusFilter === "ended" && !auction.isActive);
+      (statusFilter === "active" && auction.status === "active") ||
+      (statusFilter === "upcoming" && auction.status === "upcoming") ||
+      (statusFilter === "ended" && auction.status === "ended");
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -381,27 +532,31 @@ export default function AuctionsPage() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                  {auction.image ? (
-                    <img
-                      src={auction.image}
-                      alt={auction.title}
-                      className="w-full h-48 object-cover"
-                      onError={(e) => {
-                        // Hide the broken image and show placeholder
-                        e.currentTarget.style.display = "none";
-                        const placeholder = e.currentTarget
-                          .nextElementSibling as HTMLElement;
-                        if (placeholder) {
-                          placeholder.style.display = "block";
-                        }
-                      }}
-                    />
-                  ) : null}
+                  <img
+                    src={auction.image}
+                    alt={auction.title}
+                    className="w-full h-48 object-cover transition-opacity duration-300"
+                    loading="lazy"
+                    onLoad={(e) => {
+                      // Fade in when loaded
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails to load
+                      e.currentTarget.style.display = "none";
+                      const placeholder = e.currentTarget
+                        .nextElementSibling as HTMLElement;
+                      if (placeholder) {
+                        placeholder.style.display = "block";
+                      }
+                    }}
+                    style={{ opacity: 0 }}
+                  />
 
-                  {/* Placeholder - always rendered but hidden when image exists */}
+                  {/* Placeholder - hidden by default, shown only on image error */}
                   <div
-                    className={`w-full h-48 ${auction.image ? "hidden" : "block"}`}
-                    style={{ display: auction.image ? "none" : "block" }}
+                    className="w-full h-48 hidden"
+                    style={{ display: "none" }}
                   >
                     <AuctionImagePlaceholder
                       category={auction.category}
@@ -412,18 +567,14 @@ export default function AuctionsPage() {
                 </div>
 
                 <div className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                  <div className="flex items-center justify-between mb-3 gap-3">
+                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 flex-1 min-w-0">
                       {auction.title}
                     </h3>
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        auction.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                      className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 ${getStatusColor(auction.status)}`}
                     >
-                      {auction.isActive ? "Đang diễn ra" : "Đã kết thúc"}
+                      {getStatusLabel(auction.status)}
                     </span>
                   </div>
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, Badge, Button, Dropdown, Menu, Spin } from "antd";
-import { Bell, Search as SearchIcon } from "lucide-react";
+import { Bell, Search as SearchIcon, MessageCircle } from "lucide-react";
 import { getUserIconByType, userMenuItemsBase } from "./constants";
 import { UserType } from "@/types";
 import { useUser } from "@/store/auth";
@@ -91,15 +91,18 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   // Handle notification click callback
-  const handleNotificationClick = useCallback((notification: Notification) => {
-    // Close the notification dropdown
-    setIsNotiOpen(false);
-    
-    // Refresh notifications after a short delay to update read status
-    setTimeout(() => {
-      fetchNotifications();
-    }, 500);
-  }, [fetchNotifications]);
+  const handleNotificationClick = useCallback(
+    (notification: Notification) => {
+      // Close the notification dropdown
+      setIsNotiOpen(false);
+
+      // Refresh notifications after a short delay to update read status
+      setTimeout(() => {
+        fetchNotifications();
+      }, 500);
+    },
+    [fetchNotifications]
+  );
 
   const DisplayIcon = getUserIconByType(user?.user_type);
 
@@ -111,6 +114,14 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
         icon={<SearchIcon className="h-5 w-5" />}
         onClick={onOpenSearch}
         aria-label="Tìm kiếm"
+      />
+
+      {/* Messages */}
+      <Button
+        type="text"
+        icon={<MessageCircle className="h-5 w-5" />}
+        onClick={() => router.push("/messages")}
+        aria-label="Tin nhắn"
       />
 
       {/* Notifications */}
@@ -165,9 +176,9 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
                       ) : (
                         <div className="flex flex-col gap-1">
                           {systemNotifications.map((n) => (
-                            <NotificationItem 
-                              key={n.id} 
-                              notification={n} 
+                            <NotificationItem
+                              key={n.id}
+                              notification={n}
                               onNotificationClick={handleNotificationClick}
                             />
                           ))}
@@ -185,9 +196,9 @@ export default function UserMenu({ onLogout, onOpenSearch }: Props) {
                       ) : (
                         <div className="flex flex-col gap-1">
                           {otherNotifications.map((n) => (
-                            <NotificationItem 
-                              key={n.id} 
-                              notification={n} 
+                            <NotificationItem
+                              key={n.id}
+                              notification={n}
                               onNotificationClick={handleNotificationClick}
                             />
                           ))}
