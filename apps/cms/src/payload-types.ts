@@ -645,7 +645,12 @@ export interface Bid {
   id: string;
   auction: string | Auction;
   bidder: string;
+  bidder_name?: string | null;
+  bidder_email?: string | null;
   bid_amount: number;
+  currency?: ('VND' | 'USD' | 'EUR') | null;
+  bid_type?: ('MANUAL' | 'AUTOMATIC') | null;
+  status?: ('ACTIVE' | 'CANCELLED' | 'WON' | 'LOST') | null;
   bid_time: string;
   /**
    * Cho biết đây có phải là lượt đặt giá thắng hiện tại không
@@ -1723,7 +1728,12 @@ export interface AuctionsSelect<T extends boolean = true> {
 export interface BidsSelect<T extends boolean = true> {
   auction?: T;
   bidder?: T;
+  bidder_name?: T;
+  bidder_email?: T;
   bid_amount?: T;
+  currency?: T;
+  bid_type?: T;
+  status?: T;
   bid_time?: T;
   is_winning?: T;
   updatedAt?: T;

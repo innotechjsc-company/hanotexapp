@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import {  NextRequest, NextResponse  } from 'next/server'
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
@@ -148,8 +149,7 @@ export async function POST(request: NextRequest) {
       data: { offer: (offer as { id: string }).id },
     })
 
-    return NextResponse.json(
-      {
+    return corsResponse({
         success: true,
         propose: updatedPropose,
         propose_type: proposeType,

@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {  NextRequest, NextResponse  } from 'next/server';
+import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
 import { getPayload, type CollectionSlug, type Where } from 'payload';
 import config from '@payload-config';
 
@@ -29,6 +30,10 @@ function getUrlPath(collectionName: SearchableCollections): string {
   return urlMapping[collectionName] || collectionName;
 }
 
+export async function OPTIONS() {
+  return handleCORSPreflight()
+}
+
 export async function GET(request: NextRequest) {
   try {
     const payload = await getPayload({ config });
@@ -39,10 +44,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     if (!query || query.trim().length < 2) {
-      return NextResponse.json({
-        success: false,
-        error: 'Query must be at least 2 characters long'
-      }, { status: 400 });
+      return corsErrorResponse('Query must be at least 2 characters long', 400);
     }
 
     const searchQuery = query.trim();
@@ -252,7 +254,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    return corsResponse({
       success: true,
       data: {
         results: sortedResults,
@@ -267,10 +269,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('CMS Search API error:', error);
-    return NextResponse.json({
-      success: false,
-      error: 'Internal server error'
-    }, { status: 500 });
+    return corsErrorResponse('Internal server error', 500);
   }
 }
 

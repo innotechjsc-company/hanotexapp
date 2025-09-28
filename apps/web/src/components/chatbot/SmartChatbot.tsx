@@ -158,7 +158,7 @@ export default function SmartChatbot({
   const getGeneralChatResponse = async (message: string): Promise<string> => {
     try {
       // Call ChatGPT API for general conversation
-      const response = await fetch("/api/chatgpt", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_API_URL || 'http://localhost:4000/api'}/chatgpt`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
