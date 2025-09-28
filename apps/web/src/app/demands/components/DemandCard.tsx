@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DollarSign, Users, Calendar, ArrowRight, Send } from "lucide-react";
 import { Demand } from "@/types/demand";
 import { formatPriceRange } from "@/constants/demands";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 interface DemandCardProps {
   demand: Demand;
@@ -57,6 +58,27 @@ function getStatusText(status: string): string {
   }
 }
 
+function getDemandImage(demand: Demand): string | undefined {
+  // Try to get image from demand.image field
+  if (demand.image) {
+    if (typeof demand.image === "string") {
+      return getFullMediaUrl(demand.image);
+    } else if (typeof demand.image === "object" && demand.image.url) {
+      return getFullMediaUrl(demand.image.url);
+    }
+  }
+
+  // Try to get first image from documents array as fallback
+  if (demand.documents && demand.documents.length > 0) {
+    const firstDoc = demand.documents[0];
+    if (typeof firstDoc === "object" && firstDoc.url) {
+      return getFullMediaUrl(firstDoc.url);
+    }
+  }
+
+  return undefined;
+}
+
 export default function DemandCard({
   demand,
   viewMode,
@@ -66,6 +88,7 @@ export default function DemandCard({
 }: DemandCardProps) {
   const categoryName = getCategoryName(demand);
   const ownerName = getOwnerName(demand);
+  const demandImage = getDemandImage(demand);
 
   if (viewMode === "list") {
     return (
@@ -73,15 +96,23 @@ export default function DemandCard({
         <div className="flex flex-col sm:flex-row">
           {/* Image Section - Left */}
           <div className="w-full sm:w-1/3 flex-shrink-0">
-            <div className="w-full h-48 sm:h-full bg-white flex items-center justify-center relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img
-                  src="/logo.png"
-                  alt="Hanotex"
-                  className="w-16 h-16 object-contain opacity-60"
-                />
+            {demandImage ? (
+              <img
+                src={demandImage}
+                alt={demand.title}
+                className="w-full h-48 sm:h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 sm:h-full bg-white flex items-center justify-center relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src="/logo.png"
+                    alt="Hanotex"
+                    className="w-16 h-16 object-contain opacity-60"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Content */}
@@ -174,15 +205,23 @@ export default function DemandCard({
       hoverable
       className="h-full flex flex-col"
       cover={
-        <div className="w-full h-48 bg-white flex items-center justify-center relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="Hanotex"
-              className="w-16 h-16 object-contain opacity-60"
-            />
+        demandImage ? (
+          <img
+            src={demandImage}
+            alt={demand.title}
+            className="w-full h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-48 bg-white flex items-center justify-center relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="Hanotex"
+                className="w-16 h-16 object-contain opacity-60"
+              />
+            </div>
           </div>
-        </div>
+        )
       }
       bodyStyle={{
         padding: "16px",
