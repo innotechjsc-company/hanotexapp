@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Calendar, ArrowRight, Clock } from "lucide-react";
+import { Calendar, ArrowRight, Clock, User } from "lucide-react";
 import { getNews } from "@/api/news";
 import { getUpcomingEvents } from "@/api/events";
 
@@ -191,15 +191,10 @@ export default function NewsEventsSection() {
                       {article.excerpt}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm">
-                        <img
-                          src={
-                            article.authorAvatar ||
-                            "/images/avatar-placeholder.png"
-                          }
-                          alt={article.author}
-                          className="h-8 w-8 rounded-full mr-3"
-                        />
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                          <User className="h-5 w-5 text-gray-500" />
+                        </div>
                         <span className="font-medium text-gray-700">
                           {article.author}
                         </span>
