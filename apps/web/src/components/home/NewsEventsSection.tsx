@@ -72,17 +72,14 @@ export default function NewsEventsSection() {
           date: n.createdAt
             ? new Date(n.createdAt).toLocaleDateString("vi-VN")
             : `1${5 - index} Tháng 10, 2024`,
-          category: index % 2 === 0 ? "Sự kiện" : "Tin tức",
+          category: "Tin tức",
           readTime: estimateReadTime(n.content || ""),
-          imageUrl:
-            n.imageUrl ||
-            (index % 2 === 0
-              ? "/images/news-event-1.jpg"
-              : "/images/news-event-2.jpg"),
+          imageUrl: n.image?.url,
           subCategory: "Hội nghị Khoa học",
           author: "Ban tổ chức HANOTEX",
           authorAvatar: "/images/hanotex-logo-avatar.png",
         }));
+        console.log("list", list);
         setNews(mapped);
       } catch (e) {
         console.error("Error fetching news:", e);
@@ -169,7 +166,7 @@ export default function NewsEventsSection() {
                 >
                   <div className="relative">
                     <img
-                      src={article.imageUrl || "/images/placeholder-news.jpg"}
+                      src={`https://api.hanotex.vn/${article.imageUrl}`}
                       alt={article.title}
                       className="w-full h-64 object-cover"
                     />
