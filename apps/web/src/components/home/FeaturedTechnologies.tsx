@@ -102,23 +102,22 @@ export default function FeaturedTechnologies() {
                     </div>
                   )}
 
-                  {/* Status Badge */}
-                  <div className="absolute top-4 left-4">
+                  {/* Badges Container */}
+                  <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10 gap-2">
+                    {/* Status Badge */}
                     <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white ${getBadgeColor(tech.category)}`}
+                      className={`inline-block rounded-full px-3 py-1 text-xs font-medium text-white truncate ${getBadgeColor(tech.category)}`}
                     >
                       {getBadgeText(tech.category)}
                     </span>
-                  </div>
 
-                  {/* Trending Badge */}
-                  {tech.trl_level && Number(tech.trl_level) >= 7 && (
-                    <div className="absolute top-4 right-4">
-                      <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-orange-500 text-white">
+                    {/* Trending Badge */}
+                    {tech.trl_level && Number(tech.trl_level) >= 7 && (
+                      <span className="inline-block flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium bg-orange-500 text-white">
                         TRENDING
                       </span>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Content Section */}
@@ -143,8 +142,8 @@ export default function FeaturedTechnologies() {
                       <div>
                         <p className="text-sm font-medium text-gray-900">
                           {typeof tech.submitter === "object" &&
-                          tech.submitter?.email
-                            ? tech.submitter.email.split("@")[0]
+                          tech.submitter.full_name
+                            ? tech.submitter.full_name
                             : "TS. Nguyễn Thị An"}
                         </p>
                       </div>
@@ -207,49 +206,39 @@ export default function FeaturedTechnologies() {
 function getBadgeColor(category: any): string {
   if (!category) return "bg-blue-500";
 
-  const categoryName = typeof category === "object" ? category.name : category;
+  const categoryName =
+    (typeof category === "object" ? category.name : category)?.toLowerCase() ||
+    "";
 
-  switch (categoryName?.toLowerCase()) {
-    case "ai":
-    case "artificial intelligence":
-    case "machine learning":
-      return "bg-purple-500";
-    case "renewable energy":
-    case "green technology":
-      return "bg-green-500";
-    case "biotechnology":
-    case "medical":
-      return "bg-red-500";
-    case "manufacturing":
-    case "industry":
-      return "bg-orange-500";
-    default:
-      return "bg-blue-500";
+  if (
+    categoryName.includes("ai") ||
+    categoryName.includes("machine learning")
+  ) {
+    return "bg-purple-500";
   }
+  if (categoryName.includes("energy") || categoryName.includes("green")) {
+    return "bg-green-500";
+  }
+  if (categoryName.includes("bio") || categoryName.includes("medical")) {
+    return "bg-red-500";
+  }
+  if (
+    categoryName.includes("manufactur") ||
+    categoryName.includes("industry")
+  ) {
+    return "bg-orange-500";
+  }
+  return "bg-blue-500";
 }
 
 function getBadgeText(category: any): string {
-  if (!category) return "AI & Machine Learning";
-
-  const categoryName = typeof category === "object" ? category.name : category;
-
-  switch (categoryName?.toLowerCase()) {
-    case "ai":
-    case "artificial intelligence":
-    case "machine learning":
-      return "AI & Machine Learning";
-    case "renewable energy":
-    case "green technology":
-      return "Năng lượng tái tạo";
-    case "biotechnology":
-    case "medical":
-      return "Công nghệ sinh học";
-    case "manufacturing":
-    case "industry":
-      return "Công nghệ sản xuất";
-    default:
-      return "AI & Machine Learning";
+  if (category && typeof category === "object" && category.name) {
+    return category.name;
   }
+  if (typeof category === "string" && category) {
+    return category;
+  }
+  return "Công nghệ chung";
 }
 
 // Helper function for user type label
