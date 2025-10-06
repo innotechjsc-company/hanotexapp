@@ -75,7 +75,7 @@ export default function SupplyDemandSection() {
                   <Link
                     key={(demand as any).id ?? demand.title}
                     href={`/demands/${(demand as any).id || (demand as any)._id || encodeURIComponent(demand.title)}`}
-                    className="block bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer group"
+                    className="block bg-white rounded-lg transition-all duration-200 cursor-pointer group"
                   >
                     {/* Color bar on the left */}
                     <div className="flex">
