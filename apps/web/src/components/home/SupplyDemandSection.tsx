@@ -151,17 +151,19 @@ export default function SupplyDemandSection() {
           </div>
 
           {/* Right Side - Image */}
-          <div className="relative">
-            <img
-              src="https://ictv.1cdn.vn/2021/09/09/ictvietnam-mediacdn-vn-iot-16310978301901453862004.jpeg"
-              alt="Kết nối thành công"
-              className="rounded-2xl shadow-xl w-full h-auto object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-6 rounded-b-2xl">
-              <h4 className="text-xl font-bold">Kết nối thành công</h4>
-              <p className="text-sm">
-                Hơn 3,200 giao dịch thành công đã được thực hiện
-              </p>
+          <div className="flex items-center justify-center h-full">
+            <div className="relative w-full max-w-lg">
+              <img
+                src="https://ictv.1cdn.vn/2021/09/09/ictvietnam-mediacdn-vn-iot-16310978301901453862004.jpeg"
+                alt="Kết nối thành công"
+                className="rounded-2xl shadow-xl w-full h-auto object-cover aspect-[4/3]"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-6 rounded-b-2xl">
+                <h4 className="text-xl font-bold">Kết nối thành công</h4>
+                <p className="text-sm">
+                  Hơn 3,200 giao dịch thành công đã được thực hiện
+                </p>
+              </div>
             </div>
           </div>
         </div>
