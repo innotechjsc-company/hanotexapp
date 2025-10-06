@@ -97,8 +97,18 @@ export default function FeaturedTechnologies() {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <TrendingUp className="h-16 w-16 text-white/80" />
+                    <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-20 h-20 rounded-full border-2 border-white/50 flex items-center justify-center bg-white/10 backdrop-blur-sm">
+                          <Image
+                            src="/logo.png"
+                            alt="Hanotex"
+                            width={48}
+                            height={48}
+                            className="object-contain opacity-80"
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -128,7 +138,7 @@ export default function FeaturedTechnologies() {
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 mb-4 text-sm line-clamp-3 flex-grow">
+                  <p className="text-gray-600 mb-4 text-sm line-clamp-3">
                     {tech.description ||
                       "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
                   </p>
