@@ -134,26 +134,26 @@ export default function FeaturedTechnologies() {
                       "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
                   </p>
 
-                  {/* Author Info */}
-                  <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
-                      <User className="h-4 w-4 text-gray-600" />
+                  {/* Author & Price */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                        <User className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {typeof tech.submitter === "object" &&
+                          tech.submitter?.email
+                            ? tech.submitter.email.split("@")[0]
+                            : "TS. Nguyễn Thị An"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {typeof tech.submitter === "object" &&
-                        tech.submitter?.email
-                          ? tech.submitter.email.split("@")[0]
-                          : "TS. Nguyễn Thị An"}
-                      </p>
+                    <div className="text-lg font-bold text-blue-600">
+                      {tech.pricing?.price_from
+                        ? formatCurrency(tech.pricing.price_from, "VND")
+                        : "2.5 tỷ VND"}
                     </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="text-2xl font-bold text-blue-600 mb-4">
-                    {tech.pricing?.price_from
-                      ? formatCurrency(tech.pricing.price_from, "VND")
-                      : "2.5 tỷ VND"}
                   </div>
 
                   {/* Footer - Always at bottom */}
