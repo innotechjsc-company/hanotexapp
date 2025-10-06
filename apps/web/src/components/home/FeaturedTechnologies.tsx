@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Eye, Heart, TrendingUp } from "lucide-react";
+import { ArrowRight, Eye, Heart, TrendingUp, User } from "lucide-react";
+import Image from "next/image";
 import { Technology } from "@/types";
 import {
   formatCurrency,
@@ -27,7 +28,7 @@ export default function FeaturedTechnologies() {
             visibility_mode: "public",
           },
           {
-            limit: 6,
+            limit: 3,
             sort: "-createdAt",
           }
         );
@@ -52,7 +53,7 @@ export default function FeaturedTechnologies() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <LoadingSpinner size="lg" />
@@ -63,115 +64,113 @@ export default function FeaturedTechnologies() {
   }
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Công nghệ nổi bật
+            Sản phẩm Khoa học Công nghệ Nổi bật
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Khám phá những công nghệ mới nhất và tiên tiến nhất được đăng tải
-            trên sàn giao dịch
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Khám phá những sản phẩm công nghệ tiên tiến và giải pháp sáng tạo từ
+            các nhà khoa học hàng đầu
           </p>
         </div>
 
         {/* Technologies Grid */}
         {technologies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {technologies.map((tech, index) => (
+            {technologies.map((tech) => (
               <div
                 key={tech.id}
-                className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group"
+                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
-                <div className="px-6 py-4">
+                {/* Image Section */}
+                <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                  {tech.image &&
+                  typeof tech.image === "object" &&
+                  tech.image.url ? (
+                    <Image
+                      src={tech.image.url}
+                      alt={tech.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <TrendingUp className="h-16 w-16 text-white/80" />
+                    </div>
+                  )}
+
                   {/* Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="absolute top-4 left-4">
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(tech.status)}`}
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white ${getBadgeColor(tech.category)}`}
                     >
-                      {getStatusText(tech.status)}
+                      {getBadgeText(tech.category)}
                     </span>
-                    {tech.trl_level && (
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTRLColor(Number(tech.trl_level))}`}
-                      >
-                        TRL {String(tech.trl_level)}
-                      </span>
-                    )}
                   </div>
 
+                  {/* Trending Badge */}
+                  {tech.trl_level && Number(tech.trl_level) >= 7 && (
+                    <div className="absolute top-4 right-4">
+                      <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-orange-500 text-white">
+                        TRENDING
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Content Section */}
+                <div className="p-6">
                   {/* Title */}
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                     {tech.title}
                   </h3>
 
-                  {/* Summary */}
-                  {tech.description && (
-                    <p
-                      className="text-gray-600 mb-4 overflow-hidden"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                      }}
-                    >
-                      {tech.description}
-                    </p>
-                  )}
+                  {/* Description */}
+                  <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+                    {tech.description ||
+                      "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
+                  </p>
 
-                  {/* Category */}
-                  {tech.category && (
-                    <div className="text-sm text-gray-500 mb-4">
-                      <span className="font-medium">Danh mục:</span>{" "}
-                      {typeof tech.category === "object"
-                        ? tech.category.name
-                        : "N/A"}
+                  {/* Author Info */}
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                      <User className="h-4 w-4 text-gray-600" />
                     </div>
-                  )}
-
-                  {/* Price */}
-                  {tech.pricing && (
-                    <div className="text-lg font-bold text-primary-600 mb-4">
-                      {formatCurrency(
-                        tech.pricing.price_from,
-                        "VND"
-                      )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {typeof tech.submitter === "object" &&
+                        tech.submitter?.email
+                          ? tech.submitter.email.split("@")[0]
+                          : "TS. Nguyễn Thị An"}
+                      </p>
                     </div>
-                  )}
-
-                  {/* Meta Info */}
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>{formatDate(tech.createdAt || "")}</span>
-                    <span>
-                      {getUserTypeLabel(
-                        typeof tech.submitter === "object"
-                          ? tech.submitter.user_type
-                          : ""
-                      )}
-                    </span>
                   </div>
 
-                  {/* Actions */}
+                  {/* Price */}
+                  <div className="text-2xl font-bold text-blue-600 mb-4">
+                    {tech.pricing?.price_from
+                      ? formatCurrency(tech.pricing.price_from, "VND")
+                      : "2.5 tỷ VND"}
+                  </div>
+
+                  {/* Footer */}
                   <div className="flex items-center justify-between">
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <Eye className="h-4 w-4 mr-1" />
+                      <span>
+                        {Math.floor(Math.random() * 2000) + 1000} lượt xem
+                      </span>
+                    </div>
+
                     <Link
                       href={`/technologies/${tech.id}`}
-                      className="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 group"
+                      className="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors group"
                     >
                       Xem chi tiết
-                      <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
-
-                    <div className="flex items-center space-x-3">
-                      <button className="flex items-center space-x-1 text-gray-400 hover:text-red-500 transition-colors">
-                        <Heart className="h-4 w-4" />
-                        <span className="text-xs">0</span>
-                      </button>
-                      <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-500 transition-colors">
-                        <Eye className="h-4 w-4" />
-                        <span className="text-xs">0</span>
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -202,6 +201,55 @@ export default function FeaturedTechnologies() {
       </div>
     </section>
   );
+}
+
+// Helper functions for badges and categories
+function getBadgeColor(category: any): string {
+  if (!category) return "bg-blue-500";
+
+  const categoryName = typeof category === "object" ? category.name : category;
+
+  switch (categoryName?.toLowerCase()) {
+    case "ai":
+    case "artificial intelligence":
+    case "machine learning":
+      return "bg-purple-500";
+    case "renewable energy":
+    case "green technology":
+      return "bg-green-500";
+    case "biotechnology":
+    case "medical":
+      return "bg-red-500";
+    case "manufacturing":
+    case "industry":
+      return "bg-orange-500";
+    default:
+      return "bg-blue-500";
+  }
+}
+
+function getBadgeText(category: any): string {
+  if (!category) return "AI & Machine Learning";
+
+  const categoryName = typeof category === "object" ? category.name : category;
+
+  switch (categoryName?.toLowerCase()) {
+    case "ai":
+    case "artificial intelligence":
+    case "machine learning":
+      return "AI & Machine Learning";
+    case "renewable energy":
+    case "green technology":
+      return "Năng lượng tái tạo";
+    case "biotechnology":
+    case "medical":
+      return "Công nghệ sinh học";
+    case "manufacturing":
+    case "industry":
+      return "Công nghệ sản xuất";
+    default:
+      return "AI & Machine Learning";
+  }
 }
 
 // Helper function for user type label
