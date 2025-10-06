@@ -83,7 +83,7 @@ export default function FeaturedTechnologies() {
             {technologies.map((tech) => (
               <div
                 key={tech.id}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
+                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col h-full"
               >
                 {/* Image Section */}
                 <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
@@ -122,14 +122,14 @@ export default function FeaturedTechnologies() {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-grow">
                   {/* Title */}
                   <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                     {tech.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+                  <p className="text-gray-600 mb-4 text-sm line-clamp-3 flex-grow">
                     {tech.description ||
                       "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
                   </p>
@@ -156,8 +156,8 @@ export default function FeaturedTechnologies() {
                       : "2.5 tỷ VND"}
                   </div>
 
-                  {/* Footer */}
-                  <div className="flex items-center justify-between">
+                  {/* Footer - Always at bottom */}
+                  <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center text-gray-500 text-sm">
                       <Eye className="h-4 w-4 mr-1" />
                       <span>
