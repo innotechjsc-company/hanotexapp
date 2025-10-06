@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -80,6 +81,7 @@ const useCountUp = (
 };
 
 export default function HeroSection() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [statsVisible, setStatsVisible] = useState(false);
   const statsRef = useRef<HTMLDivElement>(null);
@@ -196,27 +198,31 @@ export default function HeroSection() {
   const features = [
     {
       icon: Rocket,
-      title: "Đăng ký công nghệ",
+      title: "Tìm kiếm công nghệ",
       description: "Niêm yết sản phẩm KH&CN",
       color: "bg-gradient-to-r from-blue-500 to-blue-600",
+      href: "/technologies",
     },
     {
       icon: Target,
       title: "Tìm kiếm nhu cầu",
       description: "Khám phá cơ hội hợp tác mới",
       color: "bg-gradient-to-r from-green-500 to-green-600",
+      href: "/demands",
     },
     {
       icon: Award,
       title: "Đấu giá công nghệ",
       description: "Tham gia đấu giá minh bạch",
       color: "bg-gradient-to-r from-purple-500 to-purple-600",
+      href: "/auctions",
     },
     {
       icon: Users,
       title: "Kết nối chuyên gia",
       description: "Mạng lưới chuyên gia toàn quốc",
       color: "bg-gradient-to-r from-orange-500 to-orange-600",
+      href: "/contact",
     },
   ];
 
@@ -346,11 +352,12 @@ export default function HeroSection() {
             {features.map((feature, index) => (
               <div
                 key={feature.title}
-                className="group relative"
+                className="group relative cursor-pointer"
                 style={{ animationDelay: `${index * 200}ms` }}
+                onClick={() => router.push(feature.href)}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-all duration-300 hover:scale-105 h-full">
                   <div
                     className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
                   >
