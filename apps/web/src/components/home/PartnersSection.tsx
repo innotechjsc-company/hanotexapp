@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Building2,
   TrendingUp,
@@ -8,6 +8,8 @@ import {
   Globe,
   Award,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { getCompanies } from "@/api/company";
 import { getResearchInstitutions } from "@/api/research-institution";
@@ -28,6 +30,21 @@ export default function PartnersSection() {
   const [funds, setFunds] = useState<FundItem[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const partnersSliderRef = useRef<HTMLDivElement>(null);
+  const fundsSliderRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (
+    ref: React.RefObject<HTMLDivElement>,
+    direction: "left" | "right"
+  ) => {
+    if (ref.current) {
+      const scrollAmount = ref.current.offsetWidth;
+      ref.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
   useEffect(() => {
     const fetchPartnersAndFunds = async () => {
       try {
@@ -116,36 +133,49 @@ export default function PartnersSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {partners.map((partner, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 text-center"
-                onClick={() => {
-                  console.log(partner.url);
-                  if (partner.url) {
-                    window.open(partner.url, "_blank");
-                  }
-                }}
-              >
-                {/* Logo Placeholder */}
-                <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Building2 className="h-10 w-10 text-blue-600" />
+          <div className="relative">
+            <button
+              onClick={() => handleScroll(partnersSliderRef, "left")}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-2 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6 text-gray-700" />
+            </button>
+            <div
+              ref={partnersSliderRef}
+              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+            >
+              {partners.map((partner, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 text-center cursor-pointer"
+                  onClick={() => {
+                    if (partner.url) {
+                      window.open(partner.url, "_blank");
+                    }
+                  }}
+                >
+                  {/* Logo Placeholder */}
+                  <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Building2 className="h-10 w-10 text-blue-600" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                    {partner.name}
+                  </h4>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">
+                    {partner.type}
+                  </span>
+                  <p className="text-gray-600 text-sm h-12 overflow-hidden">
+                    {partner.description || ""}
+                  </p>
                 </div>
-
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  {partner.name}
-                </h4>
-
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">
-                  {partner.type}
-                </span>
-
-                <p className="text-gray-600 text-sm">
-                  {partner.description || ""}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
+            <button
+              onClick={() => handleScroll(partnersSliderRef, "right")}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-2 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-700" />
+            </button>
           </div>
         </div>
 
@@ -160,31 +190,47 @@ export default function PartnersSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {funds.map((fund, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
-              >
-                <div className="flex items-start mb-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                    <TrendingUp className="h-6 w-6 text-green-600" />
+          <div className="relative">
+            <button
+              onClick={() => handleScroll(fundsSliderRef, "left")}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-2 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6 text-gray-700" />
+            </button>
+            <div
+              ref={fundsSliderRef}
+              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+            >
+              {funds.map((fund, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-full sm:w-1/2 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
+                >
+                  <div className="flex items-start mb-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                      <TrendingUp className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                        {fund.name}
+                      </h4>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Quỹ đầu tư
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                      {fund.name}
-                    </h4>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Quỹ đầu tư
-                    </span>
-                  </div>
+                  <p className="text-gray-600 text-sm mb-4 h-16 overflow-hidden">
+                    {fund.description || ""}
+                  </p>
                 </div>
-
-                <p className="text-gray-600 text-sm mb-4">
-                  {fund.description || ""}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
+            <button
+              onClick={() => handleScroll(fundsSliderRef, "right")}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-2 hover:bg-gray-100 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-700" />
+            </button>
           </div>
         </div>
 
