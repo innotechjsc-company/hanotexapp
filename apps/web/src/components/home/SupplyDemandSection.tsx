@@ -72,9 +72,10 @@ export default function SupplyDemandSection() {
             <div className="space-y-4">
               {demands.length > 0 ? (
                 demands.map((demand, index) => (
-                  <div
+                  <Link
                     key={(demand as any).id ?? demand.title}
-                    className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                    href={`/demands/${(demand as any).id || (demand as any)._id || encodeURIComponent(demand.title)}`}
+                    className="block bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer group"
                   >
                     {/* Color bar on the left */}
                     <div className="flex">
@@ -88,7 +89,7 @@ export default function SupplyDemandSection() {
                         }`}
                       />
                       <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                           {demand.title}
                         </h4>
                         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -123,7 +124,7 @@ export default function SupplyDemandSection() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <div className="text-center py-8">
