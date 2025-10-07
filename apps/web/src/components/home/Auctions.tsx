@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Cpu, Rocket, Zap, type LucideIcon } from "lucide-react";
 import { getAuctions } from "@/api/auctions";
+import { type Auction } from "@/types/auctions";
 
 // --- DATA TYPES ---
 interface LiveAuction {
@@ -130,35 +131,30 @@ export default function AuctionsSection() {
           {},
           { limit: 10, sort: "-createdAt" }
         );
-        const auctionsList = response.docs || [];
+        const auctionsList = (response.docs as any[]) || [];
 
-        const processedAuctions = auctionsList.map((auction: any) => {
-          const status = calculateAuctionStatus(
-            auction.start_time,
-            auction.end_time
-          );
-          return { ...auction, status };
-        });
-
-        const liveAuctions = processedAuctions
-          .filter((a) => a.status === "active")
-          .slice(0, 2)
+        const liveAuctions = auctionsList
+          .filter(
+            (a) => calculateAuctionStatus(a.startTime, a.endTime) === "active"
+          )
           .map((a) => ({
             id: a.id,
             title: a.title || "Không có tiêu đề",
-            description: a.description || "Không có mô tả",
+            description: "Mô tả chi tiết có sẵn trong trang đấu giá.",
             imageUrl: getRandomAuctionImage(a.id),
-            currentPrice: a.current_price || a.start_price || 0,
-            endTime: new Date(a.end_time),
+            currentPrice: a.currentBid || a.startingPrice || 0,
+            endTime: new Date(a.endTime),
           }));
 
-        const upcomingAuctions = processedAuctions
-          .filter((a) => a.status === "upcoming")
+        const upcomingAuctions = auctionsList
+          .filter(
+            (a) => calculateAuctionStatus(a.startTime, a.endTime) === "upcoming"
+          )
           .slice(0, 2)
           .map((a) => ({
-            icon: "Cpu", // Default icon, can be customized later
+            icon: "Cpu",
             title: a.title || "Không có tiêu đề",
-            time: `Bắt đầu: ${new Date(a.start_time).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`,
+            time: `Bắt đầu: ${new Date(a.startTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`,
           }));
 
         setData({ liveAuctions, upcomingAuctions });
@@ -215,7 +211,7 @@ export default function AuctionsSection() {
                     )}
                   </div>
                   <div className="space-y-6">
-                    {data.liveAuctions.length > 0 ? (
+                    {data.liveAuctions && data.liveAuctions.length > 0 ? (
                       data.liveAuctions.map((auction) => (
                         <div
                           key={auction.id}
@@ -283,7 +279,8 @@ export default function AuctionsSection() {
                   <div className="bg-purple-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                     <h3 className="text-xl font-bold mb-4">Đấu giá sắp tới</h3>
                     <ul className="space-y-4">
-                      {data.upcomingAuctions.length > 0 ? (
+                      {data.upcomingAuctions &&
+                      data.upcomingAuctions.length > 0 ? (
                         data.upcomingAuctions.map((item) => (
                           <li key={item.title} className="flex items-center">
                             <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
