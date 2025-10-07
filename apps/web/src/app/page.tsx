@@ -24,10 +24,14 @@ export default function HomePage() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <HeroSection />
-
-      {/* Intro Section */}
-      <IntroSection />
-
+      {/* Featured Technologies */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <FeaturedTechnologies />
+      </Suspense>
+      {/* Supply-Demand Section */}
+      <Suspense fallback={<LoadingSpinner />}>
+        <SupplyDemandSection />
+      </Suspense>
       <AuctionsSection />
       <FundsSection />
 
@@ -39,24 +43,14 @@ export default function HomePage() {
       {/* Main Features Section */}
       {/* <MainFeaturesSection /> */}
 
-      {/* Featured Technologies */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <FeaturedTechnologies />
-      </Suspense>
-
-      {/* Supply-Demand Section */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <SupplyDemandSection />
-      </Suspense>
-
-      {/* News & Events Section */}
-      <NewsEventsSection />
-
+      {/* Intro Section */}
+      <IntroSection />
       {/* Partners Section */}
       <PartnersSection />
-
       {/* Stats Section */}
-      {/* <StatsSection /> */}
+      <StatsSection />
+      {/* News & Events Section */}
+      <NewsEventsSection />
 
       {/* How It Works Section */}
       {/* <HowItWorksSection /> */}
