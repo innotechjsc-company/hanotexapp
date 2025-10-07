@@ -1,6 +1,7 @@
 import { ID, DateTimeString } from "./common";
 import { Company } from "./companies";
 import { ResearchInstitution } from "./research-institutions";
+import { Media } from "./media1";
 
 // Phân loại người dùng
 export type UserType = "INDIVIDUAL" | "COMPANY" | "RESEARCH_INSTITUTION"; // Loại hồ sơ người dùng
@@ -18,7 +19,8 @@ export interface User {
   is_active: boolean; // Tài khoản đang hoạt động
 
   // Hồ sơ cá nhân (INDIVIDUAL)
-  full_name?: string; // Họ và tên
+  name?: string; // Họ và tên
+  photo?: Media | string;
   id_number?: string; // Số CMND/CCCD/hộ chiếu
   phone?: string; // Số điện thoại
   profession?: string; // Nghề nghiệp
