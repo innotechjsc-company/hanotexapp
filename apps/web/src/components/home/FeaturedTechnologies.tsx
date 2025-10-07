@@ -14,6 +14,7 @@ import {
 } from "@/lib/utils";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { getTechnologies } from "@/api/technologies";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 export default function FeaturedTechnologies() {
   const [technologies, setTechnologies] = useState<Technology[]>([]);
@@ -40,6 +41,7 @@ export default function FeaturedTechnologies() {
               ? (response as any).docs
               : []
         ) as Technology[];
+        debugger;
         setTechnologies(list);
       } catch (error) {
         console.error("Error fetching featured technologies:", error);
@@ -90,11 +92,10 @@ export default function FeaturedTechnologies() {
                   {tech.image &&
                   typeof tech.image === "object" &&
                   tech.image.url ? (
-                    <Image
-                      src={tech.image.url}
+                    <img
+                      src={getFullMediaUrl(tech.image.url)}
                       alt={tech.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center relative">
@@ -152,9 +153,9 @@ export default function FeaturedTechnologies() {
                       <div>
                         <p className="text-sm font-medium text-gray-900">
                           {typeof tech.submitter === "object" &&
-                          tech.submitter.full_name
-                            ? tech.submitter.full_name
-                            : "TS. Nguyễn Thị An"}
+                          tech.submitter?.full_name
+                            ? tech.submitter?.full_name
+                            : "_"}
                         </p>
                       </div>
                     </div>

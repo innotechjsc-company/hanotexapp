@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BrainCircuit, Rocket, Dna, type LucideIcon } from "lucide-react";
+import { BrainCircuit, Rocket, Dna, User, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { getActiveProjectsAll } from "@/api/projects";
 import type { Project } from "@/types/project";
-import type { Media } from "@/types/media1";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Logo from "@/components/layout/Header/components/Logo";
 
@@ -94,20 +92,12 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
 
         <div className="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            {user && (
-              <Image
-                src={
-                  (user.photo as Media)?.url || "/images/avatars/default.jpg"
-                }
-                alt={user.name || "founder"}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-            )}
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <User className="w-5 h-5 text-gray-600" />
+            </div>
             <div>
               <p className="font-semibold text-gray-800">
-                {user?.name || "Chủ dự án"}
+                {(project?.user as any)?.full_name || "Chủ dự án"}
               </p>
               <p className="text-xs text-gray-500">Founder</p>
             </div>
@@ -220,7 +210,6 @@ export default function FundsSection() {
         setIsLoading(false);
       }
     };
-
     fetchProjects();
   }, []);
 

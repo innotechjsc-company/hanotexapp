@@ -20,6 +20,7 @@ export interface User {
 
   // Hồ sơ cá nhân (INDIVIDUAL)
   name?: string; // Họ và tên
+  full_name?: string; // Họ và tên đầy đủ
   photo?: Media | string;
   id_number?: string; // Số CMND/CCCD/hộ chiếu
   phone?: string; // Số điện thoại
