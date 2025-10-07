@@ -200,10 +200,8 @@ export default function FundsSection() {
           sort: "-goal_money",
         });
         const items = (response.data as any) || (response.docs as any) || [];
-        debugger;
         setProjects(items);
       } catch (err) {
-        debugger;
         setError("Không thể tải danh sách dự án.");
         console.error(err);
       } finally {

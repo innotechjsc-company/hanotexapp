@@ -41,7 +41,6 @@ export default function FeaturedTechnologies() {
               ? (response as any).docs
               : []
         ) as Technology[];
-        debugger;
         setTechnologies(list);
       } catch (error) {
         console.error("Error fetching featured technologies:", error);
