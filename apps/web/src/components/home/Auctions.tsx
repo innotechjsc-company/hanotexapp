@@ -276,7 +276,9 @@ export default function AuctionsSection() {
                         >
                           <span>{stat.label}</span>
                           <span className="font-bold text-white">
-                            {stat.value}
+                            {stat.label === "Phiên đấu giá hoạt động"
+                              ? data.liveAuctions.length
+                              : stat.value}
                           </span>
                         </li>
                       ))}

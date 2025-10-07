@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BrainCircuit, Rocket, Dna, type LucideIcon } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
 import { getActiveProjectsAll } from "@/api/projects";
 import type { Project } from "@/types/project";
@@ -37,11 +38,12 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
       )
     : 0;
 
-  // Mock progress for now as it's not in the API response
   const raisedPercent = Math.floor(Math.random() * (85 - 40 + 1)) + 40;
   const raisedAmount = project.goal_money
     ? ((project.goal_money * raisedPercent) / 100).toLocaleString("vi-VN")
     : 0;
+
+  const projectId = project?.id ?? "";
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col">
@@ -110,11 +112,13 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
               <p className="text-xs text-gray-500">Founder</p>
             </div>
           </div>
-          <button
-            className={`px-6 py-2.5 font-semibold text-white rounded-lg transition-transform hover:scale-105 bg-green-600 hover:bg-green-700`}
-          >
-            Đầu tư ngay
-          </button>
+          <Link href={projectId ? `/funds/fundraising/${projectId}` : "#"}>
+            <button
+              className={`px-6 py-2.5 font-semibold text-white rounded-lg cursor-pointer transition-transform hover:scale-105 bg-green-600 hover:bg-green-700 cursor-pointer`}
+            >
+              Đầu tư ngay
+            </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -143,40 +147,51 @@ const OtherProjectCard = ({
   const Icon = icons[index % icons.length];
   const raisedPercent = Math.floor(Math.random() * (85 - 40 + 1)) + 40;
 
+  const techId = project.technologies?.[0]
+    ? typeof project.technologies[0] === "object"
+      ? project.technologies[0].id
+      : project.technologies[0]
+    : null;
+
   return (
-    <div
-      className={`bg-white p-5 rounded-xl border ${selectedColor.border} flex flex-col relative`}
+    <Link
+      href={techId ? `/technologies/${techId}` : "#"}
+      className="block h-full"
     >
-      <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-lg z-10">
-        <Logo />
-      </div>
-      <div className="flex items-start gap-4">
-        <div
-          className={`w-12 h-12 ${selectedColor.bg} rounded-lg flex items-center justify-center flex-shrink-0`}
-        >
-          <Icon className={`w-6 h-6 ${selectedColor.text}`} />
+      <div
+        className={`bg-white p-5 rounded-xl border ${selectedColor.border} flex flex-col relative h-full hover:shadow-lg transition-shadow cursor-pointer`}
+      >
+        {/* <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-lg z-10">
+          <Logo />
+        </div> */}
+        <div className="flex items-start gap-4">
+          <div
+            className={`w-12 h-12 ${selectedColor.bg} rounded-lg flex items-center justify-center flex-shrink-0`}
+          >
+            <Icon className={`w-6 h-6 ${selectedColor.text}`} />
+          </div>
+          <div>
+            <h4 className="font-bold text-gray-800 line-clamp-1">
+              {project.name}
+            </h4>
+            <p className="text-xs text-gray-500">
+              {(typeof project.technologies?.[0] === "object" &&
+                project.technologies[0]?.title) ||
+                "Công nghệ"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h4 className="font-bold text-gray-800 line-clamp-1">
-            {project.name}
-          </h4>
-          <p className="text-xs text-gray-500">
-            {(typeof project.technologies?.[0] === "object" &&
-              project.technologies[0]?.title) ||
-              "Công nghệ"}
-          </p>
-        </div>
-      </div>
-      <p className="text-sm text-gray-600 my-4 flex-grow line-clamp-3">
-        {project.description}
-      </p>
-      <div className="text-right">
-        <p className={`font-bold ${selectedColor.text} text-lg`}>
-          {project.goal_money?.toLocaleString("vi-VN")} VND
+        <p className="text-sm text-gray-600 my-4 flex-grow line-clamp-3">
+          {project.description}
         </p>
-        <p className="text-xs text-gray-500">{raisedPercent}% hoàn thành</p>
+        <div className="text-right flex justify-between items-center">
+          <p className={`font-bold ${selectedColor.text} text-lg`}>
+            {project.goal_money?.toLocaleString("vi-VN")} VND
+          </p>
+          <p className="text-xs text-gray-500">{raisedPercent}% hoàn thành</p>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -195,8 +210,10 @@ export default function FundsSection() {
           sort: "-goal_money",
         });
         const items = (response.data as any) || (response.docs as any) || [];
+        debugger;
         setProjects(items);
       } catch (err) {
+        debugger;
         setError("Không thể tải danh sách dự án.");
         console.error(err);
       } finally {
@@ -244,7 +261,7 @@ export default function FundsSection() {
                 </h3>
                 <a
                   href="/funds"
-                  className="text-blue-600 font-semibold hover:underline"
+                  className="text-blue-600 font-semibold hover:underline cursor-pointer"
                 >
                   Xem tất cả
                 </a>
