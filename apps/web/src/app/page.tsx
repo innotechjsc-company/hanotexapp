@@ -15,6 +15,7 @@ import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CTASection from "@/components/home/CTASection";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import AuctionsSection from "@/components/home/Auctions";
+import FundsSection from "@/components/home/Funds";
 
 // Metadata moved to layout.tsx since this is now a client component
 
@@ -28,6 +29,7 @@ export default function HomePage() {
       <IntroSection />
 
       <AuctionsSection />
+      <FundsSection />
 
       {/* Categories Section */}
       {/* <Suspense fallback={<LoadingSpinner />}>
