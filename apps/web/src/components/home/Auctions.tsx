@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Cpu, Rocket, Zap, type LucideIcon } from "lucide-react";
 import { getAuctions } from "@/api/auctions";
 import { type Auction } from "@/types/auctions";
+import Link from "next/link";
 
 // --- DATA TYPES ---
 interface LiveAuction {
@@ -16,6 +17,7 @@ interface LiveAuction {
 }
 
 interface UpcomingAuction {
+  id: string;
   icon: string;
   title: string;
   time: string;
@@ -152,6 +154,7 @@ export default function AuctionsSection() {
           )
           .slice(0, 2)
           .map((a) => ({
+            id: a.id,
             icon: "Cpu",
             title: a.title || "Không có tiêu đề",
             time: `Bắt đầu: ${new Date(a.startTime).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`,
@@ -238,9 +241,12 @@ export default function AuctionsSection() {
                                   {formatPrice(auction.currentPrice)}
                                 </p>
                               </div>
-                              <button className="bg-purple-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                              <Link
+                                href={`/auction/${auction.id}`}
+                                className="bg-purple-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                              >
                                 Đặt giá thầu
-                              </button>
+                              </Link>
                             </div>
                           </div>
                           <div className="text-right sm:text-center">
@@ -282,16 +288,21 @@ export default function AuctionsSection() {
                       {data.upcomingAuctions &&
                       data.upcomingAuctions.length > 0 ? (
                         data.upcomingAuctions.map((item) => (
-                          <li key={item.title} className="flex items-center">
-                            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
-                              <DynamicIcon name={item.icon} />
-                            </div>
-                            <div>
-                              <p className="font-semibold">{item.title}</p>
-                              <p className="text-sm text-purple-300">
-                                {item.time}
-                              </p>
-                            </div>
+                          <li key={item.id}>
+                            <Link
+                              href={`/auction/${item.id}`}
+                              className="flex items-center p-2 -m-2 rounded-lg transition-colors hover:bg-purple-700/50"
+                            >
+                              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                                <DynamicIcon name={item.icon} />
+                              </div>
+                              <div>
+                                <p className="font-semibold">{item.title}</p>
+                                <p className="text-sm text-purple-300">
+                                  {item.time}
+                                </p>
+                              </div>
+                            </Link>
                           </li>
                         ))
                       ) : (
