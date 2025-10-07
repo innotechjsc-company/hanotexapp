@@ -457,7 +457,7 @@ export default function HeroSection() {
       </section>
 
       {/* White Section - Call to Action */}
-      <section className="relative bg-white py-20">
+      {/* <section className="relative bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
             Sẵn sàng bắt đầu hành trình công nghệ?
@@ -468,8 +468,8 @@ export default function HeroSection() {
           </p>
 
           {/* CTA Buttons with alternating colors */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <Link
+      {/* <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16"> */}
+      {/* <Link
               href="/auth/register"
               className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-lg"
             >
@@ -485,10 +485,10 @@ export default function HeroSection() {
               Tìm hiểu thêm
               <ArrowRight className="ml-3 h-5 w-5" />
             </Link>
-          </div>
+          </div> */}
 
-          {/* Features Grid */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Features Grid */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 title: "Nền tảng tin cậy",
@@ -525,8 +525,8 @@ export default function HeroSection() {
               </div>
             ))}
           </div> */}
-        </div>
-      </section>
+      {/* </div> */}
+      {/* </section>  */}
     </div>
   );
 }

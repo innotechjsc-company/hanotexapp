@@ -14,6 +14,7 @@ import HowItWorksSection from "@/components/home/HowItWorksSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CTASection from "@/components/home/CTASection";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import AuctionsSection from "@/components/home/Auctions";
 
 // Metadata moved to layout.tsx since this is now a client component
 
@@ -26,13 +27,15 @@ export default function HomePage() {
       {/* Intro Section */}
       <IntroSection />
 
+      <AuctionsSection />
+
       {/* Categories Section */}
-      <Suspense fallback={<LoadingSpinner />}>
+      {/* <Suspense fallback={<LoadingSpinner />}>
         <CategoriesSection />
-      </Suspense>
+      </Suspense> */}
 
       {/* Main Features Section */}
-      <MainFeaturesSection />
+      {/* <MainFeaturesSection /> */}
 
       {/* Featured Technologies */}
       <Suspense fallback={<LoadingSpinner />}>
@@ -51,10 +54,10 @@ export default function HomePage() {
       <PartnersSection />
 
       {/* Stats Section */}
-      <StatsSection />
+      {/* <StatsSection /> */}
 
       {/* How It Works Section */}
-      <HowItWorksSection />
+      {/* <HowItWorksSection /> */}
 
       {/* Testimonials Section */}
       <TestimonialsSection />
