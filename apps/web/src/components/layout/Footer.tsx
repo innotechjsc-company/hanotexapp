@@ -70,8 +70,14 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-gray-300">
-              Nền tảng kết nối toàn diện cho chuyển giao sản phẩm khoa học công
-              nghệ, đáp ứng nhu cầu nghiên cứu và kêu gọi đầu tư.
+              Sàn giao dịch công nghệ trực tuyến do UBND Thành phố Hà Nội chỉ
+              đạo phát triển, Sở Khoa học và Công nghệ Hà Nội trực tiếp quản lý,
+              vận hành.
+              <br />
+              <br />
+              HANOTEX là nền tảng kết nối cung – cầu công nghệ, thúc đẩy thương
+              mại hóa kết quả nghiên cứu và đổi mới sáng tạo, góp phần xây dựng
+              hệ sinh thái khoa học công nghệ bền vững của Thủ đô.
             </p>
             <div className="flex space-x-4">
               {socialLinks.map((social) => (

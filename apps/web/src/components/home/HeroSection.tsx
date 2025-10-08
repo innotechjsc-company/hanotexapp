@@ -126,6 +126,8 @@ export default function HeroSection() {
     {
       icon: TrendingUp,
       label: "Công nghệ",
+      description:
+        "Nguồn công nghệ xác thực từ viện – trường – doanh nghiệp Việt Nam",
       value: 500,
       suffix: "+",
       color: "from-red-500 to-red-600",
@@ -136,6 +138,7 @@ export default function HeroSection() {
       icon: Users,
       label: "Người dùng",
       value: 2500,
+      description: "Mạng lưới chuyên gia – tổ chức – nhà đầu tư đang hoạt động",
       suffix: "+",
       color: "from-red-600 to-red-700",
       animation: "pulse" as const,
@@ -144,6 +147,7 @@ export default function HeroSection() {
     {
       icon: Award,
       label: "Giao dịch",
+      description: "Giao dịch công nghệ, kết nối nhu cầu, đấu giá, chuyển giao",
       value: 150,
       suffix: "+",
       color: "from-red-500 to-red-700",
@@ -153,6 +157,8 @@ export default function HeroSection() {
     {
       icon: Zap,
       label: "TRL Level",
+      description:
+        "Đa dạng mức độ sẵn sàng công nghệ – từ ý tưởng đến thương mại",
       value: 9,
       suffix: "",
       prefix: "1-",
@@ -198,29 +204,33 @@ export default function HeroSection() {
   const features = [
     {
       icon: Rocket,
-      title: "Tìm kiếm công nghệ",
-      description: "Niêm yết sản phẩm KH&CN",
+      title: "Đăng ký & Định danh tài sản KH&CN",
+      description:
+        "Niêm yết và xác thực công nghệ – sản phẩm – kết quả nghiên cứu",
       color: "bg-gradient-to-r from-blue-500 to-blue-600",
       href: "/technologies",
     },
     {
       icon: Target,
-      title: "Tìm kiếm nhu cầu",
-      description: "Khám phá cơ hội hợp tác mới",
+      title: "Tìm đối tác – Kết nối cơ hội",
+      description:
+        "Khám phá nhu cầu chuyển giao, thương mại hóa, hợp tác đầu tư",
       color: "bg-gradient-to-r from-green-500 to-green-600",
       href: "/demands",
     },
     {
       icon: Award,
-      title: "Đấu giá công nghệ",
-      description: "Tham gia đấu giá minh bạch",
+      title: "Giao dịch & Đấu giá công nghệ",
+      description:
+        "Tham gia đấu giá minh bạch, bảo hộ pháp lý và định giá quốc tế",
       color: "bg-gradient-to-r from-purple-500 to-purple-600",
       href: "/auctions",
     },
     {
       icon: Users,
-      title: "Kết nối chuyên gia",
-      description: "Mạng lưới chuyên gia toàn quốc",
+      title: "Mạng lưới chuyên gia KH&CN",
+      description:
+        "Tư vấn, phản biện, đồng hành phát triển giải pháp công nghệ",
       color: "bg-gradient-to-r from-orange-500 to-orange-600",
       href: "/contact",
     },
@@ -316,7 +326,11 @@ export default function HeroSection() {
               Sàn Giao Dịch Công Nghệ Hà Nội
             </h2>
             <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed mb-8">
-              Kết nối tri thức - Hội tụ Công Nghệ - Đổi mới sáng tạo
+              HANOTEX là sàn giao dịch công nghệ Hà Nội do UBND Thành phố Hà Nội
+              chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì
+              triển khai, nhằm kết nối toàn diện giữa công nghệ, tài chính,
+              chuyên gia và chính sách, thúc đẩy thương mại hóa kết quả nghiên
+              cứu và phát triển thị trường KH&CN Thủ đô.{" "}
             </p>
           </div>
 
@@ -332,7 +346,7 @@ export default function HeroSection() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Tìm công nghệ, nhu cầu, chuyên gia, dự án..."
+                      placeholder="Tìm kiếm công nghệ, nhu cầu, chuyên gia, giải pháp đổi mới sáng tạo…"
                       className="w-full pl-16 pr-40 py-5 text-lg bg-transparent text-blue-900 placeholder-blue-700 focus:outline-none focus:ring-0"
                     />
                     <button
@@ -381,7 +395,12 @@ export default function HeroSection() {
               <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
               <div className="relative flex items-center">
                 <Plus className="h-6 w-6 mr-3" />
-                Đăng sản phẩm KH&CN
+                <div className="flex flex-col items-center text-center leading-tight">
+                  <p>Gửi công nghệ lên sàn</p>
+                  <p className="text-sm">
+                    Định danh – Niêm yết – Kết nối đầu tư
+                  </p>
+                </div>
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -391,7 +410,12 @@ export default function HeroSection() {
             >
               <div className="flex items-center">
                 <Target className="h-6 w-6 mr-3" />
-                Đăng nhu cầu KH&CN
+                <div className="flex flex-col items-center text-center leading-tight">
+                  <p>Đăng nhu cầu kết nối</p>
+                  <p className="text-sm">
+                    Tìm giải pháp công nghệ phù hợp doanh nghiệp
+                  </p>
+                </div>
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </div>
             </Link>
@@ -411,11 +435,12 @@ export default function HeroSection() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Công nghệ tiên tiến đang chờ bạn
+              HỆ SINH THÁI CÔNG NGHỆ TIÊN TIẾN ĐANG CHỜ BẠN
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Khám phá hàng trăm công nghệ đột phá từ các viện nghiên cứu, doanh
-              nghiệp và chuyên gia hàng đầu
+              HANOTEX là nền tảng trung gian công nghệ do thành phố trực tiếp
+              định hướng, nơi doanh nghiệp và cá nhân tìm thấy lợi thế cạnh
+              tranh bằng kết nối và đổi mới.
             </p>
           </div>
 
@@ -442,11 +467,18 @@ export default function HeroSection() {
                         <stat.icon className="h-8 w-8" />
                       </AnimatedIcon>
                     </div>
-                    <div className="text-3xl md:text-4xl font-bold text-white mb-2 group-hover:text-red-200 transition-colors duration-300">
-                      {displayValues[index]}
+                    <div className="flex items-baseline justify-center gap-2 leading-tight whitespace-nowrap text-center">
+                      <span className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-red-200 via-white to-red-200 bg-clip-text text-transparent drop-shadow-sm">
+                        {displayValues[index]}
+                      </span>
+                      <span className="text-white/80 text-xs md:text-sm font-semibold uppercase tracking-wide">
+                        {stat.label}
+                      </span>
                     </div>
-                    <div className="text-white/80 text-sm font-medium">
-                      {stat.label}
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <p className="text-white/70 text-xs md:text-sm leading-snug">
+                        {stat.description}
+                      </p>
                     </div>
                   </div>
                 </div>

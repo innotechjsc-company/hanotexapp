@@ -87,35 +87,38 @@ export default function StatsSection() {
           counts.technologies > 0
             ? counts.technologies.toLocaleString("vi-VN")
             : "—",
-        description: "Các công nghệ đa dạng từ nhiều lĩnh vực",
+        description:
+          "Nhiều công nghệ mới, đa ngành nghề đã sẵn sàng chuyển giao",
         color: "text-primary-600",
         bgColor: "bg-primary-100",
       },
       {
         icon: Users,
-        label: "Người dùng đăng ký",
+        label: "Hàng nghìn người dùng đăng ký",
         value: counts.users > 0 ? counts.users.toLocaleString("vi-VN") : "—",
-        description: "Cá nhân, doanh nghiệp và viện nghiên cứu",
+        description:
+          "Gồm các doanh nghiệp, tổ chức nghiên cứu, viện trường và chuyên gia",
         color: "text-secondary-600",
         bgColor: "bg-secondary-100",
       },
       {
         icon: Award,
-        label: "Giao dịch/phiên đấu giá",
+        label: "Phiên giao dịch, đấu giá công nghệ",
         value:
           counts.transactions > 0
             ? counts.transactions.toLocaleString("vi-VN")
             : "—",
-        description: "Các thương vụ/phiên giao dịch công nghệ",
+        description:
+          "Các giao dịch minh bạch, công khai, bảo đảm quyền lợi các bên tham gia",
         color: "text-accent-600",
         bgColor: "bg-accent-100",
       },
       {
         icon: Building,
-        label: "Doanh nghiệp tham gia",
+        label: "Doanh nghiệp trong và ngoài nước tham gia",
         value:
           counts.companies > 0 ? counts.companies.toLocaleString("vi-VN") : "—",
-        description: "Các công ty từ khắp cả nước",
+        description: "Hình thành mạng lưới hợp tác công nghệ rộng mở",
         color: "text-purple-600",
         bgColor: "bg-purple-100",
       },
@@ -123,15 +126,17 @@ export default function StatsSection() {
         icon: Globe,
         label: "Quốc gia kết nối",
         value: "15+",
-        description: "Mở rộng ra thị trường quốc tế",
+        description:
+          "Tăng cường hội nhập và hợp tác quốc tế trong lĩnh vực KH&CN",
         color: "text-blue-600",
         bgColor: "bg-blue-100",
       },
       {
         icon: Crosshair,
-        label: "Tỷ lệ thành công",
+        label: "Tỷ lệ chuyển giao thành công",
         value: "85%",
-        description: "Các dự án chuyển giao thành công",
+        description:
+          "Khẳng định hiệu quả của cơ chế thẩm định – môi giới – hỗ trợ pháp lý trên HANOTEX",
         color: "text-green-600",
         bgColor: "bg-green-100",
       },
@@ -144,11 +149,12 @@ export default function StatsSection() {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Thành tựu nổi bật
+            Giải thưởng & Ghi nhận
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Những con số ấn tượng và thành tựu đạt được trong hành trình phát
-            triển sàn giao dịch công nghệ
+            Những con số phản ánh kết quả bước đầu trong quá trình xây dựng và
+            vận hành Sàn giao dịch công nghệ Hà Nội – HANOTEX, khẳng định vai
+            trò kết nối và thúc đẩy thị trường công nghệ
           </p>
         </div>
 
@@ -167,7 +173,7 @@ export default function StatsSection() {
               <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
                 {stat.value}
               </div>
-              <div className="text-lg font-semibold text-gray-700 mb-2">
+              <div className="text-lg font-semibold text-gray-700 mb-2 leading-snug">
                 {stat.label}
               </div>
               <div className="text-sm text-gray-500">{stat.description}</div>
@@ -179,10 +185,12 @@ export default function StatsSection() {
         <div className="bg-gray-50 rounded-2xl p-8">
           <div className="text-center mb-12">
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              Thành tựu & Giải thưởng
+              Giải thưởng & Ghi nhận
             </h3>
             <p className="text-lg text-gray-600">
-              Những dấu mốc quan trọng trong quá trình phát triển
+              HANOTEX được các tổ chức trong nước và quốc tế ghi nhận với nhiều
+              giải thưởng và chứng nhận uy tín, góp phần củng cố vị thế trung
+              tâm chuyển giao công nghệ của Thủ đô.
             </p>
           </div>
 

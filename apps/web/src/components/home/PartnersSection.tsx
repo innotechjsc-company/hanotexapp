@@ -186,7 +186,11 @@ export default function PartnersSection() {
               Quỹ đầu tư liên kết
             </h3>
             <p className="text-gray-600 text-lg">
-              Các quỹ đầu tư chuyên nghiệp hỗ trợ phát triển dự án công nghệ
+              HANOTEX hợp tác với các quỹ đầu tư trong và ngoài nước, tạo cầu
+              nối tài chính cho doanh nghiệp, viện trường và các dự án nghiên
+              cứu. Đây là nguồn lực quan trọng hỗ trợ hoạt động nghiên cứu –
+              phát triển (R&D), sản xuất thử nghiệm và thương mại hóa công nghệ
+              tại Hà Nội và trên toàn quốc.
             </p>
           </div>
 
