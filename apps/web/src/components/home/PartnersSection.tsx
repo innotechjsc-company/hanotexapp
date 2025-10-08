@@ -142,12 +142,12 @@ export default function PartnersSection() {
             </button>
             <div
               ref={partnersSliderRef}
-              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto space-x-6 pb-4 snap-x snap-mandatory scrollbar-hide"
             >
               {partners.map((partner, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 text-center cursor-pointer"
+                  className="flex-shrink-0 w-80 sm:w-72 lg:w-80 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-4 text-center cursor-pointer"
                   onClick={() => {
                     if (partner.url) {
                       window.open(partner.url, "_blank");
@@ -155,16 +155,16 @@ export default function PartnersSection() {
                   }}
                 >
                   {/* Logo Placeholder */}
-                  <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Building2 className="h-10 w-10 text-blue-600" />
+                  <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <Building2 className="h-8 w-8 text-blue-600" />
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h4 className="text-base font-semibold text-gray-900 mb-2 h-10 leading-5 overflow-hidden line-clamp-2">
                     {partner.name}
                   </h4>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
                     {partner.type}
                   </span>
-                  <p className="text-gray-600 text-sm h-12 overflow-hidden">
+                  <p className="text-gray-600 text-sm h-10 overflow-hidden">
                     {partner.description || ""}
                   </p>
                 </div>
