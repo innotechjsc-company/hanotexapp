@@ -55,15 +55,15 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
           </span>
         </div>
       </div>
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-2xl font-bold text-gray-800 mb-2">
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="text-2xl font-bold text-gray-800 mb-1">
           {project.name}
         </h3>
-        <p className="text-gray-600 mb-6 text-sm leading-relaxed line-clamp-3 flex-grow">
+        <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3 flex-grow overflow-hidden">
           {project.description}
         </p>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6 text-sm">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-4 text-sm">
           <div>
             <p className="text-gray-500">Mục tiêu gọi vốn</p>
             <p className="font-bold text-gray-800 text-base">
@@ -71,13 +71,13 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Đã gọi được</p>
+            <p className="text-gray-500">Tỉ lệ cổ phần chia sẻ</p>
             <p className={`font-bold text-base text-green-500`}>
               {raisedAmount} VND ({raisedPercent}%)
             </p>
           </div>
           <div>
-            <p className="text-gray-500">Số nhà đầu tư</p>
+            <p className="text-gray-500">Số lượng đề xuất</p>
             <p className="font-bold text-gray-800 text-base">
               {Math.floor(Math.random() * 50) + 5}
             </p>
@@ -88,9 +88,9 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
           </div>
         </div>
 
-        <ProgressBar value={raisedPercent} color="green" />
+        {/* <ProgressBar value={raisedPercent} color="green" /> */}
 
-        <div className="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
+        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
               <User className="w-5 h-5 text-gray-600" />
@@ -149,7 +149,7 @@ const OtherProjectCard = ({
       className="block h-full"
     >
       <div
-        className={`bg-white p-5 rounded-xl border ${selectedColor.border} flex flex-col relative h-full hover:shadow-lg transition-shadow cursor-pointer`}
+        className={`bg-white p-4 rounded-xl border ${selectedColor.border} flex flex-col relative h-full hover:shadow-lg transition-shadow cursor-pointer`}
       >
         {/* <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-lg z-10">
           <Logo />
@@ -171,7 +171,7 @@ const OtherProjectCard = ({
             </p>
           </div>
         </div>
-        <p className="text-sm text-gray-600 my-4 flex-grow line-clamp-3">
+        <p className="text-sm text-gray-600 my-3 flex-grow line-clamp-3 overflow-hidden">
           {project.description}
         </p>
         <div className="text-right flex justify-between items-center">
@@ -215,9 +215,9 @@ export default function FundsSection() {
   const otherProjects = projects.slice(2, 5);
 
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-gray-50 py-7">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
             Cơ hội Đầu tư
           </h2>
@@ -235,14 +235,14 @@ export default function FundsSection() {
           <div className="text-center text-red-500">{error}</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {featuredProjects.map((project) => (
                 <FeaturedFundCard key={project.id} project={project} />
               ))}
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-4">
                 <h3 className="text-3xl font-bold text-gray-800">
                   Dự án đầu tư khác
                 </h3>
@@ -253,7 +253,7 @@ export default function FundsSection() {
                   Xem tất cả
                 </a>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {otherProjects.map((project, index) => (
                   <OtherProjectCard
                     key={project.id}

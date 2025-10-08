@@ -180,9 +180,9 @@ export default function AuctionsSection() {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-purple-900 to-indigo-900 text-white">
+    <section className="py-10 bg-gradient-to-br from-purple-900 to-indigo-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Đấu giá Công nghệ
           </h2>
@@ -192,7 +192,7 @@ export default function AuctionsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {loading ? (
             <LoadingSkeleton />
           ) : error ? (
@@ -202,8 +202,8 @@ export default function AuctionsSection() {
           ) : (
             data && (
               <>
-                <div className="lg:col-span-2 bg-white text-gray-900 rounded-2xl p-8 shadow-2xl">
-                  <div className="flex justify-between items-center mb-6">
+                <div className="lg:col-span-2 bg-white text-gray-900 rounded-2xl p-6 shadow-2xl">
+                  <div className="flex justify-between items-center mb-4">
                     <h3 className="text-2xl font-bold">
                       Phiên đấu giá đang diễn ra
                     </h3>
@@ -213,12 +213,12 @@ export default function AuctionsSection() {
                       </span>
                     )}
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {data.liveAuctions && data.liveAuctions.length > 0 ? (
                       data.liveAuctions.map((auction) => (
                         <div
                           key={auction.id}
-                          className="bg-gray-50 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-6"
+                          className="bg-gray-50 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4"
                         >
                           <img
                             src={auction.imageUrl}
@@ -265,10 +265,10 @@ export default function AuctionsSection() {
                   </div>
                 </div>
 
-                <div className="space-y-8">
-                  <div className="bg-purple-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-                    <h3 className="text-xl font-bold mb-4">Thống kê đấu giá</h3>
-                    <ul className="space-y-3">
+                <div className="space-y-6">
+                  <div className="bg-purple-800/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
+                    <h3 className="text-xl font-bold mb-3">Thống kê đấu giá</h3>
+                    <ul className="space-y-2">
                       {auctionStats.map((stat) => (
                         <li
                           key={stat.label}
@@ -284,9 +284,9 @@ export default function AuctionsSection() {
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-purple-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-                    <h3 className="text-xl font-bold mb-4">Đấu giá sắp tới</h3>
-                    <ul className="space-y-4">
+                  <div className="bg-purple-800/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
+                    <h3 className="text-xl font-bold mb-3">Đấu giá sắp tới</h3>
+                    <ul className="space-y-3">
                       {data.upcomingAuctions &&
                       data.upcomingAuctions.length > 0 ? (
                         data.upcomingAuctions.map((item) => (
