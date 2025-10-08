@@ -273,7 +273,7 @@ export default function NewsEventsSection() {
                 Sự kiện sắp tới
               </h3>
               <div className="space-y-5">
-                {events.slice(0, 3).map((event) => {
+                {events.slice(0, 1).map((event) => {
                   const eventDate = event.date
                     ? new Date(event.date.split("/").reverse().join("-"))
                     : new Date();
@@ -327,7 +327,7 @@ export default function NewsEventsSection() {
                   Sự kiện đang diễn ra
                 </h3>
                 <div className="space-y-5">
-                  {ongoingEvents.slice(0, 3).map((event) => {
+                  {ongoingEvents.slice(0, 1).map((event) => {
                     const eventDate = event.date
                       ? new Date(event.date.split("/").reverse().join("-"))
                       : new Date();
