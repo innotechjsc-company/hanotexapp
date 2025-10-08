@@ -69,8 +69,9 @@ export const Project: CollectionConfig = {
     // Thông tin dự án
     {
       name: 'image',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
+      hasMany: false,
       label: 'Ảnh đại diện',
     },
     {
