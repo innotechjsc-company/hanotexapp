@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Calendar, ArrowRight, Clock, User } from "lucide-react";
 import { getNews } from "@/api/news";
-import { getUpcomingEvents } from "@/api/events";
+import { getUpcomingEvents, getOngoingEvents } from "@/api/events";
 
 type EventItem = {
   id: string | number;
@@ -34,6 +34,7 @@ export default function NewsEventsSection() {
     }>
   >([]);
   const [events, setEvents] = useState<EventItem[]>([]);
+  const [ongoingEvents, setOngoingEvents] = useState<EventItem[]>([]);
 
   const estimateReadTime = (content: string): string => {
     if (!content) return "1 phút";
@@ -139,6 +140,57 @@ export default function NewsEventsSection() {
       }
     };
     fetchLatestEvents();
+
+    const fetchOngoingEvents = async () => {
+      try {
+        // Fetch 5 ongoing events
+        const res = await getOngoingEvents({ limit: 5, sort: "start_date" });
+        const list = (
+          Array.isArray((res as any).data)
+            ? (res as any).data
+            : Array.isArray((res as any).docs)
+              ? (res as any).docs
+              : []
+        ) as any[];
+
+        const mapped: EventItem[] = list.map((event: any) => {
+          const start = event.start_date
+            ? new Date(event.start_date)
+            : undefined;
+          const end = event.end_date ? new Date(event.end_date) : undefined;
+          return {
+            id: event.id || event._id || Math.random(),
+            title: event.title || "Sự kiện",
+            description: event.content
+              ? event.content.length > 100
+                ? event.content.substring(0, 100) + "..."
+                : event.content
+              : undefined,
+            date: start ? start.toLocaleDateString("vi-VN") : undefined,
+            time:
+              start && end
+                ? `${start.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })} - ${end.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`
+                : start
+                  ? start.toLocaleTimeString("vi-VN", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : undefined,
+            location: event.location || "TBA",
+            attendees: event.max_attendees
+              ? `${event.max_attendees} người`
+              : undefined,
+            type: "Sự kiện",
+            status: "Đang diễn ra",
+          };
+        });
+        setOngoingEvents(mapped);
+      } catch (e) {
+        console.error("Error fetching ongoing events:", e);
+        setOngoingEvents([]);
+      }
+    };
+    fetchOngoingEvents();
   }, []);
 
   return (
@@ -267,6 +319,61 @@ export default function NewsEventsSection() {
                 Xem tất cả sự kiện
               </Link>
             </div>
+
+            {/* Ongoing Events */}
+            {ongoingEvents.length > 0 && (
+              <div className="bg-orange-50 rounded-xl p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">
+                  Sự kiện đang diễn ra
+                </h3>
+                <div className="space-y-5">
+                  {ongoingEvents.slice(0, 3).map((event) => {
+                    const eventDate = event.date
+                      ? new Date(event.date.split("/").reverse().join("-"))
+                      : new Date();
+                    const day = eventDate.getDate();
+                    const month = `THG ${eventDate.getMonth() + 1}`;
+
+                    return (
+                      <Link
+                        key={event.id}
+                        href={`/events/${event.id}`}
+                        className="flex items-center gap-4 group"
+                      >
+                        <div className="text-center flex-shrink-0">
+                          <div className="bg-orange-600 text-white rounded-t-lg px-3 py-1 text-xs font-bold">
+                            {month}
+                          </div>
+                          <div className="bg-white border border-gray-200 text-orange-600 rounded-b-lg px-3 py-2 text-2xl font-bold">
+                            {day}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800 group-hover:text-orange-600 transition-colors">
+                            {event.title}
+                          </h4>
+                          <p className="text-sm text-gray-500 line-clamp-2">
+                            {event.description}
+                          </p>
+                          {event.time && (
+                            <div className="flex items-center text-xs text-gray-500 mt-1">
+                              <Clock className="h-3 w-3 mr-1.5" />
+                              <span>{event.time}</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <Link
+                  href="/events?status=ongoing"
+                  className="mt-6 w-full inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-orange-600 text-white hover:bg-orange-700 focus:ring-orange-500"
+                >
+                  Xem tất cả sự kiện đang diễn ra
+                </Link>
+              </div>
+            )}
 
             {/* Newsletter Subscription */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-8 text-white text-center">
