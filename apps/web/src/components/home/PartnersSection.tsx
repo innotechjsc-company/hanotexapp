@@ -199,29 +199,27 @@ export default function PartnersSection() {
             </button>
             <div
               ref={fundsSliderRef}
-              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto space-x-4 pb-4 snap-x snap-mandatory scrollbar-hide"
             >
               {funds.map((fund, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-full sm:w-1/2 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
+                  className="flex-shrink-0 w-64 sm:w-72 lg:w-80 snap-center bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 p-4"
                 >
-                  <div className="flex items-start mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                       <TrendingUp className="h-6 w-6 text-green-600" />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                        {fund.name}
-                      </h4>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Quỹ đầu tư
-                      </span>
-                    </div>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2 h-10 leading-5 overflow-hidden line-clamp-2">
+                      {fund.name}
+                    </h4>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mb-3">
+                      Quỹ đầu tư
+                    </span>
+                    <p className="text-gray-600 text-sm h-12 overflow-hidden line-clamp-3">
+                      {fund.description || ""}
+                    </p>
                   </div>
-                  <p className="text-gray-600 text-sm mb-4 h-16 overflow-hidden">
-                    {fund.description || ""}
-                  </p>
                 </div>
               ))}
             </div>
