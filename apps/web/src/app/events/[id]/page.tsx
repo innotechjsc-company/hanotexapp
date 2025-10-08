@@ -395,7 +395,7 @@ export default function EventDetailPage({
       <div
         className="relative bg-cover bg-center text-white py-12 md:py-24 lg:py-32"
         style={{
-          backgroundImage: `url(https://api.hanotex.vn/${event.image_url})`,
+          backgroundImage: `url(https://api.hanotex.vn${event.image_url})`,
         }}
       >
         {/* Overlay for text readability */}
