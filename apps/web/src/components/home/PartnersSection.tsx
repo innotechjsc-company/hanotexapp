@@ -235,7 +235,7 @@ export default function PartnersSection() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 text-center">
+        {/* <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Trở thành đối tác của HANOTEX
@@ -256,9 +256,9 @@ export default function PartnersSection() {
                 <Globe className="mr-2 h-5 w-5" />
                 Tìm hiểu thêm
               </button> */}
-            </div>
+        {/* </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
