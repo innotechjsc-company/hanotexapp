@@ -54,7 +54,7 @@ export default function FeaturedTechnologies() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gray-50">
+      <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <LoadingSpinner size="lg" />
@@ -65,10 +65,10 @@ export default function FeaturedTechnologies() {
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-5 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Sản phẩm Khoa học Công nghệ Nổi bật
           </h2>
@@ -80,7 +80,7 @@ export default function FeaturedTechnologies() {
 
         {/* Technologies Grid */}
         {technologies.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {technologies.map((tech) => (
               <div
                 key={tech.id}
@@ -131,20 +131,20 @@ export default function FeaturedTechnologies() {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 flex flex-col flex-grow">
+                <div className="p-4 flex flex-col flex-grow">
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
                     {tech.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+                  <p className="text-gray-600 mb-3 text-sm line-clamp-3">
                     {tech.description ||
                       "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
                   </p>
 
                   {/* Author & Price */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
                         <User className="h-4 w-4 text-gray-600" />

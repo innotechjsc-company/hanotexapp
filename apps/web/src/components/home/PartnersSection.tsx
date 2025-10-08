@@ -113,22 +113,22 @@ export default function PartnersSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          {/* <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Đối tác & Quỹ đầu tư
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          </h2> */}
+          {/* <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Hệ thống đối tác uy tín và các quỹ đầu tư chuyên nghiệp hỗ trợ phát
             triển hệ sinh thái khoa học công nghệ
-          </p>
+          </p> */}
         </div>
 
         {/* Partners Section */}
         <div className="mb-20">
           <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Đối tác chiến lược
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               Các tổ chức, doanh nghiệp và viện nghiên cứu hàng đầu
             </p>
           </div>
@@ -142,12 +142,12 @@ export default function PartnersSection() {
             </button>
             <div
               ref={partnersSliderRef}
-              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto space-x-6 pb-4 snap-x snap-mandatory scrollbar-hide"
             >
               {partners.map((partner, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6 text-center cursor-pointer"
+                  className="flex-shrink-0 w-80 sm:w-72 lg:w-80 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-4 text-center cursor-pointer"
                   onClick={() => {
                     if (partner.url) {
                       window.open(partner.url, "_blank");
@@ -155,16 +155,16 @@ export default function PartnersSection() {
                   }}
                 >
                   {/* Logo Placeholder */}
-                  <div className="w-20 h-20 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Building2 className="h-10 w-10 text-blue-600" />
+                  <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    <Building2 className="h-8 w-8 text-blue-600" />
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h4 className="text-base font-semibold text-gray-900 mb-2 h-10 leading-5 overflow-hidden line-clamp-2">
                     {partner.name}
                   </h4>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-2">
                     {partner.type}
                   </span>
-                  <p className="text-gray-600 text-sm h-12 overflow-hidden">
+                  <p className="text-gray-600 text-sm h-10 overflow-hidden">
                     {partner.description || ""}
                   </p>
                 </div>
@@ -182,10 +182,10 @@ export default function PartnersSection() {
         {/* Investment Funds Section */}
         <div>
           <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Quỹ đầu tư liên kết
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               Các quỹ đầu tư chuyên nghiệp hỗ trợ phát triển dự án công nghệ
             </p>
           </div>
@@ -199,29 +199,27 @@ export default function PartnersSection() {
             </button>
             <div
               ref={fundsSliderRef}
-              className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex overflow-x-auto space-x-4 pb-4 snap-x snap-mandatory scrollbar-hide"
             >
               {funds.map((fund, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-full sm:w-1/2 snap-center bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 p-6"
+                  className="flex-shrink-0 w-64 sm:w-72 lg:w-80 snap-center bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 p-4"
                 >
-                  <div className="flex items-start mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                       <TrendingUp className="h-6 w-6 text-green-600" />
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                        {fund.name}
-                      </h4>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Quỹ đầu tư
-                      </span>
-                    </div>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2 h-10 leading-5 overflow-hidden line-clamp-2">
+                      {fund.name}
+                    </h4>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mb-3">
+                      Quỹ đầu tư
+                    </span>
+                    <p className="text-gray-600 text-sm h-12 overflow-hidden line-clamp-3">
+                      {fund.description || ""}
+                    </p>
                   </div>
-                  <p className="text-gray-600 text-sm mb-4 h-16 overflow-hidden">
-                    {fund.description || ""}
-                  </p>
                 </div>
               ))}
             </div>
@@ -235,7 +233,7 @@ export default function PartnersSection() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-16 text-center">
+        {/* <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Trở thành đối tác của HANOTEX
@@ -256,9 +254,9 @@ export default function PartnersSection() {
                 <Globe className="mr-2 h-5 w-5" />
                 Tìm hiểu thêm
               </button> */}
-            </div>
+        {/* </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

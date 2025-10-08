@@ -16,7 +16,7 @@ export default function SupplyDemandSection() {
       try {
         const demandRes = await getDemands(
           {},
-          { limit: 3, sort: "-createdAt" }
+          { limit: 2, sort: "-createdAt" }
         );
 
         const demandList = (
@@ -26,7 +26,7 @@ export default function SupplyDemandSection() {
               ? (demandRes as any).docs
               : []
         ) as Demand[];
-        setDemands(demandList.slice(0, 3));
+        setDemands(demandList.slice(0, 2));
       } catch (error) {
         console.error("Error fetching demand data:", error);
       } finally {
@@ -41,7 +41,7 @@ export default function SupplyDemandSection() {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gray-50">
+      <section className="py-5 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <LoadingSpinner size="lg" />
@@ -52,13 +52,13 @@ export default function SupplyDemandSection() {
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-7 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Left Side - Demands List */}
           <div>
             {/* Section Header */}
-            <div className="mb-8">
+            <div className="mb-6">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 Nhu cầu Khoa học Công nghệ
               </h2>
@@ -69,18 +69,18 @@ export default function SupplyDemandSection() {
             </div>
 
             {/* Demands List */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {demands.length > 0 ? (
                 demands.map((demand, index) => (
                   <Link
                     key={(demand as any).id ?? demand.title}
                     href={`/demands/${(demand as any).id || (demand as any)._id || encodeURIComponent(demand.title)}`}
-                    className="block bg-white rounded-lg transition-all duration-200 cursor-pointer group"
+                    className="block  rounded-lg transition-all duration-200 cursor-pointer group"
                   >
                     {/* Color bar on the left */}
-                    <div className="flex">
+                    <div className="flex p-4">
                       <div
-                        className={`w-1 rounded-full mr-4 ${
+                        className={`w-1 rounded-full mr-3 ${
                           index === 0
                             ? "bg-green-500"
                             : index === 1
@@ -89,15 +89,15 @@ export default function SupplyDemandSection() {
                         }`}
                       />
                       <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                           {demand.title}
                         </h4>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                           {demand.description}
                         </p>
 
                         {/* Tags */}
-                        <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="flex flex-wrap gap-2 mb-2">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {typeof demand.category === "object"
                               ? (demand.category as any).name
@@ -109,18 +109,22 @@ export default function SupplyDemandSection() {
                         </div>
 
                         {/* Budget */}
-                        <div className="text-sm text-gray-500">
-                          <span className="font-medium">Ngân sách: </span>
-                          {demand.from_price && demand.to_price ? (
-                            <>
-                              {new Intl.NumberFormat("vi-VN").format(
-                                demand.from_price
-                              )}
-                              {" triệu VNĐ"}
-                            </>
-                          ) : (
-                            "500 triệu VNĐ"
-                          )}
+                        <div className="text-sm text-gray-700">
+                          <span className="font-bold text-gray-900">
+                            Ngân sách:{" "}
+                          </span>
+                          <span className="font-bold text-green-600 text-base">
+                            {demand.from_price && demand.to_price ? (
+                              <>
+                                {new Intl.NumberFormat("vi-VN").format(
+                                  demand.from_price
+                                )}
+                                {" triệu VNĐ"}
+                              </>
+                            ) : (
+                              "0 VNĐ"
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -135,7 +139,7 @@ export default function SupplyDemandSection() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4 mt-8">
+            <div className="flex gap-4 mt-6">
               <Link
                 href="/demands"
                 className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-green-600 text-white hover:bg-green-700 focus:ring-green-500"
