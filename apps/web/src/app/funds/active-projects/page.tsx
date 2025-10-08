@@ -181,7 +181,7 @@ export default function ActiveProjectsPage() {
                   ) : (
                     <img
                       src={"/logo.png"}
-                      alt={proj.name || "Project image"}
+                      alt={"Hanotex"}
                       className="w-full h-full object-contain object-center"
                     />
                   )}
