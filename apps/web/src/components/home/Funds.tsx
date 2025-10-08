@@ -178,7 +178,7 @@ const OtherProjectCard = ({
           <p className={`font-bold ${selectedColor.text} text-lg`}>
             {project.goal_money?.toLocaleString("vi-VN")} VND
           </p>
-          <p className="text-xs text-gray-500">{raisedPercent}% hoàn thành</p>
+          <p className="text-xs text-gray-500">{raisedPercent}% cổ phần</p>
         </div>
       </div>
     </Link>

@@ -113,22 +113,22 @@ export default function PartnersSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          {/* <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Đối tác & Quỹ đầu tư
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          </h2> */}
+          {/* <p className="text-lg text-gray-600 max-w-3xl mx-auto">
             Hệ thống đối tác uy tín và các quỹ đầu tư chuyên nghiệp hỗ trợ phát
             triển hệ sinh thái khoa học công nghệ
-          </p>
+          </p> */}
         </div>
 
         {/* Partners Section */}
         <div className="mb-20">
           <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Đối tác chiến lược
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               Các tổ chức, doanh nghiệp và viện nghiên cứu hàng đầu
             </p>
           </div>
@@ -182,10 +182,10 @@ export default function PartnersSection() {
         {/* Investment Funds Section */}
         <div>
           <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Quỹ đầu tư liên kết
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               Các quỹ đầu tư chuyên nghiệp hỗ trợ phát triển dự án công nghệ
             </p>
           </div>
