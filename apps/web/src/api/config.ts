@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
   EVENT_COMMENT: "/event-comment",
   NEWS: "/news",
   NEWS_LIKE: "/news-like",
+  NEWS_COMMENT: "/news-comment",
 
   // Chat system
   ROOM_CHAT: "/room-chat",
