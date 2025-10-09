@@ -25,11 +25,11 @@ export default function FeaturedTechnologies() {
       try {
         const response = await getTechnologies(
           {
-            status: "active",
-            visibility_mode: "public",
+            is_hot: true,
           },
           {
-            limit: 3,
+            // fetch more than 3 so we can randomly pick 3 items client-side
+            limit: 50,
             sort: "-createdAt",
           }
         );
@@ -41,7 +41,11 @@ export default function FeaturedTechnologies() {
               ? (response as any).docs
               : []
         ) as Technology[];
-        setTechnologies(list);
+        const selected =
+          list.length > 3
+            ? [...list].sort(() => 0.5 - Math.random()).slice(0, 3)
+            : list;
+        setTechnologies(selected);
       } catch (error) {
         console.error("Error fetching featured technologies:", error);
       } finally {
