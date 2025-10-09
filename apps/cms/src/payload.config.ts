@@ -32,6 +32,7 @@ import { ServiceTicketLog } from './collections/ServiceTicketLog'
 import { EventUser } from './collections/EventUser'
 import { EventComment } from './collections/EventComment'
 import { NewsLike } from './collections/NewsLike'
+import { NewsComment } from './collections/NewsComment'
 import { NegotiatingMessage } from './collections/NegotiatingMessage'
 import { RoomChat } from './collections/RoomChat'
 import { RoomMessage } from './collections/RoomMessage'
@@ -78,6 +79,7 @@ export default buildConfig({
     EventUser,
     EventComment,
     NewsLike,
+    NewsComment,
     NegotiatingMessage,
     RoomChat,
     RoomMessage,
