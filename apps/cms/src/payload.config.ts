@@ -101,11 +101,6 @@ export default buildConfig({
       'mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test',
   }),
   sharp,
-  upload: {
-    limits: {
-      fileSize: 5000000, // 5MB
-    },
-  },
   plugins: [
     payloadCloudPlugin(),
     // storage-adapter-placeholder
