@@ -75,6 +75,16 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     crop: true,
+    resizeOptions: {
+      withoutEnlargement: true,
+    },
+    formatOptions: {
+      format: 'webp',
+      options: {
+        quality: 40,
+        effort: 4,
+      },
+    },
   },
   hooks: {
     beforeChange: [
