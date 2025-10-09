@@ -66,14 +66,26 @@ export default function ActiveProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const response = await getActiveProjectsAll(false, { limit: 12 });
+        if (isMounted) setIsLoading(true);
+        const response = await getActiveProjectsAll(false, {
+          limit: 10,
+          page: currentPage,
+        });
         const list = (response.data as any) || (response.docs as any) || [];
         if (isMounted) setProjects(list);
+        if (isMounted) {
+          const tp = (response.totalPages as any) ?? 1;
+          const pg = (response.page as any) ?? 1;
+          setTotalPages(typeof tp === "number" && tp > 0 ? tp : 1);
+          setCurrentPage(typeof pg === "number" && pg > 0 ? pg : 1);
+        }
       } catch (e: any) {
         if (isMounted) setError(e?.message || "Đã xảy ra lỗi");
       } finally {
@@ -84,7 +96,7 @@ export default function ActiveProjectsPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [currentPage]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -274,21 +286,43 @@ export default function ActiveProjectsPage() {
         {/* Pagination */}
         <div className="flex justify-center mt-12">
           <nav className="flex items-center space-x-2">
-            <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
+            <button
+              className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={isLoading || currentPage <= 1}
+            >
               Trước
             </button>
-            <button className="px-3 py-2 bg-blue-600 text-white rounded-lg">
-              1
-            </button>
-            <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
-              2
-            </button>
-            <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
-              3
-            </button>
-            <button className="px-3 py-2 text-gray-500 hover:text-gray-700">
+            {Array.from({ length: totalPages })
+              .slice(0, 10)
+              .map((_, idx) => {
+                const pageNum = idx + 1;
+                const isActive = pageNum === currentPage;
+                return (
+                  <button
+                    key={`page-${pageNum}`}
+                    className={
+                      isActive
+                        ? "px-3 py-2 bg-blue-600 text-white rounded-lg"
+                        : "px-3 py-2 text-gray-500 hover:text-gray-700"
+                    }
+                    onClick={() => setCurrentPage(pageNum)}
+                    disabled={isLoading}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            <button
+              className="px-3 py-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={isLoading || currentPage >= totalPages}
+            >
               Sau
             </button>
+            {isLoading && (
+              <span className="ml-3 text-sm text-gray-500">Đang tải...</span>
+            )}
           </nav>
         </div>
       </div>
