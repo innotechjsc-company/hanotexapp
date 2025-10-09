@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { 
-  Users, 
-  CheckCircle, 
+import {
+  Users,
+  CheckCircle,
   ArrowRight,
   Phone,
   Mail,
@@ -12,65 +12,68 @@ import {
   Star,
   UserPlus,
   Rocket,
-  Lightbulb
-} from 'lucide-react';
-import Link from 'next/link';
+  Lightbulb,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ConsultingPage() {
   const services = [
     {
-      title: 'Đánh giá tiềm năng thương mại',
-      description: 'Phân tích và đánh giá khả năng thương mại hóa của công nghệ, sản phẩm nghiên cứu.',
+      title: "Đánh giá tiềm năng thương mại",
+      description:
+        "Phân tích và đánh giá khả năng thương mại hóa của công nghệ, sản phẩm nghiên cứu.",
       features: [
-        'Phân tích thị trường mục tiêu',
-        'Đánh giá tính cạnh tranh',
-        'Dự báo doanh thu tiềm năng',
-        'Báo cáo chi tiết và khuyến nghị'
-      ]
+        "Phân tích thị trường mục tiêu",
+        "Đánh giá tính cạnh tranh",
+        "Dự báo doanh thu tiềm năng",
+        "Báo cáo chi tiết và khuyến nghị",
+      ],
     },
     {
-      title: 'Tư vấn chiến lược chuyển giao',
-      description: 'Xây dựng chiến lược chuyển giao công nghệ phù hợp với từng loại hình và mục tiêu.',
+      title: "Tư vấn chiến lược chuyển giao",
+      description:
+        "Xây dựng chiến lược chuyển giao công nghệ phù hợp với từng loại hình và mục tiêu.",
       features: [
-        'Lựa chọn phương thức chuyển giao',
-        'Xây dựng kế hoạch triển khai',
-        'Định giá và cấu trúc hợp đồng',
-        'Quản lý rủi ro và bảo vệ quyền lợi'
-      ]
+        "Lựa chọn phương thức chuyển giao",
+        "Xây dựng kế hoạch triển khai",
+        "Định giá và cấu trúc hợp đồng",
+        "Quản lý rủi ro và bảo vệ quyền lợi",
+      ],
     },
     {
-      title: 'Hỗ trợ đàm phán hợp đồng',
-      description: 'Hỗ trợ đàm phán và ký kết các hợp đồng chuyển giao công nghệ.',
+      title: "Hỗ trợ đàm phán hợp đồng",
+      description:
+        "Hỗ trợ đàm phán và ký kết các hợp đồng chuyển giao công nghệ.",
       features: [
-        'Soạn thảo hợp đồng chuyên nghiệp',
-        'Đàm phán điều khoản hợp lý',
-        'Rà soát và hoàn thiện hợp đồng',
-        'Hỗ trợ thực hiện và giám sát'
-      ]
-    }
+        "Soạn thảo hợp đồng chuyên nghiệp",
+        "Đàm phán điều khoản hợp lý",
+        "Rà soát và hoàn thiện hợp đồng",
+        "Hỗ trợ thực hiện và giám sát",
+      ],
+    },
   ];
 
   const process = [
     {
       step: 1,
-      title: 'Tiếp nhận yêu cầu',
-      description: 'Thu thập thông tin và tài liệu về công nghệ cần tư vấn'
+      title: "Tiếp nhận yêu cầu",
+      description: "Thu thập thông tin và tài liệu về công nghệ cần tư vấn",
     },
     {
       step: 2,
-      title: 'Phân tích và đánh giá',
-      description: 'Nghiên cứu, phân tích và đánh giá toàn diện'
+      title: "Phân tích và đánh giá",
+      description: "Nghiên cứu, phân tích và đánh giá toàn diện",
     },
     {
       step: 3,
-      title: 'Tư vấn và khuyến nghị',
-      description: 'Đưa ra các khuyến nghị và giải pháp cụ thể'
+      title: "Tư vấn và khuyến nghị",
+      description: "Đưa ra các khuyến nghị và giải pháp cụ thể",
     },
     {
       step: 4,
-      title: 'Hỗ trợ triển khai',
-      description: 'Hỗ trợ thực hiện các khuyến nghị đã đưa ra'
-    }
+      title: "Hỗ trợ triển khai",
+      description: "Hỗ trợ thực hiện các khuyến nghị đã đưa ra",
+    },
   ];
 
   return (
@@ -87,7 +90,8 @@ export default function ConsultingPage() {
               Tư vấn chuyển giao công nghệ
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Dịch vụ tư vấn chuyên nghiệp giúp bạn chuyển giao công nghệ một cách hiệu quả và an toàn
+              Dịch vụ tư vấn chuyên nghiệp giúp bạn chuyển giao công nghệ một
+              cách hiệu quả và an toàn
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -121,13 +125,17 @@ export default function ConsultingPage() {
               Dịch vụ tư vấn
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi cung cấp các dịch vụ tư vấn toàn diện cho quá trình chuyển giao công nghệ
+              Chúng tôi cung cấp các dịch vụ tư vấn toàn diện cho quá trình
+              chuyển giao công nghệ
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div key={index} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+              <div
+                key={index}
+                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+              >
                 <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-600 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/10"></div>
                   <div className="absolute top-4 right-4">
@@ -141,12 +149,12 @@ export default function ConsultingPage() {
                     </h3>
                   </div>
                 </div>
-                
+
                 <div className="p-8">
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     {service.description}
                   </p>
-                  
+
                   <ul className="space-y-3 mb-6">
                     {service.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
@@ -156,7 +164,7 @@ export default function ConsultingPage() {
                     ))}
                   </ul>
 
-                  <Link 
+                  <Link
                     href="/contact"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors group-hover:translate-x-1"
                   >
@@ -176,7 +184,9 @@ export default function ConsultingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-green-50 text-green-600 rounded-full px-4 py-2 mb-4">
               <Clock className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">Quy trình chuyên nghiệp</span>
+              <span className="text-sm font-medium">
+                Quy trình chuyên nghiệp
+              </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Quy trình tư vấn
@@ -202,9 +212,7 @@ export default function ConsultingPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-gray-600">
-                  {item.description}
-                </p>
+                <p className="text-gray-600">{item.description}</p>
               </div>
             ))}
           </div>
@@ -253,13 +261,16 @@ export default function ConsultingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-purple-50 text-purple-600 rounded-full px-4 py-2 mb-4">
               <Award className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">Tại sao chọn chúng tôi</span>
+              <span className="text-sm font-medium">
+                Tại sao chọn chúng tôi
+              </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Tại sao chọn chúng tôi?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Đội ngũ chuyên gia giàu kinh nghiệm và phương pháp tư vấn chuyên nghiệp
+              Đội ngũ chuyên gia giàu kinh nghiệm và phương pháp tư vấn chuyên
+              nghiệp
             </p>
           </div>
 
@@ -272,7 +283,8 @@ export default function ConsultingPage() {
                 Chuyên gia hàng đầu
               </h3>
               <p className="text-gray-600">
-                Đội ngũ chuyên gia giàu kinh nghiệm trong lĩnh vực chuyển giao công nghệ và sở hữu trí tuệ
+                Đội ngũ chuyên gia giàu kinh nghiệm trong lĩnh vực chuyển giao
+                công nghệ và sở hữu trí tuệ
               </p>
             </div>
 
@@ -284,7 +296,8 @@ export default function ConsultingPage() {
                 Phương pháp khoa học
               </h3>
               <p className="text-gray-600">
-                Sử dụng các phương pháp tư vấn khoa học và công cụ phân tích hiện đại
+                Sử dụng các phương pháp tư vấn khoa học và công cụ phân tích
+                hiện đại
               </p>
             </div>
 
@@ -296,7 +309,8 @@ export default function ConsultingPage() {
                 Kết quả thực tế
               </h3>
               <p className="text-gray-600">
-                Cam kết mang lại kết quả thực tế và giá trị lâu dài cho khách hàng
+                Cam kết mang lại kết quả thực tế và giá trị lâu dài cho khách
+                hàng
               </p>
             </div>
           </div>
@@ -314,17 +328,18 @@ export default function ConsultingPage() {
             Bắt đầu tư vấn ngay hôm nay
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Liên hệ với chúng tôi để được tư vấn miễn phí và xây dựng chiến lược chuyển giao công nghệ hiệu quả
+            Liên hệ với chúng tôi để được tư vấn miễn phí và xây dựng chiến lược
+            chuyển giao công nghệ hiệu quả
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="tel:0848567193"
+            <a
+              href="tel:0986287758"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               <Phone className="h-5 w-5 mr-2" />
-              0848567193
+              0986287758
             </a>
-            <a 
+            <a
               href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center hover:bg-white/10"
             >

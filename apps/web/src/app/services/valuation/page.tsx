@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { 
-  DollarSign, 
-  CheckCircle, 
+import {
+  DollarSign,
+  CheckCircle,
   TrendingUp,
   Phone,
   Mail,
@@ -16,57 +16,58 @@ import {
   Rocket,
   Lightbulb,
   Users,
-  Zap as ZapIcon
-} from 'lucide-react';
-import Link from 'next/link';
+  Zap as ZapIcon,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ValuationPage() {
   const services = [
     {
-      title: 'Định giá sáng chế',
-      description: 'Đánh giá giá trị kinh tế của các sáng chế và giải pháp hữu ích.',
+      title: "Định giá sáng chế",
+      description:
+        "Đánh giá giá trị kinh tế của các sáng chế và giải pháp hữu ích.",
       features: [
-        'Phân tích tính độc đáo của sáng chế',
-        'Đánh giá tiềm năng thương mại',
-        'So sánh với các sáng chế tương tự',
-        'Báo cáo định giá chuyên nghiệp'
-      ]
+        "Phân tích tính độc đáo của sáng chế",
+        "Đánh giá tiềm năng thương mại",
+        "So sánh với các sáng chế tương tự",
+        "Báo cáo định giá chuyên nghiệp",
+      ],
     },
     {
-      title: 'Đánh giá tài sản trí tuệ',
-      description: 'Định giá toàn diện các tài sản trí tuệ của doanh nghiệp.',
+      title: "Đánh giá tài sản trí tuệ",
+      description: "Định giá toàn diện các tài sản trí tuệ của doanh nghiệp.",
       features: [
-        'Đánh giá danh mục sáng chế',
-        'Định giá nhãn hiệu và tên thương mại',
-        'Đánh giá bí quyết công nghệ',
-        'Báo cáo tổng hợp tài sản trí tuệ'
-      ]
+        "Đánh giá danh mục sáng chế",
+        "Định giá nhãn hiệu và tên thương mại",
+        "Đánh giá bí quyết công nghệ",
+        "Báo cáo tổng hợp tài sản trí tuệ",
+      ],
     },
     {
-      title: 'Báo cáo định giá chuyên nghiệp',
-      description: 'Cung cấp báo cáo định giá đáp ứng các tiêu chuẩn quốc tế.',
+      title: "Báo cáo định giá chuyên nghiệp",
+      description: "Cung cấp báo cáo định giá đáp ứng các tiêu chuẩn quốc tế.",
       features: [
-        'Tuân thủ chuẩn mực quốc tế',
-        'Phân tích rủi ro chi tiết',
-        'Dự báo dòng tiền',
-        'Hỗ trợ thẩm định độc lập'
-      ]
-    }
+        "Tuân thủ chuẩn mực quốc tế",
+        "Phân tích rủi ro chi tiết",
+        "Dự báo dòng tiền",
+        "Hỗ trợ thẩm định độc lập",
+      ],
+    },
   ];
 
   const methods = [
     {
-      title: 'Phương pháp chi phí',
-      description: 'Định giá dựa trên chi phí phát triển và thay thế'
+      title: "Phương pháp chi phí",
+      description: "Định giá dựa trên chi phí phát triển và thay thế",
     },
     {
-      title: 'Phương pháp thị trường',
-      description: 'So sánh với các giao dịch tương tự trên thị trường'
+      title: "Phương pháp thị trường",
+      description: "So sánh với các giao dịch tương tự trên thị trường",
     },
     {
-      title: 'Phương pháp thu nhập',
-      description: 'Định giá dựa trên dòng tiền tương lai từ tài sản'
-    }
+      title: "Phương pháp thu nhập",
+      description: "Định giá dựa trên dòng tiền tương lai từ tài sản",
+    },
   ];
 
   return (
@@ -75,22 +76,28 @@ export default function ValuationPage() {
       <section className="relative bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white py-20 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
               <DollarSign className="h-5 w-5 mr-2" />
-              <span className="text-sm font-medium">Định giá chuyên nghiệp</span>
+              <span className="text-sm font-medium">
+                Định giá chuyên nghiệp
+              </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Định giá công nghệ
             </h1>
             <p className="text-xl md:text-2xl text-green-100 mb-8 max-w-3xl mx-auto">
-              Dịch vụ định giá chuyên nghiệp cho các công nghệ, sáng chế và tài sản trí tuệ
+              Dịch vụ định giá chuyên nghiệp cho các công nghệ, sáng chế và tài
+              sản trí tuệ
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -124,13 +131,17 @@ export default function ValuationPage() {
               Dịch vụ định giá
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi cung cấp các dịch vụ định giá chuyên nghiệp theo tiêu chuẩn quốc tế
+              Chúng tôi cung cấp các dịch vụ định giá chuyên nghiệp theo tiêu
+              chuẩn quốc tế
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div key={index} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+              <div
+                key={index}
+                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+              >
                 {/* Header with gradient */}
                 <div className="h-32 bg-gradient-to-r from-green-500 to-green-600 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/10"></div>
@@ -145,12 +156,12 @@ export default function ValuationPage() {
                     </h3>
                   </div>
                 </div>
-                
+
                 <div className="p-8">
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     {service.description}
                   </p>
-                  
+
                   <ul className="space-y-3 mb-6">
                     {service.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
@@ -160,7 +171,7 @@ export default function ValuationPage() {
                     ))}
                   </ul>
 
-                  <Link 
+                  <Link
                     href="/contact"
                     className="inline-flex items-center text-green-600 hover:text-green-700 font-medium transition-colors group-hover:translate-x-1"
                   >
@@ -186,7 +197,8 @@ export default function ValuationPage() {
               Phương pháp định giá
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Sử dụng các phương pháp định giá tiên tiến và được công nhận quốc tế
+              Sử dụng các phương pháp định giá tiên tiến và được công nhận quốc
+              tế
             </p>
           </div>
 
@@ -199,9 +211,7 @@ export default function ValuationPage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
                   {method.title}
                 </h3>
-                <p className="text-gray-600">
-                  {method.description}
-                </p>
+                <p className="text-gray-600">{method.description}</p>
               </div>
             ))}
           </div>
@@ -256,7 +266,8 @@ export default function ValuationPage() {
               Tại sao chọn chúng tôi?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Đội ngũ chuyên gia giàu kinh nghiệm và phương pháp định giá chuyên nghiệp
+              Đội ngũ chuyên gia giàu kinh nghiệm và phương pháp định giá chuyên
+              nghiệp
             </p>
           </div>
 
@@ -269,7 +280,8 @@ export default function ValuationPage() {
                 Độ chính xác cao
               </h3>
               <p className="text-gray-600">
-                Sử dụng các mô hình định giá tiên tiến và dữ liệu thị trường cập nhật
+                Sử dụng các mô hình định giá tiên tiến và dữ liệu thị trường cập
+                nhật
               </p>
             </div>
 
@@ -281,7 +293,8 @@ export default function ValuationPage() {
                 Tiêu chuẩn quốc tế
               </h3>
               <p className="text-gray-600">
-                Tuân thủ các chuẩn mực định giá quốc tế và được công nhận rộng rãi
+                Tuân thủ các chuẩn mực định giá quốc tế và được công nhận rộng
+                rãi
               </p>
             </div>
 
@@ -304,11 +317,14 @@ export default function ValuationPage() {
       <section className="bg-gradient-to-r from-gray-900 via-green-900 to-emerald-900 text-white py-20 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
             <ZapIcon className="h-5 w-5 mr-2" />
@@ -318,17 +334,18 @@ export default function ValuationPage() {
             Cần định giá công nghệ?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Liên hệ với chúng tôi để được tư vấn và thực hiện định giá chuyên nghiệp
+            Liên hệ với chúng tôi để được tư vấn và thực hiện định giá chuyên
+            nghiệp
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="tel:0848567193"
+            <a
+              href="tel:0986287758"
               className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               <Phone className="h-5 w-5 mr-2" />
-              0848567193
+              0986287758
             </a>
-            <a 
+            <a
               href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center hover:bg-white/10"
             >

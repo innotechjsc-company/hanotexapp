@@ -94,7 +94,7 @@ export default function FAQPage() {
         {
           question: "Làm thế nào để liên hệ tư vấn?",
           answer:
-            "Bạn có thể liên hệ qua: hotline 0848567193, email contact@hanotex.vn, hoặc đặt lịch tư vấn trực tiếp tại văn phòng.",
+            "Bạn có thể liên hệ qua: hotline 0986287758, email contact@hanotex.vn, hoặc đặt lịch tư vấn trực tiếp tại văn phòng.",
         },
       ],
     },
@@ -173,7 +173,7 @@ export default function FAQPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Gọi điện thoại
                   </h3>
-                  <p className="text-gray-600 mb-4">Hotline: 0848567193</p>
+                  <p className="text-gray-600 mb-4">Hotline: 0986287758</p>
                   <div className="flex flex-col items-center gap-3">
                     <Button
                       color="primary"

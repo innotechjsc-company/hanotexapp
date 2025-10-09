@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle, Users, MessageCircle, Rocket, Star } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  CheckCircle,
+  Users,
+  MessageCircle,
+  Rocket,
+  Star,
+} from "lucide-react";
 import {
   Card,
   CardBody,
@@ -56,16 +67,12 @@ export default function ContactPage() {
     {
       icon: MapPin,
       title: "Địa chỉ",
-      details: [
-        "Sở KH&CN Hà Nội",
-        "15 Lê Thánh Tông, Hoàn Kiếm",
-        "Hà Nội, Việt Nam",
-      ],
+      details: ["256 Đường Võ Chí Công, Tây Hồ, Hà Nội", "Hà Nội, Việt Nam"],
     },
     {
       icon: Phone,
       title: "Điện thoại",
-      details: ["0848567193", "Hotline: 1900 1234"],
+      details: ["+84 986287758"],
     },
     {
       icon: Mail,
@@ -100,11 +107,14 @@ export default function ContactPage() {
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-20 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
@@ -120,7 +130,7 @@ export default function ContactPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <Phone className="h-4 w-4 mr-2" />
-                <span className="text-sm">0848567193</span>
+                <span className="text-sm">0986287758</span>
               </div>
               <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <Mail className="h-4 w-4 mr-2" />
@@ -152,7 +162,10 @@ export default function ContactPage() {
 
               <div className="space-y-6">
                 {contactInfo.map((info, index) => (
-                  <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <Card
+                    key={index}
+                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  >
                     <CardBody className="flex flex-row items-start space-x-4 p-6">
                       <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <info.icon className="h-6 w-6 text-white" />
@@ -196,7 +209,7 @@ export default function ContactPage() {
                         Sở KH&CN Hà Nội
                       </p>
                       <p className="text-gray-500 text-sm">
-                        15 Lê Thánh Tông, Hoàn Kiếm, Hà Nội
+                        256 Đường Võ Chí Công, Tây Hồ, Hà Nội
                       </p>
                     </div>
                   </div>
@@ -229,11 +242,14 @@ export default function ContactPage() {
                       Tin nhắn đã được gửi thành công!
                     </h3>
                     <p className="text-gray-600 mb-6">
-                      Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi lại trong thời gian sớm nhất.
+                      Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi lại trong
+                      thời gian sớm nhất.
                     </p>
                     <div className="flex items-center justify-center text-green-600">
                       <Star className="h-4 w-4 mr-1" />
-                      <span className="text-sm font-medium">Đánh giá dịch vụ của chúng tôi</span>
+                      <span className="text-sm font-medium">
+                        Đánh giá dịch vụ của chúng tôi
+                      </span>
                     </div>
                   </CardBody>
                 </Card>

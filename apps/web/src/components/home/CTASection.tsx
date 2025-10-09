@@ -102,7 +102,7 @@ export default function CTASection() {
                 href="tel:+84123456789"
                 className="hover:text-primary-100 transition-colors"
               >
-                📞 +84 123 456 789
+                📞 +84 986287758
               </a>
               <span className="hidden sm:block">•</span>
               <span>🕒 24/7 Hỗ trợ</span>

@@ -1,63 +1,65 @@
-'use client';
+"use client";
 
-import { 
-  TrendingUp, 
-  CheckCircle, 
+import {
+  TrendingUp,
+  CheckCircle,
   Users,
   Phone,
   Mail,
   Target,
   Award,
-  Briefcase
-} from 'lucide-react';
+  Briefcase,
+} from "lucide-react";
 
 export default function InvestmentPage() {
   const services = [
     {
-      title: 'Kết nối nhà đầu tư',
-      description: 'Kết nối các dự án công nghệ tiềm năng với các nhà đầu tư phù hợp.',
+      title: "Kết nối nhà đầu tư",
+      description:
+        "Kết nối các dự án công nghệ tiềm năng với các nhà đầu tư phù hợp.",
       features: [
-        'Phân tích và đánh giá dự án',
-        'Tìm kiếm nhà đầu tư phù hợp',
-        'Tổ chức các buổi pitch',
-        'Hỗ trợ đàm phán và ký kết'
-      ]
+        "Phân tích và đánh giá dự án",
+        "Tìm kiếm nhà đầu tư phù hợp",
+        "Tổ chức các buổi pitch",
+        "Hỗ trợ đàm phán và ký kết",
+      ],
     },
     {
-      title: 'Hỗ trợ pitch deck',
-      description: 'Hỗ trợ xây dựng pitch deck chuyên nghiệp để trình bày dự án.',
+      title: "Hỗ trợ pitch deck",
+      description:
+        "Hỗ trợ xây dựng pitch deck chuyên nghiệp để trình bày dự án.",
       features: [
-        'Thiết kế pitch deck chuyên nghiệp',
-        'Tư vấn nội dung trình bày',
-        'Luyện tập thuyết trình',
-        'Hỗ trợ Q&A và phản biện'
-      ]
+        "Thiết kế pitch deck chuyên nghiệp",
+        "Tư vấn nội dung trình bày",
+        "Luyện tập thuyết trình",
+        "Hỗ trợ Q&A và phản biện",
+      ],
     },
     {
-      title: 'Tư vấn gọi vốn',
-      description: 'Tư vấn chiến lược gọi vốn và cấu trúc vốn cho startup.',
+      title: "Tư vấn gọi vốn",
+      description: "Tư vấn chiến lược gọi vốn và cấu trúc vốn cho startup.",
       features: [
-        'Đánh giá nhu cầu vốn',
-        'Lựa chọn phương thức gọi vốn',
-        'Cấu trúc vốn tối ưu',
-        'Tư vấn pháp lý gọi vốn'
-      ]
-    }
+        "Đánh giá nhu cầu vốn",
+        "Lựa chọn phương thức gọi vốn",
+        "Cấu trúc vốn tối ưu",
+        "Tư vấn pháp lý gọi vốn",
+      ],
+    },
   ];
 
   const investors = [
     {
-      name: 'Nhà đầu tư thiên thần',
-      description: 'Các cá nhân giàu có đầu tư vào giai đoạn sớm'
+      name: "Nhà đầu tư thiên thần",
+      description: "Các cá nhân giàu có đầu tư vào giai đoạn sớm",
     },
     {
-      name: 'Quỹ đầu tư mạo hiểm',
-      description: 'Các quỹ chuyên đầu tư vào startup công nghệ'
+      name: "Quỹ đầu tư mạo hiểm",
+      description: "Các quỹ chuyên đầu tư vào startup công nghệ",
     },
     {
-      name: 'Nhà đầu tư chiến lược',
-      description: 'Các doanh nghiệp lớn tìm kiếm công nghệ mới'
-    }
+      name: "Nhà đầu tư chiến lược",
+      description: "Các doanh nghiệp lớn tìm kiếm công nghệ mới",
+    },
   ];
 
   return (
@@ -84,7 +86,8 @@ export default function InvestmentPage() {
               Dịch vụ kết nối đầu tư
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi cung cấp các dịch vụ toàn diện để kết nối dự án với nhà đầu tư
+              Chúng tôi cung cấp các dịch vụ toàn diện để kết nối dự án với nhà
+              đầu tư
             </p>
           </div>
 
@@ -98,9 +101,7 @@ export default function InvestmentPage() {
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
                     {service.title}
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    {service.description}
-                  </p>
+                  <p className="text-gray-600 mb-6">{service.description}</p>
                 </div>
 
                 <ul className="space-y-3">
@@ -138,9 +139,7 @@ export default function InvestmentPage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {investor.name}
                 </h3>
-                <p className="text-gray-600">
-                  {investor.description}
-                </p>
+                <p className="text-gray-600">{investor.description}</p>
               </div>
             ))}
           </div>
@@ -203,17 +202,18 @@ export default function InvestmentPage() {
             Cần gọi vốn cho dự án?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Liên hệ với chúng tôi để được hỗ trợ kết nối với các nhà đầu tư phù hợp
+            Liên hệ với chúng tôi để được hỗ trợ kết nối với các nhà đầu tư phù
+            hợp
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="tel:0848567193"
+            <a
+              href="tel:0986287758"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
             >
               <Phone className="h-5 w-5 mr-2" />
-              0848567193
+              0986287758
             </a>
-            <a 
+            <a
               href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
             >

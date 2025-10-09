@@ -132,13 +132,11 @@ export default function Footer() {
             <ul className="space-y-4 text-gray-300">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-3 mt-1 flex-shrink-0" />
-                <span>
-                  Tầng 15, Tòa nhà HAGL, Số 6 Đoàn Khuê, Cầu Giấy, Hà Nội
-                </span>
+                <span>256 Đường Võ Chí Công, Tây Hồ, Hà Nội</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-3" />
-                <span>+84 24 3765 4321</span>
+                <span>+84 986287758</span>
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 mr-3" />

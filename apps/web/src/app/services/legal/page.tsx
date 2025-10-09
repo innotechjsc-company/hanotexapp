@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { 
-  Shield, 
-  CheckCircle, 
+import {
+  Shield,
+  CheckCircle,
   FileText,
   Phone,
   Mail,
@@ -15,68 +15,70 @@ import {
   Lightbulb,
   TrendingUp,
   Target,
-  Brain
-} from 'lucide-react';
-import Link from 'next/link';
+  Brain,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function LegalPage() {
   const services = [
     {
-      title: 'Đăng ký sở hữu trí tuệ',
-      description: 'Hỗ trợ đăng ký bản quyền, sáng chế, nhãn hiệu và các tài sản trí tuệ khác.',
+      title: "Đăng ký sở hữu trí tuệ",
+      description:
+        "Hỗ trợ đăng ký bản quyền, sáng chế, nhãn hiệu và các tài sản trí tuệ khác.",
       features: [
-        'Đăng ký sáng chế và giải pháp hữu ích',
-        'Đăng ký nhãn hiệu và tên thương mại',
-        'Đăng ký bản quyền tác giả',
-        'Đăng ký kiểu dáng công nghiệp'
+        "Đăng ký sáng chế và giải pháp hữu ích",
+        "Đăng ký nhãn hiệu và tên thương mại",
+        "Đăng ký bản quyền tác giả",
+        "Đăng ký kiểu dáng công nghiệp",
       ],
-      icon: Shield
+      icon: Shield,
     },
     {
-      title: 'Tư vấn hợp đồng',
-      description: 'Soạn thảo và tư vấn các loại hợp đồng chuyển giao công nghệ.',
+      title: "Tư vấn hợp đồng",
+      description:
+        "Soạn thảo và tư vấn các loại hợp đồng chuyển giao công nghệ.",
       features: [
-        'Hợp đồng chuyển giao công nghệ',
-        'Hợp đồng li-xăng sáng chế',
-        'Hợp đồng hợp tác nghiên cứu',
-        'Hợp đồng bảo mật thông tin'
+        "Hợp đồng chuyển giao công nghệ",
+        "Hợp đồng li-xăng sáng chế",
+        "Hợp đồng hợp tác nghiên cứu",
+        "Hợp đồng bảo mật thông tin",
       ],
-      icon: FileText
+      icon: FileText,
     },
     {
-      title: 'Bảo vệ quyền sở hữu',
-      description: 'Hỗ trợ bảo vệ và thực thi quyền sở hữu trí tuệ.',
+      title: "Bảo vệ quyền sở hữu",
+      description: "Hỗ trợ bảo vệ và thực thi quyền sở hữu trí tuệ.",
       features: [
-        'Giám sát vi phạm quyền sở hữu',
-        'Xử lý tranh chấp về IP',
-        'Tư vấn chiến lược bảo vệ',
-        'Hỗ trợ pháp lý tại tòa án'
+        "Giám sát vi phạm quyền sở hữu",
+        "Xử lý tranh chấp về IP",
+        "Tư vấn chiến lược bảo vệ",
+        "Hỗ trợ pháp lý tại tòa án",
       ],
-      icon: Award
-    }
+      icon: Award,
+    },
   ];
 
   const process = [
     {
       step: 1,
-      title: 'Tư vấn ban đầu',
-      description: 'Phân tích tình huống và đưa ra lời khuyên pháp lý'
+      title: "Tư vấn ban đầu",
+      description: "Phân tích tình huống và đưa ra lời khuyên pháp lý",
     },
     {
       step: 2,
-      title: 'Soạn thảo tài liệu',
-      description: 'Chuẩn bị các tài liệu pháp lý cần thiết'
+      title: "Soạn thảo tài liệu",
+      description: "Chuẩn bị các tài liệu pháp lý cần thiết",
     },
     {
       step: 3,
-      title: 'Nộp đơn và theo dõi',
-      description: 'Nộp đơn và theo dõi tiến trình xử lý'
+      title: "Nộp đơn và theo dõi",
+      description: "Nộp đơn và theo dõi tiến trình xử lý",
     },
     {
       step: 4,
-      title: 'Hoàn thiện thủ tục',
-      description: 'Hoàn tất các thủ tục và bàn giao kết quả'
-    }
+      title: "Hoàn thiện thủ tục",
+      description: "Hoàn tất các thủ tục và bàn giao kết quả",
+    },
   ];
 
   return (
@@ -85,22 +87,28 @@ export default function LegalPage() {
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-20 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
               <Shield className="h-5 w-5 mr-2" />
-              <span className="text-sm font-medium">Hỗ trợ pháp lý chuyên nghiệp</span>
+              <span className="text-sm font-medium">
+                Hỗ trợ pháp lý chuyên nghiệp
+              </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Hỗ trợ pháp lý
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Dịch vụ pháp lý chuyên nghiệp cho sở hữu trí tuệ và chuyển giao công nghệ
+              Dịch vụ pháp lý chuyên nghiệp cho sở hữu trí tuệ và chuyển giao
+              công nghệ
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -134,13 +142,17 @@ export default function LegalPage() {
               Dịch vụ pháp lý
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Chúng tôi cung cấp các dịch vụ pháp lý toàn diện cho sở hữu trí tuệ và chuyển giao công nghệ
+              Chúng tôi cung cấp các dịch vụ pháp lý toàn diện cho sở hữu trí
+              tuệ và chuyển giao công nghệ
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div key={index} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+              <div
+                key={index}
+                className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+              >
                 {/* Header with gradient */}
                 <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-600 relative overflow-hidden">
                   <div className="absolute inset-0 bg-black/10"></div>
@@ -155,12 +167,12 @@ export default function LegalPage() {
                     </h3>
                   </div>
                 </div>
-                
+
                 <div className="p-8">
                   <p className="text-gray-600 mb-6 leading-relaxed">
                     {service.description}
                   </p>
-                  
+
                   <ul className="space-y-3 mb-6">
                     {service.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
@@ -170,7 +182,7 @@ export default function LegalPage() {
                     ))}
                   </ul>
 
-                  <Link 
+                  <Link
                     href="/contact"
                     className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors group-hover:translate-x-1"
                   >
@@ -190,7 +202,9 @@ export default function LegalPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-green-50 text-green-600 rounded-full px-4 py-2 mb-4">
               <Clock className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">Quy trình chuyên nghiệp</span>
+              <span className="text-sm font-medium">
+                Quy trình chuyên nghiệp
+              </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Quy trình hỗ trợ pháp lý
@@ -216,9 +230,7 @@ export default function LegalPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                   {item.title}
                 </h3>
-                <p className="text-gray-600">
-                  {item.description}
-                </p>
+                <p className="text-gray-600">{item.description}</p>
               </div>
             ))}
           </div>
@@ -267,13 +279,16 @@ export default function LegalPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-purple-50 text-purple-600 rounded-full px-4 py-2 mb-4">
               <Award className="h-4 w-4 mr-2" />
-              <span className="text-sm font-medium">Tại sao chọn chúng tôi</span>
+              <span className="text-sm font-medium">
+                Tại sao chọn chúng tôi
+              </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Tại sao chọn chúng tôi?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Đội ngũ luật sư chuyên nghiệp và phương pháp hỗ trợ pháp lý hiệu quả
+              Đội ngũ luật sư chuyên nghiệp và phương pháp hỗ trợ pháp lý hiệu
+              quả
             </p>
           </div>
 
@@ -286,7 +301,8 @@ export default function LegalPage() {
                 Đội ngũ chuyên gia
               </h3>
               <p className="text-gray-600">
-                Đội ngũ luật sư và chuyên gia giàu kinh nghiệm trong lĩnh vực sở hữu trí tuệ
+                Đội ngũ luật sư và chuyên gia giàu kinh nghiệm trong lĩnh vực sở
+                hữu trí tuệ
               </p>
             </div>
 
@@ -298,7 +314,8 @@ export default function LegalPage() {
                 Thời gian nhanh chóng
               </h3>
               <p className="text-gray-600">
-                Xử lý nhanh chóng với thời gian cam kết rõ ràng cho từng loại dịch vụ
+                Xử lý nhanh chóng với thời gian cam kết rõ ràng cho từng loại
+                dịch vụ
               </p>
             </div>
 
@@ -310,7 +327,8 @@ export default function LegalPage() {
                 Chất lượng đảm bảo
               </h3>
               <p className="text-gray-600">
-                Cam kết chất lượng dịch vụ với tỷ lệ thành công cao trong các thủ tục pháp lý
+                Cam kết chất lượng dịch vụ với tỷ lệ thành công cao trong các
+                thủ tục pháp lý
               </p>
             </div>
           </div>
@@ -321,11 +339,14 @@ export default function LegalPage() {
       <section className="bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 text-white py-20 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
             <Lightbulb className="h-5 w-5 mr-2" />
@@ -335,17 +356,18 @@ export default function LegalPage() {
             Cần hỗ trợ pháp lý?
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Liên hệ với chúng tôi để được tư vấn pháp lý chuyên nghiệp và bảo vệ quyền sở hữu trí tuệ
+            Liên hệ với chúng tôi để được tư vấn pháp lý chuyên nghiệp và bảo vệ
+            quyền sở hữu trí tuệ
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="tel:0848567193"
+            <a
+              href="tel:0986287758"
               className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               <Phone className="h-5 w-5 mr-2" />
-              0848567193
+              0986287758
             </a>
-            <a 
+            <a
               href="mailto:contact@hanotex.vn"
               className="border border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 inline-flex items-center justify-center hover:bg-white/10"
             >
