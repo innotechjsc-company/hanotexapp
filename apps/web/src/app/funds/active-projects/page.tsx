@@ -173,20 +173,16 @@ export default function ActiveProjectsPage() {
                   {proj.image &&
                   typeof proj.image === "object" &&
                   proj.image.url ? (
-                    <Image
+                    <img
                       src={getFullMediaUrl(proj.image.url)}
                       alt={proj.name || "Project image"}
-                      fill
-                      className="object-contain"
-                      priority={false}
+                      className="w-full h-full object-cover object-center"
                     />
                   ) : (
-                    <Image
-                      src="/logo.png"
-                      alt="Hanotex"
-                      fill
-                      className="object-contain"
-                      priority={false}
+                    <img
+                      src={"/logo.png"}
+                      alt={"Hanotex"}
+                      className="w-full h-full object-contain object-center"
                     />
                   )}
                 </div>

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowRight, Rocket, Users, TrendingUp } from 'lucide-react';
+import Link from "next/link";
+import { ArrowRight, Rocket, Users, TrendingUp } from "lucide-react";
 
 export default function CTASection() {
   return (
     <section className="py-20 bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-10" />
-      
+
       {/* Floating Elements */}
       <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full opacity-10 animate-pulse" />
       <div className="absolute top-20 right-20 w-16 h-16 bg-white rounded-full opacity-10 animate-pulse animation-delay-200" />
@@ -23,9 +23,10 @@ export default function CTASection() {
               Sẵn sàng tham gia cộng đồng công nghệ?
             </h2>
             <p className="text-xl text-primary-100 max-w-3xl mx-auto mb-8">
-              Hãy bắt đầu hành trình chuyển giao và thương mại hóa công nghệ của bạn ngay hôm nay
+              Hãy bắt đầu hành trình chuyển giao và thương mại hóa công nghệ của
+              bạn ngay hôm nay
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/auth/register"
@@ -104,9 +105,7 @@ export default function CTASection() {
                 📞 +84 123 456 789
               </a>
               <span className="hidden sm:block">•</span>
-              <span>
-                🕒 24/7 Hỗ trợ
-              </span>
+              <span>🕒 24/7 Hỗ trợ</span>
             </div>
           </div>
         </div>

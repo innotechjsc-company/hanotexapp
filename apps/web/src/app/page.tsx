@@ -14,6 +14,8 @@ import HowItWorksSection from "@/components/home/HowItWorksSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import CTASection from "@/components/home/CTASection";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import AuctionsSection from "@/components/home/Auctions";
+import FundsSection from "@/components/home/Funds";
 
 // Metadata moved to layout.tsx since this is now a client component
 
@@ -22,39 +24,36 @@ export default function HomePage() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <HeroSection />
-
-      {/* Intro Section */}
-      <IntroSection />
-
-      {/* Categories Section */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <CategoriesSection />
-      </Suspense>
-
-      {/* Main Features Section */}
-      <MainFeaturesSection />
-
       {/* Featured Technologies */}
       <Suspense fallback={<LoadingSpinner />}>
         <FeaturedTechnologies />
       </Suspense>
-
       {/* Supply-Demand Section */}
       <Suspense fallback={<LoadingSpinner />}>
         <SupplyDemandSection />
       </Suspense>
+      <AuctionsSection />
+      <FundsSection />
 
+      {/* Categories Section */}
+      {/* <Suspense fallback={<LoadingSpinner />}>
+        <CategoriesSection />
+      </Suspense> */}
+
+      {/* Main Features Section */}
+      {/* <MainFeaturesSection /> */}
+
+      {/* Intro Section */}
+      <IntroSection />
+      {/* Partners Section */}
+      <PartnersSection />
+      {/* Stats Section */}
+      <StatsSection />
       {/* News & Events Section */}
       <NewsEventsSection />
 
-      {/* Partners Section */}
-      <PartnersSection />
-
-      {/* Stats Section */}
-      <StatsSection />
-
       {/* How It Works Section */}
-      <HowItWorksSection />
+      {/* <HowItWorksSection /> */}
 
       {/* Testimonials Section */}
       <TestimonialsSection />

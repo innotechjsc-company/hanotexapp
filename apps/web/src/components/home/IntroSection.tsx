@@ -10,25 +10,25 @@ export default function IntroSection() {
       icon: Building2,
       title: "HANOTEX là gì?",
       description:
-        "Sàn giao dịch công nghệ trực tuyến của thành phố Hà Nội, kết nối các bên trong hệ sinh thái khoa học công nghệ.",
+        "HANOTEX là sàn giao dịch công nghệ Hà Nội do Ủy ban nhân dân thành phố Hà Nội chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì triển khai, nhằm kết nối toàn diện giữa công nghệ – nhu cầu – tài chính – chuyên gia – chính sách, góp phần thúc đẩy thương mại hóa kết quả nghiên cứu và đổi mới sáng tạo, phát triển thị trường khoa học và công nghệ của Thủ đô theo mô hình minh bạch, hiện đại, hội nhập quốc tế.",
     },
     {
       icon: Target,
       title: "Mục tiêu",
       description:
-        "Thúc đẩy chuyển giao công nghệ, thương mại hóa kết quả nghiên cứu và tạo cầu nối giữa cung - cầu công nghệ.",
+        "Tăng cường kết nối đa chiều giữa doanh nghiệp – viện trường – chuyên gia – nhà đầu tư, từng bước hình thành hệ sinh thái đổi mới sáng tạo đồng bộ và phát triển bền vững tại Hà Nội.",
     },
     {
       icon: Users,
-      title: "Đối tượng",
+      title: "Đối tượng phục vụ",
       description:
-        "Doanh nghiệp, viện nghiên cứu, trường đại học, cá nhân nghiên cứu và các tổ chức khoa học công nghệ.",
+        "Doanh nghiệp và tổ chức sản xuất, kinh doanh, Viện nghiên cứu, trường đại học, tổ chức khoa học và công nghệ,Chuyên gia, nhà sáng chế, nhà khoa học, Nhà đầu tư và các tổ chức hỗ trợ đổi mới sáng tạo",
     },
     {
       icon: Lightbulb,
-      title: "Lợi ích",
+      title: "Lợi ích mang lại",
       description:
-        "Tăng cường hiệu quả chuyển giao công nghệ, mở rộng thị trường và tạo cơ hội hợp tác đổi mới sáng tạo.",
+        "Tiếp cận công nghệ chất lượng cao, sẵn sàng chuyển giao, Mở rộng kết nối chuyên gia, viện trường, đối tác tiềm năng, Khai phá cơ hội hợp tác đầu tư, phát triển sản phẩm, Thụ hưởng chính sách hỗ trợ từ Thành phố Hà Nội",
     },
   ];
 
@@ -40,8 +40,8 @@ export default function IntroSection() {
             Về HANOTEX
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Nền tảng kết nối toàn diện cho hệ sinh thái khoa học công nghệ Hà
-            Nội
+            Nền tảng chuyển giao công nghệ – kết nối toàn diện hệ sinh thái đổi
+            mới sáng tạo
           </p>
         </div>
 
