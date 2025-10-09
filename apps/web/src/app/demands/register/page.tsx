@@ -733,7 +733,7 @@ export default function RegisterDemandPage() {
             </div>
 
             {/* Yêu cầu mong muốn */}
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white shadow rounded-lg mt-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Yêu cầu mong muốn
@@ -797,7 +797,7 @@ export default function RegisterDemandPage() {
             </div>
 
             {/* Ảnh đại diện */}
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white shadow rounded-lg mt-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Ảnh đại diện
@@ -884,7 +884,7 @@ export default function RegisterDemandPage() {
             </div>
 
             {/* Tài liệu đính kèm */}
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white shadow rounded-lg mt-6">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Tài liệu đính kèm
@@ -996,7 +996,7 @@ export default function RegisterDemandPage() {
 
             {/* Submit Button */}
             {/* TODO: button dùng của antd */}
-            <div className="flex justify-end space-x-3 mt-4">
+            <div className="flex justify-end space-x-3 mt-6">
               <Button
                 type="default"
                 onClick={() => router.back()}
