@@ -204,7 +204,8 @@ export default function HeroSection() {
   const features = [
     {
       icon: Rocket,
-      title: "Đăng ký & Định danh tài sản KH&CN",
+      title: "Đăng ký & Định danh",
+      subTitle: "tài sản KH&CN",
       description:
         "Niêm yết và xác thực công nghệ – sản phẩm – kết quả nghiên cứu",
       color: "bg-gradient-to-r from-blue-500 to-blue-600",
@@ -212,7 +213,8 @@ export default function HeroSection() {
     },
     {
       icon: Target,
-      title: "Tìm đối tác – Kết nối cơ hội",
+      title: "Tìm đối tác – Kết nối",
+      subTitle: "cơ hội",
       description:
         "Khám phá nhu cầu chuyển giao, thương mại hóa, hợp tác đầu tư",
       color: "bg-gradient-to-r from-green-500 to-green-600",
@@ -377,8 +379,10 @@ export default function HeroSection() {
                   >
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
                     {feature.title}
+                    <br />
+                    {feature.subTitle}
                   </h3>
                   <p className="text-white/80 text-sm">{feature.description}</p>
                 </div>
