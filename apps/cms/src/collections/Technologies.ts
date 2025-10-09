@@ -397,6 +397,11 @@ export const Technologies: CollectionConfig = {
         { label: 'Hạn chế', value: 'restricted' },
       ],
     },
+    {
+      name: 'is_hot',
+      type: 'checkbox',
+      label: 'Đặt làm công nghệ nổi bật',
+    },
   ],
   timestamps: true,
 }

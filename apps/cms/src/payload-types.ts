@@ -544,6 +544,7 @@ export interface Technology {
   submitter: string | User;
   status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active' | 'inactive';
   visibility_mode: 'public' | 'private' | 'restricted';
+  is_hot?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1678,6 +1679,7 @@ export interface TechnologiesSelect<T extends boolean = true> {
   submitter?: T;
   status?: T;
   visibility_mode?: T;
+  is_hot?: T;
   updatedAt?: T;
   createdAt?: T;
 }
