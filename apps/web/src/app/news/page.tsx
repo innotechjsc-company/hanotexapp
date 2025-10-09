@@ -117,6 +117,8 @@ export default function NewsPage() {
   const router = useRouter();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearchQuery, setActiveSearchQuery] = useState(""); // Query được sử dụng để gọi API
@@ -133,8 +135,12 @@ export default function NewsPage() {
   const fetchNews = async (isLoadMore = false, customSearchQuery?: string) => {
     try {
       if (!isLoadMore) {
-        setLoading(true);
         setError(null);
+        if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+        }
       } else {
         setLoadingMore(true);
       }
@@ -199,6 +205,8 @@ export default function NewsPage() {
       }
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
+      setIsInitialLoad(false);
       setLoadingMore(false);
     }
   };
@@ -297,7 +305,7 @@ export default function NewsPage() {
     });
   };
 
-  if (loading) {
+  if (loading && isInitialLoad) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -428,97 +436,107 @@ export default function NewsPage() {
 
         {/* Regular Articles List */}
         {articles.length > 0 ? (
-          <div className="space-y-6">
-            {articles.map((article) => (
-              <article
-                key={article.id}
-                onClick={() => handleArticleClick(article.id)}
-                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
-              >
-                <div className="flex flex-col md:flex-row">
-                  {/* Featured Image */}
-                  <div className="md:w-1/3 relative overflow-hidden">
-                    <img
-                      src={article.featured_image}
-                      alt={article.title}
-                      className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/90 text-gray-800">
-                        {article.category}
-                      </span>
-                    </div>
-                    <div className="absolute top-4 right-4 flex space-x-2">
-                      <button
-                        onClick={(e) => handleShareClick(e, article)}
-                        className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-                        title="Chia sẻ bài viết"
-                      >
-                        <Share2 className="h-4 w-4 text-white" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="md:w-2/3 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>{formatDate(article.published_at)}</span>
-                        </div>
+          <div className="relative">
+            {isRefreshing && (
+              <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                <div className="flex items-center space-x-3 text-gray-700">
+                  <LoadingSpinner size="md" />
+                  <span>Đang cập nhật...</span>
+                </div>
+              </div>
+            )}
+            <div className="space-y-6">
+              {articles.map((article) => (
+                <article
+                  key={article.id}
+                  onClick={() => handleArticleClick(article.id)}
+                  className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                >
+                  <div className="flex flex-col md:flex-row">
+                    {/* Featured Image */}
+                    <div className="md:w-1/3 relative overflow-hidden">
+                      <img
+                        src={article.featured_image}
+                        alt={article.title}
+                        className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/90 text-gray-800">
+                          {article.category}
+                        </span>
                       </div>
-                    </div>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                      {article.title}
-                    </h2>
-
-                    <p className="text-gray-600 mb-4 line-clamp-3">
-                      {article.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 mr-1" />
-                          <span>{article.author}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span>{article.views}</span>
-                        </div>
-                        <LikeButton
-                          newsId={article.id}
-                          initialLikes={article.likes}
-                          variant="compact"
-                          size="sm"
-                        />
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-1">
-                          {article.tags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700"
-                            >
-                              <Tag className="h-3 w-3 mr-1" />
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <button className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
-                          Đọc thêm
-                          <ArrowRight className="ml-1 h-4 w-4" />
+                      <div className="absolute top-4 right-4 flex space-x-2">
+                        <button
+                          onClick={(e) => handleShareClick(e, article)}
+                          className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+                          title="Chia sẻ bài viết"
+                        >
+                          <Share2 className="h-4 w-4 text-white" />
                         </button>
                       </div>
                     </div>
+
+                    {/* Content */}
+                    <div className="md:w-2/3 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            <span>{formatDate(article.published_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                        {article.title}
+                      </h2>
+
+                      <p className="text-gray-600 mb-4 line-clamp-3">
+                        {article.excerpt}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 mr-1" />
+                            <span>{article.author}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span>{article.views}</span>
+                          </div>
+                          <LikeButton
+                            newsId={article.id}
+                            initialLikes={article.likes}
+                            variant="compact"
+                            size="sm"
+                          />
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1">
+                            {article.tags.slice(0, 2).map((tag) => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700"
+                              >
+                                <Tag className="h-3 w-3 mr-1" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <button className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
+                            Đọc thêm
+                            <ArrowRight className="ml-1 h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">
