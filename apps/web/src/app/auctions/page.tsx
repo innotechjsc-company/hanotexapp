@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import { getAuctions } from "@/api/auctions";
 import { getBidsByAuction } from "@/api/bids";
 import { payloadApiClient } from "@/api/client";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 interface AuctionDisplay {
   id: string;
@@ -310,6 +311,15 @@ export default function AuctionsPage() {
             );
             const calculatedStatus = calculateAuctionStatus(startTime, endTime);
 
+            // Resolve image: prefer auction.image if present, fallback to random
+            const rawImage = auction.image as any;
+            const resolvedImage =
+              (rawImage && typeof rawImage === "string" && rawImage) ||
+              (rawImage && typeof rawImage === "object" && rawImage.url
+                ? getFullMediaUrl(rawImage.url)
+                : null) ||
+              getRandomAuctionImage(auction.id);
+
             return {
               id: auction.id,
               title: auction.title || "Không có tiêu đề",
@@ -318,7 +328,7 @@ export default function AuctionsPage() {
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
               isActive: calculatedStatus === "active",
-              image: getRandomAuctionImage(auction.id),
+              image: resolvedImage,
               category: auction.category || "Không phân loại",
               startTime: startTime,
               endTime: endTime,
@@ -338,6 +348,14 @@ export default function AuctionsPage() {
             );
             const calculatedStatus = calculateAuctionStatus(startTime, endTime);
 
+            const rawImage = auction.image as any;
+            const resolvedImage =
+              (rawImage && typeof rawImage === "string" && rawImage) ||
+              (rawImage && typeof rawImage === "object" && rawImage.url
+                ? getFullMediaUrl(rawImage.url)
+                : null) ||
+              getRandomAuctionImage(auction.id);
+
             return {
               id: auction.id,
               title: auction.title || "Không có tiêu đề",
@@ -351,7 +369,7 @@ export default function AuctionsPage() {
               timeLeft: calculateTimeLeft(endTime),
               viewers: auction.viewers || 0,
               isActive: calculatedStatus === "active",
-              image: getRandomAuctionImage(auction.id),
+              image: resolvedImage,
               category: auction.category || "Không phân loại",
               startTime: startTime,
               endTime: endTime,
