@@ -12,6 +12,8 @@ services:
       - PORT=4000
     ports:
       - "4000:4000"
+    volumes:
+      - cms_uploads:/app/uploads
     restart: unless-stopped
 
   # Web (Next.js) - Port 3000
@@ -33,3 +35,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  cms_uploads:
