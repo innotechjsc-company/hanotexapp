@@ -234,6 +234,14 @@ export default function NewsPage() {
     fetchNews();
   };
 
+  // Clear active search and reload all data
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setActiveSearchQuery("");
+    setCurrentPage(1);
+    fetchNews(false, "");
+  };
+
   // Handle share button click
   const handleShareClick = (e: React.MouseEvent, article: NewsArticle) => {
     e.preventDefault();
@@ -364,21 +372,24 @@ export default function NewsPage() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
-              <button
-                type="submit"
-                className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center ${
-                  activeSearchQuery
-                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
-                    : "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800"
-                }`}
-              >
-                {activeSearchQuery ? (
+              {activeSearchQuery ? (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700`}
+                >
                   <X className="h-4 w-4 mr-2" />
-                ) : (
+                  Xóa tìm kiếm
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800`}
+                >
                   <Search className="h-4 w-4 mr-2" />
-                )}
-                {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
-              </button>
+                  Tìm kiếm
+                </button>
+              )}
             </div>
           </form>
         </div>
