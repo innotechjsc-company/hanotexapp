@@ -73,7 +73,7 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
           <div>
             <p className="text-gray-500">Tỉ lệ cổ phần chia sẻ</p>
             <p className={`font-bold text-base text-green-500`}>
-              {raisedAmount} VND ({raisedPercent}%)
+              {raisedPercent}%
             </p>
           </div>
           <div>
