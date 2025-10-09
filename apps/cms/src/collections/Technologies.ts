@@ -6,14 +6,14 @@ export const Technologies: CollectionConfig = {
   slug: 'technologies',
   admin: {
     useAsTitle: 'title',
-    group: 'Quản lý Công nghệ',
+    group: '🔬 Công nghệ & Dự án',
     defaultColumns: ['title', 'status', 'trl_level', 'submitter_id'],
   },
   access: {
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
   },
   hooks: {
     beforeValidate: [
@@ -21,72 +21,25 @@ export const Technologies: CollectionConfig = {
         // Only apply to create operations
         if (operation !== 'create') return data
 
-        // Skip authentication check for seed operations (when submitter is already provided)
+        // Skip if submitter is already provided (for seed operations)
         if (
           data &&
           typeof data === 'object' &&
           'submitter' in data &&
           (data as { submitter?: unknown }).submitter
         ) {
-          // Store IP data in req context for later use
-          const ipObj = data as { intellectual_property?: unknown; intellectualProperty?: unknown }
-          const ipInput = ipObj?.intellectual_property ?? ipObj?.intellectualProperty
-          if (ipInput) {
-            ;(req as unknown as { ipData?: unknown }).ipData = ipInput
-            // Remove from main data to avoid validation issues
-            const {
-              intellectual_property: _intellectual_property,
-              intellectualProperty: _intellectualProperty,
-              ...cleanData
-            } = data as Record<string, unknown>
-            data = cleanData as typeof data
-          }
           return data
         }
 
-        // Get authenticated user from PayloadCMS context
-        let user: { id: string } | undefined
-        try {
-          if (req.user) {
-            user = req.user as { id: string }
-          } else {
-            const payload = await getPayload({ config: configPromise })
-            const authResult = await payload.auth({ headers: req.headers })
-            user = authResult.user as { id: string } | undefined
+        // Add authenticated user as submitter if available
+        if (req.user) {
+          return {
+            ...data,
+            submitter: (req.user as { id: string }).id,
           }
-        } catch (_error) {
-          throw new Error('Authentication failed')
         }
 
-        // Check if user is authenticated
-        if (!user) {
-          throw new Error('User not authenticated')
-        }
-
-        // Store IP data in req context for later use
-        const ipInput =
-          data && typeof data === 'object'
-            ? ((data as { intellectual_property?: unknown; intellectualProperty?: unknown })
-                .intellectual_property ??
-              (data as { intellectual_property?: unknown; intellectualProperty?: unknown })
-                .intellectualProperty)
-            : undefined
-        if (ipInput) {
-          ;(req as unknown as { ipData?: unknown }).ipData = ipInput
-          // Remove from main data to avoid validation issues
-          const {
-            intellectual_property: _intellectual_property2,
-            intellectualProperty: _intellectualProperty2,
-            ...cleanData
-          } = data as Record<string, unknown>
-          data = cleanData as typeof data
-        }
-
-        // Add authenticated user as submitter
-        return {
-          ...data,
-          submitter: user.id,
-        }
+        return data
       },
     ],
     afterChange: [
@@ -185,11 +138,28 @@ export const Technologies: CollectionConfig = {
       label: 'Tiêu đề Công nghệ',
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+      admin: {
+        description: 'Ảnh đại diện của công nghệ',
+        position: 'sidebar',
+        width: '50%',
+      },
+    },
+    {
       name: 'documents',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       hasMany: true,
       label: 'Tài liệu chứng minh',
+      admin: {
+        description: 'Tài liệu chứng minh của công nghệ',
+        position: 'sidebar',
+        width: '50%',
+      },
     },
     {
       name: 'category',
@@ -330,13 +300,7 @@ export const Technologies: CollectionConfig = {
       ],
     },
     // Pricing Information
-    {
-      name: 'image',
-      type: 'relationship',
-      relationTo: 'media',
-      required: true,
-      label: 'Ảnh đại diện',
-    },
+
     {
       name: 'pricing',
       type: 'group',

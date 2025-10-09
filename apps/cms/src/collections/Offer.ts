@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const Offer: CollectionConfig = {
   slug: 'offer',
+  admin: {
+    group: '💰 Giao dịch & Đấu thầu',
+  },
   access: {
     read: () => true,
     create: () => true,

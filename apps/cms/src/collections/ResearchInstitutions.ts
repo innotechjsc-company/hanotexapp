@@ -4,7 +4,7 @@ export const ResearchInstitutions: CollectionConfig = {
   slug: 'research-institutions',
   admin: {
     useAsTitle: 'institution_name',
-    group: 'Quản lý Người dùng',
+    group: '👥 Người dùng & Tổ chức',
     defaultColumns: ['institution_name', 'institution_code', 'governing_body'],
   },
   access: {

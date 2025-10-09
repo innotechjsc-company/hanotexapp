@@ -4,6 +4,7 @@ export const Experts: CollectionConfig = {
   slug: 'experts',
   admin: {
     useAsTitle: 'name',
+    group: '👥 Người dùng & Tổ chức',
     defaultColumns: ['name', 'field', 'organization', 'createdAt'],
   },
   access: {

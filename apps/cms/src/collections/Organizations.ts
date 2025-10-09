@@ -4,6 +4,7 @@ export const Organizations: CollectionConfig = {
   slug: 'organizations',
   admin: {
     useAsTitle: 'name',
+    group: '👥 Người dùng & Tổ chức',
     defaultColumns: ['name', 'type', 'location', 'createdAt'],
   },
   access: {

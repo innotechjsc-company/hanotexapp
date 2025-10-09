@@ -13,6 +13,7 @@ import { OfferModal } from "./components/OfferModal";
 import { ContractSigningStep } from "./components/ContractSigningStep";
 import { ContractLogsStep } from "./components/ContractLogsStep";
 import { useRouter } from "next/navigation";
+import downloadService from "@/services/downloadService";
 
 const { Text } = Typography;
 
@@ -178,9 +179,16 @@ export const NegotiationDetailsScreen: React.FC<
       <div className="flex-1 overflow-hidden">
         {isCompleted ? (
           <div className="h-full overflow-auto space-y-6">
-            <NegotiationChat messages={messages} formatFileSize={formatFileSize} />
+            <NegotiationChat
+              messages={messages}
+              formatFileSize={formatFileSize}
+            />
             {isTechnologyPropose ? (
-              <ContractSigningStep proposal={proposal} readOnly onBothAccepted={reloadProposal} />
+              <ContractSigningStep
+                proposal={proposal}
+                readOnly
+                onBothAccepted={reloadProposal}
+              />
             ) : (
               <div className="h-full overflow-auto p-4">
                 <Alert
@@ -236,7 +244,10 @@ export const NegotiationDetailsScreen: React.FC<
             )}
             {currentStep === 1 && isTechnologyPropose && (
               <div className="h-full overflow-auto">
-                <ContractSigningStep proposal={proposal} onBothAccepted={reloadProposal} />
+                <ContractSigningStep
+                  proposal={proposal}
+                  onBothAccepted={reloadProposal}
+                />
               </div>
             )}
             {currentStep === 1 && !isTechnologyPropose && (

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Avatar,
   Button,
@@ -18,6 +24,7 @@ import {
   CheckCircle,
   X as XIcon,
 } from "lucide-react";
+import downloadService from "@/services/downloadService";
 import type { TechnologyPropose } from "@/types/technology-propose";
 import { contractLogsApi } from "@/api/contract-logs";
 import { contractsApi } from "@/api/contracts";
@@ -101,47 +108,50 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
     });
   };
 
-  const fetchLogs = useCallback(async (options: { silent?: boolean } = {}) => {
-    const { silent = false } = options;
-    if (!proposal?.id) return;
-    if (!silent) {
-      setLoading(true);
-    }
-    try {
-      // Load active contract for this proposal (required by CMS schema)
-      try {
-        const contract = await contractsApi.getByTechnologyPropose(
-          proposal.id,
-          1
-        );
-        setActiveContractId(
-          (contract as any)?.id || (contract as any)?._id || null
-        );
-      } catch {
-        setActiveContractId(null);
-      }
-
-      const res = await contractLogsApi.list(
-        { technology_propose: proposal.id },
-        { limit: 100, sort: "createdAt" }
-      );
-      const data = (res as any).docs || (res as any).data || [];
-      setLogs(data as ContractLog[]);
-      setTimeout(() => {
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop =
-            scrollContainerRef.current.scrollHeight;
-        }
-      }, 50);
-    } catch (e) {
-      console.error("Failed to load contract logs", e);
-      message.error("Không thể tải nhật ký hợp đồng");
-    } finally {
+  const fetchLogs = useCallback(
+    async (options: { silent?: boolean } = {}) => {
+      const { silent = false } = options;
+      if (!proposal?.id) return;
       if (!silent) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  }, [proposal?.id]);
+      try {
+        // Load active contract for this proposal (required by CMS schema)
+        try {
+          const contract = await contractsApi.getByTechnologyPropose(
+            proposal.id,
+            1
+          );
+          setActiveContractId(
+            (contract as any)?.id || (contract as any)?._id || null
+          );
+        } catch {
+          setActiveContractId(null);
+        }
+
+        const res = await contractLogsApi.list(
+          { technology_propose: proposal.id },
+          { limit: 100, sort: "createdAt" }
+        );
+        const data = (res as any).docs || (res as any).data || [];
+        setLogs(data as ContractLog[]);
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop =
+              scrollContainerRef.current.scrollHeight;
+          }
+        }, 50);
+      } catch (e) {
+        console.error("Failed to load contract logs", e);
+        message.error("Không thể tải nhật ký hợp đồng");
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [proposal?.id]
+  );
 
   useEffect(() => {
     fetchLogs();
@@ -560,13 +570,16 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
                             <Button
                               type="text"
                               icon={<Download size={14} />}
-                              onClick={() => {
-                                const a = document.createElement("a");
-                                a.href = docUrl;
-                                a.download = fileName || "document";
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
+                              onClick={async () => {
+                                try {
+                                  await downloadService.downloadByUrl(
+                                    docUrl,
+                                    fileName || "document"
+                                  );
+                                } catch (error) {
+                                  console.error("Download failed:", error);
+                                  message.error("Không thể tải xuống file");
+                                }
                               }}
                             >
                               Tải xuống
@@ -625,7 +638,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
           </div>
 
           {!isCompleted && (
-          <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
+            <div className="flex-shrink-0 border-t border-gray-200 bg-white p-3">
               {(() => {
                 // Only block sending when there is a pending completion log
                 const hasPendingCompletion = logs.some(
@@ -638,9 +651,7 @@ export const ContractLogsStep: React.FC<ContractLogsStepProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">
                       {disabled ? (
-                        <span>
-                          ⏳ Đang chờ xác nhận hoàn thành hợp đồng.
-                        </span>
+                        <span>⏳ Đang chờ xác nhận hoàn thành hợp đồng.</span>
                       ) : (
                         <span>Chọn một hành động để tiếp tục.</span>
                       )}

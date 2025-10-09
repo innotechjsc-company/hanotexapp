@@ -438,6 +438,13 @@ export interface Category {
 export interface Technology {
   id: string;
   title: string;
+  /**
+   * Ảnh đại diện của công nghệ
+   */
+  image: string | Media;
+  /**
+   * Tài liệu chứng minh của công nghệ
+   */
   documents?: (string | Media)[] | null;
   category: string | Category;
   trl_level: number;
@@ -481,7 +488,6 @@ export interface Technology {
     transfer_option?: string | null;
     id?: string | null;
   }[];
-  image: string | Media;
   pricing: {
     pricing_type: 'grant_seed' | 'vc_joint_venture' | 'growth_strategic';
     price_from: number;
@@ -776,6 +782,9 @@ export interface ServiceTicket {
  */
 export interface Project {
   id: string;
+  /**
+   * Ảnh đại diện của dự án
+   */
   image?: (string | null) | Media;
   name: string;
   description: string;
@@ -875,6 +884,10 @@ export interface Trl {
 export interface Demand {
   id: string;
   title: string;
+  /**
+   * Ảnh đại diện
+   */
+  image: string | Media;
   description: string;
   category: string | Category;
   user: string | User;
@@ -886,7 +899,6 @@ export interface Demand {
   to_price?: number | null;
   cooperation?: string | null;
   start_date?: string | null;
-  image: string | Media;
   end_date?: string | null;
   status?: ('pending' | 'approved' | 'rejected' | 'active' | 'inactive') | null;
   documents?: (string | Media)[] | null;
@@ -1605,6 +1617,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface TechnologiesSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   documents?: T;
   category?: T;
   trl_level?: T;
@@ -1647,7 +1660,6 @@ export interface TechnologiesSelect<T extends boolean = true> {
         transfer_option?: T;
         id?: T;
       };
-  image?: T;
   pricing?:
     | T
     | {
@@ -1838,6 +1850,7 @@ export interface TrlSelect<T extends boolean = true> {
  */
 export interface DemandSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
   description?: T;
   category?: T;
   user?: T;
@@ -1849,7 +1862,6 @@ export interface DemandSelect<T extends boolean = true> {
   to_price?: T;
   cooperation?: T;
   start_date?: T;
-  image?: T;
   end_date?: T;
   status?: T;
   documents?: T;

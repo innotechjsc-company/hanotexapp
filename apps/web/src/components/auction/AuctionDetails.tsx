@@ -19,7 +19,7 @@ interface AuctionDetailsProps {
   organizer: {
     name: string;
     email: string;
-    phone?: string;
+    phone?: string | null;
   };
   documents: Array<{
     id: string;

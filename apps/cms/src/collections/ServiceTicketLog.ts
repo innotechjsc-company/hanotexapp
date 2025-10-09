@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const ServiceTicketLog: CollectionConfig = {
   slug: 'service-ticket-log',
+  admin: {
+    group: '🛠️ Dịch vụ',
+  },
   access: {
     read: () => true,
     create: () => true,

@@ -13,6 +13,7 @@ import { ContractSigningStep } from "./components/ContractSigningStep";
 import { ContractLogsStep } from "./components/ContractLogsStep";
 import { ConfirmationModal } from "./components/ConfirmationModal";
 import { OfferModal } from "./components/OfferModal";
+import downloadService from "@/services/downloadService";
 
 const { Text } = Typography;
 
@@ -151,7 +152,10 @@ export const ProjectNegotiationDetailsScreen: React.FC<
     <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Header - Fixed at top */}
       <div className="flex-shrink-0">
-        <ProjectNegotiationHeader projectProposal={projectProposal} onClose={handleClose} />
+        <ProjectNegotiationHeader
+          projectProposal={projectProposal}
+          onClose={handleClose}
+        />
       </div>
 
       {/* Steps Indicator */}
@@ -177,12 +181,16 @@ export const ProjectNegotiationDetailsScreen: React.FC<
       <div className="flex-1 overflow-hidden">
         {isCompleted ? (
           <div className="h-full overflow-auto space-y-6">
-            <ProjectNegotiationChat 
-              messages={messages} 
+            <ProjectNegotiationChat
+              messages={messages}
               formatFileSize={formatFileSize}
               messageInputComponent={<div />}
             />
-            <ContractSigningStep proposal={projectProposal} readOnly onBothAccepted={reloadProposal} />
+            <ContractSigningStep
+              proposal={projectProposal}
+              readOnly
+              onBothAccepted={reloadProposal}
+            />
             <ContractLogsStep proposal={projectProposal} />
           </div>
         ) : (
@@ -217,7 +225,10 @@ export const ProjectNegotiationDetailsScreen: React.FC<
             )}
             {currentStep === 1 && (
               <div className="h-full overflow-auto">
-                <ContractSigningStep proposal={projectProposal} onBothAccepted={reloadProposal} />
+                <ContractSigningStep
+                  proposal={projectProposal}
+                  onBothAccepted={reloadProposal}
+                />
               </div>
             )}
             {currentStep === 2 && (

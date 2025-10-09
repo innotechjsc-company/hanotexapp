@@ -10,11 +10,22 @@ class DownloadService {
     if (!url) throw new Error("URL is required");
 
     const fullUrl = getFullMediaUrl(url);
+    
+    console.log("DownloadService: Starting download", {
+      originalUrl: url,
+      fullUrl: fullUrl,
+      requestedFilename: filename
+    });
 
     // Try to fetch the blob first (works best when CORS is configured)
     try {
+      console.log("DownloadService: Attempting fetch download...");
       const res = await fetch(fullUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      if (!res.ok) {
+        console.error(`DownloadService: Fetch failed with status ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
 
       const blob = await res.blob();
       const suggested = this.getFilenameFromUrl(fullUrl);
@@ -22,17 +33,34 @@ class DownloadService {
         filename || suggested,
         blob.type || undefined
       );
+      
+      console.log("DownloadService: Blob download successful", {
+        blobSize: blob.size,
+        blobType: blob.type,
+        finalName: finalName
+      });
+      
       this.triggerBlobDownload(blob, finalName);
       return;
     } catch (err) {
+      console.warn("DownloadService: Blob download failed, trying fallback", err);
+      
       // Fallback: best-effort anchor download
-      const a = document.createElement("a");
-      a.href = fullUrl;
-      if (filename) a.download = filename;
-      a.target = "_blank";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      try {
+        const a = document.createElement("a");
+        a.href = fullUrl;
+        if (filename) a.download = filename;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        console.log("DownloadService: Fallback download triggered");
+      } catch (fallbackErr) {
+        console.error("DownloadService: Both download methods failed", fallbackErr);
+        throw new Error(`Download failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
     }
   }
 

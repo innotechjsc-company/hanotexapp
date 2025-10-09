@@ -53,21 +53,6 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  // CORS/CSRF: default dev origins + ALLOWED_ORIGINS from env
-  cors: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://34.142.238.176:3000',
-    'https://hanotex.vn',
-    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
-  ],
-  csrf: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://34.142.238.176:3000',
-    'https://hanotex.vn',
-    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : []),
-  ],
   collections: [
     Users,
     Companies,
@@ -116,6 +101,11 @@ export default buildConfig({
       'mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test',
   }),
   sharp,
+  upload: {
+    limits: {
+      fileSize: 5000000, // 5MB
+    },
+  },
   plugins: [
     payloadCloudPlugin(),
     // storage-adapter-placeholder

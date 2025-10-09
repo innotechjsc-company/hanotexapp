@@ -4,6 +4,7 @@ export const Auctions: CollectionConfig = {
   slug: 'auctions',
   admin: {
     useAsTitle: 'title',
+    group: '💰 Giao dịch & Đấu thầu',
     defaultColumns: ['title', 'currentBid', 'endTime', 'status'],
   },
   access: {

@@ -4,7 +4,7 @@ export const Events: CollectionConfig = {
   slug: 'events',
   admin: {
     useAsTitle: 'title',
-    group: 'Quản lý sự kiện',
+    group: '📰 Tin tức & Sự kiện',
     defaultColumns: ['title', 'start_date', 'end_date', 'location', 'status', 'url'],
   },
   access: {

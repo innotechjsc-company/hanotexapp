@@ -41,7 +41,7 @@ export const ContractLogs: CollectionConfig = {
   slug: 'contract-logs',
   admin: {
     useAsTitle: 'content',
-    group: 'Quản lý tiến độ hợp đồng',
+    group: '💰 Giao dịch & Đấu thầu',
   },
   access: {
     read: () => true,

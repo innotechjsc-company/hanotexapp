@@ -14,6 +14,7 @@ import { negotiatingMessageApi } from "@/api/negotiating-messages";
 import type { Media } from "@/types/media1";
 import { useUser } from "@/store/auth";
 import { OfferStatus } from "@/types/offer";
+import downloadService from "@/services/downloadService";
 
 const { Text } = Typography;
 
@@ -86,10 +87,36 @@ const FileAttachment: React.FC<{
 }> = ({ attachment, isRightSide, formatFileSize }) => {
   const getFileName = () => {
     if (typeof attachment === "string") {
+      // Try to extract filename from URL
+      if (attachment.includes('/')) {
+        const segments = attachment.split('/');
+        const lastSegment = segments[segments.length - 1];
+        if (lastSegment && lastSegment.includes('.')) {
+          return lastSegment;
+        }
+      }
       return "Document";
     }
-    // Use filename first, then alt as fallback, then default
-    return attachment.filename || attachment.alt || "Tài liệu";
+    
+    // Use filename first, then alt as fallback, then extract from URL, then default
+    if (attachment.filename) {
+      return attachment.filename;
+    }
+    
+    if (attachment.alt) {
+      return attachment.alt;
+    }
+    
+    // Try to extract from URL
+    if (attachment.url && attachment.url.includes('/')) {
+      const segments = attachment.url.split('/');
+      const lastSegment = segments[segments.length - 1];
+      if (lastSegment && lastSegment.includes('.')) {
+        return lastSegment;
+      }
+    }
+    
+    return "Tài liệu";
   };
 
   const getFileSize = () => {
@@ -100,10 +127,21 @@ const FileAttachment: React.FC<{
   };
 
   const getFileUrl = () => {
+    console.log("Getting file URL for attachment:", attachment);
+    
     if (typeof attachment === "string") {
+      // If attachment is just a string, it might be a URL itself
+      if (attachment.startsWith('http') || attachment.startsWith('/')) {
+        return attachment;
+      }
       return "#";
     }
-    return attachment.url || "#";
+    
+    // Handle Media object
+    const url = attachment?.url;
+    console.log("Extracted URL:", url);
+    
+    return url || "#";
   };
 
   const getMimeType = () => {
@@ -131,17 +169,38 @@ const FileAttachment: React.FC<{
     return "📎";
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const url = getFileUrl();
-    if (url && url !== "#") {
-      // Create a temporary link element to trigger download
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = getFileName();
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    const fileName = getFileName();
+    
+    console.log("Download attempt:", { url, fileName, attachment });
+    
+    if (!url || url === "#") {
+      antdMessage.error("Không tìm thấy đường dẫn file");
+      return;
+    }
+    
+    try {
+      antdMessage.loading("Đang tải file...", 0.5);
+      await downloadService.downloadByUrl(url, fileName);
+      antdMessage.success("Tải file thành công!");
+    } catch (error) {
+      console.error("Download failed:", error);
+      
+      // Fallback: try opening in new tab
+      try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'download';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        antdMessage.success("Đã mở file trong tab mới!");
+      } catch (fallbackError) {
+        console.error("Fallback download failed:", fallbackError);
+        antdMessage.error(`Không thể tải xuống file: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`);
+      }
     }
   };
 
@@ -177,7 +236,7 @@ const FileAttachment: React.FC<{
           size="small"
           icon={<Download size={14} />}
           onClick={handleDownload}
-          disabled={getFileUrl() === "#"}
+          disabled={!getFileUrl() || getFileUrl() === "#"}
           className={`
             border-none rounded-lg p-2 transition-colors
             ${

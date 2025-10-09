@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { ProjectPropose } from "@/types/project-propose";
 import type { Contract } from "@/types/contract";
+import downloadService from "@/services/downloadService";
 import { ContractStatusEnum } from "@/types/contract";
 import { contractsApi } from "@/api/contracts";
 import { useUser } from "@/store/auth";
@@ -78,15 +79,18 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
   const formatDateTime = (iso?: string) =>
     iso ? new Date(iso).toLocaleString("vi-VN") : "-";
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     // Download the contract file if available
     if (activeContract?.contract_file?.url) {
-      const link = document.createElement("a");
-      link.href = activeContract.contract_file.url;
-      link.download = activeContract.contract_file.filename || "contract.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        await downloadService.downloadByUrl(
+          activeContract.contract_file.url,
+          activeContract.contract_file.filename || "contract.pdf"
+        );
+      } catch (error) {
+        console.error("Download failed:", error);
+        message.error("Không thể tải xuống file");
+      }
       return;
     }
     // No template download. Start from upload only.
@@ -320,20 +324,18 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
           message.success(result.message);
 
           // If both parties accepted, refresh contract and notify parent to refresh proposal
-          
+
           if ((result as any)?.bothAccepted) {
             try {
               await refreshContract();
             } finally {
               onBothAccepted?.();
               // chỉnh sửa dự án thành không kêu gọi đầu tư nữa
-              if(proposal.project?.id){
-             await updateProject(
-              proposal.project?.id as string,
-              { open_investment_fund: false }
-            );
+              if (proposal.project?.id) {
+                await updateProject(proposal.project?.id as string, {
+                  open_investment_fund: false,
+                });
               }
-             
             }
             return;
           }
@@ -790,13 +792,16 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                           <Button
                             icon={<Download size={14} />}
                             type="text"
-                            onClick={() => {
-                              const a = document.createElement("a");
-                              a.href = doc.url || "#";
-                              a.download = doc.filename || `document-${doc.id}`;
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
+                            onClick={async () => {
+                              try {
+                                await downloadService.downloadByUrl(
+                                  doc.url || "#",
+                                  doc.filename || `document-${doc.id}`
+                                );
+                              } catch (error) {
+                                console.error("Download failed:", error);
+                                message.error("Không thể tải xuống file");
+                              }
                             }}
                           >
                             Tải xuống

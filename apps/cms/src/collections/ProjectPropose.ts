@@ -3,7 +3,7 @@ import { CollectionConfig } from 'payload'
 export const ProjectPropose: CollectionConfig = {
   slug: 'project-propose',
   admin: {
-    group: 'Đề xuất đầu tư dự án',
+    group: '🎯 Đề xuất',
   },
   access: {
     read: () => true,

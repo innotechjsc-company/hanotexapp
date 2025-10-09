@@ -4,7 +4,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
-    group: 'Quản lý Người dùng',
+    group: '👥 Người dùng & Tổ chức',
     defaultColumns: ['email', 'user_type', 'role', 'is_verified'],
   },
   auth: true,

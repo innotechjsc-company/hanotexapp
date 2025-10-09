@@ -5,6 +5,7 @@ export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
     useAsTitle: 'alt',
+    group: '🔔 Hệ thống',
     description: 'Quản lý tất cả file media (ảnh, video, documents)',
   },
   access: {
@@ -74,6 +75,16 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     crop: true,
+    resizeOptions: {
+      withoutEnlargement: true,
+    },
+    formatOptions: {
+      format: 'webp',
+      options: {
+        quality: 40,
+        effort: 4,
+      },
+    },
   },
   hooks: {
     beforeChange: [

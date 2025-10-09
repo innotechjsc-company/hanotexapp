@@ -4,14 +4,14 @@ export const InvestmentFund: CollectionConfig = {
   slug: 'investment-fund',
   admin: {
     useAsTitle: 'name',
-    group: 'Quản lý Quỹ đầu tư',
+    group: '💰 Giao dịch & Đấu thầu',
     defaultColumns: ['name', 'description', 'user'],
   },
   access: {
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

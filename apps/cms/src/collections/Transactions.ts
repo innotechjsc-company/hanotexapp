@@ -4,7 +4,7 @@ export const Transactions: CollectionConfig = {
   slug: 'transactions',
   admin: {
     useAsTitle: 'id',
-    group: 'Quản lý Giao dịch',
+    group: '💰 Giao dịch & Đấu thầu',
     defaultColumns: ['technology_id', 'buyer_id', 'seller_id', 'amount', 'status'],
   },
   access: {

@@ -4,7 +4,7 @@ export const Project: CollectionConfig = {
   slug: 'project',
   admin: {
     useAsTitle: 'name',
-    group: 'Quản lý Dự án',
+    group: '🔬 Công nghệ & Dự án',
     defaultColumns: ['name', 'description', 'status', 'end_date', 'user'],
     description: 'Quản lý các dự án đầu tư và kêu gọi vốn',
   },
@@ -69,10 +69,15 @@ export const Project: CollectionConfig = {
     // Thông tin dự án
     {
       name: 'image',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       hasMany: false,
       label: 'Ảnh đại diện',
+      admin: {
+        description: 'Ảnh đại diện của dự án',
+        position: 'sidebar',
+        width: '50%',
+      },
     },
     {
       name: 'name',
@@ -184,7 +189,7 @@ export const Project: CollectionConfig = {
     },
     {
       name: 'documents_finance',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       hasMany: true,
       label: 'Tài liệu tài chính',

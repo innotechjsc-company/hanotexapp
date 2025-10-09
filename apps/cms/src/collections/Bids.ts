@@ -4,7 +4,7 @@ export const Bids: CollectionConfig = {
   slug: 'bids',
   admin: {
     useAsTitle: 'id',
-    group: 'Quản lý Đấu giá',
+    group: '💰 Giao dịch & Đấu thầu',
     defaultColumns: ['auction', 'bidder', 'bid_amount', 'bid_time', 'is_winning'],
   },
   access: {

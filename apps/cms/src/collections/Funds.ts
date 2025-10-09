@@ -4,6 +4,7 @@ export const Funds: CollectionConfig = {
   slug: 'funds',
   admin: {
     useAsTitle: 'name',
+    group: '💰 Giao dịch & Đấu thầu',
     defaultColumns: ['name', 'type', 'size', 'status', 'createdAt'],
   },
   access: {

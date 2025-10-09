@@ -24,6 +24,7 @@ import { useUser } from "@/store/auth";
 import { uploadFile } from "@/api/media";
 import { MediaType } from "@/types/media1";
 import { FileUpload, type FileUploadItem } from "@/components/input";
+import downloadService from "@/services/downloadService";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -75,15 +76,18 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
   const formatDateTime = (iso?: string) =>
     iso ? new Date(iso).toLocaleString("vi-VN") : "-";
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     // Download the contract file if available
     if (activeContract?.contract_file?.url) {
-      const link = document.createElement("a");
-      link.href = activeContract.contract_file.url;
-      link.download = activeContract.contract_file.filename || "contract.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        await downloadService.downloadByUrl(
+          activeContract.contract_file.url,
+          activeContract.contract_file.filename || "contract.pdf"
+        );
+      } catch (error) {
+        console.error("Download failed:", error);
+        message.error("Không thể tải xuống file");
+      }
       return;
     }
     // No template download. Start from upload only.
@@ -753,13 +757,16 @@ export const ContractSigningStep: React.FC<ContractSigningStepProps> = ({
                           <Button
                             icon={<Download size={14} />}
                             type="text"
-                            onClick={() => {
-                              const a = document.createElement("a");
-                              a.href = doc.url || "#";
-                              a.download = doc.filename || `document-${doc.id}`;
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
+                            onClick={async () => {
+                              try {
+                                await downloadService.downloadByUrl(
+                                  doc.url || "#",
+                                  doc.filename || `document-${doc.id}`
+                                );
+                              } catch (error) {
+                                console.error("Download failed:", error);
+                                message.error("Không thể tải xuống file");
+                              }
                             }}
                           >
                             Tải xuống
