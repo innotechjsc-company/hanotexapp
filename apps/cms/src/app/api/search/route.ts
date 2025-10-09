@@ -1,306 +1,189 @@
-import {  NextRequest, NextResponse  } from 'next/server';
+/**
+ * Search API Route - Improved Version
+ *
+ * Endpoint: GET /api/search
+ *
+ * Query Parameters:
+ * - q: string (required, min 2 chars, max 200 chars)
+ * - type: 'all' | 'technology' | 'demand' | 'project' | 'news' | 'event' | 'company' | 'research-institution' (optional, default: 'all')
+ * - page: number (optional, default: 1, max: 1000)
+ * - limit: number (optional, default: 12, max: 100)
+ * - sort: 'relevance' | 'date' | 'title' (optional, default: 'relevance')
+ */
+
+import { NextRequest } from 'next/server'
 import { handleCORSPreflight, corsResponse, corsErrorResponse } from '@/utils/cors'
-import { getPayload, type CollectionSlug, type Where } from 'payload';
-import config from '@payload-config';
+import { getPayload, type CollectionSlug } from 'payload'
+import config from '@payload-config'
 
-// Limit to existing Payload collections
-type SearchableCollections = 'technologies' | 'demand' | 'project' | 'news' | 'events';
+import type { SearchableCollections, SearchResult, GenericDoc, SearchResultType } from './types'
+import {
+  COLLECTION_CONFIGS,
+  validateSearchParams,
+  buildWhereClause,
+  transformDocToResult,
+  calculateRelevanceScore,
+  sortResults,
+  paginateResults,
+  getSingularType,
+} from './helpers'
 
-// Helper function to convert collection names to singular types
-function getSingularType(collectionName: SearchableCollections): string {
-  const mapping: { [key in SearchableCollections]: string } = {
-    'technologies': 'technology',
-    'demand': 'demand',
-    'project': 'project',
-    'news': 'news',
-    'events': 'event'
-  };
-  return mapping[collectionName] || collectionName;
-}
+// Constants
+const SEARCH_COLLECTIONS: SearchableCollections[] = [
+  'technologies',
+  'demand',
+  'project',
+  'news',
+  'events',
+  'companies',
+  'research-institutions',
+]
 
-// Helper function to get URL path (using plural forms for web routes)
-function getUrlPath(collectionName: SearchableCollections): string {
-  const urlMapping: { [key in SearchableCollections]: string } = {
-    'technologies': 'technologies',
-    'demand': 'demands', // Note: demand -> demands for URL
-    'project': 'projects', // Note: project -> projects for URL
-    'news': 'news',
-    'events': 'events'
-  };
-  return urlMapping[collectionName] || collectionName;
-}
-
+/**
+ * Handle CORS preflight
+ */
 export async function OPTIONS() {
   return handleCORSPreflight()
 }
 
+/**
+ * Main search endpoint
+ */
 export async function GET(request: NextRequest) {
-  try {
-    const payload = await getPayload({ config });
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q');
-    const type = searchParams.get('type') || 'all';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+  const startTime = Date.now()
 
-    if (!query || query.trim().length < 2) {
-      return corsErrorResponse('Query must be at least 2 characters long', 400);
+  try {
+    // Get search params
+    const { searchParams } = new URL(request.url)
+    const q = searchParams.get('q')
+    const type = searchParams.get('type')
+    const page = searchParams.get('page')
+    const limit = searchParams.get('limit')
+    const sort = searchParams.get('sort') || 'relevance'
+
+    // Validate params
+    const validation = validateSearchParams({ q, type, page, limit })
+
+    if (!validation.isValid) {
+      return corsErrorResponse(validation.error || 'Invalid parameters', 400)
     }
 
-    const searchQuery = query.trim();
-    type SearchResult = {
-      id: string;
-      type: string;
-      title: string;
-      description: string;
-      image?: string;
-      url: string;
-      metadata?: Record<string, unknown>;
-    };
+    const { query, type: searchType, page: pageNum, limit: limitNum } = validation.validated!
 
-    type MediaWithUrl = { url?: string } | null | undefined;
-    type GenericDoc = {
-      id: string;
-      title?: string;
-      name?: string;
-      description?: string;
-      image?: MediaWithUrl;
-      logo?: MediaWithUrl;
-      avatar?: MediaWithUrl;
-      category?: unknown;
-      trl?: unknown;
-      price?: unknown;
-      owner?: unknown;
-      type?: unknown;
-      field?: unknown;
-      location?: unknown;
-      startDate?: unknown;
-      endDate?: unknown;
-      organizer?: unknown;
-      budget?: unknown;
-      publishedAt?: unknown;
-      author?: unknown;
-      featured?: unknown;
-      [key: string]: unknown;
-    };
+    // Validate sort param
+    const sortBy = ['relevance', 'date', 'title'].includes(sort)
+      ? (sort as 'relevance' | 'date' | 'title')
+      : 'relevance'
 
-    const results: SearchResult[] = [];
-    const searchTypes: SearchableCollections[] = ['technologies', 'demand', 'project', 'news', 'events'];
+    // Initialize Payload
+    const payload = await getPayload({ config })
 
-    // Search in each collection
-    for (const collectionName of searchTypes) {
-      // Map collection names to their singular forms for type comparison
-      const singularType = getSingularType(collectionName);
-      if (type !== 'all' && type !== singularType) {
-        continue;
-      }
+    // Determine which collections to search
+    const collectionsToSearch =
+      searchType === 'all'
+        ? SEARCH_COLLECTIONS
+        : SEARCH_COLLECTIONS.filter((col) => COLLECTION_CONFIGS[col].singular === searchType)
 
+    // Search all collections in parallel
+    const searchPromises = collectionsToSearch.map(async (collectionName) => {
       try {
-        let whereClause: Where = {
-          or: [
-            { title: { contains: searchQuery } },
-            { name: { contains: searchQuery } },
-            { description: { contains: searchQuery } },
-            { specialization: { contains: searchQuery } }
-          ]
-        };
+        console.log('🚀 ~ searchPromises ~ collectionName:', collectionName)
 
-        // Collection-specific search fields
-        if (collectionName === 'technologies') {
-          whereClause = {
-            or: [
-              { title: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { category: { contains: searchQuery } }
-            ]
-          } as Where;
-        } else if (collectionName === 'demand') {
-          whereClause = {
-            or: [
-              { title: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { category: { contains: searchQuery } }
-            ]
-          } as Where;
-        } else if (collectionName === 'project') {
-          whereClause = {
-            or: [
-              { title: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { type: { contains: searchQuery } },
-              { organization: { contains: searchQuery } }
-            ]
-          } as Where;
-        } else if (collectionName === 'news') {
-          whereClause = {
-            or: [
-              { title: { contains: searchQuery } },
-              { content: { contains: searchQuery } },
-              { category: { contains: searchQuery } }
-            ]
-          } as Where;
-        } else if (collectionName === 'events') {
-          whereClause = {
-            or: [
-              { title: { contains: searchQuery } },
-              { description: { contains: searchQuery } },
-              { location: { contains: searchQuery } },
-              { type: { contains: searchQuery } }
-            ]
-          } as Where;
-        }
+        const whereClause = buildWhereClause(collectionName, query)
+        console.log('🚀 ~ searchPromises ~ whereClause:', whereClause)
 
         const searchResults = await payload.find({
           collection: collectionName as CollectionSlug,
           where: whereClause,
-          limit: limit,
-          page: page,
-          depth: 1
-        });
-
-        // Transform results based on collection type
-        const docs = searchResults.docs as unknown as GenericDoc[];
-        const transformedResults = docs.map((doc) => {
-          const singularType = getSingularType(collectionName);
-          const urlPath = getUrlPath(collectionName);
-          const getMediaUrl = (m: MediaWithUrl): string | undefined => (m && typeof m === 'object' && 'url' in m && typeof m.url === 'string') ? m.url : undefined;
-          const baseResult: SearchResult = {
-            id: doc.id,
-            type: singularType,
-            title: doc.title || doc.name || '',
-            description: doc.description || '',
-            image: getMediaUrl(doc.image) || getMediaUrl(doc.logo) || getMediaUrl(doc.avatar),
-            url: `/${urlPath}/${doc.id}`,
-            metadata: {}
-          };
-
-          // Add collection-specific metadata
-          if (collectionName === 'technologies') {
-            baseResult.metadata = {
-              category: doc.category,
-              trl: doc.trl,
-              price: doc.price,
-              owner: doc.owner
-            };
-          } else if (collectionName === 'demand') {
-            baseResult.metadata = {
-              category: doc.category,
-              budget: doc.budget,
-              deadline: doc.deadline,
-              user: doc.user
-            };
-          } else if (collectionName === 'project') {
-            baseResult.metadata = {
-              type: doc.type,
-              organization: doc.organization,
-              status: doc.status,
-              startDate: doc.startDate,
-              endDate: doc.endDate,
-              budget: doc.budget
-            };
-          } else if (collectionName === 'news') {
-            baseResult.metadata = {
-              category: doc.category,
-              publishedAt: doc.publishedAt,
-              author: doc.author,
-              featured: doc.featured
-            };
-          } else if (collectionName === 'events') {
-            baseResult.metadata = {
-              type: doc.type,
-              location: doc.location,
-              startDate: doc.startDate,
-              endDate: doc.endDate,
-              organizer: doc.organizer
-            };
-          }
-
-          return baseResult;
-        });
-
-        results.push(...transformedResults);
-      } catch (_error) {
-        console.error(`Error searching ${collectionName}:`, _error);
-        // Continue with other collections even if one fails
+          limit: 1000, // Get all matching results for proper sorting
+          depth: 1,
+        })
+        console.log('🚀 ~ searchPromises ~ searchResults:', searchResults)
+        // Transform results
+        const docs = searchResults.docs as unknown as GenericDoc[]
+        return docs.map((doc) => transformDocToResult(doc, collectionName))
+      } catch (error) {
+        console.error(`Error searching ${collectionName}:`, error)
+        return []
       }
-    }
+    })
 
-    // Sort by relevance (simple scoring)
-    const sortedResults = results.sort((a, b) => {
-      const aScore = calculateRelevanceScore(a, searchQuery);
-      const bScore = calculateRelevanceScore(b, searchQuery);
-      return bScore - aScore;
-    });
+    // Wait for all searches to complete
+    console.log('🚀 ~ GET ~ searchPromises:', searchPromises)
+    const searchResultsArrays = await Promise.all(searchPromises)
 
-    // Get total counts for each type
-    const typeCounts: Record<string, number> = {};
-    for (const collectionName of searchTypes) {
+    // Flatten results and calculate scores
+    const allResults = searchResultsArrays.flat().map((result) => ({
+      ...result,
+      score: calculateRelevanceScore(result, query),
+    }))
+
+    // Sort results
+    const sortedResults = sortResults(allResults, sortBy, query)
+
+    // Paginate results
+    const { data: paginatedResults, totalPages } = paginateResults(sortedResults, pageNum, limitNum)
+
+    // Get type counts in parallel
+    const countPromises = SEARCH_COLLECTIONS.map(async (collectionName) => {
       try {
+        const whereClause = buildWhereClause(collectionName, query)
         const countResult = await payload.count({
           collection: collectionName as CollectionSlug,
-          where: {
-            or: [
-              { title: { contains: searchQuery } },
-              { name: { contains: searchQuery } },
-              { description: { contains: searchQuery } }
-            ]
-          } as Where,
-        });
-        const singularType = getSingularType(collectionName);
-        typeCounts[singularType] = countResult.totalDocs;
-      } catch (_error) {
-        const singularType = getSingularType(collectionName);
-        typeCounts[singularType] = 0;
+          where: whereClause,
+        })
+        return {
+          type: getSingularType(collectionName),
+          count: countResult.totalDocs,
+        }
+      } catch (error) {
+        console.error(`Error counting ${collectionName}:`, error)
+        return {
+          type: getSingularType(collectionName),
+          count: 0,
+        }
       }
-    }
+    })
 
+    const counts = await Promise.all(countPromises)
+    const typeCounts = counts.reduce(
+      (acc, { type, count }) => {
+        acc[type] = count
+        return acc
+      },
+      {} as Record<SearchResultType, number>,
+    )
+
+    // Calculate request duration
+    const duration = Date.now() - startTime
+
+    // Build response
     return corsResponse({
       success: true,
       data: {
-        results: sortedResults,
-        total: results.length,
-        page: page,
-        limit: limit,
-        totalPages: Math.ceil(results.length / limit),
-        query: searchQuery,
-        types: typeCounts
-      }
-    });
-
+        results: paginatedResults,
+        total: allResults.length,
+        page: pageNum,
+        limit: limitNum,
+        totalPages,
+        query,
+        types: typeCounts,
+        meta: {
+          duration: `${duration}ms`,
+          sort: sortBy,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    })
   } catch (error) {
-    console.error('CMS Search API error:', error);
-    return corsErrorResponse('Internal server error', 500);
-  }
-}
+    console.error('Search API error:', error)
 
-function calculateRelevanceScore(result: { title: string; description: string; metadata?: Record<string, unknown> }, query: string): number {
-  const queryLower = query.toLowerCase();
-  const titleLower = (result.title || '').toLowerCase();
-  const descLower = (result.description || '').toLowerCase();
-  
-  let score = 0;
-  
-  // Title exact match gets highest score
-  if (titleLower.includes(queryLower)) {
-    score += 100;
+    // Better error messages in development
+    const errorMessage =
+      process.env.NODE_ENV === 'development' && error instanceof Error
+        ? error.message
+        : 'Internal server error'
+
+    return corsErrorResponse(errorMessage, 500)
   }
-  
-  // Description match gets medium score
-  if (descLower.includes(queryLower)) {
-    score += 50;
-  }
-  
-  // Category/field match gets lower score
-  const category = result.metadata?.category;
-  const field = result.metadata?.field;
-  
-  if (category && typeof category === 'string' && category.toLowerCase().includes(queryLower)) {
-    score += 25;
-  }
-  
-  if (field && typeof field === 'string' && field.toLowerCase().includes(queryLower)) {
-    score += 25;
-  }
-  
-  return score;
 }
