@@ -10,7 +10,7 @@ export default function IntroSection() {
       icon: Building2,
       title: "HANOTEX là gì?",
       description:
-        "HANOTEX là sàn giao dịch công nghệ Hà Nội do Ủy ban nhân dân thành phố Hà Nội chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì triển khai, nhằm kết nối toàn diện giữa công nghệ – nhu cầu – tài chính – chuyên gia – chính sách, góp phần thúc đẩy thương mại hóa kết quả nghiên cứu và đổi mới sáng tạo, phát triển thị trường khoa học và công nghệ của Thủ đô theo mô hình minh bạch, hiện đại, hội nhập quốc tế.",
+        "HANOTEX là sàn giao dịch công nghệ Hà Nội do UBND thành phố Hà Nội chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì triển khai.",
     },
     {
       icon: Target,
@@ -40,8 +40,11 @@ export default function IntroSection() {
             Về HANOTEX
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Nền tảng chuyển giao công nghệ – kết nối toàn diện hệ sinh thái đổi
-            mới sáng tạo
+            Sàn Giao dịch Công nghệ Hà Nội hướng tới trở thành hạ tầng khoa học
+            và công nghệ hiện đại, đóng vai trò trung tâm kết nối, định giá, môi
+            giới và xúc tiến giao dịch công nghệ trong nước và quốc tế, góp phần
+            thúc đẩy thương mại hóa kết quả nghiên cứu và phát triển kinh tế tri
+            thức của Thủ đô.
           </p>
         </div>
 
@@ -49,7 +52,7 @@ export default function IntroSection() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="h-72 md:h-80 text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all duration-300 group"
+              className="min-h-72 md:min-h-80 text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 hover:scale-105 transition-all duration-300 group"
             >
               <div className="flex flex-col h-full">
                 <div className="inline-flex self-center items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-full mb-4 group-hover:shadow-lg transition-shadow duration-300">
@@ -61,21 +64,12 @@ export default function IntroSection() {
                     <feature.icon className="h-8 w-8" />
                   </AnimatedIcon>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3 overflow-hidden text-ellipsis whitespace-nowrap">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {feature.title}
                 </h3>
-                <p
-                  className="text-gray-600 leading-relaxed"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
+                <p className="text-gray-600 leading-relaxed flex-1">
                   {feature.description}
                 </p>
-                <div className="mt-auto" />
               </div>
             </div>
           ))}
