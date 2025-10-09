@@ -324,7 +324,7 @@ export default function HeroSection() {
               </div>
             </div>
 
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
               Sàn Giao Dịch Công Nghệ Hà Nội
             </h2>
             <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed mb-8">
@@ -337,7 +337,7 @@ export default function HeroSection() {
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="max-w-4xl mx-auto mb-16">
+          <div className="max-w-4xl mx-auto mb-12">
             <form onSubmit={handleSearch} className="relative">
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
@@ -364,7 +364,7 @@ export default function HeroSection() {
           </div>
 
           {/* Feature Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
             {features.map((feature, index) => (
               <div
                 key={feature.title}
