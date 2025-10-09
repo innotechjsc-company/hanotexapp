@@ -92,6 +92,7 @@ export interface Config {
     'event-user': EventUser;
     'event-comment': EventComment;
     'news-like': NewsLike;
+    'news-comment': NewsComment;
     'negotiating-messages': NegotiatingMessage;
     'room-chat': RoomChat;
     'room-message': RoomMessage;
@@ -132,6 +133,7 @@ export interface Config {
     'event-user': EventUserSelect<false> | EventUserSelect<true>;
     'event-comment': EventCommentSelect<false> | EventCommentSelect<true>;
     'news-like': NewsLikeSelect<false> | NewsLikeSelect<true>;
+    'news-comment': NewsCommentSelect<false> | NewsCommentSelect<true>;
     'negotiating-messages': NegotiatingMessagesSelect<false> | NegotiatingMessagesSelect<true>;
     'room-chat': RoomChatSelect<false> | RoomChatSelect<true>;
     'room-message': RoomMessageSelect<false> | RoomMessageSelect<true>;
@@ -1044,6 +1046,18 @@ export interface NewsLike {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-comment".
+ */
+export interface NewsComment {
+  id: string;
+  user: string | User;
+  news: string | News;
+  comment: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "negotiating-messages".
  */
 export interface NegotiatingMessage {
@@ -1355,6 +1369,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news-like';
         value: string | NewsLike;
+      } | null)
+    | ({
+        relationTo: 'news-comment';
+        value: string | NewsComment;
       } | null)
     | ({
         relationTo: 'negotiating-messages';
@@ -1987,6 +2005,17 @@ export interface EventCommentSelect<T extends boolean = true> {
 export interface NewsLikeSelect<T extends boolean = true> {
   news?: T;
   user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-comment_select".
+ */
+export interface NewsCommentSelect<T extends boolean = true> {
+  user?: T;
+  news?: T;
+  comment?: T;
   updatedAt?: T;
   createdAt?: T;
 }
