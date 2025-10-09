@@ -34,6 +34,7 @@ import { Demand } from "@/types/demand";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
 import DemandContactCard from "@/components/demands/DemandContactCard";
 import { getProposes } from "@/api/propose";
+import downloadService from "@/services/downloadService";
 
 export default function DemandDetailPage() {
   const router = useRouter();
@@ -49,20 +50,16 @@ export default function DemandDetailPage() {
 
   const demandId = params.id as string;
 
-  const handleDownload = async (url: string, filename: string) => {
+  const handleDownloadDocument = async (doc: any, index: number) => {
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const blob = await response.blob();
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(link.href);
+      const media: any = doc?.file ?? doc;
+      const url: string =
+        media?.url || (media?.filename ? `/media/${media.filename}` : "");
+      const name: string =
+        doc?.name || media?.filename || media?.alt || `tai-lieu-${index + 1}`;
+
+      if (!url) return;
+      await downloadService.downloadByUrl(url, name);
     } catch (error) {
       console.error("Download failed:", error);
     }
@@ -517,9 +514,9 @@ export default function DemandDetailPage() {
                   {demand.documents.map((doc, index) => {
                     const documentUrl = getDocumentUrl(doc);
                     const documentName =
-                      typeof doc === "object" && doc.filename
-                        ? doc.filename
-                        : `Tài liệu ${index + 1}`;
+                      (doc as any)?.name ||
+                      (doc as any)?.filename ||
+                      `Tài liệu ${index + 1}`;
 
                     return (
                       <div
@@ -546,9 +543,7 @@ export default function DemandDetailPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (documentUrl) {
-                              handleDownload(documentUrl, documentName);
-                            }
+                            handleDownloadDocument(doc, index);
                           }}
                           className="flex-shrink-0 p-2 rounded-md hover:bg-gray-200 transition-colors opacity-50 group-hover:opacity-100"
                           aria-label={`Tải xuống ${documentName}`}
