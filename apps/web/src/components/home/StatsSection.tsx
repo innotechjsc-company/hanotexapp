@@ -83,10 +83,7 @@ export default function StatsSection() {
       {
         icon: TrendingUp,
         label: "Công nghệ đã đăng tải",
-        value:
-          counts.technologies > 0
-            ? counts.technologies.toLocaleString("vi-VN")
-            : "—",
+        value: "976+",
         description:
           "Nhiều công nghệ mới, đa ngành nghề đã sẵn sàng chuyển giao",
         color: "text-primary-600",
@@ -95,7 +92,7 @@ export default function StatsSection() {
       {
         icon: Users,
         label: "Hàng nghìn người dùng đăng ký",
-        value: counts.users > 0 ? counts.users.toLocaleString("vi-VN") : "—",
+        value: "1056+ ",
         description:
           "Gồm các doanh nghiệp, tổ chức nghiên cứu, viện trường và chuyên gia",
         color: "text-secondary-600",
@@ -104,10 +101,7 @@ export default function StatsSection() {
       {
         icon: Award,
         label: "Phiên giao dịch, đấu giá công nghệ",
-        value:
-          counts.transactions > 0
-            ? counts.transactions.toLocaleString("vi-VN")
-            : "—",
+        value: "120+",
         description:
           "Các giao dịch minh bạch, công khai, bảo đảm quyền lợi các bên tham gia",
         color: "text-accent-600",
@@ -116,8 +110,7 @@ export default function StatsSection() {
       {
         icon: Building,
         label: "Doanh nghiệp trong và ngoài nước tham gia",
-        value:
-          counts.companies > 0 ? counts.companies.toLocaleString("vi-VN") : "—",
+        value: "100+",
         description: "Hình thành mạng lưới hợp tác công nghệ rộng mở",
         color: "text-purple-600",
         bgColor: "bg-purple-100",

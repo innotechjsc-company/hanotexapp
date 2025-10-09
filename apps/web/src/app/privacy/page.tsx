@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Shield, Lock, Eye, Database } from 'lucide-react';
+import { Shield, Lock, Eye, Database } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
@@ -26,14 +26,17 @@ export default function PrivacyPage() {
             <div className="mb-8">
               <div className="flex items-center mb-4">
                 <Shield className="h-6 w-6 text-green-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-900">Cam kết bảo mật</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Cam kết bảo mật
+                </h2>
               </div>
               <p className="text-gray-600 mb-4">
                 Cập nhật lần cuối: <strong>15/09/2024</strong>
               </p>
               <p className="text-gray-600">
-                HANOTEX cam kết bảo vệ thông tin cá nhân và quyền riêng tư của người dùng. 
-                Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.
+                HANOTEX cam kết bảo vệ thông tin cá nhân và quyền riêng tư của
+                người dùng. Chính sách này giải thích cách chúng tôi thu thập,
+                sử dụng và bảo vệ thông tin của bạn.
               </p>
             </div>
 
@@ -45,7 +48,9 @@ export default function PrivacyPage() {
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Thông tin cá nhân:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Thông tin cá nhân:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm ml-4">
                       <li>• Họ tên, email, số điện thoại</li>
                       <li>• Thông tin công ty/tổ chức (nếu có)</li>
@@ -54,7 +59,9 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Thông tin sử dụng:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Thông tin sử dụng:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm ml-4">
                       <li>• Lịch sử truy cập và sử dụng dịch vụ</li>
                       <li>• Thông tin thiết bị và trình duyệt</li>
@@ -87,7 +94,9 @@ export default function PrivacyPage() {
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Biện pháp bảo mật:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Biện pháp bảo mật:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm">
                       <li>• Mã hóa dữ liệu trong quá trình truyền tải</li>
                       <li>• Lưu trữ an toàn với hệ thống bảo mật tiên tiến</li>
@@ -97,7 +106,9 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Đào tạo nhân viên:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Đào tạo nhân viên:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm">
                       <li>• Đào tạo về bảo mật thông tin</li>
                       <li>• Ký cam kết bảo mật</li>
@@ -108,10 +119,12 @@ export default function PrivacyPage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">4. Chia sẻ thông tin</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  4. Chia sẻ thông tin
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  Chúng tôi không bán, cho thuê hoặc chia sẻ thông tin cá nhân của bạn với bên thứ ba, 
-                  trừ các trường hợp sau:
+                  Chúng tôi không bán, cho thuê hoặc chia sẻ thông tin cá nhân
+                  của bạn với bên thứ ba, trừ các trường hợp sau:
                 </p>
                 <ul className="space-y-2 text-gray-600">
                   <li>• Có sự đồng ý rõ ràng của bạn</li>
@@ -123,10 +136,14 @@ export default function PrivacyPage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">5. Quyền của người dùng</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  5. Quyền của người dùng
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Quyền truy cập:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Quyền truy cập:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm">
                       <li>• Xem thông tin cá nhân được lưu trữ</li>
                       <li>• Yêu cầu sao chép dữ liệu</li>
@@ -134,7 +151,9 @@ export default function PrivacyPage() {
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Quyền kiểm soát:</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Quyền kiểm soát:
+                    </h4>
                     <ul className="space-y-1 text-gray-600 text-sm">
                       <li>• Cập nhật thông tin cá nhân</li>
                       <li>• Xóa tài khoản và dữ liệu</li>
@@ -145,7 +164,9 @@ export default function PrivacyPage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">6. Cookie và công nghệ theo dõi</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  6. Cookie và công nghệ theo dõi
+                </h3>
                 <ul className="space-y-2 text-gray-600">
                   <li>• Sử dụng cookie để cải thiện trải nghiệm người dùng</li>
                   <li>• Phân tích lưu lượng truy cập và hành vi sử dụng</li>
@@ -155,34 +176,52 @@ export default function PrivacyPage() {
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">7. Bảo vệ trẻ em</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  7. Bảo vệ trẻ em
+                </h3>
                 <p className="text-gray-600">
-                  Dịch vụ của chúng tôi không dành cho trẻ em dưới 13 tuổi. 
-                  Chúng tôi không cố ý thu thập thông tin cá nhân từ trẻ em dưới 13 tuổi. 
-                  Nếu phát hiện việc thu thập thông tin từ trẻ em, chúng tôi sẽ xóa thông tin đó ngay lập tức.
+                  Dịch vụ của chúng tôi không dành cho trẻ em dưới 13 tuổi.
+                  Chúng tôi không cố ý thu thập thông tin cá nhân từ trẻ em dưới
+                  13 tuổi. Nếu phát hiện việc thu thập thông tin từ trẻ em,
+                  chúng tôi sẽ xóa thông tin đó ngay lập tức.
                 </p>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">8. Thay đổi chính sách</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  8. Thay đổi chính sách
+                </h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li>• Chúng tôi có thể cập nhật chính sách này theo thời gian</li>
-                  <li>• Thông báo thay đổi sẽ được gửi qua email hoặc thông báo trên website</li>
+                  <li>
+                    • Chúng tôi có thể cập nhật chính sách này theo thời gian
+                  </li>
+                  <li>
+                    • Thông báo thay đổi sẽ được gửi qua email hoặc thông báo
+                    trên website
+                  </li>
                   <li>• Khuyến khích người dùng xem lại chính sách định kỳ</li>
-                  <li>• Việc tiếp tục sử dụng dịch vụ sau khi thay đổi được coi là đồng ý</li>
+                  <li>
+                    • Việc tiếp tục sử dụng dịch vụ sau khi thay đổi được coi là
+                    đồng ý
+                  </li>
                 </ul>
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">9. Liên hệ về bảo mật</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  9. Liên hệ về bảo mật
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  Nếu bạn có câu hỏi hoặc quan ngại về chính sách bảo mật này, 
+                  Nếu bạn có câu hỏi hoặc quan ngại về chính sách bảo mật này,
                   hoặc muốn thực hiện quyền của mình, vui lòng liên hệ:
                 </p>
                 <ul className="space-y-1 text-gray-600">
                   <li>• Email: contact@hanotex.vn</li>
-                  <li>• Điện thoại: 0848567193</li>
-                  <li>• Địa chỉ: Sở KH&CN Hà Nội, 15 Lê Thánh Tông, Hoàn Kiếm, Hà Nội</li>
+                  <li>• Điện thoại: 0986287758</li>
+                  <li>
+                    • Địa chỉ: Sở KH&CN Hà Nội, 15 Lê Thánh Tông, Hoàn Kiếm, Hà
+                    Nội
+                  </li>
                 </ul>
               </div>
             </div>

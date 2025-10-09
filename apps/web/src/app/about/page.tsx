@@ -1,25 +1,42 @@
 "use client";
 
-import { Building2, Award, MapPin, Phone, Mail, Globe, Users, Target, Lightbulb, Rocket, CheckCircle, Star, TrendingUp, Shield } from "lucide-react";
+import {
+  Building2,
+  Award,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Users,
+  Target,
+  Lightbulb,
+  Rocket,
+  CheckCircle,
+  Star,
+  TrendingUp,
+  Shield,
+} from "lucide-react";
 import { Card, CardBody, Chip, Avatar } from "@heroui/react";
 
 export default function AboutPage() {
   const values = [
     {
       title: "Đổi mới sáng tạo",
-      description: "Thúc đẩy và hỗ trợ các ý tưởng sáng tạo, công nghệ tiên tiến",
+      description:
+        "Thúc đẩy và hỗ trợ các ý tưởng sáng tạo, công nghệ tiên tiến",
       icon: Lightbulb,
       color: "from-yellow-500 to-orange-500",
       bgColor: "bg-yellow-50",
-      iconColor: "text-yellow-600"
+      iconColor: "text-yellow-600",
     },
     {
       title: "Minh bạch công khai",
-      description: "Hoạt động minh bạch, công khai trong mọi giao dịch và dịch vụ",
+      description:
+        "Hoạt động minh bạch, công khai trong mọi giao dịch và dịch vụ",
       icon: Shield,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50",
-      iconColor: "text-blue-600"
+      iconColor: "text-blue-600",
     },
     {
       title: "Chất lượng cao",
@@ -27,7 +44,7 @@ export default function AboutPage() {
       icon: Award,
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50",
-      iconColor: "text-green-600"
+      iconColor: "text-green-600",
     },
     {
       title: "Phát triển bền vững",
@@ -35,7 +52,7 @@ export default function AboutPage() {
       icon: Target,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
-      iconColor: "text-purple-600"
+      iconColor: "text-purple-600",
     },
   ];
 
@@ -63,16 +80,21 @@ export default function AboutPage() {
       <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white py-20 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-black/10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
               <Rocket className="h-5 w-5 mr-2" />
-              <span className="text-sm font-medium">Sàn giao dịch công nghệ</span>
+              <span className="text-sm font-medium">
+                Sàn giao dịch công nghệ
+              </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">Về HANOTEX</h1>
             <p className="text-xl md:text-2xl text-primary-100 mb-8 max-w-3xl mx-auto">
@@ -151,10 +173,14 @@ export default function AboutPage() {
                 key={index}
                 className="group text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
               >
-                <div className={`h-24 bg-gradient-to-r ${value.color} relative overflow-hidden`}>
+                <div
+                  className={`h-24 bg-gradient-to-r ${value.color} relative overflow-hidden`}
+                >
                   <div className="absolute inset-0 bg-black/10"></div>
                   <div className="absolute top-4 right-4">
-                    <div className={`w-12 h-12 ${value.bgColor} rounded-xl flex items-center justify-center`}>
+                    <div
+                      className={`w-12 h-12 ${value.bgColor} rounded-xl flex items-center justify-center`}
+                    >
                       <value.icon className={`h-6 w-6 ${value.iconColor}`} />
                     </div>
                   </div>
@@ -183,7 +209,8 @@ export default function AboutPage() {
               HANOTEX trong số liệu
             </h2>
             <p className="text-xl text-default-600 max-w-3xl mx-auto">
-              Những con số ấn tượng thể hiện sự phát triển và tác động của HANOTEX
+              Những con số ấn tượng thể hiện sự phát triển và tác động của
+              HANOTEX
             </p>
           </div>
 
@@ -192,21 +219,27 @@ export default function AboutPage() {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
-              <div className="text-3xl font-bold text-foreground mb-2">500+</div>
+              <div className="text-3xl font-bold text-foreground mb-2">
+                500+
+              </div>
               <div className="text-default-600">Thành viên đăng ký</div>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="h-8 w-8 text-green-600" />
               </div>
-              <div className="text-3xl font-bold text-foreground mb-2">150+</div>
+              <div className="text-3xl font-bold text-foreground mb-2">
+                150+
+              </div>
               <div className="text-default-600">Dự án công nghệ</div>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lightbulb className="h-8 w-8 text-purple-600" />
               </div>
-              <div className="text-3xl font-bold text-foreground mb-2">200+</div>
+              <div className="text-3xl font-bold text-foreground mb-2">
+                200+
+              </div>
               <div className="text-default-600">Sáng chế đăng ký</div>
             </div>
             <div className="text-center">
@@ -238,7 +271,10 @@ export default function AboutPage() {
 
           <div className="space-y-6">
             {milestones.map((milestone, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card
+                key={index}
+                className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              >
                 <CardBody className="p-6">
                   <div className="flex items-start space-x-6">
                     <div className="flex-shrink-0">
@@ -274,11 +310,14 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800 text-white relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
-          }}></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-11.046-8.954-20-20-20v20h20z'/%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          ></div>
         </div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
@@ -299,9 +338,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MapPin className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Địa chỉ
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Địa chỉ</h3>
                 <p className="text-primary-100 text-sm">
                   Sở KH&CN Hà Nội
                   <br />
@@ -317,10 +354,8 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Phone className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Điện thoại
-                </h3>
-                <p className="text-primary-100">0848567193</p>
+                <h3 className="text-lg font-semibold mb-2">Điện thoại</h3>
+                <p className="text-primary-100">0986287758</p>
               </CardBody>
             </Card>
 
@@ -329,9 +364,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Email
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Email</h3>
                 <p className="text-primary-100">contact@hanotex.vn</p>
               </CardBody>
             </Card>
@@ -341,9 +374,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Globe className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Website
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">Website</h3>
                 <p className="text-primary-100">www.hanotex.gov.vn</p>
               </CardBody>
             </Card>
