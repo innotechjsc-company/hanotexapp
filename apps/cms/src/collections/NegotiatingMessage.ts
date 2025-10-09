@@ -39,7 +39,7 @@ const getNegotiationRoomIds = (doc: NegotiationDoc): string[] => {
 export const NegotiatingMessage: CollectionConfig = {
   slug: 'negotiating-messages',
   admin: {
-    group: 'Tin nhắn đàm phán',
+    group: '💬 Truyền thông',
   },
   access: {
     read: () => true,

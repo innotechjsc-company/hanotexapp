@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const EventUser: CollectionConfig = {
   slug: 'event-user',
   admin: {
-    group: 'Người tham gia sự kiện',
+    group: '📰 Tin tức & Sự kiện',
   },
   access: {
     read: () => true,

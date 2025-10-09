@@ -4,7 +4,7 @@ export const Categories: CollectionConfig = {
   slug: 'categories',
   admin: {
     useAsTitle: 'name',
-    group: 'Quản lý Danh mục',
+    group: '🔬 Công nghệ & Dự án',
   },
   access: {
     read: () => true,

@@ -4,7 +4,7 @@ export const Notifications: CollectionConfig = {
   slug: 'notifications',
   admin: {
     useAsTitle: 'title',
-    group: 'Quản lý Thông báo',
+    group: '🔔 Hệ thống',
     defaultColumns: ['title', 'user_id', 'type', 'is_read', 'createdAt'],
   },
   access: {

@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const TRL: CollectionConfig = {
   slug: 'trl',
+  admin: {
+    group: '🔬 Công nghệ & Dự án',
+  },
   access: {
     read: () => true,
     create: () => true,

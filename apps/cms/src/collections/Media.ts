@@ -5,6 +5,7 @@ export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
     useAsTitle: 'alt',
+    group: '🔔 Hệ thống',
     description: 'Quản lý tất cả file media (ảnh, video, documents)',
   },
   access: {

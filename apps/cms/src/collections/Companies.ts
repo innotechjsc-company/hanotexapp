@@ -4,7 +4,7 @@ export const Companies: CollectionConfig = {
   slug: 'companies',
   admin: {
     useAsTitle: 'company_name',
-    group: 'Quản lý Người dùng',
+    group: '👥 Người dùng & Tổ chức',
     defaultColumns: ['company_name', 'tax_code', 'legal_representative'],
   },
   access: {

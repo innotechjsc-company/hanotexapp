@@ -3,7 +3,7 @@ import { CollectionConfig } from 'payload'
 export const RoomUser: CollectionConfig = {
   slug: 'room-user',
   admin: {
-    group: 'Phòng người dùng',
+    group: '💬 Truyền thông',
   },
   access: {
     read: () => true,

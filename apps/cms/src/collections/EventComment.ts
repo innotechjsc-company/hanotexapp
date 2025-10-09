@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const EventComment: CollectionConfig = {
   slug: 'event-comment',
   admin: {
-    group: 'Bình luận sự kiện',
+    group: '📰 Tin tức & Sự kiện',
   },
   access: {
     read: () => true,

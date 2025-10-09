@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const NewsLike: CollectionConfig = {
   slug: 'news-like',
   admin: {
-    group: 'lượt thích tin tức',
+    group: '📰 Tin tức & Sự kiện',
   },
   access: {
     read: () => true,

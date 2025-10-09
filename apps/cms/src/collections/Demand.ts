@@ -4,14 +4,14 @@ export const Demand: CollectionConfig = {
   slug: 'demand',
   admin: {
     useAsTitle: 'title',
-    group: 'Quản lý Yêu cầu dịch vụ',
+    group: '🎯 Đề xuất',
     defaultColumns: ['title', 'trl_level', 'cooperation'],
   },
   access: {
     read: () => true,
-    create: () => true,
-    update: () => true,
-    delete: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {
@@ -19,6 +19,18 @@ export const Demand: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'Tiêu đề',
+    },
+    {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      label: 'Ảnh đại diện',
+      admin: {
+        description: 'Ảnh đại diện',
+        position: 'sidebar',
+        width: '50%',
+      },
     },
     {
       name: 'description',
@@ -81,13 +93,7 @@ export const Demand: CollectionConfig = {
       type: 'text',
       label: 'Thời gian dự kiến bắt đầu',
     },
-    {
-      name: 'image',
-      type: 'relationship',
-      relationTo: 'media',
-      required: true,
-      label: 'Ảnh đại diện',
-    },
+
     {
       name: 'end_date',
       type: 'text',
@@ -108,7 +114,7 @@ export const Demand: CollectionConfig = {
     },
     {
       name: 'documents',
-      type: 'relationship',
+      type: 'upload',
       relationTo: 'media',
       hasMany: true,
       label: 'Tài liệu đính kèm',

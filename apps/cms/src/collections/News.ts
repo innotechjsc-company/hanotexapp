@@ -4,7 +4,7 @@ export const News: CollectionConfig = {
   slug: 'news',
   admin: {
     useAsTitle: 'title',
-    group: 'Quản lý tin tức',
+    group: '📰 Tin tức & Sự kiện',
     defaultColumns: ['title', 'hashtags', 'document'],
   },
   access: {

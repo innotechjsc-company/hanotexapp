@@ -4,7 +4,7 @@ export const Propose: CollectionConfig = {
   slug: 'propose',
   admin: {
     useAsTitle: 'title',
-    group: 'Đề xuất yêu cầu',
+    group: '🎯 Đề xuất',
   },
   access: {
     read: () => true,

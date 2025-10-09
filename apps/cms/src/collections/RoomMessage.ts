@@ -5,7 +5,7 @@ export const RoomMessage: CollectionConfig = {
   slug: 'room-message',
   admin: {
     useAsTitle: 'message',
-    group: 'Phòng tin nhắn',
+    group: '💬 Truyền thông',
   },
   access: {
     read: () => true,

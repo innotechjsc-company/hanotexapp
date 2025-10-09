@@ -4,7 +4,7 @@ export const RoomChat: CollectionConfig = {
   slug: 'room-chat',
   admin: {
     useAsTitle: 'title',
-    group: 'Phòng chat',
+    group: '💬 Truyền thông',
   },
   access: {
     read: () => true,

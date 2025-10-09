@@ -4,7 +4,7 @@ export const IntellectualProperty: CollectionConfig = {
   slug: 'intellectual_property',
   admin: {
     useAsTitle: 'code',
-    group: 'Quản lý sở hữu trí tuệ',
+    group: '🔬 Công nghệ & Dự án',
     defaultColumns: ['code', 'type', 'status'],
   },
   access: {

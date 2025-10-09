@@ -3,7 +3,7 @@ import type { CollectionConfig } from 'payload'
 export const Contract: CollectionConfig = {
   slug: 'contract',
   admin: {
-    group: 'Hợp đồng',
+    group: '💰 Giao dịch & Đấu thầu',
   },
   access: {
     read: () => true,
