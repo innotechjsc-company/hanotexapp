@@ -60,7 +60,9 @@ const getDaysRemaining = (endDate?: string) => {
   const end = new Date(endDate);
   if (Number.isNaN(end.getTime())) return undefined;
   const now = new Date();
-  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diff = Math.ceil(
+    (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
   return diff;
 };
 
@@ -84,7 +86,10 @@ export default function FundraisingPage() {
 
           // Calculate statistics
           setTotalProjects(list.length);
-          const sumGoalMoney = list.reduce((sum: number, proj: Project) => sum + (proj.goal_money || 0), 0);
+          const sumGoalMoney = list.reduce(
+            (sum: number, proj: Project) => sum + (proj.goal_money || 0),
+            0
+          );
           setTotalGoalMoney(sumGoalMoney);
 
           const uniqueUsers = new Set<string>();
@@ -126,15 +131,21 @@ export default function FundraisingPage() {
         {/* Investment Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{totalProjects}</div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              {totalProjects}
+            </div>
             <div className="text-gray-600">Dự án đang gọi vốn</div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{formatCurrency(totalGoalMoney)}</div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              {formatCurrency(totalGoalMoney)}
+            </div>
             <div className="text-gray-600">Tổng vốn cần huy động (VNĐ)</div>
           </div>
           <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{totalInvestors}+</div>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              {totalInvestors}+
+            </div>
             <div className="text-gray-600">Người tạo dự án</div>
           </div>
         </div>
@@ -204,13 +215,13 @@ export default function FundraisingPage() {
                 onClick={() => router.push(`/funds/fundraising/${proj.id}`)}
               >
                 <div className="h-40 relative overflow-hidden bg-gray-200">
-                {proj.image && typeof proj.image === 'object' && proj.image.url ? (
-                    <Image
+                  {proj.image &&
+                  typeof proj.image === "object" &&
+                  proj.image.url ? (
+                    <img
                       src={getFullMediaUrl(proj.image.url)}
                       alt={proj.name || "Project image"}
-                      fill
                       className="object-contain"
-                      priority={false}
                     />
                   ) : (
                     <Image
@@ -251,21 +262,28 @@ export default function FundraisingPage() {
                     </div>
                     <div className="flex items-center justify-between text-sm text-gray-700">
                       <span>Mục tiêu gọi vốn</span>
-                      <span className="font-medium">{formatCurrency(proj.goal_money)}</span>
+                      <span className="font-medium">
+                        {formatCurrency(proj.goal_money)}
+                      </span>
                     </div>
                     {typeof proj.share_percentage === "number" && (
                       <div className="flex items-center justify-between text-sm text-gray-700">
                         <span>Tỷ lệ cổ phần đề xuất (%)</span>
-                        <span className="font-medium">{proj.share_percentage}%</span>
+                        <span className="font-medium">
+                          {proj.share_percentage}%
+                        </span>
                       </div>
                     )}
                     {/* technologies */}
-                    {Array.isArray(proj.technologies) && proj.technologies.length > 0 && (
-                      <div className="flex items-center justify-between text-sm text-gray-700">
-                        <span>Công nghệ sử dụng</span>
-                        <span className="font-medium">{proj.technologies.length} công nghệ</span>
-                      </div>
-                    )}
+                    {Array.isArray(proj.technologies) &&
+                      proj.technologies.length > 0 && (
+                        <div className="flex items-center justify-between text-sm text-gray-700">
+                          <span>Công nghệ sử dụng</span>
+                          <span className="font-medium">
+                            {proj.technologies.length} công nghệ
+                          </span>
+                        </div>
+                      )}
                     {proj.end_date && (
                       <div className="flex items-center justify-between text-sm text-gray-700">
                         <span>Hạn gọi vốn</span>
