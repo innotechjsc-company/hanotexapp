@@ -267,59 +267,6 @@ export default function NewsEventsSection() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-8">
-            {/* Upcoming Events */}
-            <div className="bg-slate-50 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                Sự kiện sắp tới
-              </h3>
-              <div className="space-y-5">
-                {events.slice(0, 1).map((event) => {
-                  const eventDate = event.date
-                    ? new Date(event.date.split("/").reverse().join("-"))
-                    : new Date();
-                  const day = eventDate.getDate();
-                  const month = `THG ${eventDate.getMonth() + 1}`;
-
-                  return (
-                    <Link
-                      key={event.id}
-                      href={`/events/${event.id}`}
-                      className="flex items-center gap-4 group"
-                    >
-                      <div className="text-center flex-shrink-0">
-                        <div className="bg-blue-600 text-white rounded-t-lg px-3 py-1 text-xs font-bold">
-                          {month}
-                        </div>
-                        <div className="bg-white border border-gray-200 text-blue-600 rounded-b-lg px-3 py-2 text-2xl font-bold">
-                          {day}
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                          {event.title}
-                        </h4>
-                        <p className="text-sm text-gray-500 line-clamp-2">
-                          {event.description}
-                        </p>
-                        {event.time && (
-                          <div className="flex items-center text-xs text-gray-500 mt-1">
-                            <Clock className="h-3 w-3 mr-1.5" />
-                            <span>{event.time}</span>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-              <Link
-                href="/events"
-                className="mt-6 w-full inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-              >
-                Xem tất cả sự kiện
-              </Link>
-            </div>
-
             {/* Ongoing Events */}
             {ongoingEvents.length > 0 && (
               <div className="bg-orange-50 rounded-xl p-6">
@@ -374,6 +321,58 @@ export default function NewsEventsSection() {
                 </Link>
               </div>
             )}
+            {/* Upcoming Events */}
+            <div className="bg-slate-50 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">
+                Sự kiện sắp tới
+              </h3>
+              <div className="space-y-5">
+                {events.slice(0, 1).map((event) => {
+                  const eventDate = event.date
+                    ? new Date(event.date.split("/").reverse().join("-"))
+                    : new Date();
+                  const day = eventDate.getDate();
+                  const month = `THG ${eventDate.getMonth() + 1}`;
+
+                  return (
+                    <Link
+                      key={event.id}
+                      href={`/events/${event.id}`}
+                      className="flex items-center gap-4 group"
+                    >
+                      <div className="text-center flex-shrink-0">
+                        <div className="bg-blue-600 text-white rounded-t-lg px-3 py-1 text-xs font-bold">
+                          {month}
+                        </div>
+                        <div className="bg-white border border-gray-200 text-blue-600 rounded-b-lg px-3 py-2 text-2xl font-bold">
+                          {day}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                          {event.title}
+                        </h4>
+                        <p className="text-sm text-gray-500 line-clamp-2">
+                          {event.description}
+                        </p>
+                        {event.time && (
+                          <div className="flex items-center text-xs text-gray-500 mt-1">
+                            <Clock className="h-3 w-3 mr-1.5" />
+                            <span>{event.time}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+              <Link
+                href="/events"
+                className="mt-6 w-full inline-flex items-center justify-center rounded-lg px-6 py-3 text-base font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              >
+                Xem tất cả sự kiện
+              </Link>
+            </div>
 
             {/* Newsletter Subscription */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-8 text-white text-center">
