@@ -7,6 +7,7 @@ import { getActiveProjectsAll } from "@/api/projects";
 import type { Project } from "@/types/project";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Logo from "@/components/layout/Header/components/Logo";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 // --- HELPER COMPONENTS ---
 const ProgressBar = ({ value, color }: { value: number; color: string }) => (
@@ -43,10 +44,40 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
 
   const projectId = project?.id ?? "";
 
+  // Resolve project image
+  const projectImage = project.image
+    ? typeof project.image === "string"
+      ? project.image
+      : project.image.url
+        ? getFullMediaUrl(project.image.url)
+        : null
+    : null;
+
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col">
-      <div className="relative w-full h-56 bg-gray-100 flex items-center justify-center">
-        <Logo />
+      <div className="relative w-full h-56 bg-gray-100 overflow-hidden">
+        {projectImage ? (
+          <img
+            src={projectImage}
+            alt={project.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to logo if image fails to load
+              e.currentTarget.style.display = "none";
+              const fallback = e.currentTarget
+                .nextElementSibling as HTMLElement;
+              if (fallback) {
+                fallback.style.display = "flex";
+              }
+            }}
+          />
+        ) : null}
+        <div
+          className={`w-full h-full flex items-center justify-center ${projectImage ? "absolute inset-0 bg-black/20" : ""}`}
+          style={{ display: projectImage ? "none" : "flex" }}
+        >
+          <Logo />
+        </div>
         <div className="absolute top-4 left-4 flex gap-2">
           <span
             className={`px-3 py-1 text-sm font-semibold text-white rounded-full bg-green-600`}
@@ -143,6 +174,15 @@ const OtherProjectCard = ({
       : project.technologies[0]
     : null;
 
+  // Resolve project image
+  const projectImage = project.image
+    ? typeof project.image === "string"
+      ? project.image
+      : project.image.url
+        ? getFullMediaUrl(project.image.url)
+        : null
+    : null;
+
   return (
     <Link
       href={techId ? `/technologies/${techId}` : "#"}
@@ -151,9 +191,20 @@ const OtherProjectCard = ({
       <div
         className={`bg-white p-4 rounded-xl border ${selectedColor.border} flex flex-col relative h-full hover:shadow-lg transition-shadow cursor-pointer`}
       >
-        {/* <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-1 rounded-lg z-10">
-          <Logo />
-        </div> */}
+        {/* Project Image */}
+        {projectImage && (
+          <div className="w-full h-24 mb-3 rounded-lg overflow-hidden">
+            <img
+              src={projectImage}
+              alt={project.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        )}
+
         <div className="flex items-start gap-4">
           <div
             className={`w-12 h-12 ${selectedColor.bg} rounded-lg flex items-center justify-center flex-shrink-0`}

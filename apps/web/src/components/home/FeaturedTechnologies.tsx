@@ -88,7 +88,7 @@ export default function FeaturedTechnologies() {
             {technologies.map((tech) => (
               <div
                 key={tech.id}
-                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col h-full"
+                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group flex flex-col h-full min-h-full"
               >
                 {/* Image Section */}
                 <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
@@ -137,12 +137,12 @@ export default function FeaturedTechnologies() {
                 {/* Content Section */}
                 <div className="p-4 flex flex-col flex-grow">
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 h-14">
                     {tech.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 mb-3 text-sm line-clamp-3">
+                  <p className="text-gray-600 mb-3 text-sm line-clamp-3 h-16">
                     {tech.description ||
                       "Giải pháp kỹ thuật tiên tiến cho việc chẩn đoán và phân tích dữ liệu về tế độ chính xác cao."}
                   </p>
