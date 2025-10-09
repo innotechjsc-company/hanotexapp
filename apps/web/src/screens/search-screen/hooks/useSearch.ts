@@ -99,6 +99,10 @@ export const useSearch = ({
   const handleTypeChange = (newType: string) => {
     setSearchType(newType);
     if (searchQuery.trim()) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("q", searchQuery.trim());
+      url.searchParams.set("type", newType);
+      window.history.pushState({}, "", url.toString());
       performSearch(searchQuery.trim(), newType);
     }
   };
