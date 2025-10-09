@@ -81,4 +81,5 @@ export interface Technology {
   submitter: ID | User // ID người đăng tải
   status: TechnologyStatus // Trạng thái công nghệ
   visibility_mode?: VisibilityMode // Chế độ hiển thị
+  is_hot?: boolean // Đặt làm công nghệ nổi bật
 }
