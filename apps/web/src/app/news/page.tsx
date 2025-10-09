@@ -22,6 +22,7 @@ import ShareModal from "@/components/ui/ShareModal";
 import Link from "next/link";
 import {
   getNews,
+  getNewsByTitle,
   NewsFilters,
   PaginationParams,
   incrementNewsViews,
@@ -152,7 +153,12 @@ export default function NewsPage() {
         filters.search = searchQueryToUse.trim();
       }
 
-      const response = await getNews(filters, pagination);
+      let response;
+      if (filters.search) {
+        response = await getNewsByTitle(filters.search, pagination);
+      } else {
+        response = await getNews(filters, pagination);
+      }
 
       if (response.docs && Array.isArray(response.docs)) {
         const transformedArticles = (response.docs as unknown as News[]).map(
@@ -205,22 +211,19 @@ export default function NewsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Nếu đã có activeSearchQuery, thực hiện xóa tìm kiếm
-    if (activeSearchQuery) {
-      setSearchQuery("");
+    const newSearchQuery = searchQuery.trim();
+    if (!newSearchQuery) {
+      // Reset về tất cả tin tức nếu ô tìm kiếm trống
       setActiveSearchQuery("");
       setCurrentPage(1);
       fetchNews(false, "");
       return;
     }
 
-    // Nếu chưa có activeSearchQuery, thực hiện tìm kiếm
-    const newSearchQuery = searchQuery.trim();
-    if (newSearchQuery) {
-      setActiveSearchQuery(newSearchQuery);
-      setCurrentPage(1);
-      fetchNews(false, newSearchQuery);
-    }
+    // Tìm kiếm theo tiêu đề khớp nội dung nhập
+    setActiveSearchQuery(newSearchQuery);
+    setCurrentPage(1);
+    fetchNews(false, newSearchQuery);
   };
 
   const handleLoadMore = () => {
