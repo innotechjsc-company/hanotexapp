@@ -35,6 +35,7 @@ export interface TechnologyFilters {
   pricing_type?: PricingType;
   search?: string;
   submitter?: string;
+  is_hot?: boolean;
 }
 
 export interface PaginationParams {
@@ -57,16 +58,6 @@ export async function getTechnologies(
     sort: pagination.sort || "-createdAt",
   };
 
-  // Visibility mode
-  if (filters.visibility_mode) {
-    params["where[visibility_mode][equals]"] = filters.visibility_mode;
-  }
-
-  // Status
-  if (filters.status) {
-    params["where[status][equals]"] = filters.status;
-  }
-
   // Category relationship (map category_id -> category field)
   if (filters.category_id) {
     params["where[category][equals]"] = filters.category_id;
@@ -86,6 +77,11 @@ export async function getTechnologies(
   if (filters.search && filters.search.trim()) {
     const q = filters.search.trim();
     params["where[title][contains]"] = q;
+  }
+
+  // Hot flag
+  if (typeof filters.is_hot === "boolean") {
+    params["where[is_hot][equals]"] = filters.is_hot;
   }
 
   return payloadApiClient.get<Technology[]>(
