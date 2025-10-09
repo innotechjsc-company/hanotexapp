@@ -6,7 +6,7 @@
 // Base URL của PayloadCMS API - sử dụng helper function
 import { getPayloadApiBaseUrl } from "@/lib/api-config";
 
-export const PAYLOAD_API_BASE_URL = "http://localhost:4000/api";
+export const PAYLOAD_API_BASE_URL = getPayloadApiBaseUrl();
 
 // API endpoints cho các collections
 export const API_ENDPOINTS = {
