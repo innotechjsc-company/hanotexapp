@@ -20,10 +20,15 @@ export default function SearchResultCard({
   index,
 }: SearchResultCardProps) {
   const TypeIcon = getTypeIcon(result.type);
+  
+  // Override URL for project type to navigate to fundraising detail page
+  const cardUrl = result.type === 'project' 
+    ? `/funds/fundraising/${result.id}`
+    : result.url;
 
   return (
     <Link
-      href={result.url}
+      href={cardUrl}
       className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
       style={{ animationDelay: `${index * 100}ms` }}
     >

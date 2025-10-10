@@ -32,13 +32,15 @@ export interface PaginationParams {
  */
 export async function getProjects(
   filters: ProjectFilters = {},
-  pagination: PaginationParams = {}
+  pagination: PaginationParams = {},
+  depth: number = 2
 ): Promise<ApiResponse<Project[]>> {
   // Map friendly filters to PayloadCMS REST 'where' syntax
   const params: Record<string, any> = {
     limit: pagination.limit || PAGINATION_DEFAULTS.limit,
     page: pagination.page || PAGINATION_DEFAULTS.page,
     sort: pagination.sort || "-createdAt",
+    depth: depth, // Populate nested relations
   };
 
   // Status filter
@@ -90,11 +92,16 @@ export async function getProjects(
 }
 
 /**
- * Get project by ID
+ * Get project by ID with depth for relations
  */
-export async function getProjectById(id: string): Promise<Project> {
+export async function getProjectById(id: string, depth: number = 2): Promise<Project> {
+  const params: Record<string, any> = {
+    depth: depth, // Populate nested relations (user, investment_fund, documents_finance, etc.)
+  };
+
   const response = await payloadApiClient.get<Project>(
-    `${API_ENDPOINTS.PROJECTS}/${id}`
+    `${API_ENDPOINTS.PROJECTS}/${id}`,
+    params
   );
 
   // Handle different response formats from PayloadCMS

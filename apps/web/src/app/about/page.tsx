@@ -279,7 +279,7 @@ export default function AboutPage() {
                   <div className="flex items-start space-x-6">
                     <div className="flex-shrink-0">
                       <Chip
-                        color="primary"
+                        color="default"
                         variant="solid"
                         size="lg"
                         className="font-bold text-lg min-w-[80px] text-center"
@@ -334,12 +334,14 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/10 backdrop-blur-sm border-white/20">
-              <CardBody className="p-6">
+              <CardBody className="p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <MapPin className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Địa chỉ</h3>
-                <p className="text-primary-100 text-sm">
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Địa chỉ
+                </h3>
+                <p className="text-white text-sm">
                   Sở KH&CN Hà Nội
                   <br />
                   15 Lê Thánh Tông
@@ -350,32 +352,36 @@ export default function AboutPage() {
             </Card>
 
             <Card className="text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/10 backdrop-blur-sm border-white/20">
-              <CardBody className="p-6">
+              <CardBody className="p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Phone className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Điện thoại</h3>
-                <p className="text-primary-100">0986287758</p>
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Điện thoại
+                </h3>
+                <p className="text-white">0986287758</p>
               </CardBody>
             </Card>
 
             <Card className="text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/10 backdrop-blur-sm border-white/20">
-              <CardBody className="p-6">
+              <CardBody className="p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Mail className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Email</h3>
-                <p className="text-primary-100">contact@hanotex.vn</p>
+                <h3 className="text-lg font-semibold mb-2 text-white">Email</h3>
+                <p className="text-white">contact@hanotex.vn</p>
               </CardBody>
             </Card>
 
             <Card className="text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white/10 backdrop-blur-sm border-white/20">
-              <CardBody className="p-6">
+              <CardBody className="p-6 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Globe className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Website</h3>
-                <p className="text-primary-100">www.hanotex.gov.vn</p>
+                <h3 className="text-lg font-semibold mb-2 text-white">
+                  Website
+                </h3>
+                <p className="text-white">www.hanotex.gov.vn</p>
               </CardBody>
             </Card>
           </div>

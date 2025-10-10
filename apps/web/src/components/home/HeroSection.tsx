@@ -389,7 +389,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
             <Link
               href="/technologies/register"
-              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-2xl"
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white hover:text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-all duration-300 hover:scale-105 shadow-2xl"
             >
               <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
               <div className="relative flex items-center">
@@ -405,7 +405,7 @@ export default function HeroSection() {
             </Link>
             <Link
               href="/demands/register"
-              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 bg-yellow-400 border-2 border-yellow-500 rounded-2xl hover:bg-yellow-500 hover:border-yellow-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-900 hover:text-gray-900 bg-yellow-400 border-2 border-yellow-500 rounded-2xl hover:bg-yellow-500 hover:border-yellow-600 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <div className="flex items-center">
                 <Target className="h-6 w-6 mr-3" />

@@ -28,7 +28,7 @@ export const COLLECTION_CONFIGS: Record<SearchableCollections, CollectionConfig>
   },
   project: {
     singular: 'project',
-    urlPath: 'projects',
+    urlPath: 'funds/fundraising',
     searchFields: ['name', 'description'], // Project uses 'name' field
     metadataFields: ['status', 'user', 'end_date', 'goal_money', 'revenue', 'profit'],
   },
