@@ -165,7 +165,7 @@ export default function FeaturedTechnologies() {
                     <div className="text-lg font-bold text-blue-600">
                       {tech.pricing?.price_from
                         ? formatCurrency(tech.pricing.price_from, "VND")
-                        : "2.5 tỷ VND"}
+                        : "Liên hệ"}
                     </div>
                   </div>
 
