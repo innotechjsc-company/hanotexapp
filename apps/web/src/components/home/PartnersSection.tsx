@@ -109,7 +109,7 @@ export default function PartnersSection() {
   }, []);
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-10 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -126,7 +126,7 @@ export default function PartnersSection() {
         <div className="mb-20">
           <div className="text-center mb-12">
             <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Đối tác chiến lược
+              Mạng lưới Đối tác chiến lược
             </h3>
             <p className="text-gray-600 text-lg">
               Các tổ chức, doanh nghiệp và viện nghiên cứu hàng đầu
@@ -183,7 +183,7 @@ export default function PartnersSection() {
         <div>
           <div className="text-center mb-12">
             <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Quỹ đầu tư liên kết
+              Mạng lưới Quỹ đầu tư liên kết
             </h3>
             <p className="text-gray-600 text-lg">
               HANOTEX hợp tác với các quỹ đầu tư trong và ngoài nước, tạo cầu

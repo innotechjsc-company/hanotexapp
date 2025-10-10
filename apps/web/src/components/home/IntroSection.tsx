@@ -10,13 +10,13 @@ export default function IntroSection() {
       icon: Building2,
       title: "HANOTEX là gì?",
       description:
-        "HANOTEX là sàn giao dịch công nghệ Hà Nội do UBND thành phố Hà Nội chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì triển khai.",
+        "HANOTEX là sàn giao dịch công nghệ Hà Nội do Ủy ban Nhân dân thành phố Hà Nội chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì triển khai.",
     },
     {
       icon: Target,
       title: "Mục tiêu",
       description:
-        "Tăng cường kết nối đa chiều giữa doanh nghiệp – viện trường – chuyên gia – nhà đầu tư, từng bước hình thành hệ sinh thái đổi mới sáng tạo đồng bộ và phát triển bền vững tại Hà Nội.",
+        "Tăng cường kết nối đa chiều giữa doanh nghiệp, viện trường, chuyên gia, nhà đầu tư, từng bước hình thành hệ sinh thái đổi mới sáng tạo đồng bộ và phát triển bền vững tại Thành phố Hà Nội.",
     },
     {
       icon: Users,
@@ -39,7 +39,7 @@ export default function IntroSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Về HANOTEX
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-5xl mx-auto text-center">
             Sàn Giao dịch Công nghệ Hà Nội hướng tới trở thành hạ tầng khoa học
             và công nghệ hiện đại, đóng vai trò trung tâm kết nối, định giá, môi
             giới và xúc tiến giao dịch công nghệ trong nước và quốc tế, góp phần
@@ -67,7 +67,7 @@ export default function IntroSection() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed flex-1">
+                <p className="text-gray-600 leading-relaxed flex-1 text-justify">
                   {feature.description}
                 </p>
               </div>
@@ -81,11 +81,17 @@ export default function IntroSection() {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Tham gia ngay để kết nối và phát triển
             </h3>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Hãy trở thành một phần của hệ sinh thái khoa học công nghệ Hà Nội.
-              Đăng ký tài khoản miễn phí và bắt đầu hành trình đổi mới sáng tạo
-              của bạn.
-            </p>
+            <div className="flex flex-col gap-4">
+              <p className="text-gray-600 max-w-2xl text-justify">
+                Hãy trở thành một phần của hệ sinh thái khoa học công nghệ Hà
+                Nội.
+              </p>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-justify">
+                Đăng ký tài khoản miễn phí và bắt đầu hành trình đổi mới sáng
+                tạo của bạn.
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/auth/register"

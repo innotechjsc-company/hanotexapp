@@ -190,7 +190,7 @@ export default function AuctionsSection() {
     <section className="py-10 bg-gradient-to-br from-purple-900 to-indigo-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Đấu giá Công nghệ
           </h2>
           <p className="text-lg text-purple-200 max-w-3xl mx-auto">

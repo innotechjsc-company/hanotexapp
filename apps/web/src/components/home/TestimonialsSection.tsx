@@ -41,7 +41,7 @@ export default function TestimonialsSection() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ý kiến từ cộng đồng
           </h2>
-          <p className="text-lg text-blue-200 max-w-3xl mx-auto">
+          <p className="text-lg text-blue-200 max-w-5xl mx-auto">
             Những chia sẻ từ các nhà khoa học, doanh nghiệp và nhà đầu tư về
             trải nghiệm sử dụng HANOTEX
           </p>

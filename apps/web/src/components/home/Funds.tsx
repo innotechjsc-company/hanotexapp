@@ -91,7 +91,18 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
         <h3 className="text-2xl font-bold text-gray-800 mb-1">
           {project.name}
         </h3>
-        <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3 flex-grow overflow-hidden">
+        <p
+          className="text-gray-600 mb-4 text-sm overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxHeight: "4.5rem", // 3 lines * 1.5rem line-height
+            lineHeight: "1.5rem",
+          }}
+        >
           {project.description}
         </p>
 
@@ -194,7 +205,7 @@ const OtherProjectCard = ({
         className={`bg-white p-4 rounded-xl border ${selectedColor.border} flex flex-col relative h-full hover:shadow-lg transition-shadow cursor-pointer`}
       >
         {/* Project Image */}
-        {projectImage && (
+        {/* {projectImage && (
           <div className="w-full h-24 mb-3 rounded-lg overflow-hidden">
             <img
               src={projectImage}
@@ -205,7 +216,7 @@ const OtherProjectCard = ({
               }}
             />
           </div>
-        )}
+        )} */}
 
         <div className="flex items-start gap-4">
           <div
@@ -224,7 +235,18 @@ const OtherProjectCard = ({
             </p>
           </div>
         </div>
-        <p className="text-sm text-gray-600 my-3 flex-grow line-clamp-3 overflow-hidden">
+        <p
+          className="text-sm text-gray-600 my-3 overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxHeight: "4.5rem", // 3 lines * 1.5rem line-height
+            lineHeight: "1.5rem",
+          }}
+        >
           {project.description}
         </p>
         <div className="text-right flex justify-between items-center">
@@ -268,15 +290,19 @@ export default function FundsSection() {
   const otherProjects = projects.slice(2, 5);
 
   return (
-    <section className="bg-gray-50 py-7">
+    <section className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Cơ hội Đầu tư
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Khám phá những dự án khoa học công nghệ tiềm năng và tham gia đầu tư
-            vào tương lai
+            Khám phá các dự án công nghệ tiềm năng và cùng đầu tư vào những giải
+            pháp khoa học
+          </p>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            {" "}
+            mang giá trị ứng dụng cao cho tương lai
           </p>
         </div>
 
