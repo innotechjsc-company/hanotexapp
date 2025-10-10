@@ -83,27 +83,27 @@ export default function StatsSection() {
       {
         icon: TrendingUp,
         label: "Công nghệ đã đăng tải",
-        value: "976+",
-        description:
-          "Nhiều công nghệ mới, đa ngành nghề đã sẵn sàng chuyển giao",
+        value: "500+",
+        description: "Nhiều công nghệ mới, đa ngành nghề",
+        subDescription: "đã sẵn sàng chuyển giao",
         color: "text-primary-600",
         bgColor: "bg-primary-100",
       },
       {
         icon: Users,
         label: "Hàng nghìn người dùng đăng ký",
-        value: "1056+ ",
-        description:
-          "Gồm các doanh nghiệp, tổ chức nghiên cứu, viện trường và chuyên gia",
+        value: "2,500+ ",
+        description: "Gồm các doanh nghiệp, tổ chức nghiên cứu,",
+        subDescription: "viện trường và chuyên gia",
         color: "text-secondary-600",
         bgColor: "bg-secondary-100",
       },
       {
         icon: Award,
         label: "Phiên giao dịch, đấu giá công nghệ",
-        value: "120+",
-        description:
-          "Các giao dịch minh bạch, công khai, bảo đảm quyền lợi các bên tham gia",
+        value: "150+",
+        description: "Các giao dịch minh bạch, công khai,",
+        subDescription: "bảo đảm quyền lợi các bên tham gia",
         color: "text-accent-600",
         bgColor: "bg-accent-100",
       },
@@ -119,8 +119,8 @@ export default function StatsSection() {
         icon: Globe,
         label: "Quốc gia kết nối",
         value: "15+",
-        description:
-          "Tăng cường hội nhập và hợp tác quốc tế trong lĩnh vực KH&CN",
+        description: "Tăng cường hội nhập và hợp tác quốc tế",
+        subDescription: "trong lĩnh vực KH&CN",
         color: "text-blue-600",
         bgColor: "bg-blue-100",
       },
@@ -128,8 +128,8 @@ export default function StatsSection() {
         icon: Crosshair,
         label: "Tỷ lệ chuyển giao thành công",
         value: "85%",
-        description:
-          "Khẳng định hiệu quả của cơ chế thẩm định – môi giới – hỗ trợ pháp lý trên HANOTEX",
+        description: "Khẳng định hiệu quả của cơ chế thẩm định,",
+        subDescription: "môi giới, hỗ trợ pháp lý trên HANOTEX",
         color: "text-green-600",
         bgColor: "bg-green-100",
       },
@@ -137,7 +137,7 @@ export default function StatsSection() {
     [counts]
   );
   return (
-    <section className="py-20 bg-white">
+    <section className="py-8 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -170,6 +170,7 @@ export default function StatsSection() {
                 {stat.label}
               </div>
               <div className="text-sm text-gray-500">{stat.description}</div>
+              <div className="text-sm text-gray-500">{stat.subDescription}</div>
             </div>
           ))}
         </div>

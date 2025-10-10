@@ -13,19 +13,13 @@ import {
 } from "lucide-react";
 
 const Logo = () => (
-  <svg
-    width="40"
-    height="40"
-    viewBox="0 0 40 40"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="40" height="40" rx="8" fill="#4F46E5" />
-    <path
-      d="M12 28V12H16.344L20.352 20.64L24.36 12H28V28H24.8V17.92L20.832 26.4H19.872L15.864 17.92V28H12Z"
-      fill="white"
+  <div className="w-10 h-10 flex items-center justify-center">
+    <img
+      src="/Group 1000004724.svg"
+      alt="HANOTEX Logo"
+      className="w-full h-full object-contain"
     />
-  </svg>
+  </div>
 );
 
 export default function Footer() {
@@ -157,9 +151,6 @@ export default function Footer() {
             </Link>
             <Link href="/privacy" className="hover:text-white">
               Chính sách bảo mật
-            </Link>
-            <Link href="/cookies" className="hover:text-white">
-              Cookie
             </Link>
           </div>
         </div>

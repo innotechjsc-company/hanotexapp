@@ -538,9 +538,16 @@ export default function EventDetailPage({
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
                     Mô tả sự kiện
                   </h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    {event.description || event.content}
-                  </p>
+                  <div
+                    className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: (
+                        event.description ||
+                        event.content ||
+                        ""
+                      ).replace(/\n/g, "<br>"),
+                    }}
+                  />
                 </div>
               </div>
             </div>

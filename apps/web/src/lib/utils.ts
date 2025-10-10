@@ -9,6 +9,12 @@ export function formatCurrency(
   amount: number,
   currency: string = "VND"
 ): string {
+  if (currency === "VND") {
+    // Format with VNĐ instead of ₫
+    const formatted = new Intl.NumberFormat("vi-VN").format(amount);
+    return `${formatted} VNĐ`;
+  }
+
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: currency,

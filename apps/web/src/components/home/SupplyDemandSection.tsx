@@ -63,8 +63,11 @@ export default function SupplyDemandSection() {
                 Nhu cầu Khoa học Công nghệ
               </h2>
               <p className="text-lg text-gray-600">
-                Kết nối doanh nghiệp với các nhà khoa học để giải quyết những
-                thách thức công nghệ thực tế
+                Cầu nối giữa doanh nghiệp với các chuyên gia nghiên cứu KH&CN
+              </p>
+              <p className="text-lg text-gray-600">
+                Cùng chuyển hóa thách thức công nghệ thành giải pháp ứng dụng
+                thực tế{" "}
               </p>
             </div>
 
@@ -118,11 +121,11 @@ export default function SupplyDemandSection() {
                               <>
                                 {new Intl.NumberFormat("vi-VN").format(
                                   demand.from_price
-                                )}
-                                {" triệu VNĐ"}
+                                )}{" "}
+                                VNĐ
                               </>
                             ) : (
-                              "0 VNĐ"
+                              "Liên hệ"
                             )}
                           </span>
                         </div>

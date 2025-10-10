@@ -22,7 +22,7 @@ export default function CTASection() {
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
               Sẵn sàng tham gia cộng đồng công nghệ?
             </h2>
-            <p className="text-xl text-primary-100 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-primary-100 max-w-4xl mx-auto mb-8">
               Hãy bắt đầu hành trình chuyển giao và thương mại hóa công nghệ của
               bạn ngay hôm nay
             </p>
@@ -47,7 +47,7 @@ export default function CTASection() {
           </div>
 
           {/* Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
                 <Rocket className="h-8 w-8 text-white" />
@@ -55,7 +55,7 @@ export default function CTASection() {
               <h3 className="text-xl font-semibold text-white mb-2">
                 Bắt đầu nhanh chóng
               </h3>
-              <p className="text-primary-100">
+              <p className="text-primary-100 ">
                 Đăng ký và đăng tải công nghệ trong vài phút
               </p>
             </div>

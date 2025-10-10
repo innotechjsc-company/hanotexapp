@@ -5,6 +5,7 @@ import { Cpu, Rocket, Zap, type LucideIcon } from "lucide-react";
 import { getAuctions } from "@/api/auctions";
 import { type Auction } from "@/types/auctions";
 import Link from "next/link";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 // --- DATA TYPES ---
 interface LiveAuction {
@@ -49,13 +50,8 @@ const getRandomAuctionImage = (auctionId: string): string => {
 };
 
 const formatPrice = (price: number): string => {
-  if (price >= 1_000_000_000) {
-    return `${(price / 1_000_000_000).toFixed(1)} tỷ VND`;
-  }
-  if (price >= 1_000_000) {
-    return `${(price / 1_000_000).toFixed(1)} triệu VND`;
-  }
-  return `${price.toLocaleString("vi-VN")} VND`;
+  // Always use Vietnamese locale formatting with dots as thousand separators
+  return `${price.toLocaleString("vi-VN")} VNĐ`;
 };
 
 // --- DYNAMIC ICON COMPONENT ---
@@ -139,14 +135,25 @@ export default function AuctionsSection() {
           .filter(
             (a) => calculateAuctionStatus(a.startTime, a.endTime) === "active"
           )
-          .map((a) => ({
-            id: a.id,
-            title: a.title || "Không có tiêu đề",
-            description: "Mô tả chi tiết có sẵn trong trang đấu giá.",
-            imageUrl: getRandomAuctionImage(a.id),
-            currentPrice: a.currentBid || a.startingPrice || 0,
-            endTime: new Date(a.endTime),
-          }));
+          .map((a) => {
+            // Resolve auction image
+            const auctionImage = a.image
+              ? typeof a.image === "string"
+                ? a.image
+                : a.image.url
+                  ? getFullMediaUrl(a.image.url)
+                  : null
+              : null;
+
+            return {
+              id: a.id,
+              title: a.title || "Không có tiêu đề",
+              description: "Mô tả chi tiết có sẵn trong trang đấu giá.",
+              imageUrl: auctionImage || getRandomAuctionImage(a.id), // Fallback to random if no image
+              currentPrice: a.currentBid || a.startingPrice || 0,
+              endTime: new Date(a.endTime),
+            };
+          });
 
         const upcomingAuctions = auctionsList
           .filter(
@@ -183,7 +190,7 @@ export default function AuctionsSection() {
     <section className="py-10 bg-gradient-to-br from-purple-900 to-indigo-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Đấu giá Công nghệ
           </h2>
           <p className="text-lg text-purple-200 max-w-3xl mx-auto">
@@ -224,6 +231,12 @@ export default function AuctionsSection() {
                             src={auction.imageUrl}
                             alt={auction.title}
                             className="w-full sm:w-40 h-32 object-cover rounded-lg"
+                            onError={(e) => {
+                              // Fallback to a default placeholder if image fails to load
+                              e.currentTarget.src = getRandomAuctionImage(
+                                auction.id
+                              );
+                            }}
                           />
                           <div className="flex-1">
                             <h4 className="font-bold text-lg mb-1">
