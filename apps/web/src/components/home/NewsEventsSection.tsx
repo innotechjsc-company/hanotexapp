@@ -239,9 +239,11 @@ export default function NewsEventsSection() {
                         {article.title}
                       </h4>
                     </Link>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {article.excerpt}
-                    </p>
+
+                    <p
+                      className="text-gray-600 text-sm mb-4 line-clamp-3"
+                      dangerouslySetInnerHTML={{ __html: article.excerpt }}
+                    />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 text-sm">
                         <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
