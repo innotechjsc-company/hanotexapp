@@ -147,7 +147,8 @@ export default function HeroSection() {
     {
       icon: Award,
       label: "Giao dịch",
-      description: "Giao dịch công nghệ, kết nối nhu cầu, đấu giá, chuyển giao",
+      description: "Giao dịch công nghệ, kết nối",
+      subDescription: "nhu cầu, đấu giá, chuyển giao",
       value: 150,
       suffix: "+",
       color: "from-red-500 to-red-700",
@@ -157,8 +158,8 @@ export default function HeroSection() {
     {
       icon: Zap,
       label: "TRL Level",
-      description:
-        "Đa dạng mức độ sẵn sàng công nghệ – từ ý tưởng đến thương mại",
+      description: "Đa dạng mức độ sẵn sàng",
+      subDescription: "công nghệ",
       value: 9,
       suffix: "",
       prefix: "1-",
@@ -328,7 +329,7 @@ export default function HeroSection() {
           </div>
 
           {/* Enhanced Search Bar */}
-          <div className="max-w-4xl mx-auto mb-12">
+          <div className="max-w-4xl mx-auto mb-16">
             <form onSubmit={handleSearch} className="relative">
               <div className="relative group">
                 <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
@@ -432,8 +433,9 @@ export default function HeroSection() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              HỆ SINH THÁI CÔNG NGHỆ TIÊN TIẾN ĐANG CHỜ BẠN
+            <h2 className="text-3xl md:text-3xl lg:text-5xl font-bold text-white mb-6">
+              H
+              {`Ệ SINH THÁI CÔNG NGHỆ TIÊN TIẾN ĐANG CHỜ BẠN`.toLocaleLowerCase()}
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
               HANOTEX là nền tảng trung gian công nghệ do thành phố trực tiếp
@@ -476,6 +478,9 @@ export default function HeroSection() {
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <p className="text-white/70 text-xs md:text-sm leading-snug">
                         {stat.description}
+                      </p>
+                      <p className="text-white/70 text-xs md:text-sm leading-snug">
+                        {stat.subDescription}
                       </p>
                     </div>
                   </div>
