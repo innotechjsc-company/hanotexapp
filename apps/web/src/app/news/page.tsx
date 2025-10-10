@@ -492,9 +492,10 @@ export default function NewsPage() {
                         {article.title}
                       </h2>
 
-                      <p className="text-gray-600 mb-4 line-clamp-3">
-                        {article.excerpt}
-                      </p>
+                      <p
+                        className="text-gray-600 mb-4 line-clamp-3"
+                        dangerouslySetInnerHTML={{ __html: article.excerpt }}
+                      />
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 text-sm text-gray-500">

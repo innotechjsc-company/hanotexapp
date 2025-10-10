@@ -5,23 +5,15 @@ import {
   Calendar,
   Clock,
   User,
-  Tag,
   ArrowLeft,
   Eye,
-  Heart,
   Share2,
-  BookOpen,
-  TrendingUp,
-  Image as ImageIcon,
-  ChevronLeft,
-  ChevronRight,
   MessageCircle,
   Send,
 } from "lucide-react";
 import Link from "next/link";
-import { getNewsById, getNews } from "@/api/news";
+import { getNewsById } from "@/api/news";
 import { News } from "@/types/news";
-import { PAYLOAD_API_BASE_URL } from "@/api/config";
 import { getFullMediaUrl } from "@/utils/mediaUrl";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import LikeButton from "@/components/ui/LikeButton";
@@ -44,7 +36,6 @@ interface NewsArticle {
   category: string;
   read_time: string;
   featured_image: string;
-  gallery_images?: string[];
   tags: string[];
   views: number;
   likes: number;
@@ -89,29 +80,47 @@ function convertNewsToArticle(news: News): NewsArticle {
     category: "Tin tức",
     read_time: "3 phút",
     featured_image: imageUrl,
-    gallery_images: [imageUrl],
-    tags: tags,
+    tags,
     views: news.views || 0,
     likes: news.likes || 0,
     is_featured: true,
   };
 }
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+// Split HTML content roughly in the middle by paragraph boundaries
+function splitHtmlContent(html: string): { first: string; second: string } {
+  if (!html) return { first: "", second: "" };
+  const parts = html.split(/<\/p>/i);
+  if (parts.length <= 1) {
+    const midpoint = Math.ceil(html.length / 2);
+    return { first: html.slice(0, midpoint), second: html.slice(midpoint) };
+  }
+  const midpoint = Math.ceil(parts.length / 2);
+  const first = parts.slice(0, midpoint).join("</p>");
+  const second = parts.slice(midpoint).join("</p>");
+  return { first, second };
+}
+
 export default function NewsDetailPage({ params }: { params: { id: string } }) {
   const [article, setArticle] = useState<NewsArticle | null>(null);
-  const [relatedArticles, setRelatedArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [shareModal, setShareModal] = useState<{
-    isOpen: boolean;
-    article: NewsArticle | null;
-  }>({ isOpen: false, article: null });
+  const [shareArticle, setShareArticle] = useState<NewsArticle | null>(null);
   const { user, isAuthenticated } = useAuth();
   const [comments, setComments] = useState<CommentDisplay[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const isShareModalOpen = Boolean(shareArticle);
 
   const fetchNewsComments = async (newsId: string) => {
     try {
@@ -154,7 +163,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
   };
 
   useEffect(() => {
-    const fetchArticleAndRelated = async () => {
+    const fetchArticleData = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -166,18 +175,6 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
 
         // Fetch comments
         await fetchNewsComments(params.id);
-
-        // Fetch related articles (2 random articles, excluding current one)
-        const relatedResponse = await getNews({}, { limit: 3, page: 1 });
-        const relatedData = relatedResponse.data || [];
-
-        // Convert to NewsArticle format and exclude current article
-        const relatedConverted = relatedData
-          .filter((news) => news.id !== params.id)
-          .slice(0, 2)
-          .map(convertNewsToArticle);
-
-        setRelatedArticles(relatedConverted);
       } catch (err) {
         console.error("Error fetching article:", err);
         setError("Không thể tải bài viết. Vui lòng thử lại sau.");
@@ -186,44 +183,19 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       }
     };
 
-    fetchArticleAndRelated();
+    fetchArticleData();
   }, [params.id]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   // Handle share button click
-  const handleShareClick = (e: React.MouseEvent, article: NewsArticle) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShareModal({ isOpen: true, article });
+  const handleShareClick = (event: React.MouseEvent, article: NewsArticle) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setShareArticle(article);
   };
 
   // Close share modal
   const closeShareModal = () => {
-    setShareModal({ isOpen: false, article: null });
-  };
-
-  const nextImage = () => {
-    if (article?.gallery_images) {
-      setCurrentImageIndex((prev) =>
-        prev === article.gallery_images!.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (article?.gallery_images) {
-      setCurrentImageIndex((prev) =>
-        prev === 0 ? article.gallery_images!.length - 1 : prev - 1
-      );
-    }
+    setShareArticle(null);
   };
 
   if (loading) {
@@ -266,22 +238,6 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       </div>
     );
   }
-
-  // Split HTML content roughly in the middle by paragraph boundaries
-  const splitHtmlContent = (
-    html: string
-  ): { first: string; second: string } => {
-    if (!html) return { first: "", second: "" };
-    const parts = html.split(/<\/p>/i);
-    if (parts.length <= 1) {
-      const midpoint = Math.ceil(html.length / 2);
-      return { first: html.slice(0, midpoint), second: html.slice(midpoint) };
-    }
-    const midpoint = Math.ceil(parts.length / 2);
-    const first = parts.slice(0, midpoint).join("</p>");
-    const second = parts.slice(midpoint).join("</p>");
-    return { first, second };
-  };
 
   const { first: contentFirstHalf, second: contentSecondHalf } =
     splitHtmlContent(article.content);
@@ -363,11 +319,6 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Featured Image */}
         <div className="relative mb-8 rounded-xl overflow-hidden shadow-lg">
-          <ImageWithFallback
-            src={article.featured_image}
-            alt={article.title}
-            className="w-full h-96 object-cover"
-          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
           {/* Share Button on Image */}
@@ -386,15 +337,6 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <div className="prose prose-lg max-w-none">
             <div dangerouslySetInnerHTML={{ __html: contentFirstHalf }} />
-            {article.featured_image && (
-              <div className="my-6">
-                <ImageWithFallback
-                  src={article.featured_image}
-                  alt={article.title}
-                  className="w-full rounded-xl object-cover"
-                />
-              </div>
-            )}
             <div dangerouslySetInnerHTML={{ __html: contentSecondHalf }} />
           </div>
         </div>
@@ -498,13 +440,13 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Share Modal */}
-      {shareModal.article && (
+      {shareArticle && (
         <ShareModal
-          isOpen={shareModal.isOpen}
+          isOpen={isShareModalOpen}
           onClose={closeShareModal}
-          title={shareModal.article.title}
-          url={`/news/${shareModal.article.id}`}
-          description={shareModal.article.excerpt}
+          title={shareArticle.title}
+          url={`/news/${shareArticle.id}`}
+          description={shareArticle.excerpt}
         />
       )}
     </div>
