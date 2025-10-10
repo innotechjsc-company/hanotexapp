@@ -223,16 +223,16 @@ export default function HeroSection() {
     {
       icon: Award,
       title: "Giao dịch & Đấu giá công nghệ",
-      description:
-        "Tham gia đấu giá minh bạch, bảo hộ pháp lý và định giá quốc tế",
+      description: "Tham gia đấu giá minh bạch,",
+      subDescription: "bảo hộ pháp lý và định giá quốc tế",
       color: "bg-gradient-to-r from-purple-500 to-purple-600",
       href: "/auctions",
     },
     {
       icon: Users,
       title: "Mạng lưới chuyên gia KH&CN",
-      description:
-        "Tư vấn, phản biện, đồng hành phát triển giải pháp công nghệ",
+      description: "Tư vấn, phản biện, đồng hành",
+      subDescription: "phát triển giải pháp công nghệ",
       color: "bg-gradient-to-r from-orange-500 to-orange-600",
       href: "/contact",
     },
@@ -312,22 +312,13 @@ export default function HeroSection() {
                   <AnimatedIcon animation="bounce" delay={500}>
                     <Rocket className="h-12 w-12 text-white" />
                   </AnimatedIcon>
-                  <div>
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                      HANOTEX
-                    </h1>
-                    <div className="text-sm text-white/90 font-medium tracking-wider">
-                      TECHNOLOGY EXCHANGE PLATFORM
-                    </div>
-                  </div>
+                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                    {`Sàn Giao Dịch Công Nghệ Hà Nội`.toUpperCase()}
+                  </h2>
                 </div>
               </div>
             </div>
-
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-              Sàn Giao Dịch Công Nghệ Hà Nội
-            </h2>
-            <p className="text-xl md:text-2xl text-white/90 max-w-4xl mx-auto leading-relaxed mb-8">
+            <p className="text-xl text-white/90 max-w-4xl mx-auto leading-relaxed mb-8">
               HANOTEX là sàn giao dịch công nghệ Hà Nội do UBND Thành phố Hà Nội
               chỉ đạo phát triển, được Sở Khoa học và Công nghệ Hà Nội chủ trì
               triển khai, nhằm kết nối toàn diện giữa công nghệ, tài chính,
@@ -349,7 +340,7 @@ export default function HeroSection() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Tìm kiếm công nghệ, nhu cầu, chuyên gia, giải pháp đổi mới sáng tạo…"
-                      className="w-full pl-16 pr-40 py-5 text-lg bg-transparent text-blue-900 placeholder-blue-700 focus:outline-none focus:ring-0"
+                      className="w-full pl-16 pr-40 py-5 text-xl bg-transparent text-blue-900 placeholder-blue-700 focus:outline-none focus:ring-0"
                     />
                     <button
                       type="submit"
@@ -373,18 +364,21 @@ export default function HeroSection() {
                 onClick={() => router.push(feature.href)}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center hover:bg-white/20 transition-all duration-300 hover:scale-105 h-full">
+                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 text-center hover:bg-white/20 transition-all duration-300 hover:scale-105 h-full">
                   <div
                     className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
                   >
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-lg md:text-xl font-semibold text-white mb-2">
+                  <h3 className="text-xl md:text-xl font-semibold text-white mb-2">
                     {feature.title}
                     <br />
                     {feature.subTitle}
                   </h3>
                   <p className="text-white/80 text-sm">{feature.description}</p>
+                  <p className="text-white/80 text-sm">
+                    {feature.subDescription}
+                  </p>
                 </div>
               </div>
             ))}

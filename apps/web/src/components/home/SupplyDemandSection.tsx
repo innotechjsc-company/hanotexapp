@@ -118,11 +118,11 @@ export default function SupplyDemandSection() {
                               <>
                                 {new Intl.NumberFormat("vi-VN").format(
                                   demand.from_price
-                                )}
-                                {" triệu VNĐ"}
+                                )}{" "}
+                                VNĐ
                               </>
                             ) : (
-                              "0 VNĐ"
+                              "Liên hệ"
                             )}
                           </span>
                         </div>

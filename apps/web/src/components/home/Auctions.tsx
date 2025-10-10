@@ -50,13 +50,8 @@ const getRandomAuctionImage = (auctionId: string): string => {
 };
 
 const formatPrice = (price: number): string => {
-  if (price >= 1_000_000_000) {
-    return `${(price / 1_000_000_000).toFixed(1)} tỷ VND`;
-  }
-  if (price >= 1_000_000) {
-    return `${(price / 1_000_000).toFixed(1)} triệu VND`;
-  }
-  return `${price.toLocaleString("vi-VN")} VND`;
+  // Always use Vietnamese locale formatting with dots as thousand separators
+  return `${price.toLocaleString("vi-VN")} VNĐ`;
 };
 
 // --- DYNAMIC ICON COMPONENT ---

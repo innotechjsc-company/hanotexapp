@@ -37,7 +37,8 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
       )
     : 0;
 
-  const raisedPercent = Math.floor(Math.random() * (85 - 40 + 1)) + 40;
+  const raisedPercent =
+    project.share_percentage || Math.floor(Math.random() * (85 - 40 + 1)) + 40;
   const raisedAmount = project.goal_money
     ? ((project.goal_money * raisedPercent) / 100).toLocaleString("vi-VN")
     : 0;
@@ -98,7 +99,7 @@ const FeaturedFundCard = ({ project }: { project: Project }) => {
           <div>
             <p className="text-gray-500">Mục tiêu gọi vốn</p>
             <p className="font-bold text-gray-800 text-base">
-              {project.goal_money?.toLocaleString("vi-VN")} VND
+              {project.goal_money?.toLocaleString("vi-VN")} VNĐ
             </p>
           </div>
           <div>
@@ -166,7 +167,8 @@ const OtherProjectCard = ({
 
   const selectedColor = colors[index % colors.length];
   const Icon = icons[index % icons.length];
-  const raisedPercent = Math.floor(Math.random() * (85 - 40 + 1)) + 40;
+  const raisedPercent =
+    project.share_percentage || Math.floor(Math.random() * (85 - 40 + 1)) + 40;
 
   const techId = project.technologies?.[0]
     ? typeof project.technologies[0] === "object"
@@ -227,7 +229,7 @@ const OtherProjectCard = ({
         </p>
         <div className="text-right flex justify-between items-center">
           <p className={`font-bold ${selectedColor.text} text-lg`}>
-            {project.goal_money?.toLocaleString("vi-VN")} VND
+            {project.goal_money?.toLocaleString("vi-VN")} VNĐ
           </p>
           <p className="text-xs text-gray-500">{raisedPercent}% cổ phần</p>
         </div>
