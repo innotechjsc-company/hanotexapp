@@ -223,59 +223,67 @@ export default function EventsPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card className="mb-8">
-          <CardBody className="p-6">
-            <form onSubmit={handleSearch} className="space-y-4">
-              {/* Search Bar */}
-              <div className="flex gap-4 items-center flex-wrap">
-                <Input
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-8">
+          <div className="flex items-center mb-4">
+            <Search className="h-5 w-5 text-blue-600 mr-2" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              Tìm kiếm & Lọc
+            </h2>
+          </div>
+          <form onSubmit={handleSearch} className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sự kiện..."
-                  startContent={<Search className="h-5 w-5 text-gray-400" />}
-                  variant="bordered"
-                  className="flex-1"
+                  placeholder="Tìm kiếm sự kiện, hội thảo, triển lãm..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
-                <Button
-                  type="submit"
-                  color={activeSearchQuery ? "danger" : "primary"} // Change button color when activeSearchQuery is present
-                  className={`px-6 shadow-md min-w-[120px] visible opacity-100 z-10 relative flex-shrink-0 ${
-                    activeSearchQuery
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
-                  }`}
-                  size="md"
-                >
-                  {activeSearchQuery ? (
-                    <X className="h-5 w-5 mr-2" />
-                  ) : (
-                    <Search className="h-5 w-5 mr-2" />
-                  )}
-                  {activeSearchQuery ? "Xóa tìm kiếm" : "Tìm kiếm"}
-                </Button>
               </div>
-            </form>
-          </CardBody>
-        </Card>
+              {activeSearchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveSearchQuery("");
+                    setCurrentPage(1);
+                    fetchEvents(false, "");
+                  }}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700`}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Xóa tìm kiếm
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800`}
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Tìm kiếm
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
 
         {/* Results Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            {activeSearchQuery ? (
-              <p className="text-gray-600">
-                Tìm thấy <span className="font-semibold">{totalDocs}</span> sự
-                kiện
-                <span className="ml-1 text-gray-500">
-                  cho "{activeSearchQuery}"
-                </span>
-              </p>
-            ) : (
-              <p className="text-gray-600">
-                Tổng cộng <span className="font-semibold">{totalDocs}</span> sự
-                kiện
-              </p>
-            )}
+            <div className="flex items-center bg-blue-50 text-blue-600 rounded-full px-4 py-2">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span className="text-sm font-medium">
+                <span className="font-bold">{totalDocs}</span> sự kiện
+                {activeSearchQuery && (
+                  <span className="ml-1 text-gray-500">
+                    cho "{activeSearchQuery}"
+                  </span>
+                )}
+              </span>
+            </div>
           </div>
         </div>
         {/* Events List */}
@@ -304,9 +312,23 @@ export default function EventsPage() {
                         Sự kiện
                       </span>
                     </div>
-                    <div className="absolute top-4 right-4">
+                  </div>
+
+                  {/* Content */}
+                  <div className="md:w-2/3 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>{formatDate(event.start_date)}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>{formatDate(event.end_date)}</span>
+                        </div>
+                      </div>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                           event.status === "in_progress"
                             ? "bg-green-100 text-green-800"
                             : event.status === "completed"
@@ -325,26 +347,14 @@ export default function EventsPage() {
                               : "Chờ duyệt"}
                       </span>
                     </div>
-                  </div>
 
-                  {/* Content */}
-                  <div className="md:w-2/3 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          <span>{formatDate(event.start_date)}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock className="h-4 w-4 mr-1" />
-                          <span>{formatDate(event.end_date)}</span>
-                        </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3 flex-1">
+                        <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          {event.title}
+                        </h2>
                       </div>
                     </div>
-
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                      {event.title}
-                    </h2>
 
                     <p className="text-gray-600 mb-4 line-clamp-3">
                       {event.content.length > 200
@@ -432,37 +442,44 @@ export default function EventsPage() {
 
         {/* Load More Button */}
         {events.length > 0 && events.length < totalDocs && (
-          <div className="text-center mt-8">
-            <Button
-              variant="bordered"
-              endContent={<ArrowRight className="h-4 w-4" />}
-              className="px-6 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 shadow-sm font-medium visible opacity-100 z-10 relative"
-              size="md"
-              onPress={() => fetchEvents(true)}
-              isLoading={loading}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => fetchEvents(true)}
+              disabled={loading}
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Xem thêm sự kiện
-            </Button>
+              {loading ? (
+                <>
+                  <Spinner size="sm" className="mr-2" />
+                  Đang tải...
+                </>
+              ) : (
+                <>
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Xem thêm sự kiện
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </button>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ExternalLink className="h-8 w-8 text-red-400" />
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-red-600 mb-4">
+                <ExternalLink className="h-12 w-12 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold">Có lỗi xảy ra</h3>
+                <p className="text-sm mt-2">{error}</p>
+              </div>
+              <button
+                onClick={() => fetchEvents()}
+                className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Thử lại
+              </button>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Có lỗi xảy ra
-            </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button
-              color="primary"
-              onPress={() => fetchEvents()}
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Thử lại
-            </Button>
           </div>
         )}
       </div>
