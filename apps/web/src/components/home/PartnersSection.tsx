@@ -49,9 +49,9 @@ export default function PartnersSection() {
     const fetchPartnersAndFunds = async () => {
       try {
         const [companiesRes, institutionsRes, fundsRes] = await Promise.all([
-          getCompanies({ is_active: true }, { limit: 3 }),
-          getResearchInstitutions({ is_active: true }, { limit: 3 }),
-          getInvestmentFunds({}, { limit: 4 }),
+          getCompanies({ is_active: true }, { limit: 10 }),
+          getResearchInstitutions({ is_active: true }, { limit: 10 }),
+          getInvestmentFunds({}, { limit: 8 }),
         ]);
 
         const companies = (
@@ -89,7 +89,7 @@ export default function PartnersSection() {
             description: i.contact_info?.website || i.governing_body || "",
             url: i.contact_info?.website,
           })),
-        ].slice(0, 6);
+        ].slice(0, 12);
 
         setPartners(partnerItems);
 
