@@ -36,6 +36,7 @@ import {
 } from "@/api/events";
 import { PAYLOAD_API_BASE_URL } from "@/api/config";
 import { useRouter } from "next/navigation";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 export default function EventsPage() {
   const router = useRouter();
@@ -51,6 +52,25 @@ export default function EventsPage() {
   const [sortBy, setSortBy] = useState("start_date");
   const [totalDocs, setTotalDocs] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Helper function to resolve event image
+  const getEventImageUrl = (event: Event): string => {
+    if (!event.image) {
+      return "/images/events/default.jpg"; // Default event image
+    }
+
+    if (typeof event.image === "string") {
+      return event.image.startsWith("http")
+        ? event.image
+        : getFullMediaUrl(event.image);
+    }
+
+    if (event.image.url) {
+      return getFullMediaUrl(event.image.url);
+    }
+
+    return "/images/events/default.jpg";
+  };
 
   const eventStatuses = [
     { value: "all", label: "Tất cả" },
@@ -262,107 +282,136 @@ export default function EventsPage() {
         {events.length > 0 ? (
           <div className="space-y-6 w-full">
             {events.map((event: Event) => (
-              <Card
+              <article
                 key={event.id}
-                className="hover:shadow-md transition-shadow w-full cursor-pointer"
-                isPressable
-                onPress={() => router.push(`/events/${event.id}`)}
+                onClick={() => router.push(`/events/${event.id}`)}
+                className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
               >
-                <CardBody className="p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
-                    {event.title}
-                  </h2>
-
-                  <p className="text-gray-600 mb-4 line-clamp-3">
-                    {event.content.length > 200
-                      ? event.content.substring(0, 200) + "..."
-                      : event.content}
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 text-sm">
-                    <div className="flex items-center text-gray-500">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span>{formatDate(event.start_date)}</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <Clock className="h-4 w-4 mr-2" />
-                      <span>{formatDate(event.end_date)}</span>
-                    </div>
-                    {event.location && hasValidAddress(event.location) ? (
-                      <div className="flex flex-col sm:flex-row sm:items-center text-gray-500 gap-2 sm:gap-0">
-                        <div className="flex items-start flex-1 min-w-0">
-                          <MapPin className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-1">{event.location}</span>
-                        </div>
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-1 h-8 w-8 min-w-0 visible opacity-100 z-10 relative flex-shrink-0"
-                            onPress={() =>
-                              window.open(
-                                getGoogleMapsUrl(event?.location || ""),
-                                "_blank"
-                              )
-                            }
-                            title="Xem vị trí trên Google Maps"
-                            aria-label={`Xem địa điểm "${event.location}" trên Google Maps`}
-                          >
-                            <Navigation className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center text-gray-400">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        <span>Chưa cập nhật địa điểm</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Divider className="my-4" />
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                      <span>Ngày tạo: </span>
-                      <span className="font-medium">
-                        {event.createdAt ? formatDate(event.createdAt) : "N/A"}
+                <div className="flex flex-col md:flex-row">
+                  {/* Featured Image */}
+                  <div className="md:w-1/3 relative overflow-hidden">
+                    <img
+                      src={getEventImageUrl(event)}
+                      alt={event.title}
+                      className="w-full h-48 md:h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/events/default.jpg";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                    <div className="absolute top-4 left-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/90 text-gray-800">
+                        Sự kiện
                       </span>
                     </div>
+                    <div className="absolute top-4 right-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          event.status === "in_progress"
+                            ? "bg-green-100 text-green-800"
+                            : event.status === "completed"
+                              ? "bg-gray-100 text-gray-800"
+                              : event.status === "cancelled"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {event.status === "in_progress"
+                          ? "Đang diễn ra"
+                          : event.status === "completed"
+                            ? "Đã kết thúc"
+                            : event.status === "cancelled"
+                              ? "Đã hủy"
+                              : "Chờ duyệt"}
+                      </span>
+                    </div>
+                  </div>
 
-                    <div className="flex items-center gap-2 flex-wrap min-h-[40px]">
-                      {event.url && (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="light"
-                            color="primary"
-                            size="sm"
-                            endContent={<ExternalLink className="h-3 w-3" />}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
-                            onPress={() =>
-                              window.open(event?.url || "", "_blank")
-                            }
-                          >
-                            Xem chi tiết
-                          </Button>
+                  {/* Content */}
+                  <div className="md:w-2/3 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>{formatDate(event.start_date)}</span>
                         </div>
-                      )}
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="light"
-                          color="primary"
-                          size="sm"
-                          endContent={<ExternalLink className="h-3 w-3" />}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium visible opacity-100 z-10 relative flex-shrink-0"
-                          onPress={() => router.push(`/events/${event.id}`)}
-                        >
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>{formatDate(event.end_date)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                      {event.title}
+                    </h2>
+
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {event.content.length > 200
+                        ? event.content.substring(0, 200) + "..."
+                        : event.content}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        {event.location && hasValidAddress(event.location) ? (
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span className="line-clamp-1 max-w-32">
+                              {event.location}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(
+                                  getGoogleMapsUrl(event?.location || ""),
+                                  "_blank"
+                                );
+                              }}
+                              className="ml-2 p-1 hover:bg-gray-100 rounded"
+                              title="Xem vị trí trên Google Maps"
+                            >
+                              <Navigation className="h-3 w-3 text-blue-600" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-gray-400">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span>Chưa cập nhật địa điểm</span>
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <span>
+                            Ngày tạo:{" "}
+                            {event.createdAt
+                              ? formatDate(event.createdAt)
+                              : "N/A"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        {event.url && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(event?.url || "", "_blank");
+                            }}
+                            className="inline-flex items-center px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            <ExternalLink className="h-3 w-3 mr-1" />
+                            Xem chi tiết
+                          </button>
+                        )}
+                        <button className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm">
                           Chi tiết sự kiện
-                        </Button>
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
-                </CardBody>
-              </Card>
+                </div>
+              </article>
             ))}
           </div>
         ) : (

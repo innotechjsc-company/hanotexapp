@@ -5,6 +5,7 @@ import { Cpu, Rocket, Zap, type LucideIcon } from "lucide-react";
 import { getAuctions } from "@/api/auctions";
 import { type Auction } from "@/types/auctions";
 import Link from "next/link";
+import { getFullMediaUrl } from "@/utils/mediaUrl";
 
 // --- DATA TYPES ---
 interface LiveAuction {
@@ -139,14 +140,25 @@ export default function AuctionsSection() {
           .filter(
             (a) => calculateAuctionStatus(a.startTime, a.endTime) === "active"
           )
-          .map((a) => ({
-            id: a.id,
-            title: a.title || "Không có tiêu đề",
-            description: "Mô tả chi tiết có sẵn trong trang đấu giá.",
-            imageUrl: getRandomAuctionImage(a.id),
-            currentPrice: a.currentBid || a.startingPrice || 0,
-            endTime: new Date(a.endTime),
-          }));
+          .map((a) => {
+            // Resolve auction image
+            const auctionImage = a.image
+              ? typeof a.image === "string"
+                ? a.image
+                : a.image.url
+                  ? getFullMediaUrl(a.image.url)
+                  : null
+              : null;
+
+            return {
+              id: a.id,
+              title: a.title || "Không có tiêu đề",
+              description: "Mô tả chi tiết có sẵn trong trang đấu giá.",
+              imageUrl: auctionImage || getRandomAuctionImage(a.id), // Fallback to random if no image
+              currentPrice: a.currentBid || a.startingPrice || 0,
+              endTime: new Date(a.endTime),
+            };
+          });
 
         const upcomingAuctions = auctionsList
           .filter(
@@ -224,6 +236,12 @@ export default function AuctionsSection() {
                             src={auction.imageUrl}
                             alt={auction.title}
                             className="w-full sm:w-40 h-32 object-cover rounded-lg"
+                            onError={(e) => {
+                              // Fallback to a default placeholder if image fails to load
+                              e.currentTarget.src = getRandomAuctionImage(
+                                auction.id
+                              );
+                            }}
                           />
                           <div className="flex-1">
                             <h4 className="font-bold text-lg mb-1">

@@ -83,7 +83,7 @@ export default function StatsSection() {
       {
         icon: TrendingUp,
         label: "Công nghệ đã đăng tải",
-        value: "976+",
+        value: "500+",
         description:
           "Nhiều công nghệ mới, đa ngành nghề đã sẵn sàng chuyển giao",
         color: "text-primary-600",
@@ -92,7 +92,7 @@ export default function StatsSection() {
       {
         icon: Users,
         label: "Hàng nghìn người dùng đăng ký",
-        value: "1056+ ",
+        value: "2,500+ ",
         description:
           "Gồm các doanh nghiệp, tổ chức nghiên cứu, viện trường và chuyên gia",
         color: "text-secondary-600",
@@ -101,7 +101,7 @@ export default function StatsSection() {
       {
         icon: Award,
         label: "Phiên giao dịch, đấu giá công nghệ",
-        value: "120+",
+        value: "150+",
         description:
           "Các giao dịch minh bạch, công khai, bảo đảm quyền lợi các bên tham gia",
         color: "text-accent-600",
