@@ -18,7 +18,9 @@ export default function ConfidentialDetailCard({
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Chi tiết kỹ thuật</h2>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Chi tiết kỹ thuật
+        </h2>
         {!isAuthenticated && (
           <div className="flex items-center text-amber-600 text-sm">
             <Shield className="h-4 w-4 mr-1" />
@@ -27,9 +29,12 @@ export default function ConfidentialDetailCard({
         )}
       </div>
       {isAuthenticated ? (
-        <div className="prose max-w-none">
-          <p className="text-gray-700 leading-relaxed">{confidential_detail}</p>
-        </div>
+        <div
+          className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{
+            __html: (confidential_detail || "").replace(/\n/g, "<br>"),
+          }}
+        />
       ) : (
         <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-gray-600 text-center">
@@ -48,4 +53,3 @@ export default function ConfidentialDetailCard({
     </div>
   );
 }
-
