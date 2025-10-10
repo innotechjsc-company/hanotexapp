@@ -47,7 +47,7 @@ export default function EventsPage() {
   const [activeSearchQuery, setActiveSearchQuery] = useState(""); // New state for active search query
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<
-    "pending" | "in_progress" | "completed" | "cancelled" | "all"
+    "upcoming" | "in_progress" | "completed" | "all"
   >("all");
   const [sortBy, setSortBy] = useState("start_date");
   const [totalDocs, setTotalDocs] = useState(0);
@@ -74,10 +74,9 @@ export default function EventsPage() {
 
   const eventStatuses = [
     { value: "all", label: "Tất cả" },
-    { value: "pending", label: "Chờ duyệt" },
+    { value: "upcoming", label: "Chưa bắt đầu" },
     { value: "in_progress", label: "Đang diễn ra" },
     { value: "completed", label: "Đã kết thúc" },
-    { value: "cancelled", label: "Đã hủy" },
   ];
 
   // Fetch events from API
@@ -114,7 +113,17 @@ export default function EventsPage() {
       // Fetch all events without status filter
       response = await getEvents(filters, paginationParams);
 
-      const newEvents = Array.isArray(response.docs) ? response.docs : [];
+      let newEvents: Event[] = Array.isArray(response.docs)
+        ? (response.docs as unknown as Event[])
+        : [];
+
+      // Filter events by status based on dates if not "all"
+      if (selectedStatus !== "all") {
+        newEvents = newEvents.filter((event: Event) => {
+          const eventStatus = getEventStatus(event.start_date, event.end_date);
+          return eventStatus.status === selectedStatus;
+        });
+      }
 
       if (isLoadMore) {
         setEvents((prev) => [...prev, ...newEvents] as any);
@@ -124,7 +133,11 @@ export default function EventsPage() {
         setCurrentPage(1);
       }
 
-      setTotalDocs(response.totalDocs || 0);
+      // For filtered results, we need to calculate total based on all events
+      // This is a simplified approach - in production you might want to fetch all events to get accurate count
+      setTotalDocs(
+        selectedStatus === "all" ? response.totalDocs || 0 : newEvents.length
+      );
     } catch (err) {
       console.error("Error fetching events:", err);
       setError("Không thể tải danh sách sự kiện. Vui lòng thử lại sau.");
@@ -184,6 +197,33 @@ export default function EventsPage() {
   // Helper function to check if address has Google Maps URL
   const hasValidAddress = (address: string | null | undefined): boolean => {
     return !!(address && address.trim() !== "");
+  };
+
+  // Helper function to determine event status based on dates
+  const getEventStatus = (startDate: string, endDate: string) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (now < start) {
+      return {
+        status: "upcoming",
+        label: "Chưa bắt đầu",
+        className: "bg-blue-100 text-blue-800",
+      };
+    } else if (now >= start && now <= end) {
+      return {
+        status: "in_progress",
+        label: "Đang diễn ra",
+        className: "bg-green-100 text-green-800",
+      };
+    } else {
+      return {
+        status: "completed",
+        label: "Đã kết thúc",
+        className: "bg-gray-100 text-gray-800",
+      };
+    }
   };
 
   if (loading) {
@@ -267,6 +307,25 @@ export default function EventsPage() {
                 </button>
               )}
             </div>
+
+            {/* Status Filter */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center text-sm text-gray-500">
+                <Filter className="h-4 w-4 mr-2" />
+                <span>Trạng thái:</span>
+              </div>
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              >
+                {eventStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </form>
         </div>
 
@@ -327,25 +386,19 @@ export default function EventsPage() {
                           <span>{formatDate(event.end_date)}</span>
                         </div>
                       </div>
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
-                          event.status === "in_progress"
-                            ? "bg-green-100 text-green-800"
-                            : event.status === "completed"
-                              ? "bg-gray-100 text-gray-800"
-                              : event.status === "cancelled"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {event.status === "in_progress"
-                          ? "Đang diễn ra"
-                          : event.status === "completed"
-                            ? "Đã kết thúc"
-                            : event.status === "cancelled"
-                              ? "Đã hủy"
-                              : "Chờ duyệt"}
-                      </span>
+                      {(() => {
+                        const eventStatus = getEventStatus(
+                          event.start_date,
+                          event.end_date
+                        );
+                        return (
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${eventStatus.className}`}
+                          >
+                            {eventStatus.label}
+                          </span>
+                        );
+                      })()}
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
