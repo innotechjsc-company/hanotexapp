@@ -1,20 +1,20 @@
 services:
   # CMS (Payload) - Port 4000
-  cms:
-    build:
-      context: ./apps/cms
-      dockerfile: Dockerfile
-    container_name: hanotex-cms
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URI=mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test
-      - PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
-      - PORT=4000
-    ports:
-      - "4000:4000"
-    volumes:
-      - cms_uploads:/app/uploads
-    restart: unless-stopped
+  # cms:
+  #   build:
+  #     context: ./apps/cms
+  #     dockerfile: Dockerfile
+  #   container_name: hanotex-cms
+  #   environment:
+  #     - NODE_ENV=production
+  #     - DATABASE_URI=mongodb+srv://office:ZtXXocAefgiuvUcP@chainivodev.rpy80md.mongodb.net/hanotex-test
+  #     - PAYLOAD_SECRET=0e4cd0c22d6eaeaee81a0628
+  #     - PORT=4000
+  #   ports:
+  #     - "4000:4000"
+  #   volumes:
+  #     - cms_uploads:/app/uploads
+  #   restart: unless-stopped
 
   # Web (Next.js) - Port 3000
   web:
