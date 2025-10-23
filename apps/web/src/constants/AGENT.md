@@ -1,25 +1,25 @@
-# Constants Folder Rules
+# Quy Tắc Thư Mục Constants
 
-## Purpose
-This folder contains application-wide constants, configuration values, and static data.
+## Mục Đích
+Thư mục này chứa các hằng số toàn ứng dụng, giá trị cấu hình, và dữ liệu tĩnh.
 
-## Guidelines
+## Hướng Dẫn
 
-### Constant Categories
+### Phân Loại Hằng Số
 1. **API Constants**: Endpoints, base URLs, API keys (non-sensitive)
-2. **UI Constants**: Colors, sizes, breakpoints, z-index values
-3. **Route Constants**: Application routes and paths
+2. **UI Constants**: Màu sắc, kích thước, breakpoints, z-index values
+3. **Route Constants**: Application routes và paths
 4. **Validation Constants**: Regex patterns, min/max values, rules
 5. **Business Constants**: Status values, types, categories
 6. **Configuration**: Feature flags, limits, thresholds
 
-### Naming Conventions
-- Use UPPER_SNAKE_CASE for primitive constants
-- Use PascalCase for constant objects
-- Prefix related constants with common prefix
-- Use descriptive names that explain purpose
+### Quy Ước Đặt Tên
+- Sử dụng UPPER_SNAKE_CASE cho primitive constants
+- Sử dụng PascalCase cho constant objects
+- Prefix các constants liên quan với common prefix
+- Sử dụng tên mô tả rõ mục đích
 
-### Example Structure
+### Ví Dụ Cấu Trúc
 ```typescript
 // routes.ts
 export const ROUTES = {
@@ -48,19 +48,19 @@ export type AuctionStatus = typeof AUCTION_STATUS[keyof typeof AUCTION_STATUS];
 ```
 
 ### Best Practices
-- Use `as const` for object constants to get literal types
-- Group related constants in single files
-- Export constants as named exports
-- Don't duplicate values - reference existing constants
-- Document complex constants with comments
-- Use TypeScript utility types to derive types from constants
-- Never store secrets or sensitive data here (use environment variables)
+- Sử dụng `as const` cho object constants để có literal types
+- Nhóm các constants liên quan trong cùng file
+- Export constants dưới dạng named exports
+- KHÔNG duplicate giá trị - tham chiếu constants có sẵn
+- Document các constants phức tạp bằng comments
+- Sử dụng TypeScript utility types để tạo types từ constants
+- KHÔNG bao giờ lưu secrets hoặc sensitive data ở đây (dùng environment variables)
 
-### Environment Variables
-- Access environment variables through a config file
-- Provide fallback values
-- Validate required environment variables on startup
-- Use type-safe wrappers
+### Biến Môi Trường (Environment Variables)
+- Truy cập environment variables qua config file
+- Cung cấp fallback values
+- Validate required environment variables khi khởi động
+- Sử dụng type-safe wrappers
 
 ```typescript
 // config.ts
@@ -74,23 +74,31 @@ export const Config = {
 ```
 
 ### Magic Numbers
-- Replace magic numbers with named constants
-- Add comments explaining the meaning
-- Group related numeric constants
+- Thay thế magic numbers bằng named constants
+- Thêm comments giải thích ý nghĩa
+- Nhóm các numeric constants liên quan
 
 ```typescript
-// Instead of: if (users.length > 100)
+// Thay vì: if (users.length > 100)
 export const MAX_USERS_PER_PAGE = 100;
-// Use: if (users.length > MAX_USERS_PER_PAGE)
+// Sử dụng: if (users.length > MAX_USERS_PER_PAGE)
 ```
 
-### TypeScript Integration
-- Export types derived from constants
-- Use const assertions for immutability
-- Leverage union types from constant objects
+### Tích Hợp TypeScript
+- Export types tạo từ constants
+- Sử dụng const assertions cho immutability
+- Tận dụng union types từ constant objects
 
-### What to Avoid
-- Mutable constants (use Object.freeze or as const)
-- Function calls in constant definitions (unless truly constant)
-- Importing from components or hooks (constants should be low-level)
-- Overly specific constants used only once
+### Điều Cần Tránh
+- Mutable constants (dùng Object.freeze hoặc as const)
+- Gọi functions trong constant definitions (trừ khi thực sự constant)
+- Import từ components hoặc hooks (constants nên ở low-level)
+- Constants quá cụ thể chỉ dùng một lần
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Nhóm constants theo domain/feature
+- ✅ **NÊN**: Sử dụng enum cho các giá trị liên quan
+- ❌ **KHÔNG**: Hard-code strings/numbers trong code - tạo constants
+- ✅ **NÊN**: Document nguồn gốc của magic values (API specs, business rules, etc.)
+- ✅ **NÊN**: Version control các thay đổi về constants quan trọng
+- ❌ **KHÔNG**: Mix configuration và business constants trong cùng file

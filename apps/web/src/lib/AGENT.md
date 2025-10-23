@@ -1,11 +1,11 @@
-# Lib Folder Rules
+# Quy Tắc Thư Mục Lib
 
-## Purpose
-This folder contains configurations, initializations, and wrappers for third-party libraries and external integrations.
+## Mục Đích
+Thư mục này chứa configurations, initializations, và wrappers cho third-party libraries và external integrations.
 
-## Guidelines
+## Hướng Dẫn
 
-### Common Library Integrations
+### Tích Hợp Library Phổ Biến
 1. **Analytics**: Google Analytics, Mixpanel, Segment
 2. **Monitoring**: Sentry, LogRocket, DataDog
 3. **UI Libraries**: Tailwind config, styled-components theme
@@ -15,11 +15,11 @@ This folder contains configurations, initializations, and wrappers for third-par
 7. **i18n**: Internationalization configuration
 8. **Charts**: Chart.js, Recharts configuration
 
-### File Organization
-- One file per library: `analytics.ts`, `sentry.ts`, `reactQuery.ts`
-- Export configured instances or initialization functions
-- Keep library-specific logic isolated
-- Provide type-safe wrappers when needed
+### Tổ Chức File
+- Một file cho một library: `analytics.ts`, `sentry.ts`, `reactQuery.ts`
+- Export configured instances hoặc initialization functions
+- Giữ library-specific logic biệt lập
+- Cung cấp type-safe wrappers khi cần
 
 ### Example Structure
 ```typescript
@@ -62,26 +62,26 @@ export const queryClient = new QueryClient({
 ```
 
 ### Best Practices
-- Centralize library configuration in one place
-- Provide type-safe wrappers for better DX
-- Handle environment-specific configuration
-- Document required environment variables
-- Export initialized instances, not raw libraries
-- Handle SSR considerations (check for `window`, `document`)
-- Implement error boundaries for library failures
-- Keep library versions in sync across the app
+- Tập trung library configuration ở một nơi
+- Cung cấp type-safe wrappers cho DX tốt hơn
+- Xử lý environment-specific configuration
+- Document các environment variables bắt buộc
+- Export initialized instances, không phải raw libraries
+- Xử lý SSR considerations (check for `window`, `document`)
+- Implement error boundaries cho library failures
+- Giữ library versions đồng bộ trong toàn app
 
 ### Wrapper Functions
-- Create wrapper functions to abstract library specifics
-- Provide consistent API across the app
-- Make it easier to swap libraries in the future
-- Add application-specific defaults
+- Tạo wrapper functions để abstract library specifics
+- Cung cấp consistent API trong toàn app
+- Dễ dàng thay thế libraries trong tương lai
+- Thêm application-specific defaults
 
 ```typescript
-// Instead of using library directly in components:
+// Thay vì sử dụng library trực tiếp trong components:
 import { toast } from 'react-toastify';
 
-// Create a wrapper:
+// Tạo wrapper:
 // lib/notifications.ts
 export const showSuccess = (message: string) => {
   toast.success(message, {
@@ -99,17 +99,27 @@ export const showError = (message: string) => {
 ```
 
 ### Server vs Client
-- Mark client-only libraries with 'use client' directive
-- Handle SSR-safe initialization
-- Use dynamic imports for large client-only libraries
-- Check for browser APIs before using
+- Đánh dấu client-only libraries với 'use client' directive
+- Xử lý SSR-safe initialization
+- Sử dụng dynamic imports cho large client-only libraries
+- Kiểm tra browser APIs trước khi sử dụng
 
 ### Testing
-- Mock library instances in tests
-- Provide test utilities that mock library functions
-- Export mock versions for Storybook
+- Mock library instances trong tests
+- Cung cấp test utilities để mock library functions
+- Export mock versions cho Storybook
 
-### Version Management
-- Document library versions in README
-- Keep peer dependencies in sync
-- Test major version upgrades thoroughly
+### Quản Lý Version
+- Document library versions trong README
+- Giữ peer dependencies đồng bộ
+- Test major version upgrades kỹ lưỡng
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Tạo abstraction layer cho mọi third-party library
+- ✅ **NÊN**: Sử dụng TypeScript để type library configs
+- ❌ **KHÔNG**: Import libraries trực tiếp trong components - dùng wrappers
+- ✅ **NÊN**: Lazy load heavy libraries khi có thể
+- ✅ **NÊN**: Document tất cả configuration options
+- ❌ **KHÔNG**: Hard-code library configs - sử dụng environment variables
+- ✅ **NÊN**: Implement fallbacks cho khi libraries fail
+- ✅ **NÊN**: Kiểm tra library size trước khi add vào project

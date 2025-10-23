@@ -1,10 +1,10 @@
-# App Folder Rules (Next.js App Router)
+# Quy Tắc Thư Mục App (Next.js App Router)
 
-## Purpose
-This folder contains Next.js 13+ App Router pages, layouts, and route-specific components.
+## Mục Đích
+Thư mục này chứa Next.js 13+ App Router pages, layouts, và route-specific components.
 
-## Structure
-Routes follow the file-system based routing convention:
+## Cấu Trúc
+Routes tuân theo file-system based routing convention:
 - `admin/`: Admin dashboard pages
 - `auction/`: Auction-related pages
 - `auth/`: Authentication pages
@@ -17,52 +17,63 @@ Routes follow the file-system based routing convention:
 - `technologies/`: Technology catalog
 - Static pages: `privacy/`, `terms/`, `faq/`, `refund-policy/`, `user-guide/`
 
-## Guidelines
+## Hướng Dẫn
 
 ### Page Components
-- Use `page.tsx` for route endpoints
-- Use `layout.tsx` for shared layouts
-- Use `loading.tsx` for loading states
-- Use `error.tsx` for error boundaries
-- Use `not-found.tsx` for 404 pages
+- Sử dụng `page.tsx` cho route endpoints
+- Sử dụng `layout.tsx` cho shared layouts
+- Sử dụng `loading.tsx` cho loading states
+- Sử dụng `error.tsx` cho error boundaries
+- Sử dụng `not-found.tsx` cho 404 pages
 
 ### Server vs Client Components
-- Default to Server Components for better performance
-- Add `'use client'` directive only when needed:
-  - Using React hooks (useState, useEffect, etc.)
+- Mặc định sử dụng Server Components cho performance tốt hơn
+- Chỉ thêm `'use client'` directive khi cần:
+  - Sử dụng React hooks (useState, useEffect, etc.)
   - Event handlers
   - Browser-only APIs
-  - Third-party libraries that depend on client features
+  - Third-party libraries phụ thuộc vào client features
 
 ### Data Fetching
-- Fetch data in Server Components directly
-- Use async/await in Server Components
-- Leverage Next.js caching automatically
-- Use Client Components with hooks for client-side data fetching
+- Fetch data trong Server Components trực tiếp
+- Sử dụng async/await trong Server Components
+- Tận dụng Next.js caching tự động
+- Sử dụng Client Components với hooks cho client-side data fetching
 
 ### Metadata
-- Export `metadata` object from pages for SEO
-- Use `generateMetadata` for dynamic metadata
-- Include title, description, OpenGraph, and Twitter cards
+- Export `metadata` object từ pages cho SEO
+- Sử dụng `generateMetadata` cho dynamic metadata
+- Bao gồm title, description, OpenGraph, và Twitter cards
 
 ### Best Practices
-- Keep page components simple - delegate to feature components
-- Co-locate route-specific components in the route folder
-- Use route groups `(groupName)` for organization without affecting URL
+- Giữ page components đơn giản - delegate sang feature components
+- Co-locate route-specific components trong route folder
+- Sử dụng route groups `(groupName)` để tổ chức mà không ảnh hưởng URL
 - Implement proper error boundaries
-- Use loading states for better UX
-- Follow Next.js conventions for special files
-- Implement proper authentication checks for protected routes
-- Use dynamic routes with `[param]` syntax when needed
-- Leverage Server Actions for mutations when appropriate
+- Sử dụng loading states cho UX tốt hơn
+- Tuân theo Next.js conventions cho special files
+- Implement proper authentication checks cho protected routes
+- Sử dụng dynamic routes với `[param]` syntax khi cần
+- Tận dụng Server Actions cho mutations khi phù hợp
 
 ### Navigation
-- Use `next/link` for client-side navigation
-- Use `next/navigation` hooks: `useRouter`, `usePathname`, `useSearchParams`
-- Implement proper loading states during navigation
+- Sử dụng `next/link` cho client-side navigation
+- Sử dụng `next/navigation` hooks: `useRouter`, `usePathname`, `useSearchParams`
+- Implement proper loading states trong quá trình navigation
 
 ### Static vs Dynamic
-- Use Static Generation by default
-- Use Dynamic Rendering when data changes frequently
-- Use `revalidate` option for ISR (Incremental Static Regeneration)
-- Be explicit about dynamic behavior with `dynamic` export
+- Sử dụng Static Generation mặc định
+- Sử dụng Dynamic Rendering khi data thay đổi thường xuyên
+- Sử dụng `revalidate` option cho ISR (Incremental Static Regeneration)
+- Rõ ràng về dynamic behavior với `dynamic` export
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Sử dụng Server Components cho data fetching khi có thể
+- ✅ **NÊN**: Tách layout logic khỏi page logic
+- ✅ **NÊN**: Implement error.tsx cho từng route quan trọng
+- ✅ **NÊN**: Sử dụng loading.tsx thay vì custom loading components
+- ❌ **KHÔNG**: Fetch data trong Client Components nếu có thể fetch ở Server
+- ✅ **NÊN**: Sử dụng parallel routes cho complex layouts
+- ✅ **NÊN**: Implement breadcrumbs cho navigation tốt hơn
+- ❌ **KHÔNG**: Nest quá nhiều layouts (tối đa 3 levels)
+- ✅ **NÊN**: Sử dụng Suspense boundaries cho streaming

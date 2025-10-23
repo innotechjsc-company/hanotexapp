@@ -1,21 +1,21 @@
-# Store Folder Rules
+# Quy Tắc Thư Mục Store
 
-## Purpose
-This folder contains global state management configuration and stores (Zustand, Redux, or similar).
+## Mục Đích
+Thư mục này chứa global state management configuration và stores (Zustand, Redux, hoặc tương tự).
 
-## Guidelines
+## Hướng Dẫn
 
-### State Management Strategy
-- Use global store for truly global state (user auth, theme, app settings)
-- Prefer local state (useState) for component-specific state
-- Use server state libraries (React Query, SWR) for API data
-- Keep the store minimal and focused
+### Chiến Lược Quản Lý State
+- Sử dụng global store cho truly global state (user auth, theme, app settings)
+- Ưu tiên local state (useState) cho component-specific state
+- Sử dụng server state libraries (React Query, SWR) cho API data
+- Giữ store minimal và focused
 
-### Store Structure
-- One file per store domain: `authStore.ts`, `uiStore.ts`
-- Export hooks to access store: `useAuthStore`, `useUIStore`
-- Define TypeScript interfaces for store state and actions
-- Use slices or modules for large stores
+### Cấu Trúc Store
+- Một file cho một store domain: `authStore.ts`, `uiStore.ts`
+- Export hooks để truy cập store: `useAuthStore`, `useUIStore`
+- Định nghĩa TypeScript interfaces cho store state và actions
+- Sử dụng slices hoặc modules cho large stores
 
 ### Common Store Patterns (Zustand Example)
 ```typescript
@@ -47,31 +47,42 @@ export const useAuthStore = create<AuthState>((set) => ({
 ```
 
 ### Best Practices
-- Keep actions simple and focused
-- Use immer for immutable updates (if not built-in)
-- Implement selectors for derived state
-- Avoid storing server state - use React Query instead
-- Persist critical state to localStorage when needed
-- Use middleware for logging, persistence, or devtools
-- Document state shape and actions
+- Giữ actions simple và focused
+- Sử dụng immer cho immutable updates (nếu không built-in)
+- Implement selectors cho derived state
+- Tránh lưu server state - sử dụng React Query thay thế
+- Persist critical state vào localStorage khi cần
+- Sử dụng middleware cho logging, persistence, hoặc devtools
+- Document state shape và actions
 
-### What to Store
-**DO Store:**
+### Nên Lưu Gì
+**NÊN LƯƯ:**
 - Authentication state (user, token)
 - UI state (theme, sidebar open/closed, modals)
 - User preferences
 - App-wide settings
 - WebSocket connection state
 
-**DON'T Store:**
-- API response data (use React Query/SWR)
-- Form state (use local state or form libraries)
-- Derived state (compute on-the-fly)
+**KHÔNG NÊN LƯƯ:**
+- API response data (dùng React Query/SWR)
+- Form state (dùng local state hoặc form libraries)
+- Derived state (tính toán on-the-fly)
 - Temporary UI state
 
-### Integration
-- Import store hooks in components and hooks
-- Don't access store directly outside of React
-- Use store actions for state mutations
-- Combine with localStorage service for persistence
-- Test store actions independently
+### Tích Hợp
+- Import store hooks trong components và hooks
+- KHÔNG truy cập store trực tiếp ngoài React
+- Sử dụng store actions cho state mutations
+- Kết hợp với localStorage service cho persistence
+- Test store actions độc lập
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Tách store theo domain (auth, ui, user, etc.)
+- ✅ **NÊN**: Sử dụng selectors thay vì access state trực tiếp
+- ❌ **KHÔNG**: Lưu cả app state trong một store duy nhất
+- ✅ **NÊN**: Implement reset actions để clear state
+- ✅ **NÊN**: Sử dụng TypeScript cho type-safe stores
+- ❌ **KHÔNG**: Mutate state trực tiếp - dùng actions
+- ✅ **NÊN**: Log state changes trong development mode
+- ✅ **NÊN**: Implement hydration logic cho SSR/SSG
+- ✅ **NÊN**: Document khi nào nên dùng store vs local state

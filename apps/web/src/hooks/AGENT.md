@@ -1,10 +1,10 @@
-# Hooks Folder Rules
+# Quy Tắc Thư Mục Hooks
 
-## Purpose
-This folder contains custom React hooks for reusable logic, data fetching, and side effects.
+## Mục Đích
+Thư mục này chứa custom React hooks cho reusable logic, data fetching, và side effects.
 
-## Existing Hooks
-- `useBids.ts`: Bid-related data and operations
+## Hooks Hiện Có
+- `useBids.ts`: Bid-related data và operations
 - `useCategories.ts`: Category data management
 - `useMasterData.ts`: Master/reference data fetching
 - `useNewsLike.ts`: News like functionality
@@ -13,20 +13,20 @@ This folder contains custom React hooks for reusable logic, data fetching, and s
 - `useUsers.ts`, `useUsersPayload.ts`: User data management
 - `useWebSocket.ts`: WebSocket connection management
 
-## Guidelines
+## Hướng Dẫn
 
-### Creating Custom Hooks
-1. Name hooks with `use` prefix (React convention)
-2. File name should match hook name: `useFeatureName.ts`
-3. Return values in object format for clarity: `{ data, loading, error, refetch }`
-4. Use TypeScript for parameter and return type safety
+### Tạo Custom Hooks
+1. Đặt tên hooks với prefix `use` (React convention)
+2. Tên file phải khớp với tên hook: `useFeatureName.ts`
+3. Return values dưới dạng object cho rõ ràng: `{ data, loading, error, refetch }`
+4. Sử dụng TypeScript cho parameter và return type safety
 
 ### Data Fetching Hooks
-- Integrate with API layer from `/api`
-- Manage loading, error, and success states
+- Tích hợp với API layer từ `/api`
+- Quản lý loading, error, và success states
 - Implement refetch/retry functionality
-- Cache data when appropriate
-- Handle cleanup in useEffect returns
+- Cache data khi phù hợp
+- Xử lý cleanup trong useEffect returns
 
 ### Hook Patterns
 ```typescript
@@ -49,12 +49,23 @@ export const useResourceName = (params?) => {
 ```
 
 ### Best Practices
-- Keep hooks focused on single responsibility
-- Document hook parameters and return values
-- Handle component unmounting (cleanup)
-- Use dependency arrays correctly in useEffect
-- Avoid side effects in render phase
-- Consider using React Query or SWR for complex data fetching
-- Make hooks testable and reusable
-- Don't call hooks conditionally
-- Extract common patterns into shared hooks
+- Giữ hooks tập trung vào single responsibility
+- Document hook parameters và return values
+- Xử lý component unmounting (cleanup)
+- Sử dụng dependency arrays đúng cách trong useEffect
+- Tránh side effects trong render phase
+- Cân nhắc sử dụng React Query hoặc SWR cho complex data fetching
+- Làm hooks testable và reusable
+- KHÔNG gọi hooks conditionally
+- Tách common patterns thành shared hooks
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Return cả loading state và error state
+- ✅ **NÊN**: Implement abort controller cho requests có thể hủy
+- ✅ **NÊN**: Sử dụng useCallback cho functions được return
+- ❌ **KHÔNG**: Fetch data trong hooks mà không có cleanup
+- ✅ **NÊN**: Provide refetch function để manually trigger
+- ✅ **NÊN**: Handle race conditions cho async operations
+- ❌ **KHÔNG**: Gọi API trực tiếp - sử dụng `/api` layer
+- ✅ **NÊN**: Sử dụng TypeScript generics cho flexible hooks
+- ✅ **NÊN**: Implement debounce/throttle cho hooks tìm kiếm

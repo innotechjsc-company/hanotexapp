@@ -1,48 +1,60 @@
-# Components Folder Rules
+# Quy Tắc Thư Mục Components
 
-## Purpose
-This folder contains reusable React components organized by feature/domain.
+## Mục Đích
+Thư mục này chứa các reusable React components được tổ chức theo feature/domain.
 
-## Structure
+## Cấu Trúc
 - Feature-based folders: `admin/`, `auction/`, `auth/`, `demands/`, `home/`, etc.
 - Shared UI components: `input/`, `layout/`
 - Standalone components: `DescriptionEditor.tsx`, `DownloadTest.tsx`
 
-## Guidelines
+## Hướng Dẫn
 
-### Component Creation
-1. Group related components in feature folders
-2. Use PascalCase for component files: `ComponentName.tsx`
-3. Export components as named exports when possible
-4. Keep components focused on single responsibility
+### Tạo Component
+1. Nhóm các components liên quan trong feature folders
+2. Sử dụng PascalCase cho component files: `ComponentName.tsx`
+3. Export components dưới dạng named exports khi có thể
+4. Giữ components tập trung vào single responsibility
 
 ### TypeScript
-- Define prop interfaces explicitly
-- Use `React.FC<Props>` or functional component syntax
-- Avoid `any` types - use `unknown` and type guards if needed
-- Export prop types for reusability
+- Định nghĩa prop interfaces một cách rõ ràng
+- Sử dụng `React.FC<Props>` hoặc functional component syntax
+- Tránh `any` types - sử dụng `unknown` và type guards nếu cần
+- Export prop types để tái sử dụng
 
 ### Styling
-- Use consistent styling approach (check project's styling system)
-- Co-locate styles with components when appropriate
-- Follow existing class naming conventions
+- Sử dụng TailwindCSS cho styling
+- Sử dứng Ant Design components khi phù hợp
+- Tuân theo class naming conventions có sẵn
+- Co-locate styles với components khi phù hợp
 
-### State Management
-- Use local state for component-specific data
-- Use global store (see `/store`) for shared application state
-- Leverage custom hooks (see `/hooks`) for complex logic
+### Quản Lý State
+- Sử dụng local state cho component-specific data
+- Sử dụng global store (xem `/store`) cho shared application state
+- Tận dụng custom hooks (xem `/hooks`) cho logic phức tạp
 
-### API Integration
-- Import API functions from `/api`
-- Handle loading, error, and success states
-- Use custom hooks for data fetching when applicable
-- Never call API directly - always go through the API layer
+### Tích Hợp API
+- Import API functions từ `/api`
+- Xử lý loading, error, và success states
+- Sử dứng custom hooks cho data fetching khi có thể
+- KHÔNG bao giờ gọi API trực tiếp - luôn qua API layer
 
 ### Best Practices
-- Keep components small and composable
-- Extract reusable logic into custom hooks
-- Use meaningful component and prop names
-- Add comments for complex logic
-- Handle edge cases and loading states
-- Make components accessible (ARIA attributes, semantic HTML)
-- Memoize expensive computations with useMemo/useCallback when needed
+- Giữ components nhỏ và composable
+- Tách reusable logic ra custom hooks
+- Sử dụng tên component và prop có ý nghĩa
+- Thêm comments cho logic phức tạp
+- Xử lý edge cases và loading states
+- Làm components accessible (ARIA attributes, semantic HTML)
+- Memoize expensive computations với useMemo/useCallback khi cần
+
+### Quy Ước Bổ Sung
+- ✅ **NÊN**: Tạo components tái sử dụng được (DRY principle)
+- ✅ **NÊN**: Sử dụng PropTypes hoặc TypeScript interfaces
+- ✅ **NÊN**: Giữ components dưới 200 lines of code
+- ❌ **KHÔNG**: Truyền quá nhiều props (tối đa 7-8 props)
+- ✅ **NÊN**: Sử dụng composition thay vì inheritance
+- ✅ **NÊN**: Implement error boundaries cho components phức tạp
+- ❌ **KHÔNG**: Lưu sensitive data trong component state
+- ✅ **NÊN**: Test components với React Testing Library
+- ✅ **NÊN**: Sử dụng default props cho optional props
